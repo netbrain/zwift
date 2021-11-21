@@ -46,3 +46,9 @@ docker run --gpus all \
  -v $HOME/.zwift:/home/user/Zwift \
 netbrain/zwift:$ZWIFT_VERSION
 ```
+
+Or look at zwift.sh which is more customizable.
+
+## Updating
+
+Note that this container doesn't update zwift on it's own, so if you want to update zwift you need to run the docker container with wine64 ZwiftLauncher.exe instead of the default entrypoint.sh which then will proceed to update zwift if any updates are available.
