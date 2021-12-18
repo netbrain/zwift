@@ -21,7 +21,7 @@ netbrain/zwift
 After install and update is complete stop the container `docker stop zwift` and proceed with comitting a new version.
 
 ```
-export ZWIFT_VERSION=1.0.85684 			  	# Or whatever the latest version is
+export ZWIFT_VERSION=1.20.0			  	# Or whatever the latest version is
 docker commit zwift netbrain/zwift:$ZWIFT_VERSION 	# Create a new image with the latest update
 docker rm zwift 					# Remove the no longer needed container
 ```
@@ -34,6 +34,8 @@ https://hub.docker.com/repository/docker/netbrain/zwift
 docker pull netbrain/zwift:$ZWIFT_VERSION # or simply latest
 ```
 
+or install from scratch with the `installer` tag i.e `docker pull netbrain/zwift:installer`
+
 ## Run Zwift
 
 ```
@@ -44,11 +46,27 @@ docker run --gpus all \
  -v /tmp/.X11-unix:/tmp/.X11-unix \
  -v /run/user/$UID/pulse:/run/user/1000/pulse \ 
  -v $HOME/.zwift:/home/user/Zwift \
-netbrain/zwift:$ZWIFT_VERSION
+netbrain/zwift:$ZWIFT_VERSION # or "latest"
 ```
 
-Or look at zwift.sh which is more customizable.
+Or look at zwift.sh.
 
 ## Updating
 
-Note that this container doesn't update zwift on it's own, so if you want to update zwift you need to run the docker container with wine64 ZwiftLauncher.exe instead of the default entrypoint.sh which then will proceed to update zwift if any updates are available.
+Zwift does not update on it's own. so in order to update zwift to the latest version you can issue:
+
+```
+docker run --gpus all \
+ --privileged \
+ --name zwift \
+ -e DISPLAY=$DISPLAY \
+ -v /tmp/.X11-unix:/tmp/.X11-unix \
+netbrain/zwift:latest update
+
+export ZWIFT_VERSION=1.20.0
+docker commit zwift netbrain/zwift:$ZWIFT_VERSION
+docker tag netbrain/zwift:$ZWIFT_VERSION netbrain/zwift:latest
+docker push netbrain/zwift:$ZWIFT_VERSION
+docker push netbrain/zwift:latest
+```
+
