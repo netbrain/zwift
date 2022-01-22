@@ -23,7 +23,6 @@ docker run --gpus all \
  -v /tmp/.X11-unix:/tmp/.X11-unix \
  -v /run/user/$UID/pulse:/run/user/1000/pulse \ 
 netbrain/zwift:latest
-`
 ```
 
 Please note that the above command does not mount a volume to persist configuration files. 
