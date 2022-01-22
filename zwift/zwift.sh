@@ -1,5 +1,5 @@
 #!/bin/bash
-ZWIFT_VERSION=${ZWIFT_VERSION:-1.20.0}
+ZWIFT_VERSION=${ZWIFT_VERSION:-latest}
 ZWIFT_HOME=${ZWIFT_HOME:-$HOME/.zwift/$USER}
 CONTAINER=$(docker run \
 	-d \
