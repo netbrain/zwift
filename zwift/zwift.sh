@@ -13,4 +13,5 @@ CONTAINER=$(docker run \
 	-v $ZWIFT_HOME:/home/user/Zwift \
 	netbrain/zwift:$ZWIFT_VERSION)
 	
+mkdir -p $ZWIFT_HOME
 xhost +local:$(docker inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
