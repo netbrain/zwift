@@ -90,3 +90,9 @@ docker tag netbrain/zwift:$ZWIFT_VERSION netbrain/zwift:latest
 docker push netbrain/zwift:$ZWIFT_VERSION
 docker push netbrain/zwift:latest
 ```
+
+## Contibute
+
+Would be nice to supply docker containers for other environments than nvidia gpu's. As I don't have a machine myself with intel or amd gpu's I require other to test and manage these images.
+
+If you would like to contribute, then please by all means ill accept PR's. A good starting point would be http://wiki.ros.org/docker/Tutorials/Hardware%20Acceleration
