@@ -1,6 +1,15 @@
 #!/bin/bash
+
+# The zwift version to launch
 ZWIFT_VERSION=${ZWIFT_VERSION:-latest}
+
+# The home directory to store zwift data
 ZWIFT_HOME=${ZWIFT_HOME:-$HOME/.zwift/$USER}
+
+# Create the zwift home directory if not already exists
+mkdir -p $ZWIFT_HOME
+
+# Start the zwift container
 CONTAINER=$(docker run \
 	-d \
 	--privileged \
@@ -13,5 +22,5 @@ CONTAINER=$(docker run \
 	-v $ZWIFT_HOME:/home/user/Zwift \
 	netbrain/zwift:$ZWIFT_VERSION)
 	
-mkdir -p $ZWIFT_HOME
+# Allow container to connect to X
 xhost +local:$(docker inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
