@@ -18,10 +18,10 @@ xhost +
 docker pull netbrain/zwift:latest
 docker run --gpus all \
  --privileged \
- --rm
+ --rm \
  -e DISPLAY=$DISPLAY \
  -v /tmp/.X11-unix:/tmp/.X11-unix \
- -v /run/user/$UID/pulse:/run/user/1000/pulse \ 
+ -v /run/user/$UID/pulse:/run/user/1000/pulse \
 netbrain/zwift:latest
 ```
 
