@@ -1,22 +1,28 @@
 # Zwift
 
-Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth/ant devices. The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time. It does however require a nvidia graphics card, feel free to contribute for other systems.
+Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth/ant devices. The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time. 
+
+The container comes pre-installed with zwift, so no setup is required, simply pull and run. It should also now support all manner of graphics cards that has gl rendering.
 
 If you find this image useful, then feel free add [me](https://www.zwift.com/eu/athlete/4e3c5880-1edd-4c5d-a1b8-0974ce3874f0) and give me a ride on from time to time.
 
 ## Prerequisites
-
-- [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker)
+- [Docker](https://docs.docker.com/get-docker) or [Podman](https://podman.io/getting-started/installation)
+- [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker) if you have nvidia proprietary driver
+- ATI, Intel and Nouveau drivers should work out of the box (not tested)
 - Allow container to access the x-host by issuing the command `xhost +` (this will however allow everyone to your X server which is considere unsafe, if this is a concern of yours, then `man xhost`)
 
 ## Quickstart guide
+```
+wget https://raw.githubusercontent.com/netbrain/dockerfiles/master/zwift/zwift.sh -P ~/bin
+~/bin/zwift.sh
 
-Make sure nvidia-container-toolkit is installed and working.
+OR
 
 ```
 xhost +
 docker pull netbrain/zwift:latest
-docker run --gpus all \
+docker run --gpus all \ 
  --privileged \
  --rm \
  -e DISPLAY=$DISPLAY \
@@ -24,6 +30,8 @@ docker run --gpus all \
  -v /run/user/$UID/pulse:/run/user/1000/pulse \
 netbrain/zwift:latest
 ```
+
+Instead of --gpus all, it might suffice to do a `-v /dev/dri:/dev/dri` instead dependning on your graphics card and drivers.
 
 Please note that the above command does not mount a volume to persist configuration files. 
 If you wan't a proper setup then take a look at zwift.sh
@@ -56,22 +64,6 @@ https://hub.docker.com/repository/docker/netbrain/zwift
 docker pull netbrain/zwift:$ZWIFT_VERSION # or simply latest
 ```
 
-## How can I run Zwift?
-
-I would suggest taking a look at zwift.sh, but in essence the following is executed:
-
-```
-docker run --gpus all \
- --privileged \
- --rm \
- -e DISPLAY=$DISPLAY \
- -v /tmp/.X11-unix:/tmp/.X11-unix \
- -v /run/user/$UID/pulse:/run/user/1000/pulse \ 
- -v $HOME/.zwift:/home/user/Zwift \
-netbrain/zwift:$ZWIFT_VERSION # or "latest"
-```
-
-
 ## How can I update Zwift?
 
 Zwift does not update on it's own. So in order to keep zwift up to date you can simply pull netbrain/zwift:latest from time to time, I will try to keep up with the updates. However if I fail at this task then see the following instructions.
@@ -93,6 +85,4 @@ docker push netbrain/zwift:latest
 
 ## Contibute
 
-Would be nice to supply docker containers for other environments than nvidia gpu's. As I don't have a machine myself with intel or amd gpu's I require other to test and manage these images.
-
-If you would like to contribute, then please by all means ill accept PR's. A good starting point would be http://wiki.ros.org/docker/Tutorials/Hardware%20Acceleration
+If you would like to contribute, then please by all means ill accept PR's. 

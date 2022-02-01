@@ -1,4 +1,4 @@
-FROM netbrain/nvidia-wine
-COPY entrypoint.sh .
-RUN sudo chmod +x entrypoint.sh
-ENTRYPOINT ["./entrypoint.sh"]
+FROM netbrain/wine:7.0.0
+COPY entrypoint.sh /bin/entrypoint
+RUN sudo chmod +x /bin/entrypoint
+ENTRYPOINT ["entrypoint"]

@@ -12,11 +12,11 @@ mkdir -p $ZWIFT_HOME
 # Start the zwift container
 CONTAINER=$(docker run \
 	-d \
+	--rm \
 	--privileged \
 	--gpus all \
-	--cpus=2 \
-	--rm \
 	-e DISPLAY=$DISPLAY \
+	-v /dev/dri:/dev/dri \
 	-v /tmp/.X11-unix:/tmp/.X11-unix \
 	-v /run/user/$UID/pulse:/run/user/1000/pulse \
 	-v $ZWIFT_HOME:/home/user/Zwift \
