@@ -9,6 +9,9 @@ ZWIFT_HOME=${ZWIFT_HOME:-$HOME/.zwift/$USER}
 # Create the zwift home directory if not already exists
 mkdir -p $ZWIFT_HOME
 
+# Check for updated container image
+docker pull netbrain/zwift:$ZWIFT_VERSION
+
 # Start the zwift container
 CONTAINER=$(docker run \
 	-d \
