@@ -16,8 +16,9 @@ If you find this image useful, then feel free add [me](https://www.zwift.com/eu/
 ```
 wget https://raw.githubusercontent.com/netbrain/dockerfiles/master/zwift/zwift.sh -P ~/bin
 ~/bin/zwift.sh
+```
 
-OR
+Or you can run the following instead:
 
 ```
 xhost +
