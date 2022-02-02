@@ -6,6 +6,8 @@ The container comes pre-installed with zwift, so no setup is required, simply pu
 
 If you find this image useful, then feel free add [me](https://www.zwift.com/eu/athlete/4e3c5880-1edd-4c5d-a1b8-0974ce3874f0) and give me a ride on from time to time.
 
+![example.gif](https://raw.githubusercontent.com/netbrain/dockerfiles/master/zwift/example.gif)
+
 ## Prerequisites
 - [Docker](https://docs.docker.com/get-docker) or [Podman](https://podman.io/getting-started/installation)
 - [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker) if you have nvidia proprietary driver
