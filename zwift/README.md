@@ -55,8 +55,8 @@ netbrain/zwift
 After install and update is complete stop the container `docker stop zwift` and proceed with comitting a new version.
 
 ```
-export ZWIFT_VERSION=1.20.0			  	# Or whatever the latest version is
-docker commit zwift netbrain/zwift:$ZWIFT_VERSION 	# Create a new image with the latest update
+export VERSION=1.20.0			  		# Or whatever the latest version is
+docker commit zwift netbrain/zwift:$VERSION 		# Create a new image with the latest update
 docker rm zwift 					# Remove the no longer needed container
 ```
 
@@ -65,7 +65,7 @@ docker rm zwift 					# Remove the no longer needed container
 https://hub.docker.com/repository/docker/netbrain/zwift
 
 ```
-docker pull netbrain/zwift:$ZWIFT_VERSION # or simply latest
+docker pull netbrain/zwift:$VERSION # or simply latest
 ```
 
 ## How can I update Zwift?
@@ -80,10 +80,11 @@ docker run --gpus all \
  -v /tmp/.X11-unix:/tmp/.X11-unix \
 netbrain/zwift:latest update
 
-export ZWIFT_VERSION=1.20.0 #increment this 
-docker commit zwift netbrain/zwift:$ZWIFT_VERSION
-docker tag netbrain/zwift:$ZWIFT_VERSION netbrain/zwift:latest
-docker push netbrain/zwift:$ZWIFT_VERSION
+export VERSION=$(curl http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+echo "Latest version is $VERSION"
+docker commit --change='CMD [""]' -m "updated to version $VERSION" zwift netbrain/zwift:$VERSION
+docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
+docker push netbrain/zwift:$VERSION
 docker push netbrain/zwift:latest
 ```
 
