@@ -8,6 +8,10 @@ If you find this image useful, then feel free add [me](https://www.zwift.com/eu/
 
 ![example.gif](https://raw.githubusercontent.com/netbrain/dockerfiles/master/zwift/example.gif)
 
+
+## :fire::fire::fire: Having bluetooth issues with companion app?:fire::fire::fire:
+See [this post](https://forums.zwift.com/t/anyone-else-having-issues-with-bluetooth-through-companion-app-as-of-late/579281).
+
 ## Prerequisites
 - [Docker](https://docs.docker.com/get-docker) or [Podman](https://podman.io/getting-started/installation)
 - [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker) if you have nvidia proprietary driver
