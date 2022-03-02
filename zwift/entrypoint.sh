@@ -7,11 +7,34 @@ ZWIFT_HOME="$HOME/.wine/drive_c/Program Files (x86)/Zwift"
 mkdir -p "$ZWIFT_HOME"
 cd "$ZWIFT_HOME"
 
+function get_current_version() {
+	ZWIFT_VERSION_CURRENT=$(cat Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+}
+
+function get_latest_version() {
+	ZWIFT_VERSION_LATEST=$(wget --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+}
+
 if [ "$1" = "update" ]
 then
 	echo "updating zwift..."
+	get_current_version
+	get_latest_version
+	if [ "$ZWIFT_VERSION_CURRENT" = "$ZWIFT_VERSION_LATEST" ]
+	then
+		echo "already at latest version..."
+		exit 0
+	fi
 	wine64 start ZwiftLauncher.exe
-	wineserver -w
+	until [ "$ZWIFT_VERSION_CURRENT" = "$ZWIFT_VERSION_LATEST" ]
+	do
+		echo "updating in progress..."
+		sleep 1
+		get_current_version
+	done
+	echo "updating done, waiting 5 seconds..."
+	sleep 5
+	wineserver -k
 	exit 0
 fi
 
