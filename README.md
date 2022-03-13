@@ -74,23 +74,7 @@ docker pull netbrain/zwift:$VERSION # or simply latest
 
 ## How can I update Zwift?
 
-Zwift does not update on it's own. So in order to keep zwift up to date you can simply pull netbrain/zwift:latest from time to time, I will try to keep up with the updates. However if I fail at this task then see the following instructions.
-
-```
-docker run --gpus all \
- --privileged \
- --name zwift \
- -e DISPLAY=$DISPLAY \
- -v /tmp/.X11-unix:/tmp/.X11-unix \
-netbrain/zwift:latest update
-
-export VERSION=$(curl http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
-echo "Latest version is $VERSION"
-docker commit --change='CMD [""]' -m "updated to version $VERSION" zwift netbrain/zwift:$VERSION
-docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
-docker push netbrain/zwift:$VERSION
-docker push netbrain/zwift:latest
-```
+Zwift does not update on it's own. So in order to keep zwift up to date you can simply pull netbrain/zwift:latest from time to time. There is a github action in place that will update zwift on a scheduled basis and publish new versions to docker hub.
 
 ## Contibute
 
