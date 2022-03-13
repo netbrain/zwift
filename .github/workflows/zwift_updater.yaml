@@ -1,0 +1,43 @@
+name: Zwift updater
+on: 
+  schedule:
+    - cron: "*/30 * * * *"
+jobs:
+  zwift_updater:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Check for zwift update
+        env:
+          BASE_VERSION: 1.22.4
+        run: |
+          export VERSION=$(curl http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+          echo "Latest version is $VERSION"
+          curl https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq '.results[].name' | grep $VERSION
+          
+          if [[ $? == 0 ]]
+          then
+            exit 0
+          fi
+          
+          echo "Starting update..."  
+          Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &
+          export DISPLAY=:99
+          xhost +
+          docker run --name zwift \
+                  --privileged \
+                  -e DISPLAY=$DISPLAY \
+                  --device /dev/dri \
+                  -v /tmp:/tmp \
+                  netbrain/zwift:$BASE_VERSION update
+
+          docker commit --change='CMD [""]' -m "updated to version $VERSION" zwift netbrain/zwift:$VERSION
+          docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
+          docker push netbrain/zwift:$VERSION
+          docker push netbrain/zwift:latest
+          
