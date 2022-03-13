@@ -6,7 +6,7 @@ The container comes pre-installed with zwift, so no setup is required, simply pu
 
 If you find this image useful, then feel free add [me](https://www.zwift.com/eu/athlete/4e3c5880-1edd-4c5d-a1b8-0974ce3874f0) and give me a ride on from time to time.
 
-![example.gif](https://raw.githubusercontent.com/netbrain/dockerfiles/master/zwift/example.gif)
+![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/example.gif)
 
 
 ## :fire::fire::fire: Having bluetooth issues with companion app?:fire::fire::fire:
