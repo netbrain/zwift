@@ -1,5 +1,6 @@
 name: Zwift updater
 on: 
+  workflow_dispatch:
   schedule:
     - cron: "0 * * * *"
 jobs:
@@ -16,9 +17,10 @@ jobs:
         env:
           BASE_VERSION: 1.22.4
         run: |
-          export VERSION=$(curl http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+          set +e
+          export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
           echo "Latest version is $VERSION"
-          curl https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq '.results[].name' | grep $VERSION
+          curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq '.results[].name' | grep $VERSION
           
           if [[ $? == 0 ]]
           then
