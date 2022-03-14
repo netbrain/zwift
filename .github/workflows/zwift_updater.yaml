@@ -1,7 +1,7 @@
 name: Zwift updater
 on: 
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "0 * * * *"
 jobs:
   zwift_updater:
     runs-on: ubuntu-latest
