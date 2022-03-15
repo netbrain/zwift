@@ -1,10 +1,12 @@
 # Zwift
 
+[![Zwift updater](https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg)](https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml)
+
 Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth/ant devices. The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time. 
 
 The container comes pre-installed with zwift, so no setup is required, simply pull and run. It should also now support all manner of graphics cards that has gl rendering.
 
-If you find this image useful, then feel free add [me](https://www.zwift.com/eu/athlete/4e3c5880-1edd-4c5d-a1b8-0974ce3874f0) and give me a ride on from time to time.
+If you find this image useful, then feel free add [me on zwift](https://www.zwift.com/eu/athlete/4e3c5880-1edd-4c5d-a1b8-0974ce3874f0) and give me a ride on from time to time.
 
 ![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/example.gif)
 
