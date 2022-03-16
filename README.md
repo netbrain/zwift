@@ -18,7 +18,7 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 
 ## Quickstart guide
 ```
-wget https://raw.githubusercontent.com/netbrain/dockerfiles/master/zwift/zwift.sh -P ~/bin
+wget https://raw.githubusercontent.com/netbrain/zwift/master/zwift.sh -P ~/bin
 chmod +x ~/bin/zwift.sh
 ~/bin/zwift.sh
 ```
