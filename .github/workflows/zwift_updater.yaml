@@ -13,6 +13,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Install x11-apps
+        run: sudo apt-get install -y x11-apps
       - name: Check for zwift update
         env:
           BASE_VERSION: 1.22.4
@@ -22,13 +24,13 @@ jobs:
           echo "Latest version is $VERSION"
           curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq '.results[].name' | grep $VERSION
           
-          if [[ $? == 0 ]]
+          if [ $? == 0  ] && [ $GITHUB_EVENT_NAME != "workflow_dispatch" ]
           then
             exit 0
           fi
           
           echo "Starting update..."  
-          Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &
+          Xvfb :99 -ac -screen 0 "1280x1024x24" -nolisten tcp &
           export DISPLAY=:99
           xhost +
           docker run --name zwift \
@@ -37,9 +39,46 @@ jobs:
                   --device /dev/dri \
                   -v /tmp:/tmp \
                   netbrain/zwift:$BASE_VERSION update
-
           docker commit --change='CMD [""]' -m "updated to version $VERSION" zwift netbrain/zwift:$VERSION
+          
+          docker run -d \
+                  --name=zwift-test \
+                  --rm \
+                  --privileged \
+                  -e DISPLAY=$DISPLAY \
+                  --device /dev/dri \
+                  -v /tmp:/tmp \
+                  netbrain/zwift:$VERSION
+         
+          mkdir -p /tmp/zwift 
+          for ((i=1;i<=5;i++)); 
+          do
+            sleep 15
+            echo "$(date +"%H:%M:%S") Capturing screenshot $i"
+            xwd -root -silent | convert xwd:- png:/tmp/zwift/sreenshot$i.png
+          done
+          
+          docker cp zwift-test:/home/user/Zwift/Logs/. /tmp/zwift
+          docker logs zwift-test > /tmp/zwift/docker-log.txt
+          docker rm -f zwift-test
+
+
+          if [ $GITHUB_EVENT_NAME == "workflow_dispatch" ]
+          then
+            echo "Skipping docker image push on workflow_dispatch"
+            exit 0
+          fi
+
           docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
           docker push netbrain/zwift:$VERSION
           docker push netbrain/zwift:latest
-          
+
+      - name: Logs and screenshots
+        uses: actions/upload-artifact@v3
+        with:
+          name: zwift-artifacts
+          path: |
+            /tmp/zwift/Launcher_log.txt
+            /tmp/zwift/Log.txt
+            /tmp/zwift/docker-log.txt
+            /tmp/zwift/screenshot*.png
