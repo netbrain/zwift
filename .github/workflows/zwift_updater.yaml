@@ -17,12 +17,12 @@ jobs:
         env:
           BASE_VERSION: 1.22.4
         run: |
-          set +e
+          set -x
           export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
           echo "Latest version is $VERSION"
-          curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq '.results[].name' | grep -v $VERSION
+          export IMAGE_VERSION=$(curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq '.results[].name' | grep $VERSION)
           
-          if [[ $? != 0 ]]
+          if [[ ! -z "$IMAGE_VERSION" ]]
           then
             exit 0
           fi
