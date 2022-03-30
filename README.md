@@ -64,7 +64,7 @@ docker rm zwift 					# Remove the no longer needed container
 
 ## How can I fetch the image from docker hub?
 
-https://hub.docker.com/repository/docker/netbrain/zwift
+https://hub.docker.com/r/netbrain/zwift
 
 ```
 docker pull netbrain/zwift:$VERSION # or simply latest
