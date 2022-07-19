@@ -13,8 +13,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Install x11-apps
-        run: sudo apt-get install -y x11-apps
+      - name: Install dependencies
+        run: sudo apt-get install -y x11-apps x11-xserver-utils
       - name: Check for zwift update
         env:
           BASE_VERSION: 1.22.4
