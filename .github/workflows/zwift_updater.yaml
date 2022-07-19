@@ -31,6 +31,7 @@ jobs:
           
           echo "Starting update..."  
           Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &
+          sleep 3
           export DISPLAY=:99
           xhost +
           docker run --name zwift \
