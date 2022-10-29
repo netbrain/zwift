@@ -16,15 +16,13 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y x11-xserver-utils x11-apps
       - name: Check for zwift update
-        env:
-          BASE_VERSION: 1.22.4
         run: |
           set -x
           export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
-          echo "Latest version is $VERSION"
-          export IMAGE_VERSION=$(curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq '.results[].name' | grep $VERSION)
-          
-          if [[ ! -z "$IMAGE_VERSION" ]]
+          export IMAGE_VERSION=$(curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq -r '.results[1].name')
+          echo "Latest zwift version is $VERSION"
+          echo "Latest zwift container image version is $IMAGE_VERSION"
+          if [[ "$IMAGE_VERSION" = "$VERSION" ]]
           then
             exit 0
           fi
@@ -39,7 +37,7 @@ jobs:
                   -e DISPLAY=$DISPLAY \
                   --device /dev/dri \
                   -v /tmp:/tmp \
-                  netbrain/zwift:$BASE_VERSION update
+                  netbrain/zwift:$IMAGE_VERSION update
 
           docker commit --change='CMD [""]' -m "updated to version $VERSION" zwift netbrain/zwift:$VERSION
           docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
