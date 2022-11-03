@@ -37,10 +37,17 @@ docker run --gpus all \
 netbrain/zwift:latest
 ```
 
-Instead of --gpus all, it might suffice to do a `-v /dev/dri:/dev/dri` instead dependning on your graphics card and drivers.
+Instead of `--gpus all`, it might suffice to do a `-v /dev/dri:/dev/dri` instead depending on your graphics card and drivers.
 
 Please note that the above command does not mount a volume to persist configuration files. 
-If you wan't a proper setup then take a look at zwift.sh
+If you want a proper setup then please use `zwift.sh`.
+
+## How do I connect my trainer, heart rate monitor, etc?
+
+You can [use your phone as a bridge](https://support.zwift.com/using-the-zwift-companion-app-Hybn8qzPr).
+
+For example, your Wahoo Kickr and Apple Watch conect to the Zwift Companion app on your
+iPhone; then the Companion app connects over wifi to your PC running Zwift.
 
 ## How can I build the image myself?
 
@@ -76,4 +83,4 @@ Zwift does not update on it's own. So in order to keep zwift up to date you can 
 
 ## Contibute
 
-If you would like to contribute, then please by all means ill accept PR's. 
+If you would like to contribute, then please by all means I'll accept PR's. 
