@@ -39,7 +39,12 @@ jobs:
                   -v /tmp:/tmp \
                   netbrain/zwift:$IMAGE_VERSION update
 
-          docker commit --change='CMD [""]' -m "updated to version $VERSION" zwift netbrain/zwift:$VERSION
+          docker commit --change="LABEL version=\"$VERSION\" maintainer=\"Kim Eik <kim@heldig.org>\"" \
+            --change='CMD [""]' \
+            -m "updated to version $VERSION" \
+            zwift \
+            netbrain/zwift:$VERSION
+
           docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
           docker push netbrain/zwift:$VERSION
           docker push netbrain/zwift:latest
