@@ -2,7 +2,7 @@
  
 [![Zwift updater][zwift-updater-src]][zwift-updater-href]
 [![image-href][image-pulls-src]][image-href]
-[![image-href][image-stars-src]][image-href]
+[![image-href][image-version-src]][image-href]
 [![image-href][image-size-src]][image-href]
 
 
@@ -89,9 +89,9 @@ Zwift does not update on it's own. So in order to keep zwift up to date you can 
 
 If you would like to contribute, then please by all means I'll accept PR's. 
 
-[zwift-updater-src]: https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg
-[zwift-updater-href]: https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml
-[image-stars-src]:https://badgen.net/docker/stars/netbrain/zwift?icon=docker&label=stars
+[zwift-updater-src]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg
+[zwift-updater-href]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml
+[image-version-src]:https://badgen.net/docker/metadata/version/netbrain/zwift/latest?icon=docker
 [image-pulls-src]:https://badgen.net/docker/pulls/netbrain/zwift?icon=docker&label=pulls
 [image-size-src]:https://badgen.net/docker/size/netbrain/zwift?icon=docker&label=size
 [image-href]:https://hub.docker.com/r/netbrain/zwift
