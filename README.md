@@ -3,7 +3,6 @@
 [![Zwift updater][zwift-updater-src]][zwift-updater-href]
 [![image-href][image-pulls-src]][image-href]
 [![image-href][image-version-src]][image-href]
-[![image-href][image-build-date-src]][image-href]
 [![image-href][image-size-src]][image-href]
 
 
@@ -92,8 +91,7 @@ If you would like to contribute, then please by all means I'll accept PR's.
 
 [zwift-updater-src]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg
 [zwift-updater-href]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml
-[image-version-src]:https://badgen.net/docker/metadata/version/netbrain/zwift?icon=docker
-[image-build-date-src]:https://badgen.net/docker/metadata/build-date/netbrain/zwift?icon=docker
+[image-version-src]:https://img.shields.io/docker/v/netbrain/zwift/latest?logo=docker&logoColor=white
 [image-pulls-src]:https://badgen.net/docker/pulls/netbrain/zwift?icon=docker&label=pulls
 [image-size-src]:https://badgen.net/docker/size/netbrain/zwift?icon=docker&label=size
 [image-href]:https://hub.docker.com/r/netbrain/zwift/tags
