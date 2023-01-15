@@ -89,6 +89,18 @@ Zwift does not update on it's own. So in order to keep zwift up to date you can 
 
 If you would like to contribute, then please by all means I'll accept PR's. 
 
+## Alternative's to this repository
+
+* Install zwift using wine directly or a framework like lutris. You will however have to manage installation and updates yourself
+* Use [scrcpy](https://github.com/Genymobile/scrcpy) to mirror android device to your linux screen
+  * [Enable developer options on your android device](https://developer.android.com/studio/debug/dev-options#enable)
+  * Pair your computer to the device using `adb pair` [documentation](https://developer.android.com/studio/command-line/adb#wireless-android11-command-line) 
+    * `./srccpy.sh adb pair ip:port`  [see my container solution](https://github.com/netbrain/dockerfiles/tree/master/scrcpy)
+  * Mirror the android device screen onto your linux screen using scrcpy.
+      * `./srccpy.sh scrcpy --tcpip=ip:port`
+  * If you require sound aswell, there's also a [sndcpy](https://github.com/rom1v/sndcpy) project (doesn't support wireless though, but the abovementioned can be modified to use usb)
+* Using [redroid](https://hub.docker.com/r/redroid/redroid) to install zwift apk onto a android emulator (not tested)
+
 [zwift-updater-src]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg
 [zwift-updater-href]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml
 [image-version-src]:https://img.shields.io/docker/v/netbrain/zwift/latest?logo=docker&logoColor=white
