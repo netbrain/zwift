@@ -87,7 +87,7 @@ Zwift does not update on it's own. So in order to keep zwift up to date you can 
 
 ## Contibute
 
-If you would like to contribute, then please by all means I'll accept PR's. A good starting point would be to see if there's any open issues that you feel capable of doing. In any let me know if I can help with anything.
+If you would like to contribute, then please by all means I'll accept PR's. A good starting point would be to see if there's any open issues that you feel capable of doing. Let me know if I can help with anything.
 
 ## Alternative's to this repository
 
