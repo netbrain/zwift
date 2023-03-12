@@ -1,7 +1,8 @@
 #!/bin/bash +x
 
 # Use podman if available
-if [ -x "$(command -v podman)" ]; then
+if [[ -x "$(command -v podman)" ]]
+then
         CONTAINER_TOOL=podman
 else
         CONTAINER_TOOL=docker
@@ -18,6 +19,7 @@ VERSION=${VERSION:-latest}
 
 # Create the zwift home directory if not already exists
 mkdir -p $ZWIFT_HOME
+$CONTAINER_TOOL unshare chown $UID:$UID -R $ZWIFT_HOME
 
 # Check for updated container image
 $CONTAINER_TOOL pull $IMAGE:$VERSION
