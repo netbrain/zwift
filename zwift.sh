@@ -1,4 +1,12 @@
-#!/bin/bash
+#!/bin/bash +x
+
+# Use podman if available
+if [[ -x "$(command -v podman)" ]]
+then
+        CONTAINER_TOOL=podman
+else
+        CONTAINER_TOOL=docker
+fi
 
 # The home directory to store zwift data
 ZWIFT_HOME=${ZWIFT_HOME:-$HOME/.zwift/$USER}
@@ -11,9 +19,10 @@ VERSION=${VERSION:-latest}
 
 # Create the zwift home directory if not already exists
 mkdir -p $ZWIFT_HOME
+$CONTAINER_TOOL unshare chown $UID:$UID -R $ZWIFT_HOME
 
 # Check for updated container image
-docker pull $IMAGE:$VERSION
+$CONTAINER_TOOL pull $IMAGE:$VERSION
 
 # Check for proprietary nvidia driver and set correct device to use
 if [[ -f "/proc/driver/nvidia/version" ]]
@@ -24,7 +33,7 @@ else
 fi
 
 # Start the zwift container
-CONTAINER=$(docker run \
+CONTAINER=$($CONTAINER_TOOL run \
 	-d \
 	--rm \
 	--privileged \
@@ -36,4 +45,4 @@ CONTAINER=$(docker run \
 	$IMAGE:$VERSION)
 	
 # Allow container to connect to X
-xhost +local:$(docker inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
+xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
