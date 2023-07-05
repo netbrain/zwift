@@ -50,7 +50,7 @@ then
 	winetricks --unattended d3dcompiler_47
 	
 	#install msedge
-	wget https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/d1b0e946-e654-4d81-a42a-d581b8f3c40c/MicrosoftEdgeWebView2RuntimeInstallerX64.exe
+	wget https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/02c54cda-d889-4696-bd54-7baa587df0e4/MicrosoftEdgeWebView2RuntimeInstallerX64.exe
 	wine64 MicrosoftEdgeWebview2RuntimeInstallerX64.exe /silent /install
 
 	#install zwift
@@ -60,7 +60,13 @@ then
 	wine64 ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
 
 	# Wait for Zwift to fully install and then restart container
-	wineserver -w
+	until [ "$ZWIFT_VERSION_CURRENT" != "" ]
+	do
+		echo "updating in progress..."
+		sleep 1
+		get_current_version
+	done
+	wineserver -k
 	exit 0
 fi
 echo "starting zwift..."
