@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y x11-xserver-utils x11-apps
       - uses: actions/checkout@v3
-      - name: Check for zwift update
+      - name: Install zwift from scratch
         run: |
           set -x
           export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
