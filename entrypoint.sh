@@ -50,13 +50,13 @@ then
 	winetricks --unattended d3dcompiler_47
 	
 	#install msedge
-	wget https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/02c54cda-d889-4696-bd54-7baa587df0e4/MicrosoftEdgeWebView2RuntimeInstallerX64.exe
+	wget https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/efb9eb0d-607c-4fd7-9304-0f5c3ca433fb/MicrosoftEdgeWebView2RuntimeInstallerX64.exe
 	wine64 MicrosoftEdgeWebview2RuntimeInstallerX64.exe /silent /install
 
 	#install zwift
-        wget https://www.nirsoft.net/utils/runfromprocess.zip
+    wget https://www.nirsoft.net/utils/runfromprocess.zip
 	unzip runfromprocess.zip
-	wget https://cdn.zwift.com/app/ZwiftSetup.exe
+    wget https://cdn.zwift.com/app/ZwiftSetup.exe
 	wine64 ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
 
 	# Wait for Zwift to fully install and then restart container
