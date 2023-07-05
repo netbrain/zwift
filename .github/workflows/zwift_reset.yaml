@@ -1,8 +1,8 @@
-name: Zwift updater
+name: Zwift squasher
 on: 
   workflow_dispatch:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 0 1 */3 *"
 jobs:
   zwift_updater:
     runs-on: ubuntu-22.04
@@ -19,26 +19,23 @@ jobs:
         run: |
           set -x
           export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
-          export IMAGE_VERSION=$(curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq -r '.results[1].name')
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           echo "Latest zwift version is $VERSION"
-          echo "Latest zwift container image version is $IMAGE_VERSION"
-          if [[ "$IMAGE_VERSION" = "$VERSION" ]]
-          then
-            exit 0
-          fi
           
-          echo "Starting update..."  
+          echo "Starting squash..."  
           Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &
           sleep 3
           export DISPLAY=:99
           xhost +
+
+          docker build -t netbrain/zwift:$VERSION .
+
           docker run --name zwift \
                   --privileged \
                   -e DISPLAY=$DISPLAY \
                   --device /dev/dri \
                   -v /tmp:/tmp \
-                  netbrain/zwift:$IMAGE_VERSION update
+                  netbrain/zwift:$VERSION update
 
           docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
             --change="LABEL org.opencontainers.image.version=$VERSION" \
@@ -47,7 +44,7 @@ jobs:
             zwift \
             netbrain/zwift:$VERSION
 
-          docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
-          docker push netbrain/zwift:$VERSION
-          docker push netbrain/zwift:latest
+          docker tag netbrain/zwift:$VERSION netbrain/zwift:squashed
+          #docker push netbrain/zwift:$VERSION
+          docker push netbrain/zwift:squashed
           
