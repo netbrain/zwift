@@ -18,6 +18,8 @@ jobs:
         run: |
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
       - name: Squash zwift image
         run: |
           set -x
@@ -28,10 +30,12 @@ jobs:
           echo "Pushing latest version to presquash"
           docker pull netbrain/zwift:$VERSION
           docker tag netbrain/zwift:$VERSION netbrain/zwift:$VERSION-presquash
-          docker push netbrain/zwift:$VERSION-presquash
           
           echo "Starting squash"
           docker build -t netbrain/zwift:$VERSION -f squash.Dockerfile .
           docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
-          docker push netbrain/zwift:$VERSION
+
+          echo "Starting push"
+          docker push netbrain/zwift:$VERSION-presquash
           docker push netbrain/zwift:latest
+          docker push netbrain/zwift:$VERSION
