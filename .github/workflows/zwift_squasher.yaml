@@ -32,5 +32,6 @@ jobs:
           
           echo "Starting squash"
           docker build -t netbrain/zwift:$VERSION -f squash.Dockerfile .
+          docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
           docker push netbrain/zwift:$VERSION
           docker push netbrain/zwift:latest
