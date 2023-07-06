@@ -13,39 +13,19 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Install dependencies
-        run: sudo apt-get install -y x11-xserver-utils x11-apps
       - uses: actions/checkout@v3
-      - name: Install zwift from scratch
+      - name: Squash zwift image
         run: |
           set -x
           export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           echo "Latest zwift version is $VERSION"
           
-          echo "Starting squash..."  
-          Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &
-          sleep 3
-          export DISPLAY=:99
-          xhost +
-
-          docker build -t netbrain/zwift:$VERSION .
-
-          docker run --name zwift \
-                  --privileged \
-                  -e DISPLAY=$DISPLAY \
-                  --device /dev/dri \
-                  -v /tmp:/tmp \
-                  netbrain/zwift:$VERSION
-
-          docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
-            --change="LABEL org.opencontainers.image.version=$VERSION" \
-            --change='CMD [""]' \
-            -m "updated to version $VERSION" \
-            zwift \
-            netbrain/zwift:$VERSION
-
-          docker tag netbrain/zwift:$VERSION netbrain/zwift:squashed
-          #docker push netbrain/zwift:$VERSION
-          docker push netbrain/zwift:squashed
+          echo "Pushing latest version to presquash"
+          docker tag netbrain/zwift:$VERSION netbrain/zwift:$VERSION-presquash
+          docker push netbrain/zwift:$VERSION-presquash
           
+          echo "Starting squash"
+          docker build -t netbrain/zwift:$VERSION -f squash.Dockerfile .
+          docker push netbrain/zwift:$VERSION
+          docker push netbrain/zwift:latest

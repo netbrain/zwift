@@ -29,7 +29,7 @@ then
 	until [ "$ZWIFT_VERSION_CURRENT" = "$ZWIFT_VERSION_LATEST" ]
 	do
 		echo "updating in progress..."
-		sleep 1
+		sleep 5
 		get_current_version
 	done
 	echo "updating done, waiting 5 seconds..."
@@ -54,17 +54,18 @@ then
 	wine64 MicrosoftEdgeWebview2RuntimeInstallerX64.exe /silent /install
 
 	#install zwift
-    wget https://www.nirsoft.net/utils/runfromprocess.zip
+	wget https://www.nirsoft.net/utils/runfromprocess.zip
 	unzip runfromprocess.zip
-    wget https://cdn.zwift.com/app/ZwiftSetup.exe
+	wget https://cdn.zwift.com/app/ZwiftSetup.exe
 	wine64 ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
+	sleep 30
 
 	# Wait for Zwift to fully install and then restart container
-	until [ "$ZWIFT_VERSION_CURRENT" != "" ]
+	until ! pgrep ZwiftLauncher.exe
 	do
 		echo "updating in progress..."
-		sleep 1
-		get_current_version
+		sleep 5
+
 	done
 	wineserver -k
 	exit 0
