@@ -1,13 +1,5 @@
 #!/bin/bash +x
 
-# Use podman if available
-if [[ -x "$(command -v podman)" ]]
-then
-        CONTAINER_TOOL=podman
-else
-        CONTAINER_TOOL=docker
-fi
-
 # The home directory to store zwift data
 ZWIFT_HOME=${ZWIFT_HOME:-$HOME/.zwift/$USER}
 
@@ -19,7 +11,15 @@ VERSION=${VERSION:-latest}
 
 # Create the zwift home directory if not already exists
 mkdir -p $ZWIFT_HOME
-$CONTAINER_TOOL unshare chown $UID:$UID -R $ZWIFT_HOME
+
+# Use podman if available
+if [[ -x "$(command -v podman)" ]]
+then
+	CONTAINER_TOOL=podman
+	$CONTAINER_TOOL unshare chown $UID:$UID -R $ZWIFT_HOME
+else
+	CONTAINER_TOOL=docker
+fi
 
 # Check for updated container image
 $CONTAINER_TOOL pull $IMAGE:$VERSION
@@ -43,6 +43,9 @@ CONTAINER=$($CONTAINER_TOOL run \
 	-v $ZWIFT_HOME:/home/user/Zwift \
 	$VGA_DEVICE_FLAG \
 	$IMAGE:$VERSION)
-	
-# Allow container to connect to X
-xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
+
+if [[ -z $WAYLAND_DISPLAY ]]
+then
+	# Allow container to connect to X
+	xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
+fi
