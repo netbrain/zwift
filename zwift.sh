@@ -43,6 +43,9 @@ CONTAINER=$($CONTAINER_TOOL run \
 	-v $ZWIFT_HOME:/home/user/Zwift \
 	$VGA_DEVICE_FLAG \
 	$IMAGE:$VERSION)
-	
-# Allow container to connect to X
-xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
+
+if [[ -z $WAYLAND_DISPLAY ]]
+then
+	# Allow container to connect to X
+	xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
+fi
