@@ -46,6 +46,21 @@ Instead of `--gpus all`, it might suffice to do a `-v /dev/dri:/dev/dri` instead
 Please note that the above command does not mount a volume to persist configuration files. 
 If you want a proper setup then please use `zwift.sh`.
 
+## Logging in automatically with zwift.sh
+
+To authenticate through Zwift automatically, the credentials must be present in the mounted persisted Zwift config volume.  
+A file named `.zwift-credentials` must contain the following lines:
+
+```console
+ZWIFT_USERNAME=username
+ZWIFT_PASSWORD=password
+```
+
+where `username` is your Zwift account email, and `password` your Zwift account password, respectively.  
+The `.zwift-credentials.template` file can be copied into the config directory and edited manually.
+
+The credentials will be used to authenticate before launching the Zwift app, and the user should be logged in automatically in the game.
+
 ## How do I connect my trainer, heart rate monitor, etc?
 
 You can [use your phone as a bridge](https://support.zwift.com/using-the-zwift-companion-app-Hybn8qzPr).
