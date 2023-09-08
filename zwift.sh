@@ -1,7 +1,9 @@
-#!/bin/bash +x
+#!/usr/bin/env bash
+set -x
 
 # The home directory to store zwift data
-ZWIFT_HOME=${ZWIFT_HOME:-$HOME/.zwift/$USER}
+ZWIFT_HOME=${ZWIFT_HOME:-$HOME/.config/zwift/$USER}
+mkdir -p $ZWIFT_HOME
 
 # Set the container image to use
 IMAGE=${IMAGE:-docker.io/netbrain/zwift}
@@ -13,16 +15,22 @@ VERSION=${VERSION:-latest}
 mkdir -p $ZWIFT_HOME
 
 # Use podman if available
-if [[ -x "$(command -v podman)" ]]
+if [[ ! $CONTAINER_TOOL ]]
 then
-	CONTAINER_TOOL=podman
-	$CONTAINER_TOOL unshare chown $UID:$UID -R $ZWIFT_HOME
-else
-	CONTAINER_TOOL=docker
+    if [[ -x "$(command -v podman)" ]]
+    then
+        CONTAINER_TOOL=podman
+        $CONTAINER_TOOL unshare chown $UID:$UID -R $ZWIFT_HOME
+    else
+        CONTAINER_TOOL=docker
+    fi
 fi
 
 # Check for updated container image
-$CONTAINER_TOOL pull $IMAGE:$VERSION
+if [[ ! $DONT_PULL ]]
+then
+    $CONTAINER_TOOL pull $IMAGE:$VERSION
+fi
 
 # Check for proprietary nvidia driver and set correct device to use
 if [[ -f "/proc/driver/nvidia/version" ]]
@@ -31,6 +39,7 @@ then
 else
 	VGA_DEVICE_FLAG="--device /dev/dri:/dev/dri"
 fi
+
 
 # Start the zwift container
 CONTAINER=$($CONTAINER_TOOL run \
