@@ -43,6 +43,9 @@ jobs:
           sudo apt-get autoremove -y >/dev/null 2>&1
           sudo apt-get autoclean -y >/dev/null 2>&1
 
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Build zwift
         run: |
           set -x
