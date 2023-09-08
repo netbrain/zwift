@@ -48,7 +48,7 @@ If you want a proper setup then please use `zwift.sh`.
 
 ## Logging in automatically with zwift.sh
 
-To authenticate through Zwift automatically, the credentials must be present in the mounted persisted Zwift config volume.  
+To authenticate through Zwift automatically, the credentials must be present in the mounted persisted Zwift config volume (`$HOME/.config/zwift/$USER/.zwift-credentials`).  
 A file named `.zwift-credentials` must contain the following lines:
 
 ```console
@@ -57,7 +57,6 @@ ZWIFT_PASSWORD=password
 ```
 
 where `username` is your Zwift account email, and `password` your Zwift account password, respectively.  
-The `.zwift-credentials.template` file can be copied into the config directory and edited manually.
 
 The credentials will be used to authenticate before launching the Zwift app, and the user should be logged in automatically in the game.
 
