@@ -8,15 +8,19 @@ mkdir -p "$ZWIFT_HOME"
 cd "$ZWIFT_HOME"
 
 function get_current_version() {
-	ZWIFT_VERSION_CURRENT=$(cat Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+	if grep -q sversion Zwift_ver_cur.xml; then
+		ZWIFT_VERSION_CURRENT=$(cat Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+	else
+		# Basic install only, needs initial update
+		ZWIFT_VERSION_CURRENT="0.0.0"
+	fi
 }
 
 function get_latest_version() {
 	ZWIFT_VERSION_LATEST=$(wget --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
 }
 
-if [ "$1" = "update" ]
-then
+function wait_for_zwift_game_update() {
 	echo "updating zwift..."
 	get_current_version
 	get_latest_version
@@ -25,15 +29,23 @@ then
 		echo "already at latest version..."
 		exit 0
 	fi
-	wine64 start ZwiftLauncher.exe
+
+	wine64 start ZwiftLauncher.exe SilentLaunch
 	until [ "$ZWIFT_VERSION_CURRENT" = "$ZWIFT_VERSION_LATEST" ]
 	do
 		echo "updating in progress..."
 		sleep 5
 		get_current_version
 	done
+
 	echo "updating done, waiting 5 seconds..."
 	sleep 5
+}
+
+if [ "$1" = "update" ]
+then
+	wait_for_zwift_game_update
+
 	wineserver -k
 	exit 0
 fi
@@ -48,10 +60,6 @@ then
 
 	#workaround crash issue 1.21
 	winetricks --unattended d3dcompiler_47
-	
-	#install msedge
-	wget https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/efb9eb0d-607c-4fd7-9304-0f5c3ca433fb/MicrosoftEdgeWebView2RuntimeInstallerX64.exe
-	wine64 MicrosoftEdgeWebview2RuntimeInstallerX64.exe /silent /install
 
 	#install zwift
 	wget https://www.nirsoft.net/utils/runfromprocess.zip
@@ -65,23 +73,40 @@ then
 	do
 		echo "updating in progress..."
 		sleep 5
-
 	done
+
+	# Restart updates in background
+	pkill ZwiftLauncher || true
+	wait_for_zwift_game_update
+
 	wineserver -k
 	exit 0
 fi
+
 echo "starting zwift..."
-wine64 start ZwiftLauncher.exe
-wine64 start RunFromProcess-x64.exe ZwiftLauncher.exe ZwiftApp.exe
+wine64 start ZwiftLauncher.exe SilentLaunch
+
+if [[ -f "/home/user/Zwift/.zwift-credentials" ]]
+then
+	LAUNCHER_PID_HEX=$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")
+	LAUNCHER_PID=$((16#$LAUNCHER_PID_HEX))
+
+	echo "authenticating with zwift..."
+	wine64 start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe --token=$(zwift-auth)
+
+	sleep 3
+else
+	wine64 start RunFromProcess-x64.exe ZwiftLauncher.exe ZwiftApp.exe 
+fi
+
 until pgrep ZwiftApp.exe &> /dev/null
 do
-    echo "Waiting for zwift to start ..."
-    sleep 1
+	echo "Waiting for zwift to start ..."
+	sleep 1
 done
 
 echo "Killing uneccesary applications"
 pkill ZwiftLauncher
-pkill MicrosoftEdgeUp
 pkill ZwiftWindowsCra
 
 wineserver -w
