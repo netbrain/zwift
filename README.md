@@ -20,32 +20,32 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 - ATI, Intel and Nouveau drivers should work out of the box (not tested)
 - Allow container to access the x-host by issuing the command `xhost +` (this will however allow everyone to your X server which is considere unsafe, if this is a concern of yours, then `man xhost`)
 
-## Quickstart guide
+## Install
 ```console
 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/install.sh)"
 zwift
 ```
 
-Or you can run the following instead:
+## Configuration options
+| Key           | Default                 | Description                                     |
+|---------------|-------------------------|-------------------------------------------------|
+| USER          | $USER                   | Used in creating the zwift volume `zwift-$USER` |
+| IMAGE         | docker.io/netbrain/zwift| The image to use                                |
+| VERSION       | latest                  | The image version/tag to use                    |
+| DONT_PULL     |                         | If set, don't pull for new image version        |
+| CONTAINER_TOOL|                         | Defaults to podman if installed, else docker    |
 
-```console
-xhost +
-docker pull netbrain/zwift:latest
-docker run --gpus all \
- --privileged \
- --rm \
- -e DISPLAY=$DISPLAY \
- -v /tmp/.X11-unix:/tmp/.X11-unix \
- -v /run/user/$UID/pulse:/run/user/1000/pulse \
-netbrain/zwift:latest
-```
+These environment variables can be used to alter the execution of the zwift bash script.
 
-Instead of `--gpus all`, it might suffice to do a `-v /dev/dri:/dev/dri` instead depending on your graphics card and drivers.
+Examples:
 
-Please note that the above command does not mount a volume to persist configuration files.
-If you want a proper setup then please use `zwift.sh`.
+`DONT_PULL=1 zwift` will prevent docker/podman pull before launch
 
-## Logging in automatically with zwift.sh
+`CONTAINER_TOOL=docker zwift`will launch zwift with docker even if podman is installed 
+
+`USER=Fred zwift` perfect if your neighbor fred want's to try zwift, and you don't want to mess up your zwift config.
+
+## How can I persist my login information so i don't need to login on every startup?
 
 To authenticate through Zwift automatically, the credentials must be present in the zwift volume.
 `docker volume ls` or `podman volume ls` should have a `zwift-$USER` volume.
@@ -111,7 +111,9 @@ docker pull netbrain/zwift:$VERSION # or simply latest
 
 ## How can I update Zwift?
 
-Zwift does not update on it's own. So in order to keep zwift up to date you can simply pull netbrain/zwift:latest from time to time. There is a github action in place that will update zwift on a scheduled basis and publish new versions to docker hub.
+The `zwift.sh` script will update zwift by checking for new image versions on every launch, however if you are not using this then you will have to pull netbrain/zwift:latest from time to time in order to be on the latest version.
+
+There is a github action in place that will update zwift on a scheduled basis and publish new versions to docker hub.
 
 ## Contibute
 
