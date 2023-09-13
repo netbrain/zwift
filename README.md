@@ -47,7 +47,8 @@ If you want a proper setup then please use `zwift.sh`.
 
 ## Logging in automatically with zwift.sh
 
-To authenticate through Zwift automatically, the credentials must be present in the mounted persisted Zwift config volume (`$HOME/.config/zwift/$USER/.zwift-credentials`).
+To authenticate through Zwift automatically, the credentials must be present in the zwift volume.
+`docker volume ls` or `podman volume ls` should have a `zwift-$USER` volume.
 A file named `.zwift-credentials` must contain the following lines:
 
 ```
@@ -56,6 +57,20 @@ ZWIFT_PASSWORD=password
 ```
 
 where `username` is your Zwift account email, and `password` your Zwift account password, respectively.
+
+copy this file into your zwift volume `zwift-$USER`:
+
+```console
+# docker
+docker run -v zwift-$USER:/data --name zwift-copy-op busybox true
+docker cp .zwift-credentials zwift-copy-op:/data
+docker rm zwift-copy-op
+
+# podman
+podman unshare
+cp .zwift-credentials $(podman volume mount zwift-$USER)
+exit
+```
 
 The credentials will be used to authenticate before launching the Zwift app, and the user should be logged in automatically in the game.
 
