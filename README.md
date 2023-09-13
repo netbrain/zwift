@@ -1,12 +1,12 @@
 # Zwift
- 
+
 [![Zwift updater][zwift-updater-src]][zwift-updater-href]
 [![image-href][image-pulls-src]][image-href]
 [![image-href][image-version-src]][image-href]
 [![image-href][image-size-src]][image-href]
 
 
-Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth/ant devices. The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time. 
+Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth/ant devices. The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time.
 
 The container comes pre-installed with zwift, so no setup is required, simply pull and run. It should also now support all manner of graphics cards that has gl rendering.
 
@@ -21,18 +21,17 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 - Allow container to access the x-host by issuing the command `xhost +` (this will however allow everyone to your X server which is considere unsafe, if this is a concern of yours, then `man xhost`)
 
 ## Quickstart guide
-```
-wget https://raw.githubusercontent.com/netbrain/zwift/master/zwift.sh -P ~/bin
-chmod +x ~/bin/zwift.sh
-~/bin/zwift.sh
+```console
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/install.sh)"
+zwift
 ```
 
 Or you can run the following instead:
 
-```
+```console
 xhost +
 docker pull netbrain/zwift:latest
-docker run --gpus all \ 
+docker run --gpus all \
  --privileged \
  --rm \
  -e DISPLAY=$DISPLAY \
@@ -43,20 +42,20 @@ netbrain/zwift:latest
 
 Instead of `--gpus all`, it might suffice to do a `-v /dev/dri:/dev/dri` instead depending on your graphics card and drivers.
 
-Please note that the above command does not mount a volume to persist configuration files. 
+Please note that the above command does not mount a volume to persist configuration files.
 If you want a proper setup then please use `zwift.sh`.
 
 ## Logging in automatically with zwift.sh
 
-To authenticate through Zwift automatically, the credentials must be present in the mounted persisted Zwift config volume (`$HOME/.config/zwift/$USER/.zwift-credentials`).  
+To authenticate through Zwift automatically, the credentials must be present in the mounted persisted Zwift config volume (`$HOME/.config/zwift/$USER/.zwift-credentials`).
 A file named `.zwift-credentials` must contain the following lines:
 
-```console
+```
 ZWIFT_USERNAME=username
 ZWIFT_PASSWORD=password
 ```
 
-where `username` is your Zwift account email, and `password` your Zwift account password, respectively.  
+where `username` is your Zwift account email, and `password` your Zwift account password, respectively.
 
 The credentials will be used to authenticate before launching the Zwift app, and the user should be logged in automatically in the game.
 
@@ -69,7 +68,7 @@ iPhone; then the Companion app connects over wifi to your PC running Zwift.
 
 ## How can I build the image myself?
 
-```
+```console
 docker build -t netbrain/zwift .
 docker run --gpus all \
  --privileged \
@@ -81,17 +80,17 @@ netbrain/zwift
 
 After install and update is complete stop the container `docker stop zwift` and proceed with comitting a new version.
 
-```
-export VERSION=1.20.0			  		# Or whatever the latest version is
-docker commit zwift netbrain/zwift:$VERSION 		# Create a new image with the latest update
-docker rm zwift 					# Remove the no longer needed container
+```console
+export VERSION=1.20.0                               # Or whatever the latest version is
+docker commit zwift netbrain/zwift:$VERSION         # Create a new image with the latest update
+docker rm zwift                                     # Remove the no longer needed container
 ```
 
 ## How can I fetch the image from docker hub?
 
 https://hub.docker.com/r/netbrain/zwift
 
-```
+```console
 docker pull netbrain/zwift:$VERSION # or simply latest
 ```
 
@@ -108,7 +107,7 @@ If you would like to contribute, then please by all means I'll accept PR's. A go
 * Install zwift using wine directly or a framework like lutris. You will however have to manage installation and updates yourself
 * Use [scrcpy](https://github.com/Genymobile/scrcpy) to mirror android device to your linux screen
   * [Enable developer options on your android device](https://developer.android.com/studio/debug/dev-options#enable)
-  * Pair your computer to the device using `adb pair` [documentation](https://developer.android.com/studio/command-line/adb#wireless-android11-command-line) 
+  * Pair your computer to the device using `adb pair` [documentation](https://developer.android.com/studio/command-line/adb#wireless-android11-command-line)
     * `./srccpy.sh adb pair ip:port`  [see my container solution](https://github.com/netbrain/dockerfiles/tree/master/scrcpy)
   * Mirror the android device screen onto your linux screen using scrcpy.
       * `./srccpy.sh scrcpy --tcpip=ip:port`
