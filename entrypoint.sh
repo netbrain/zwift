@@ -9,7 +9,7 @@ cd "$ZWIFT_HOME"
 
 function get_current_version() {
     CUR_FILENAME=$(cat Zwift_ver_cur_filename.txt)
-    if grep -q $CUR_FILENAME; then
+    if grep -q sversion $CUR_FILENAME; then
         ZWIFT_VERSION_CURRENT=$(cat $CUR_FILENAME | grep -oP 'sversion="\K.*?(?=\s)' | cut -f 1 -d ' ')
     else
         # Basic install only, needs initial update
