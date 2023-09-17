@@ -63,8 +63,6 @@ then
     winetricks --unattended d3dcompiler_47
 
     #install zwift
-    wget https://www.nirsoft.net/utils/runfromprocess.zip
-    unzip runfromprocess.zip
     wget https://cdn.zwift.com/app/ZwiftSetup.exe
     wine64 ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
     sleep 30
@@ -87,18 +85,18 @@ fi
 echo "starting zwift..."
 wine64 start ZwiftLauncher.exe SilentLaunch
 
+LAUNCHER_PID_HEX=$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")
+LAUNCHER_PID=$((16#$LAUNCHER_PID_HEX))
+
 if [[ -f "/home/user/Zwift/.zwift-credentials" ]]
 then
-    LAUNCHER_PID_HEX=$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")
-    LAUNCHER_PID=$((16#$LAUNCHER_PID_HEX))
-
     echo "authenticating with zwift..."
     wine64 start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe --token=$(zwift-auth)
-
-    sleep 3
 else
-    wine64 start RunFromProcess-x64.exe ZwiftLauncher.exe ZwiftApp.exe
+    wine64 start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe
 fi
+
+sleep 3
 
 until pgrep ZwiftApp.exe &> /dev/null
 do
