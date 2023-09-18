@@ -130,6 +130,10 @@ If you would like to contribute, then please by all means I'll accept PR's. A go
       * `./srccpy.sh scrcpy --tcpip=ip:port`
   * If you require sound aswell, there's also a [sndcpy](https://github.com/rom1v/sndcpy) project (doesn't support wireless though, but the abovementioned can be modified to use usb)
 * Using [redroid](https://hub.docker.com/r/redroid/redroid) to install zwift apk onto a android emulator (not tested)
+* Using a virual machine with pci passthrough
+  * https://looking-glass.io/
+  * https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF
+  * https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher (if you have a nvidia card you can eat your cake, and have it too by creating vgpus for vm's that leverage the host gpu, no dedicated gpu required)
 
 [zwift-updater-src]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg
 [zwift-updater-href]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml
