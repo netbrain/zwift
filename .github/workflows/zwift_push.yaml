@@ -21,11 +21,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache pulled images.
-        uses: ScribeMD/docker-cache@0.3.6
-        with:
-          key: docker-${{ runner.os }}
-
       - name: Get latest zwift container and diff script files
         run: |
           set -x
