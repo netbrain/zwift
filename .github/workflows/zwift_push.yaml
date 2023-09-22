@@ -41,7 +41,6 @@ jobs:
                   docker cp "${local_file}" "zwift:${container_path}"
               fi
           done
-          docker rm zwift
 
           if [ "$has_changes" = true ]; then
             export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
@@ -49,6 +48,6 @@ jobs:
               -m "Updated script files from git ($GITHUB_SHA)" \
               zwift \
               netbrain/zwift:latest
-
             docker push "netbrain/zwift:latest"
           fi
+          docker rm zwift
