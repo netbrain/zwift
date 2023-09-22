@@ -25,7 +25,7 @@ jobs:
         run: |
           set -x
           docker pull netbrain/zwift:latest
-          docker run -d --name zwift netbrain/zwift:latest sleep infinity
+          docker create --name zwift netbrain/zwift:latest
 
           declare -A files_map
           files_map["/bin/entrypoint"]="entrypoint.sh"
@@ -41,17 +41,14 @@ jobs:
                   docker cp "${local_file}" "zwift:${container_path}"
               fi
           done
+          docker rm zwift
 
           if [ "$has_changes" = true ]; then
             export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
             docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
-              --change='CMD [""]' \
               -m "Updated script files from git ($GITHUB_SHA)" \
               zwift \
               netbrain/zwift:latest
 
             docker push "netbrain/zwift:latest"
           fi
-
-          docker stop zwift
-          docker rm zwift
