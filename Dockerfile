@@ -1,13 +1,13 @@
 FROM rust:1.72 as build-runfromprocess
 
 RUN apt update && apt upgrade -y
-RUN apt install -y g++-mingw-w64-x86-64
+RUN apt install -y g++-mingw-w64-x86-64 git
 
 RUN rustup target add x86_64-pc-windows-gnu
 RUN rustup toolchain install stable-x86_64-pc-windows-gnu
 
 WORKDIR /usr/src
-COPY runfromprocess-rs .
+RUN git clone https://github.com/quietvoid/runfromprocess-rs .
 
 RUN cargo build --target x86_64-pc-windows-gnu --release
 
