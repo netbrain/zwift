@@ -22,7 +22,7 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 
 ## Install
 ```console
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/install.sh)"
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
 zwift
 ```
 
@@ -41,7 +41,7 @@ Examples:
 
 `DONT_PULL=1 zwift` will prevent docker/podman pull before launch
 
-`CONTAINER_TOOL=docker zwift`will launch zwift with docker even if podman is installed 
+`CONTAINER_TOOL=docker zwift` will launch zwift with docker even if podman is installed
 
 `USER=Fred zwift` perfect if your neighbor fred want's to try zwift, and you don't want to mess up your zwift config.
 

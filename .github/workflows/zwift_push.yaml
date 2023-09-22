@@ -1,0 +1,55 @@
+name: Zwift script files updater
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  zwift_updater:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get latest zwift container and diff script files
+        run: |
+          set -x
+          docker pull netbrain/zwift:latest
+          docker run -d --name zwift netbrain/zwift:latest sleep infinity
+
+          declare -A files_map
+          files_map["/bin/entrypoint"]="entrypoint.sh"
+          files_map["/bin/zwift-auth"]="zwift-auth.sh"
+
+          has_changes=false
+          for container_path in "${!files_map[@]}"; do
+              local_file="${files_map[${container_path}]}"
+              docker cp "zwift:${container_path}" "/tmp/${local_file}"
+              diff "${local_file}" "/tmp/${local_file}"
+              if [[ $? -eq 1 ]]; then
+                  has_changes=true
+                  docker cp "${local_file}" "zwift:${container_path}"
+              fi
+          done
+
+          if [ "$has_changes" = true ]; then
+            export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+            docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
+              --change='CMD [""]' \
+              -m "Updated script files from git ($GITHUB_SHA)" \
+              zwift \
+              netbrain/zwift:latest
+
+            docker push "netbrain/zwift:latest"
+          fi
+
+          docker stop zwift
+          docker rm zwift
