@@ -1,5 +1,5 @@
 name: Zwift squasher
-on: 
+on:
   workflow_dispatch:
   schedule:
     - cron: "0 0 1 */3 *"
@@ -8,33 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
-      - name: Free disk space
-        run: |
-          sudo docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
-          sudo rm -rf \
-            /usr/share/dotnet /usr/local/lib/android /opt/ghc \
-            /usr/local/share/powershell /usr/share/swift /usr/local/.ghcup \
-            /usr/lib/jvm /usr/local/share/boost $AGENT_TOOLSDIRECTORY || true
-          echo "some directories deleted"
-          sudo apt install aptitude -y >/dev/null 2>&1
-          sudo aptitude purge aria2 ansible azure-cli shellcheck rpm xorriso zsync \
-            esl-erlang firefox gfortran-8 gfortran-9 google-chrome-stable \
-            google-cloud-sdk imagemagick \
-            libmagickcore-dev libmagickwand-dev libmagic-dev ant ant-optional kubectl \
-            mercurial apt-transport-https mono-complete libmysqlclient \
-            unixodbc-dev yarn chrpath libssl-dev libxft-dev \
-            libfreetype6 libfreetype6-dev libfontconfig1 libfontconfig1-dev \
-            snmp pollinate libpq-dev postgresql-client powershell ruby-full \
-            sphinxsearch subversion mongodb-org azure-cli microsoft-edge-stable \
-            -y -f >/dev/null 2>&1
-          sudo aptitude purge google-cloud-sdk -f -y >/dev/null 2>&1
-          sudo aptitude purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
-          sudo apt purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
-          sudo aptitude purge '~n ^mysql' -f -y >/dev/null 2>&1
-          sudo aptitude purge '~n ^php' -f -y >/dev/null 2>&1
-          sudo aptitude purge '~n ^dotnet' -f -y >/dev/null 2>&1
-          sudo apt-get autoremove -y >/dev/null 2>&1
-          sudo apt-get autoclean -y >/dev/null 2>&1
+      - uses: netbrain/free-disk-space-action@v0.0.1
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -48,11 +22,11 @@ jobs:
           export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           echo "Latest zwift version is $VERSION"
-          
+
           echo "Pushing latest version to presquash"
           docker pull netbrain/zwift:$VERSION
           docker tag netbrain/zwift:$VERSION netbrain/zwift:$VERSION-presquash
-          
+
           echo "Starting squash"
           docker build -t netbrain/zwift:$VERSION -f squash.Dockerfile .
           docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
