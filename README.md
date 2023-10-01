@@ -18,11 +18,17 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 - [Docker](https://docs.docker.com/get-docker) or [Podman](https://podman.io/getting-started/installation)
 - [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker) if you have nvidia proprietary driver
 - ATI, Intel and Nouveau drivers should work out of the box (not tested)
-- Allow container to access the x-host by issuing the command `xhost +` (this will however allow everyone to your X server which is considere unsafe, if this is a concern of yours, then `man xhost`)
 
 ## Install
 ```console
 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+```
+This will put the `zwift.sh` script on your `$PATH`
+
+## RUN
+After installation, simply run:
+
+```console
 zwift
 ```
 
