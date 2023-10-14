@@ -63,6 +63,7 @@ ZWIFT_PASSWORD=password
 ```
 
 where `username` is your Zwift account email, and `password` your Zwift account password, respectively.
+Note that if your password contains special characters such as `;` you will need to escape them using `\`. 
 
 copy this file into your zwift volume `zwift-$USER`:
 
