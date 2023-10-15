@@ -88,6 +88,33 @@ You can [use your phone as a bridge](https://support.zwift.com/using-the-zwift-c
 For example, your Wahoo Kickr and Apple Watch conect to the Zwift Companion app on your
 iPhone; then the Companion app connects over wifi to your PC running Zwift.
 
+## How can I add custom .zwo files?
+
+The folder's name that receives .zwo files is dynamic based on your user's numeric ID. This example works considering you have a single user in the same docker volume.
+After you've downloaded/created your .zwo files use the following script to copy it to the correct folder:
+
+```console
+# docker
+docker run -v zwift-$USER:/data --name zwift-copy-op busybox ls /data/Workouts | xargs -I {} docker cp my-workouts-file.zwo zwift-copy-op:/data/Workouts/{}
+docker rm zwift-copy-op
+
+#podman
+@TBD
+```
+
+If you have multiple users at the same volume you might want to find out which IDs exist in your setup and map the ID for each user to copy correctly to the corresponding user.
+An example of this would be:
+
+```console
+# docker
+docker run -v zwift-$USER:/data --name zwift-copy-op busybox true
+docker cp my-workouts-file.zwo zwift-copy-op:/data/Workouts/1234
+docker rm zwift-copy-op
+
+#podman
+@TBD
+```
+
 ## How can I build the image myself?
 
 ```console
