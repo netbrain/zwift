@@ -149,6 +149,35 @@ The `zwift.sh` script will update zwift by checking for new image versions on ev
 
 There is a github action in place that will update zwift on a scheduled basis and publish new versions to docker hub.
 
+## How can I modify the image to use with zoffline?
+
+Run the `zwift.sh` script and open a bash in the running container
+
+```console
+docker ps -a
+docker exec -it <container-id> bash
+```
+
+In the container bash, run
+
+```console
+wget https://raw.githubusercontent.com/zoffline/zwift-offline/master/ssl/cert-zwift-com.pem
+cat cert-zwift-com.pem >> .wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/cacert.pem
+openssl x509 -in cert-zwift-com.pem -inform PEM -out cert-zwift-com.crt
+sudo mkdir /usr/local/share/ca-certificates/extra
+sudo mv cert-zwift-com.crt /usr/local/share/ca-certificates/extra
+sudo update-ca-certificates
+exit
+```
+
+Commit the changes to a new image
+
+```console
+docker commit <container-id> zoffline-client
+```
+
+Edit `ZOFFLINE_IP` in the `zoffline.sh` script (if server is not running on the same machine) and run it to launch Zwift.
+
 ## Contibute
 
 If you would like to contribute, then please by all means I'll accept PR's. A good starting point would be to see if there's any open issues that you feel capable of doing. Let me know if I can help with anything.
