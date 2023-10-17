@@ -153,6 +153,10 @@ There is a github action in place that will update zwift on a scheduled basis an
 
 If you would like to contribute, then please by all means I'll accept PR's. A good starting point would be to see if there's any open issues that you feel capable of doing. Let me know if I can help with anything.
 
+### Show and tell 🙌
+
+Check out our [Show and tell](https://github.com/netbrain/zwift/discussions/categories/show-and-tell) category in discussions and see how other people are using this solution, feel free to contribute your own tips and tricks :)
+
 ## Alternative's to this repository
 
 * Install zwift using wine directly or a framework like lutris. You will however have to manage installation and updates yourself
