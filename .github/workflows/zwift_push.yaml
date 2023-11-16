@@ -9,6 +9,7 @@ jobs:
   zwift_push:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    concurrency: zwift
     steps:
       -  uses: netbrain/free-disk-space-action@v0.0.1
 
