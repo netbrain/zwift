@@ -11,7 +11,7 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs .
 
 RUN cargo build --target x86_64-pc-windows-gnu --release
 
-FROM netbrain/wine:7.0.0
+FROM netbrain/wine:7.0.0-bookworm
 
 LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"
