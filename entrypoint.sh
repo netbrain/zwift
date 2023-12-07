@@ -54,7 +54,7 @@ fi
 if [ ! "$(ls -A .)" ] # is directory empty?
 then
     #install dotnet > 4.7.2
-    winetricks --unattended dotnet48 win10
+    winetricks --force --unattended dotnet48 win10
 
     #prevents warning when starting zwift for the first time
     winetricks --unattended dotnet20 win10
