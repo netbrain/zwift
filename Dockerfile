@@ -12,9 +12,9 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs .
 RUN cargo build --target x86_64-pc-windows-gnu --release
 
 FROM debian:bookworm-slim as wine-base
-ARG WINE_VERSION=7.0.0.0~bookworm-1
-ARG WINETRICKS_VERSION=20210206
-ARG WINE_MONO_VERSION=7.0.0
+ARG WINE_VERSION=8.0.2~bookworm-1
+ARG WINETRICKS_VERSION=20220521
+ARG WINE_MONO_VERSION=7.4.0
 ENV NVIDIA_VISIBLE_DEVICES \
   ${NVIDIA_VISIBLE_DEVICES:-all}
 ENV NVIDIA_DRIVER_CAPABILITIES \
