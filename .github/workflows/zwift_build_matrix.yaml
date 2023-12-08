@@ -9,9 +9,12 @@ jobs:
       fail-fast: false
       matrix:
         wine-version: ["8.0.2~bookworm-1", "8.0.1~bookworm-1", "8.0.0.0~bookworm-1", "7.0.2~bookworm-1", "7.0.1~bookworm-1", "7.0.0.0~bookworm-1"]
-        winetricks-version: ["20230212", "20210206"]
+        winetricks-version: ["20230212", "20220521", "20220411", "20220331", "20220328", "20210825", "20210206"]
         wine-mono-version: ["7.0.0","7.1.0","7.1.1","7.2.0","7.3.0","7.4.0","8.0.0","8.1.0"]
-    steps:
+        exclude:
+          - winetricks-version: "20230212"
+          - winetricks-version: "20210206"
+      steps:
       - name: Install dependencies
         run: sudo apt-get install -y x11-xserver-utils x11-apps
 
