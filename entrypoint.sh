@@ -8,7 +8,14 @@ mkdir -p "$ZWIFT_HOME"
 cd "$ZWIFT_HOME"
 
 function get_current_version() {
-    CUR_FILENAME=$(cat Zwift_ver_cur_filename.txt)
+    if [ -f Zwift_ver_cur_filename.txt ]; then
+        # If Zwift_ver_cur_filename.txt exists, use it
+        CUR_FILENAME=$(cat Zwift_ver_cur_filename.txt)
+    else
+        # Default to Zwift_ver_cur.xml if Zwift_ver_cur_filename.txt doesn't exist
+        CUR_FILENAME="Zwift_ver_cur.xml"
+    fi
+
     if grep -q sversion $CUR_FILENAME; then
         ZWIFT_VERSION_CURRENT=$(cat $CUR_FILENAME | grep -oP 'sversion="\K.*?(?=\s)' | cut -f 1 -d ' ')
     else
@@ -23,6 +30,7 @@ function get_latest_version() {
 
 function wait_for_zwift_game_update() {
     echo "updating zwift..."
+    cd "${ZWIFT_HOME}"
     get_current_version
     get_latest_version
     if [ "$ZWIFT_VERSION_CURRENT" = "$ZWIFT_VERSION_LATEST" ]
@@ -31,7 +39,7 @@ function wait_for_zwift_game_update() {
         exit 0
     fi
 
-    wine64 start ZwiftLauncher.exe SilentLaunch
+    wine64 ZwiftLauncher.exe SilentLaunch &
     until [ "$ZWIFT_VERSION_CURRENT" = "$ZWIFT_VERSION_LATEST" ]
     do
         echo "updating in progress..."
@@ -53,32 +61,15 @@ fi
 
 if [ ! "$(ls -A .)" ] # is directory empty?
 then
-    #install dotnet > 4.7.2
-    winetricks --force --unattended dotnet48 win10
-
-    #prevents warning when starting zwift for the first time
-    winetricks --unattended dotnet20 win10
-
-    #workaround crash issue 1.21
-    winetricks --unattended d3dcompiler_47
-
-    #install zwift
-    wget https://cdn.zwift.com/app/ZwiftSetup.exe
-    wine64 ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
-    sleep 30
-
-    # Wait for Zwift to fully install and then restart container
-    until ! pgrep ZwiftLauncher.exe
-    do
-        echo "updating in progress..."
-        sleep 5
-    done
-
-    # Restart updates in background
-    pkill ZwiftLauncher || true
+    # install dotnet and zwift
+    winetricks -q dotnet48 /home/user/zwift.verb
+    # update game through zwift launcher
     wait_for_zwift_game_update
-
     wineserver -k
+    # cleanup
+    rm "$ZWIFT_HOME/ZwiftSetup.exe"
+    rm -rf "$HOME/.wine/drive_c/users/user/Downloads/Zwift"
+    rm -rf "$HOME/.cache/wine*"
     exit 0
 fi
 

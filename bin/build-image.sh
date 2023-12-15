@@ -11,7 +11,7 @@ else
 fi
 
 docker build -t netbrain/zwift .
-docker run \
+docker run -it \
     --name zwift \
     --privileged \
     -e DISPLAY=$DISPLAY \
