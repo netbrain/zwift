@@ -61,11 +61,15 @@ fi
 
 if [ ! "$(ls -A .)" ] # is directory empty?
 then
-    #install dotnet and zwift
+    # install dotnet and zwift
     winetricks -q dotnet48 /home/user/zwift.verb
-    #update game through zwift launcher
+    # update game through zwift launcher
     wait_for_zwift_game_update
     wineserver -k
+    # cleanup
+    rm "$ZWIFT_HOME/ZwiftSetup.exe"
+    rm -rf "$HOME/.wine/drive_c/users/user/Downloads/Zwift"
+    rm -rf "$HOME/.cache/wine*"
     exit 0
 fi
 
