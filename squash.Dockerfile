@@ -6,7 +6,5 @@ LABEL org.opencontainers.image.title="netbrain/zwift"
 LABEL org.opencontainers.image.description="Easily zwift on linux"
 LABEL org.opencontainers.image.url="https://github.com/netbrain/zwift"
 
-COPY entrypoint.sh /bin/entrypoint
-RUN sudo chmod +x /bin/entrypoint
 COPY --from=latest / /
 ENTRYPOINT ["entrypoint"]
