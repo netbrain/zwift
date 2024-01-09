@@ -7,13 +7,13 @@ assignees: ''
 
 ---
 
-## Host information
+**Host information**
 > i.e ùname -a`
 
-## Container information
+**Container information**
 > i.e `docker --version`
 
-## Hardware information
+**Hardware information**
 > i.e `lspci | egrep -i "(vga|3d)"`
 
 ## Issue details
