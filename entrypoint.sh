@@ -89,7 +89,7 @@ fi
 
 sleep 3
 
-until pgrep ZwiftApp.exe &> /dev/null
+until pgrep -f ZwiftApp.exe &> /dev/null
 do
     echo "Waiting for zwift to start ..."
     sleep 1
