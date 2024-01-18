@@ -21,7 +21,7 @@ ENV WINEDEBUG=${WINEDEBUG:-fixme-all}
 
 RUN dpkg --add-architecture i386 
 
-RUN echo "deb http://ftp.de.debian.org/debian sid main" >> /etc/apt/sources.list
+RUN echo "deb http://ftp.debian.org/debian sid main" >> /etc/apt/sources.list
 
 RUN \
   apt-get update && \
