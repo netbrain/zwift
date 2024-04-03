@@ -31,6 +31,7 @@ After installation, simply run:
 ```console
 zwift
 ```
+Note you might want to disable video screenshots ([#75](https://github.com/netbrain/zwift/issues/75))
 
 ## Configuration options
 | Key           | Default                 | Description                                     |
