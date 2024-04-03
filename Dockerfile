@@ -21,8 +21,6 @@ ENV WINEDEBUG=${WINEDEBUG:-fixme-all}
 
 RUN dpkg --add-architecture i386 
 
-RUN echo "deb http://ftp.debian.org/debian sid main" >> /etc/apt/sources.list
-
 RUN \
   apt-get update && \
   apt-get install -y --no-install-recommends \
@@ -49,7 +47,6 @@ RUN \
   wget -qO - http://dl.winehq.org/wine-builds/winehq.key | apt-key add - && \
   echo "deb https://dl.winehq.org/wine-builds/debian/ bookworm main" > \
   /etc/apt/sources.list.d/winehq.list && \ 
-  sed -i '/^Types: deb/{:a; N; /\n$/!ba; s/Suites: \(.*\)/Suites: bullseye \1/}' /etc/apt/sources.list.d/debian.sources && \
   apt-get update && \
   apt-get -y install --install-recommends \
   winehq-stable=${WINE_VERSION} \
