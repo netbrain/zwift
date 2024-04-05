@@ -27,7 +27,7 @@ ENV WINEDEBUG=${WINEDEBUG:-fixme-all}
 # ENV LD_LIBRARY_PATH /usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
 
 COPY pulse-client.conf /etc/pulse/client.conf
-RUN apk add mesa-utils mesa-dri-gallium wine wine-dev wget samba-winbind-clients pulseaudio curl sudo grep bash gnutls
+RUN apk --no-cache add mesa-utils mesa-dri-gallium wine wine-dev wget samba-winbind-clients pulseaudio curl sudo grep bash gnutls
 RUN \
   wget \
   https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
