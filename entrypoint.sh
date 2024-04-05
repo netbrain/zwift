@@ -61,8 +61,9 @@ fi
 
 if [ ! "$(ls -A .)" ] # is directory empty?
 then
-    # install dotnet and zwift
+    # install dotnet
     winetricks -q dotnet48
+    
     # install webview 2
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
     wine webview2-setup.exe /silent /install
