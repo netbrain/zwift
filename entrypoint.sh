@@ -61,13 +61,28 @@ fi
 
 if [ ! "$(ls -A .)" ] # is directory empty?
 then
-    # install dotnet and zwift
-    winetricks -q dotnet48 /home/user/zwift.verb
+    # install dotnet
+    winetricks -q dotnet48
+    
+    # install webview 2
+    wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
+    wine webview2-setup.exe /silent /install
+
+    # install zwift
+    wget https://cdn.zwift.com/app/ZwiftSetup.exe
+    wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
+    wine ZwiftLauncher.exe SilentLaunch
+
+    # enable wayland support in wine 9.0
+    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
+    
     # update game through zwift launcher
     wait_for_zwift_game_update
     wineserver -k
+    
     # cleanup
     rm "$ZWIFT_HOME/ZwiftSetup.exe"
+    rm "$ZWIFT_HOME/webview2-setup.exe"
     rm -rf "$HOME/.wine/drive_c/users/user/Downloads/Zwift"
     rm -rf "$HOME/.cache/wine*"
     exit 0
