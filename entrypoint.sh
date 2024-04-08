@@ -39,7 +39,7 @@ function wait_for_zwift_game_update() {
         exit 0
     fi
 
-    wine64 ZwiftLauncher.exe SilentLaunch &
+    wine ZwiftLauncher.exe SilentLaunch &
     until [ "$ZWIFT_VERSION_CURRENT" = "$ZWIFT_VERSION_LATEST" ]
     do
         echo "updating in progress..."
@@ -61,9 +61,12 @@ fi
 
 if [ ! "$(ls -A .)" ] # is directory empty?
 then
-    # install dotnet
+    # install dotnet 20 (to prevent error dialog with CloseLauncher.exe)
+    winetricks -q dotnet20
+
+    # install dotnet48 for zwift
     winetricks -q dotnet48
-    
+        
     # install webview 2
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
     wine webview2-setup.exe /silent /install
@@ -89,7 +92,7 @@ then
 fi
 
 echo "starting zwift..."
-wine64 start ZwiftLauncher.exe SilentLaunch
+wine start ZwiftLauncher.exe SilentLaunch
 
 LAUNCHER_PID_HEX=$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")
 LAUNCHER_PID=$((16#$LAUNCHER_PID_HEX))
@@ -97,9 +100,9 @@ LAUNCHER_PID=$((16#$LAUNCHER_PID_HEX))
 if [[ -f "/home/user/Zwift/.zwift-credentials" ]]
 then
     echo "authenticating with zwift..."
-    wine64 start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe --token=$(zwift-auth)
+    wine start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe --token=$(zwift-auth)
 else
-    wine64 start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe
+    wine start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe
 fi
 
 sleep 3
