@@ -116,5 +116,6 @@ done
 echo "Killing uneccesary applications"
 pkill ZwiftLauncher
 pkill ZwiftWindowsCra
+pkill -f MicrosoftEdgeUpdate
 
 wineserver -w
