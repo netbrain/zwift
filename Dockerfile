@@ -16,9 +16,9 @@ RUN cargo build --target x86_64-pc-windows-gnu --release
 FROM alpine:${ALPINE_VERSION} as wine-base
 ARG WINETRICKS_VERSION=20240105
 ARG WINE_MONO_VERSION=8.1.0
-ENV NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
-ENV WINEDEBUG=${WINEDEBUG:-fixme-all}
+ENV WINEDEBUG=fixme-all
 
 # RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
 #   echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
