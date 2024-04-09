@@ -46,7 +46,7 @@ CONTAINER=$($CONTAINER_TOOL run \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /run/user/$UID/pulse:/run/user/1000/pulse \
-    -v zwift-$USER:/home/user/Zwift \
+    -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift \
     $([ "$CONTAINER_TOOL" = "podman" ] && echo '--userns=keep-id') \
     $VGA_DEVICE_FLAG \
     $IMAGE:$VERSION)
