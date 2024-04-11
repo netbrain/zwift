@@ -36,17 +36,17 @@ fi
 ### OVERRIDE CONFIGURATION FROM FILE ###
 
 # Check for other zwift configuration, sourced here and passed on to container aswell
-if [[ -f "~/.config/zwift/config" ]]
+if [[ -f "$HOME/.config/zwift/config" ]]
 then
-    ZWIFT_CONFIG_FLAG="--env-file ~/.config/zwift/config"
-    source ~/.config/zwift/config
+    ZWIFT_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
+    source $HOME/.config/zwift/config
 fi
 
 # Check for $USER specific zwift configuration, sourced here and passed on to container aswell
-if [[ -f "~/.config/zwift/$USER-config" ]]
+if [[ -f "$HOME/.config/zwift/$USER-config" ]]
 then
-    ZWIFT_USER_CONFIG_FLAG="--env-file ~/.config/zwift/config"
-    source ~/.config/zwift/config
+    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
+    source $HOME/.config/zwift/config
 fi
 
 # Check for updated zwift.sh
