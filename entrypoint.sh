@@ -76,9 +76,6 @@ then
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
     wine ZwiftLauncher.exe SilentLaunch
 
-    # enable wayland support in wine 9.0
-    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
-    
     # update game through zwift launcher
     wait_for_zwift_game_update
     wineserver -k
@@ -91,13 +88,19 @@ then
     exit 0
 fi
 
+if [[ ! -z "$WINE_EXPERIMENTAL_WAYLAND" ]];
+then
+    echo "enabling wayland support in wine 9.0"
+    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
+fi
+
 echo "starting zwift..."
 wine start ZwiftLauncher.exe SilentLaunch
 
 LAUNCHER_PID_HEX=$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")
 LAUNCHER_PID=$((16#$LAUNCHER_PID_HEX))
 
-if [[ -f "/home/user/Zwift/.zwift-credentials" ]]
+if [[ ! -z "$ZWIFT_USERNAME" ]] && [[ ! -z "$ZWIFT_PASSWORD" ]];
 then
     echo "authenticating with zwift..."
     wine start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe --token=$(zwift-auth)
