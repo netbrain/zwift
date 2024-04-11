@@ -2,15 +2,6 @@
 
 set -e
 
-if [[ ! -f "/home/user/Zwift/.zwift-credentials" ]]
-then
-  echo "Zwift credentials file missing!"
-  exit 1
-fi
-
-# Load credentials env variables
-source /home/user/Zwift/.zwift-credentials
-
 LAUNCHER_CLIENT_ID="Game_Launcher"
 LAUNCHER_HOME="https://launcher.zwift.com/launcher"
 
