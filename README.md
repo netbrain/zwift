@@ -39,6 +39,7 @@ Note you might want to disable video screenshots ([#75](https://github.com/netbr
 | USER                     | $USER                   | Used in creating the zwift volume `zwift-$USER`           |
 | IMAGE                    | docker.io/netbrain/zwift| The image to use                                          |
 | VERSION                  | latest                  | The image version/tag to use                              |
+| DONT_CHECK               |                         | If set, don't check for updated zwift.sh                  |
 | DONT_PULL                |                         | If set, don't pull for new image version                  |
 | CONTAINER_TOOL           |                         | Defaults to podman if installed, else docker              |
 | ZWIFT_USERNAME           |                         | If set, try to login to zwift automatically               |
