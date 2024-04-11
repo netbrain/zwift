@@ -26,6 +26,7 @@ RUN dpkg --add-architecture i386
 
 # prerequisites
 # - wget for downloading winehq key
+# - curl used in zwift authentication script
 # - sudo for normal user installation
 # - winbind for ntml_auth required by zwift/wine
 # - libgl1 for GL library
@@ -33,7 +34,7 @@ RUN dpkg --add-architecture i386
 # - procps for pgrep
 
 RUN apt-get update
-RUN apt-get install -y wget sudo winbind libgl1 libvulkan1 procps
+RUN apt-get install -y wget curl sudo winbind libgl1 libvulkan1 procps
 RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key
 RUN DEBIAN_VERSION=${DEBIAN_VERSION} echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list
 RUN apt-get update
