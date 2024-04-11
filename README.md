@@ -67,7 +67,6 @@ ZWIFT_PASSWORD=password
 ```
 
 where `username` is your Zwift account email, and `password` your Zwift account password, respectively.
-Note that if your password contains special characters such as `;` you will need to escape them using `\`. 
 
 The credentials will be used to authenticate before launching the Zwift app, and the user should be logged in automatically in the game.
 
