@@ -76,9 +76,6 @@ then
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
     wine ZwiftLauncher.exe SilentLaunch
 
-    # enable wayland support in wine 9.0
-    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
-    
     # update game through zwift launcher
     wait_for_zwift_game_update
     wineserver -k
@@ -89,6 +86,12 @@ then
     rm -rf "$HOME/.wine/drive_c/users/user/Downloads/Zwift"
     rm -rf "$HOME/.cache/wine*"
     exit 0
+fi
+
+if [[ ! -z "$WINE_EXPERIMENTAL_WAYLAND" ]];
+then
+    echo "enabling wayland support in wine 9.0"
+    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
 fi
 
 echo "starting zwift..."
