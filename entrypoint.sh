@@ -97,7 +97,7 @@ wine start ZwiftLauncher.exe SilentLaunch
 LAUNCHER_PID_HEX=$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")
 LAUNCHER_PID=$((16#$LAUNCHER_PID_HEX))
 
-if [[ -f "/home/user/Zwift/.zwift-credentials" ]]
+if [[ ! -z "$ZWIFT_USERNAME" ]] && [[ ! -z "$ZWIFT_PASSWORD" ]];
 then
     echo "authenticating with zwift..."
     wine start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe --token=$(zwift-auth)
