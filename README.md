@@ -54,10 +54,7 @@ Examples:
 
 ## How can I persist my login information so i don't need to login on every startup?
 
-To authenticate through Zwift automatically, the credentials must be present in the zwift volume.
-`docker volume ls` or `podman volume ls` should have a `zwift-$USER` volume.
-A file named `.zwift-credentials` must contain the following lines:
-
+To authenticate through Zwift automatically simply create the following file `~/.config/zwift/credentials` with the following contents:
 ```
 ZWIFT_USERNAME=username
 ZWIFT_PASSWORD=password
@@ -66,21 +63,9 @@ ZWIFT_PASSWORD=password
 where `username` is your Zwift account email, and `password` your Zwift account password, respectively.
 Note that if your password contains special characters such as `;` you will need to escape them using `\`. 
 
-copy this file into your zwift volume `zwift-$USER`:
-
-```console
-# docker
-docker run -v zwift-$USER:/data --name zwift-copy-op busybox true
-docker cp .zwift-credentials zwift-copy-op:/data
-docker rm zwift-copy-op
-
-# podman
-podman unshare
-cp .zwift-credentials $(podman volume mount zwift-$USER)
-exit
-```
-
 The credentials will be used to authenticate before launching the Zwift app, and the user should be logged in automatically in the game.
+
+Note: This will be loaded by zwift.sh in cleartext as environment variables into the container.
 
 ## How do I connect my trainer, heart rate monitor, etc?
 
@@ -119,21 +104,7 @@ docker rm zwift-copy-op
 ## How can I build the image myself?
 
 ```console
-docker build -t netbrain/zwift .
-docker run --gpus all \
- --privileged \
- --name zwift \
- -e DISPLAY=$DISPLAY \
- -v /tmp/.X11-unix:/tmp/.X11-unix \
-netbrain/zwift
-```
-
-After install and update is complete stop the container `docker stop zwift` and proceed with comitting a new version.
-
-```console
-export VERSION=1.20.0                               # Or whatever the latest version is
-docker commit zwift netbrain/zwift:$VERSION         # Create a new image with the latest update
-docker rm zwift                                     # Remove the no longer needed container
+./bin/build-image.sh
 ```
 
 ## How can I fetch the image from docker hub?
