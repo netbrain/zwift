@@ -37,6 +37,11 @@ else
     VGA_DEVICE_FLAG="--device /dev/dri:/dev/dri"
 fi
 
+# Check for zwift credentials
+if [[ -f "~/.config/zwift/credentials" ]]
+then
+    ZWIFT_CREDENTIALS_FLAG="--env-file ~/.config/zwift/credentials"
+fi
 
 # Start the zwift container
 CONTAINER=$($CONTAINER_TOOL run \
@@ -48,6 +53,7 @@ CONTAINER=$($CONTAINER_TOOL run \
     -v /run/user/$UID/pulse:/run/user/1000/pulse \
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift \
     $([ "$CONTAINER_TOOL" = "podman" ] && echo '--userns=keep-id') \
+    $ZWIFT_CREDENTIALS_FLAG \
     $VGA_DEVICE_FLAG \
     $IMAGE:$VERSION)
 
