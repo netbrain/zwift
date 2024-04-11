@@ -34,15 +34,18 @@ zwift
 Note you might want to disable video screenshots ([#75](https://github.com/netbrain/zwift/issues/75))
 
 ## Configuration options
-| Key           | Default                 | Description                                     |
-|---------------|-------------------------|-------------------------------------------------|
-| USER          | $USER                   | Used in creating the zwift volume `zwift-$USER` |
-| IMAGE         | docker.io/netbrain/zwift| The image to use                                |
-| VERSION       | latest                  | The image version/tag to use                    |
-| DONT_PULL     |                         | If set, don't pull for new image version        |
-| CONTAINER_TOOL|                         | Defaults to podman if installed, else docker    |
+| Key                      | Default                 | Description                                               |
+|--------------------------|-------------------------|-----------------------------------------------------------|
+| USER                     | $USER                   | Used in creating the zwift volume `zwift-$USER`           |
+| IMAGE                    | docker.io/netbrain/zwift| The image to use                                          |
+| VERSION                  | latest                  | The image version/tag to use                              |
+| DONT_PULL                |                         | If set, don't pull for new image version                  |
+| CONTAINER_TOOL           |                         | Defaults to podman if installed, else docker              |
+| ZWIFT_USERNAME           |                         | If set, try to login to zwift automatically               |
+| ZWIFT_PASSWORD           |                         | "                                                         |
+| WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
 
-These environment variables can be used to alter the execution of the zwift bash script.
+These environment variables can be used to alter the execution of the zwift bash script. 
 
 Examples:
 
@@ -52,9 +55,11 @@ Examples:
 
 `USER=Fred zwift` perfect if your neighbor fred want's to try zwift, and you don't want to mess up your zwift config.
 
+You can also set these in `~/.config/zwift/config` to be sourced by the zwift.sh script on execution.
+
 ## How can I persist my login information so i don't need to login on every startup?
 
-To authenticate through Zwift automatically simply create the following file `~/.config/zwift/credentials` with the following contents:
+To authenticate through Zwift automatically simply add the following file `~/.config/zwift/config`:
 ```
 ZWIFT_USERNAME=username
 ZWIFT_PASSWORD=password
