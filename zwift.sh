@@ -33,6 +33,8 @@ else
     VGA_DEVICE_FLAG="--device /dev/dri:/dev/dri"
 fi
 
+CONTAINER_NETWORKING="bridge"
+
 ### OVERRIDE CONFIGURATION FROM FILE ###
 
 # Check for other zwift configuration, sourced here and passed on to container aswell
@@ -71,11 +73,24 @@ fi
 
 ### START ###
 
+# Give write access to pulse if UID doesn't match UID inside the container.
+# Quick fix, but there are probably better ways of doing this where you
+# dynamically set the UID of the user running zwift at runtime.  The
+# --userns=keep-id argument to podman gets around this by mapping UIDs at
+# runtime do this isn't needed when using podman
+#
+if [[ "$CONTAINER_TOOL" == "docker" && $UID != 1000 ]]
+then
+  chmod 755 "/run/user/$UID/pulse"
+fi
+
 # Start the zwift container
 CONTAINER=$($CONTAINER_TOOL run \
     -d \
     --rm \
     --privileged \
+    --network $CONTAINER_NETWORKING \
+    --name zwift-$USER \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /run/user/$UID/pulse:/run/user/1000/pulse \
