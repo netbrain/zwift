@@ -33,6 +33,8 @@ else
     VGA_DEVICE_FLAG="--device /dev/dri:/dev/dri"
 fi
 
+NETWORKING=${NETWORKING:-bridge}
+
 ### OVERRIDE CONFIGURATION FROM FILE ###
 
 # Check for other zwift configuration, sourced here and passed on to container aswell
@@ -76,6 +78,7 @@ CONTAINER=$($CONTAINER_TOOL run \
     -d \
     --rm \
     --privileged \
+    --network $NETWORKING \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /run/user/$UID/pulse:/run/user/1000/pulse \
