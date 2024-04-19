@@ -45,6 +45,7 @@ Note you might want to disable video screenshots ([#75](https://github.com/netbr
 | ZWIFT_USERNAME           |                         | If set, try to login to zwift automatically               |
 | ZWIFT_PASSWORD           |                         | "                                                         |
 | WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
+| NETWORKING               | bridge                  | Sets the type of container networking to use.             |
 
 These environment variables can be used to alter the execution of the zwift bash script. 
 
@@ -55,6 +56,8 @@ Examples:
 `CONTAINER_TOOL=docker zwift` will launch zwift with docker even if podman is installed
 
 `USER=Fred zwift` perfect if your neighbor fred want's to try zwift, and you don't want to mess up your zwift config.
+
+`NETWORKING=host zwift` will use host networking which may be needed to have Zwift talk to WiFi enabled trainers.
 
 You can also set these in `~/.config/zwift/config` to be sourced by the zwift.sh script on execution.
 
