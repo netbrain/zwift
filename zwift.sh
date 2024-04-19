@@ -79,6 +79,7 @@ CONTAINER=$($CONTAINER_TOOL run \
     --rm \
     --privileged \
     --network $NETWORKING \
+    --name zwift-$USER \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /run/user/$UID/pulse:/run/user/1000/pulse \
