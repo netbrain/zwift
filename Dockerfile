@@ -21,6 +21,8 @@ ARG DEBIAN_VERSION
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV WINEDEBUG=fixme-all
+ENV ZWIFT_UID=1000
+ENV ZWIFT_GID=1000
 
 RUN dpkg --add-architecture i386 
 
@@ -34,7 +36,7 @@ RUN dpkg --add-architecture i386
 # - procps for pgrep
 
 RUN apt-get update
-RUN apt-get install -y wget curl sudo winbind libgl1 libvulkan1 procps
+RUN apt-get install -y wget curl sudo winbind libgl1 libvulkan1 procps gosu
 RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key
 RUN DEBIAN_VERSION=${DEBIAN_VERSION} echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list
 RUN apt-get update
@@ -56,14 +58,11 @@ RUN \
   -O /usr/local/bin/winetricks && \
   chmod +x /usr/local/bin/winetricks
 
-RUN adduser --disabled-password --gecos ''  user && \
+RUN adduser --disabled-password --uid ${ZWIFT_UID} --gecos ''  user && \
   adduser user sudo && \
   echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-RUN mkdir -p /run/user/1000 && chown -R user:user /run/user/1000
-
-USER user
-WORKDIR /home/user
+RUN mkdir -p /run/user/${ZWIFT_UID} && chown -R user:user /run/user/${ZWIFT_UID}
 
 RUN wget https://dl.winehq.org/wine/wine-mono/${WINE_MONO_VERSION}/wine-mono-${WINE_MONO_VERSION}-x86.msi \
         -P /home/user/.cache/wine
@@ -75,17 +74,20 @@ LABEL org.opencontainers.image.title="netbrain/zwift"
 LABEL org.opencontainers.image.description="Easily zwift on linux"
 LABEL org.opencontainers.image.url="https://github.com/netbrain/zwift"
 
-RUN sudo apt-get update && \
-    sudo apt-get install -y curl && \
-    sudo rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /bin/entrypoint
-RUN sudo chmod +x /bin/entrypoint
+RUN chmod +x /bin/entrypoint
+
+COPY setup_and_run_zwift.sh /bin/setup_and_run_zwift
+RUN chmod +x /bin/setup_and_run_zwift
 
 COPY zwift-auth.sh /bin/zwift-auth
-RUN sudo chmod +x /bin/zwift-auth
+RUN chmod +x /bin/zwift-auth
 
 COPY --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/runfromprocess-rs.exe /bin/runfromprocess-rs.exe
-RUN sudo chmod +x /bin/runfromprocess-rs.exe
+RUN chmod +x /bin/runfromprocess-rs.exe
 
 ENTRYPOINT ["entrypoint"]
