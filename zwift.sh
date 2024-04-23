@@ -84,8 +84,8 @@ CONTAINER=$($CONTAINER_TOOL run \
     --network $NETWORKING \
     --name zwift-$USER \
     -e DISPLAY=$DISPLAY \
-    -e UID=$ZWIFT_UID \
-    -e GID=$ZWIFT_GID \
+    -e ZWIFT_UID=$ZWIFT_UID \
+    -e ZWIFT_GID=$ZWIFT_GID \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse \
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift \
