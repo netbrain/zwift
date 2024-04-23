@@ -58,7 +58,7 @@ RUN \
   -O /usr/local/bin/winetricks && \
   chmod +x /usr/local/bin/winetricks
 
-RUN adduser --disabled-password --uid ${ZWIFT_UID} --gecos ''  user && \
+RUN adduser --disabled-password --gecos ''  user && \
   adduser user sudo && \
   echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
