@@ -62,8 +62,6 @@ RUN adduser --disabled-password --gecos ''  user && \
   adduser user sudo && \
   echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-RUN mkdir -p /run/user/${ZWIFT_UID} && chown -R user:user /run/user/${ZWIFT_UID}
-
 RUN wget https://dl.winehq.org/wine/wine-mono/${WINE_MONO_VERSION}/wine-mono-${WINE_MONO_VERSION}-x86.msi \
         -P /home/user/.cache/wine
 

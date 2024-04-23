@@ -46,8 +46,8 @@ Note you might want to disable video screenshots ([#75](https://github.com/netbr
 | ZWIFT_PASSWORD           |                         | "                                                         |
 | WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
 | NETWORKING               | bridge                  | Sets the type of container networking to use.             |
-| ZWIFT_UID                | 1000                    | Sets the UID that Zwift will run as                       |
-| ZWIFT_GID                | 1000                    | Sets the GID that Zwift will run as                       |
+| ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as                       |
+| ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as                       |
 
 These environment variables can be used to alter the execution of the zwift bash script. 
 
@@ -61,8 +61,7 @@ Examples:
 
 `NETWORKING=host zwift` will use host networking which may be needed to have Zwift talk to WiFi enabled trainers.
 
-`ZWIFT_UID=$UID ZWIFT_GID=$GID zwift` will run Zwift as your user.  This can fix permission
-problems (i.e. Zwift not being able to play sound).
+`ZWIFT_UID=123 ZWIFT_GID=123 zwift` will run Zwift as the given uid and gid.  By default Zwift runs with the uid and gid of the user that started the container. You should not need to change this except in rare cases.
 
 You can also set these in `~/.config/zwift/config` to be sourced by the zwift.sh script on execution.
 
