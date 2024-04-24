@@ -35,6 +35,9 @@ fi
 
 NETWORKING=${NETWORKING:-bridge}
 
+ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
+ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
+
 ### OVERRIDE CONFIGURATION FROM FILE ###
 
 # Check for other zwift configuration, sourced here and passed on to container aswell
@@ -81,8 +84,10 @@ CONTAINER=$($CONTAINER_TOOL run \
     --network $NETWORKING \
     --name zwift-$USER \
     -e DISPLAY=$DISPLAY \
+    -e ZWIFT_UID=$ZWIFT_UID \
+    -e ZWIFT_GID=$ZWIFT_GID \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v /run/user/$UID/pulse:/run/user/1000/pulse \
+    -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse \
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift \
     $([ "$CONTAINER_TOOL" = "podman" ] && echo '--userns=keep-id') \
     $ZWIFT_CONFIG_FLAG \
