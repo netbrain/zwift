@@ -89,7 +89,6 @@ CONTAINER=$($CONTAINER_TOOL run \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse \
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift \
-    $([ "$CONTAINER_TOOL" = "podman" ] && echo '--userns=keep-id') \
     $ZWIFT_CONFIG_FLAG \
     $ZWIFT_USER_CONFIG_FLAG \
     $VGA_DEVICE_FLAG \
