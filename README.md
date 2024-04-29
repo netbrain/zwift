@@ -46,8 +46,8 @@ Note you might want to disable video screenshots ([#75](https://github.com/netbr
 | ZWIFT_PASSWORD           |                         | "                                                         |
 | WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
 | NETWORKING               | bridge                  | Sets the type of container networking to use.             |
-| ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as                       |
-| ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as                       |
+| ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as (docker only)         |
+| ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as (docker only)         |
 
 These environment variables can be used to alter the execution of the zwift bash script.
 
