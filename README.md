@@ -6,7 +6,7 @@
 [![image-href][image-size-src]][image-href]
 
 
-Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth/ant devices. The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time.
+Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth devices (ant devices are not supported via the companion app). The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time.
 
 The container comes pre-installed with zwift, so no setup is required, simply pull and run. It should also now support all manner of graphics cards that has gl rendering.
 
@@ -49,7 +49,7 @@ Note you might want to disable video screenshots ([#75](https://github.com/netbr
 | ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as                       |
 | ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as                       |
 
-These environment variables can be used to alter the execution of the zwift bash script. 
+These environment variables can be used to alter the execution of the zwift bash script.
 
 Examples:
 
