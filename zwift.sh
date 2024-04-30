@@ -74,6 +74,17 @@ then
     $CONTAINER_TOOL pull $IMAGE:$VERSION
 fi
 
+if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]
+then
+    [[ $DBUS_SESSION_BUS_ADDRESS =~ ^unix:path=([^,]+) ]]
+
+    DBUS_UNIX_SOCKET=${BASH_REMATCH[1]}
+    if [[ -n "$DBUS_UNIX_SOCKET" ]]
+    then
+        DBUS_CONFIG_FLAGS="-e DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS -v $DBUS_UNIX_SOCKET:$DBUS_UNIX_SOCKET"
+    fi
+fi
+
 ### START ###
 
 CONTAINER=$($CONTAINER_TOOL run \
@@ -92,6 +103,7 @@ CONTAINER=$($CONTAINER_TOOL run \
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift \
     $ZWIFT_CONFIG_FLAG \
     $ZWIFT_USER_CONFIG_FLAG \
+    $DBUS_CONFIG_FLAGS \
     $VGA_DEVICE_FLAG \
     $IMAGE:$VERSION)
 

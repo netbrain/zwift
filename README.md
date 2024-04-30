@@ -33,6 +33,8 @@ zwift
 ```
 Note you might want to disable video screenshots ([#75](https://github.com/netbrain/zwift/issues/75))
 
+If dbus is available through a unix socket, the screensaver will be inhibited every 30 seconds to prevent xscreensaver or other programs listening on the bus from inhibiting the screen.
+
 ## Configuration options
 | Key                      | Default                 | Description                                               |
 |--------------------------|-------------------------|-----------------------------------------------------------|
