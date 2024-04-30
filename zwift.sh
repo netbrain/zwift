@@ -76,12 +76,12 @@ fi
 
 if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]
 then
-    REGEX='^unix:path=([^,]+)'
-    [[ $DBUS_SESSION_BUS_ADDRESS =~ $REGEX ]]
+    [[ $DBUS_SESSION_BUS_ADDRESS =~ ^unix:path=([^,]+) ]]
 
-    if [[ -n "${BASH_REMATCH[1]}" ]]
+    DBUS_UNIX_SOCKET=${BASH_REMATCH[1]}
+    if [[ -n "$DBUS_UNIX_SOCKET" ]]
     then
-        DBUS_CONFIG_FLAGS="-e DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS -v ${BASH_REMATCH[1]}:${BASH_REMATCH[1]}"
+        DBUS_CONFIG_FLAGS="-e DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS -v $DBUS_UNIX_SOCKET:$DBUS_UNIX_SOCKET"
     fi
 fi
 
