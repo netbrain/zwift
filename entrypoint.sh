@@ -25,4 +25,4 @@ chown -R ${USER_UID}:${USER_GID} /home/user
 mkdir -p /run/user/${USER_UID} && chown -R user:user /run/user/${USER_UID}
 sed -i "s/1000/${USER_UID}/g" /etc/pulse/client.conf
 
-gosu user:user /bin/setup_and_run_zwift
+gosu user:user /bin/setup_and_run_zwift "$@"
