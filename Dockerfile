@@ -22,7 +22,7 @@ ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV WINEDEBUG=fixme-all
 
-RUN dpkg --add-architecture i386 
+RUN dpkg --add-architecture i386
 
 # prerequisites
 # - wget for downloading winehq key
@@ -32,9 +32,10 @@ RUN dpkg --add-architecture i386
 # - libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
+# - xdg-utils for xdg-screensaver
 
 RUN apt-get update
-RUN apt-get install -y wget curl sudo winbind libgl1 libvulkan1 procps gosu
+RUN apt-get install -y wget curl sudo winbind libgl1 libvulkan1 procps gosu xdg-utils
 RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key
 RUN DEBIAN_VERSION=${DEBIAN_VERSION} echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list
 RUN apt-get update

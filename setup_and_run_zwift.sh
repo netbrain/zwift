@@ -69,7 +69,7 @@ then
 
     # install dotnet48 for zwift
     winetricks -q dotnet48
-        
+
     # install webview 2
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
     wine webview2-setup.exe /silent /install
@@ -82,7 +82,7 @@ then
     # update game through zwift launcher
     wait_for_zwift_game_update
     wineserver -k
-    
+
     # cleanup
     rm "$ZWIFT_HOME/ZwiftSetup.exe"
     rm "$ZWIFT_HOME/webview2-setup.exe"
@@ -118,6 +118,8 @@ do
     echo "Waiting for zwift to start ..."
     sleep 1
 done
+
+[[ -n "${DBUS_SESSION_BUS_ADDRESS}" ]] && watch -n 30 xdg-screensaver reset &
 
 echo "Killing uneccesary applications"
 pkill ZwiftLauncher

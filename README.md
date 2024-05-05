@@ -6,7 +6,7 @@
 [![image-href][image-size-src]][image-href]
 
 
-Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth/ant devices. The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time.
+Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth devices (ant devices are not supported via the companion app). The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time.
 
 The container comes pre-installed with zwift, so no setup is required, simply pull and run. It should also now support all manner of graphics cards that has gl rendering.
 
@@ -33,6 +33,8 @@ zwift
 ```
 Note you might want to disable video screenshots ([#75](https://github.com/netbrain/zwift/issues/75))
 
+If dbus is available through a unix socket, the screensaver will be inhibited every 30 seconds to prevent xscreensaver or other programs listening on the bus from inhibiting the screen.
+
 ## Configuration options
 | Key                      | Default                 | Description                                               |
 |--------------------------|-------------------------|-----------------------------------------------------------|
@@ -46,10 +48,10 @@ Note you might want to disable video screenshots ([#75](https://github.com/netbr
 | ZWIFT_PASSWORD           |                         | "                                                         |
 | WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
 | NETWORKING               | bridge                  | Sets the type of container networking to use.             |
-| ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as                       |
-| ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as                       |
+| ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as (docker only)         |
+| ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as (docker only)         |
 
-These environment variables can be used to alter the execution of the zwift bash script. 
+These environment variables can be used to alter the execution of the zwift bash script.
 
 Examples:
 

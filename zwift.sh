@@ -26,7 +26,7 @@ then
     if [[ $CONTAINER_TOOL == "podman" ]]
     then
         VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"
-    else 
+    else
         VGA_DEVICE_FLAG="--gpus all"
     fi
 else
@@ -74,9 +74,19 @@ then
     $CONTAINER_TOOL pull $IMAGE:$VERSION
 fi
 
+if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]
+then
+    [[ $DBUS_SESSION_BUS_ADDRESS =~ ^unix:path=([^,]+) ]]
+
+    DBUS_UNIX_SOCKET=${BASH_REMATCH[1]}
+    if [[ -n "$DBUS_UNIX_SOCKET" ]]
+    then
+        DBUS_CONFIG_FLAGS="-e DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS -v $DBUS_UNIX_SOCKET:$DBUS_UNIX_SOCKET"
+    fi
+fi
+
 ### START ###
 
-# Start the zwift container
 CONTAINER=$($CONTAINER_TOOL run \
     -d \
     --rm \
@@ -84,14 +94,16 @@ CONTAINER=$($CONTAINER_TOOL run \
     --network $NETWORKING \
     --name zwift-$USER \
     -e DISPLAY=$DISPLAY \
+    $([ "$CONTAINER_TOOL" = "podman" ] && echo '--userns=keep-id') \
+    $([ "$CONTAINER_TOOL" = "podman" ] && echo '--entrypoint /bin/setup_and_run_zwift') \
     -e ZWIFT_UID=$ZWIFT_UID \
     -e ZWIFT_GID=$ZWIFT_GID \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse \
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift \
-    $([ "$CONTAINER_TOOL" = "podman" ] && echo '--userns=keep-id') \
     $ZWIFT_CONFIG_FLAG \
     $ZWIFT_USER_CONFIG_FLAG \
+    $DBUS_CONFIG_FLAGS \
     $VGA_DEVICE_FLAG \
     $IMAGE:$VERSION)
 
