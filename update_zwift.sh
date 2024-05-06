@@ -2,7 +2,7 @@
 set -e
 set -x
 
-source /bin/zwift_common.sh
+ZWIFT_HOME="$HOME/.wine/drive_c/Program Files (x86)/Zwift"
 
 mkdir -p "$ZWIFT_HOME"
 cd "$ZWIFT_HOME"
@@ -59,7 +59,7 @@ then
     exit 0
 fi
 
-if [ ! "$(ls -A $ZWIFT_HOME)" ] # is directory empty?
+if [ ! "$(ls -A .)" ] # is directory empty?
 then
     # install dotnet 20 (to prevent error dialog with CloseLauncher.exe)
     winetricks -q dotnet20

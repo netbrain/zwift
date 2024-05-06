@@ -2,7 +2,7 @@
 set -e
 set -x
 
-source /bin/zwift_common.sh
+ZWIFT_HOME="$HOME/.wine/drive_c/Program Files (x86)/Zwift"
 
 if [ ! -d "$ZWIFT_HOME" ]; then
   echo "Directory $ZWIFT_HOME does not exist.  Has Zwift been installed?"
