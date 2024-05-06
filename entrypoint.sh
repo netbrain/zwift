@@ -2,6 +2,8 @@
 set -e
 set -x
 
+source /bin/zwift_common.sh
+
 USER_UID=`id -u user`
 USER_GID=`id -g user`
 
@@ -19,10 +21,16 @@ fi
 
 # The next two should be no-ops if ZWIFT_UID/GID are not set but no harm
 # running them anyway.
-usermod -o -u ${USER_UID} user && groupmod -o -g ${USER_GID} user
+usermod -o -u ${USER_UID} user
+groupmod -o -g ${USER_GID} user
 chown -R ${USER_UID}:${USER_GID} /home/user
 
 mkdir -p /run/user/${USER_UID} && chown -R user:user /run/user/${USER_UID}
 sed -i "s/1000/${USER_UID}/g" /etc/pulse/client.conf
 
-gosu user:user /bin/setup_and_run_zwift "$@"
+# Run update if that's the first argument or if zwift directory is empty
+if [ "$1" = "update" ] || [ ! "$(ls -A ${ZWIFT_HOME})" ] ; then
+  gosu user:user /bin/update_zwift.sh "$@"
+else
+  gosu user:user /bin/run_zwift.sh "$@"
+fi
