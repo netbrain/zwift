@@ -95,7 +95,7 @@ CONTAINER=$($CONTAINER_TOOL run \
     --name zwift-$USER \
     -e DISPLAY=$DISPLAY \
     $([ "$CONTAINER_TOOL" = "podman" ] && echo '--userns=keep-id') \
-    $([ "$CONTAINER_TOOL" = "podman" ] && echo '--entrypoint /bin/setup_and_run_zwift') \
+    $([ "$CONTAINER_TOOL" = "podman" ] && echo '--entrypoint /bin/run_zwift.sh') \
     -e ZWIFT_UID=$ZWIFT_UID \
     -e ZWIFT_GID=$ZWIFT_GID \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
