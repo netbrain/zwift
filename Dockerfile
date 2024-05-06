@@ -78,8 +78,11 @@ RUN apt-get update && \
 COPY entrypoint.sh /bin/entrypoint
 RUN chmod +x /bin/entrypoint
 
-COPY setup_and_run_zwift.sh /bin/setup_and_run_zwift
-RUN chmod +x /bin/setup_and_run_zwift
+COPY update_zwift.sh /bin/update_zwift.sh
+RUN chmod +x /bin/update_zwift.sh
+
+COPY run_zwift.sh /bin/run_zwift.sh
+RUN chmod +x /bin/run_zwift.sh
 
 COPY zwift-auth.sh /bin/zwift-auth
 RUN chmod +x /bin/zwift-auth

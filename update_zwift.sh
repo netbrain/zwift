@@ -2,9 +2,6 @@
 set -e
 set -x
 
-
-echo "Called with arguments: '$@'"
-
 ZWIFT_HOME="$HOME/.wine/drive_c/Program Files (x86)/Zwift"
 
 mkdir -p "$ZWIFT_HOME"
@@ -69,7 +66,7 @@ then
 
     # install dotnet48 for zwift
     winetricks -q dotnet48
-
+        
     # install webview 2
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
     wine webview2-setup.exe /silent /install
@@ -82,7 +79,7 @@ then
     # update game through zwift launcher
     wait_for_zwift_game_update
     wineserver -k
-
+    
     # cleanup
     rm "$ZWIFT_HOME/ZwiftSetup.exe"
     rm "$ZWIFT_HOME/webview2-setup.exe"
@@ -90,40 +87,3 @@ then
     rm -rf "$HOME/.cache/wine*"
     exit 0
 fi
-
-if [[ ! -z "$WINE_EXPERIMENTAL_WAYLAND" ]];
-then
-    echo "enabling wayland support in wine 9.0"
-    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
-fi
-
-echo "starting zwift..."
-wine start ZwiftLauncher.exe SilentLaunch
-
-LAUNCHER_PID_HEX=$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")
-LAUNCHER_PID=$((16#$LAUNCHER_PID_HEX))
-
-if [[ ! -z "$ZWIFT_USERNAME" ]] && [[ ! -z "$ZWIFT_PASSWORD" ]];
-then
-    echo "authenticating with zwift..."
-    wine start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe --token=$(zwift-auth)
-else
-    wine start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe
-fi
-
-sleep 3
-
-until pgrep -f ZwiftApp.exe &> /dev/null
-do
-    echo "Waiting for zwift to start ..."
-    sleep 1
-done
-
-[[ -n "${DBUS_SESSION_BUS_ADDRESS}" ]] && watch -n 30 xdg-screensaver reset &
-
-echo "Killing uneccesary applications"
-pkill ZwiftLauncher
-pkill ZwiftWindowsCra
-pkill -f MicrosoftEdgeUpdate
-
-wineserver -w

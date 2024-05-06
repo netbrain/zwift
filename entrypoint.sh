@@ -2,6 +2,13 @@
 set -e
 set -x
 
+# This script runs as the root user in Docker so need to do this to find the
+# home directory of the "user" user.
+ZWIFT_USER_HOME=$( getent passwd "user" | cut -d: -f6 )
+ZWIFT_HOME="$ZWIFT_USER_HOME/.wine/drive_c/Program Files (x86)/Zwift"
+
+cd "$ZWIFT_HOME"
+
 USER_UID=`id -u user`
 USER_GID=`id -g user`
 
@@ -19,10 +26,17 @@ fi
 
 # The next two should be no-ops if ZWIFT_UID/GID are not set but no harm
 # running them anyway.
-usermod -o -u ${USER_UID} user && groupmod -o -g ${USER_GID} user
+usermod -o -u ${USER_UID} user
+groupmod -o -g ${USER_GID} user
 chown -R ${USER_UID}:${USER_GID} /home/user
 
-mkdir -p /run/user/${USER_UID} && chown -R user:user /run/user/${USER_UID}
+mkdir -p /run/user/${USER_UID}
+chown -R user:user /run/user/${USER_UID}
 sed -i "s/1000/${USER_UID}/g" /etc/pulse/client.conf
 
-gosu user:user /bin/setup_and_run_zwift "$@"
+# Run update if that's the first argument or if zwift directory is empty
+if [ "$1" = "update" ] || [ ! "$(ls -A .)" ] ; then
+  gosu user:user /bin/update_zwift.sh "$@"
+else
+  gosu user:user /bin/run_zwift.sh "$@"
+fi

@@ -31,7 +31,8 @@ jobs:
           declare -A files_map
           files_map["/bin/entrypoint"]="entrypoint.sh"
           files_map["/bin/zwift-auth"]="zwift-auth.sh"
-          files_map["/bin/setup_and_run_zwift"]="setup_and_run_zwift.sh"
+          files_map["/bin/update_zwift.sh"]="update_zwift.sh"
+          files_map["/bin/run_zwift.sh"]="run_zwift.sh"
 
           has_changes=false
           for container_path in "${!files_map[@]}"; do
