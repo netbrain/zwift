@@ -20,25 +20,30 @@ then
     fi
 fi
 
-# Check for proprietary nvidia driver and set correct device to use
-if [[ -f "/proc/driver/nvidia/version" ]]
-then
-    if [[ $CONTAINER_TOOL == "podman" ]]
-    then
-        VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"
-    else
-        VGA_DEVICE_FLAG="--gpus all"
-    fi
-else
-    VGA_DEVICE_FLAG="--device /dev/dri:/dev/dri"
-fi
-
 NETWORKING=${NETWORKING:-bridge}
 
 ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
 ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
 
-### OVERRIDE CONFIGURATION FROM FILE ###
+# Define Base Container Parameters
+GENERAL_FLAGS=(
+    -d
+    --rm
+    --privileged
+    --network $NETWORKING
+    --name zwift-$USER
+    --security-opt label=disable
+
+    -e DISPLAY=$DISPLAY
+    -e WINE_EXPERIMENTAL_WAYLAND=$WINE_EXPERIMENTAL_WAYLAND
+    -e ZWIFT_UID=$ZWIFT_UID
+    -e ZWIFT_GID=$ZWIFT_GID
+    -e XAUTHORITY=$XAUTHORITY
+
+    -v /tmp/.X11-unix:/tmp/.X11-unix
+    -v /run/user/$UID:/run/user/$ZWIFT_UID
+    -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/ZwiftX
+)
 
 # Check for other zwift configuration, sourced here and passed on to container aswell
 if [[ -f "$HOME/.config/zwift/config" ]]
@@ -54,6 +59,7 @@ then
     source $HOME/.config/zwift/config
 fi
 
+### UPD SCRIPTS and CONTAINER ###
 # Check for updated zwift.sh
 if [[ ! $DONT_CHECK ]]
 then
@@ -74,6 +80,22 @@ then
     $CONTAINER_TOOL pull $IMAGE:$VERSION
 fi
 
+
+### SPECIFIC CONFIGURATIONS ###
+
+# Check for proprietary nvidia driver and set correct device to use
+if [[ -f "/proc/driver/nvidia/version" ]]
+then
+    if [[ $CONTAINER_TOOL == "podman" ]]
+    then
+    	VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"
+    else
+    	VGA_DEVICE_FLAG="--gpus=all"
+    fi
+else
+    VGA_DEVICE_FLAG="--device=/dev/dri:/dev/dri"
+fi
+
 if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]
 then
     [[ $DBUS_SESSION_BUS_ADDRESS =~ ^unix:path=([^,]+) ]]
@@ -81,32 +103,55 @@ then
     DBUS_UNIX_SOCKET=${BASH_REMATCH[1]}
     if [[ -n "$DBUS_UNIX_SOCKET" ]]
     then
-        DBUS_CONFIG_FLAGS="-e DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS -v $DBUS_UNIX_SOCKET:$DBUS_UNIX_SOCKET"
+        DBUS_CONFIG_FLAGS=(
+            -e DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
+            -v $DBUS_UNIX_SOCKET:$DBUS_UNIX_SOCKET
+        )
     fi
 fi
 
-### START ###
+# Setup Wayland Usage.
+if [[ ! -z $WAYLAND_DISPLAY ]]
+then
+    if [[ ! -z $WINE_EXPERIMENTAL_WAYLAND ]]
+    then
+        # Using Experimental Wayland, setup required parameters
+        # To force wayland DISPLAY must be blank.
+        WAYLAND_FLAGS=(
+            -e XDG_RUNTIME_DIR=/run/user/$ZWIFT_UID 
+            -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
+            -e WINE_EXPERIMENTAL_WAYLAND=1
+        )
+        DISPLAY=
+    fi
+fi
 
-CONTAINER=$($CONTAINER_TOOL run \
-    -d \
-    --rm \
-    --privileged \
-    --network $NETWORKING \
-    --name zwift-$USER \
-    -e DISPLAY=$DISPLAY \
-    $([ "$CONTAINER_TOOL" = "podman" ] && echo '--userns=keep-id') \
-    $([ "$CONTAINER_TOOL" = "podman" ] && echo '--entrypoint /bin/run_zwift.sh') \
-    -e ZWIFT_UID=$ZWIFT_UID \
-    -e ZWIFT_GID=$ZWIFT_GID \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse \
-    -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift \
-    $ZWIFT_CONFIG_FLAG \
-    $ZWIFT_USER_CONFIG_FLAG \
-    $DBUS_CONFIG_FLAGS \
-    $VGA_DEVICE_FLAG \
-    $IMAGE:$VERSION)
+# Initiate podman Volume with correct permissions
+if [[ "$CONTAINER_TOOL" == "podman" ]]
+then
+    # Create a volume if not already exists, this is done now as
+    # if left to the run command the directory can get the wrong permissions
+    if [[ -z $(podman volume ls | grep zwift-$USER) ]]
+    then
+        $CONTAINER_TOOL volume create zwift-$USER 
+    fi
+    
+    PODMAN_FLAGS=(
+        --entrypoint /bin/run_zwift.sh
+        --userns keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID
+    )
+fi
 
+CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
+        $ZWIFT_CONFIG_FLAG \
+        $ZWIFT_USER_CONFIG_FLAG \
+        $VGA_DEVICE_FLAG \
+        ${DBUS_CONFIG_FLAGS[@]} \
+        ${WAYLAND_FLAGS[@]} \
+        ${PODMAN_FLAGS[@]} \
+        $IMAGE:$VERSION
+    )
+    
 if [[ -z $WAYLAND_DISPLAY ]]
 then
     # Allow container to connect to X
