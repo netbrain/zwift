@@ -70,7 +70,12 @@ then
     if [ "$REMOTE_SUM" = "$THIS_SUM" ]; then
         echo "You are running latest zwift.sh 👏"
     else
-        echo "You are not running the latest zwift.sh 😭, please update!"
+        RED='\033[0;31m'
+        NC='\033[0m'
+        BOLD='\033[1m'
+        UNDERLINE='\033[4m'
+        echo -e "${RED}${BOLD}${UNDERLINE}You are not running the latest zwift.sh 😭, please update!${NC}"
+        sleep 5
     fi
 fi
 
