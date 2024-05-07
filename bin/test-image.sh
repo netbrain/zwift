@@ -6,14 +6,18 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ZWIFT_UID=1000
 ZWIFT_GID=1000
 
+NAME="zwift"
+
 # Use podman if available
 if [[ ! $CONTAINER_TOOL ]]
 then
     if [[ -x "$(command -v podman)" ]]
     then
         CONTAINER_TOOL=podman
+        IMAGE="localhost/$NAME"
     else
         CONTAINER_TOOL=docker
+        IMAGE=$NAME
     fi
 fi
 
@@ -21,7 +25,7 @@ GENERAL_FLAGS=(
     -it
     --privileged
     --network bridge
-    --name zwift
+    --name $NAME
     --security-opt label=disable
 
     -e DISPLAY=$DISPLAY
@@ -48,16 +52,13 @@ then
     )
 fi
 
-$CONTAINER_TOOL build --force-rm -t zwift $SCRIPT_DIR/../.
+$CONTAINER_TOOL build --force-rm -t $NAME $SCRIPT_DIR/../.
 $CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
     $VGA_DEVICE_FLAG \
     ${PODMAN_FLAGS[@]} \
-    localhost/zwift:latest \
+    $IMAGE:latest \
     $@
 
-$CONTAINER_TOOL commit zwift zwift:latest
-$CONTAINER_TOOL container rm zwift
+$CONTAINER_TOOL commit $NAME $NAME:latest
+$CONTAINER_TOOL container rm $NAME
 
-export DONT_PULL=1
-export IMAGE=localhost/zwift
-$SCRIPT_DIR/../zwift.sh
