@@ -33,9 +33,11 @@ if [[ -z $(cat /run/.containerenv | grep "podman") ]]; then
     groupmod -o -g ${USER_GID} user
     chown -R ${USER_UID}:${USER_GID} /home/user
 
-    mkdir -p /run/user/${USER_UID}
-    chown -R user:user /run/user/${USER_UID}
-    sed -i "s/1000/${USER_UID}/g" /etc/pulse/client.conf
+    if [ ! -d "/run/user/${USER_ID}" ]; then
+        mkdir -p /run/user/${USER_UID}
+        chown -R user:user /run/user/${USER_UID}
+        sed -i "s/1000/${USER_UID}/g" /etc/pulse/client.conf
+    fi 
 
     # Run update if that's the first argument or if zwift directory is empty
     if [ "$1" = "update" ] || [ ! "$(ls -A .)" ] ; then

@@ -3,8 +3,8 @@ set -x
 set -e
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-ZWIFT_UID=1000
-ZWIFT_GID=1000
+ZWIFT_UID=$(id -u)
+ZWIFT_GID=$(id -g)
 
 # Use podman if available
 if [[ ! $CONTAINER_TOOL ]]
