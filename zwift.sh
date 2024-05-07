@@ -147,7 +147,7 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         ${DBUS_CONFIG_FLAGS[@]} \
         ${WAYLAND_FLAGS[@]} \
         ${PODMAN_FLAGS[@]} \
-        $IMAGE:$VERSION
+        $IMAGE:$VERSION $@
 )
 
 if [[ -z $WAYLAND_DISPLAY ]]

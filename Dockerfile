@@ -92,3 +92,4 @@ COPY --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/r
 RUN chmod +x /bin/runfromprocess-rs.exe
 
 ENTRYPOINT ["entrypoint"]
+CMD [$@]
