@@ -56,7 +56,7 @@ $CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
     $@
 
 $CONTAINER_TOOL commit zwift zwift:latest
-$CONTAINER_TOOL containter rm zwift
+$CONTAINER_TOOL container rm zwift
 
 DONT_PULL=1
 DONT_CHECK=1
