@@ -3,6 +3,8 @@ set -x
 set -e
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+ZWIFT_UID=1000
+ZWIFT_GID=1000
 
 # Use podman if available
 if [[ ! $CONTAINER_TOOL ]]
@@ -26,6 +28,7 @@ GENERAL_FLAGS=(
     -e XAUTHORITY=$XAUTHORITY
 
     -v /tmp/.X11-unix:/tmp/.X11-unix
+    -v /run/user/$UID:/run/user/$ZWIFT_UID
 )
 
 
@@ -39,16 +42,9 @@ fi
 
 # Initiate podman Volume with correct permissions
 if [[ "$CONTAINER_TOOL" == "podman" ]]
-then
-    # Create a volume if not already exists, this is done now as
-    # if left to the run command the directory can get the wrong permissions
-    if [[ -z $(podman volume ls | grep zwift-$USER) ]]
-    then
-        $CONTAINER_TOOL volume create zwift-$USER 
-    fi
-    
+then   
     PODMAN_FLAGS=(
-        --userns keep-id
+        --userns keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID
     )
 fi
 
@@ -59,3 +55,9 @@ $CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
     localhost/zwift:latest
 
 $CONTAINER_TOOL commit zwift zwift:latest
+$CONTAINER_TOOL containter rm zwift
+
+DONT_PULL=1
+DONT_CHECK=1
+IMAGE=localhost/zwift
+@SCRIPT_DIR/../zwift.sh
