@@ -6,7 +6,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ZWIFT_UID=1000
 ZWIFT_GID=1000
 
-NAME="zwift"
+NAME="netbrain/zwift"
 
 # Use podman if available
 if [[ ! $CONTAINER_TOOL ]]
@@ -25,7 +25,7 @@ GENERAL_FLAGS=(
     -it
     --privileged
     --network bridge
-    --name $NAME
+    --name zwift
     --security-opt label=disable
 
     -e DISPLAY=$DISPLAY
@@ -52,13 +52,13 @@ then
     )
 fi
 
-$CONTAINER_TOOL build --force-rm -t $NAME $SCRIPT_DIR/../.
+$CONTAINER_TOOL build --force-rm -t zwift $SCRIPT_DIR/../.
 $CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
     $VGA_DEVICE_FLAG \
     ${PODMAN_FLAGS[@]} \
     $IMAGE:latest \
     $@
 
-$CONTAINER_TOOL commit $NAME $NAME:latest
-$CONTAINER_TOOL container rm $NAME
+$CONTAINER_TOOL commit zwift $NAME:latest
+$CONTAINER_TOOL container rm zwift
 
