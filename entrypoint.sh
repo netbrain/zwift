@@ -9,7 +9,7 @@ if [[ -z $(cat /run/.containerenv | grep "podman") ]]; then
     ZWIFT_USER_HOME=$( getent passwd "user" | cut -d: -f6 )
     ZWIFT_HOME="$ZWIFT_USER_HOME/.wine/drive_c/Program Files (x86)/Zwift"
 
-    mkdir -p $ZWIFT_HOME
+    mkdir -p "$ZWIFT_HOME"
     cd "$ZWIFT_HOME"
 
     USER_UID=`id -u user`

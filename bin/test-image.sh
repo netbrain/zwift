@@ -6,18 +6,18 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ZWIFT_UID=1000
 ZWIFT_GID=1000
 
-NAME="netbrain/zwift"
-
 # Use podman if available
 if [[ ! $CONTAINER_TOOL ]]
 then
     if [[ -x "$(command -v podman)" ]]
     then
         CONTAINER_TOOL=podman
-        IMAGE="localhost/$NAME"
+        BUILD_NAME="zwift"
+        IMAGE="localhost/zwift"
     else
         CONTAINER_TOOL=docker
-        IMAGE=$NAME
+        BUILD_NAME="netbrain/zwift"
+        IMAGE="netbrain/zwift"
     fi
 fi
 
@@ -52,13 +52,13 @@ then
     )
 fi
 
-$CONTAINER_TOOL build --force-rm -t zwift $SCRIPT_DIR/../.
+$CONTAINER_TOOL build --force-rm -t $BUILD_NAME $SCRIPT_DIR/../.
 $CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
     $VGA_DEVICE_FLAG \
     ${PODMAN_FLAGS[@]} \
     $IMAGE:latest \
     $@
 
-$CONTAINER_TOOL commit zwift $NAME:latest
+$CONTAINER_TOOL commit zwift $BUILD_NAME:latest
 $CONTAINER_TOOL container rm zwift
 
