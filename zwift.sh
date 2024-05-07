@@ -136,7 +136,6 @@ then
     fi
     
     PODMAN_FLAGS=(
-        --entrypoint /bin/entrypoint
         --userns keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID
     )
 fi
