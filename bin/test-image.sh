@@ -2,6 +2,8 @@
 set -x
 set -e
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 # Use podman if available
 if [[ ! $CONTAINER_TOOL ]]
 then
@@ -50,7 +52,7 @@ then
     )
 fi
 
-$CONTAINER_TOOL build --force-rm -t zwift .
+$CONTAINER_TOOL build --force-rm -t zwift $SCRIPT_DIR/../.
 $CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
     $VGA_DEVICE_FLAG \
     ${PODMAN_FLAGS[@]} \
