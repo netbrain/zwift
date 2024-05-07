@@ -63,6 +63,7 @@ RUN adduser --disabled-password --gecos ''  user && \
 
 RUN wget https://dl.winehq.org/wine/wine-mono/${WINE_MONO_VERSION}/wine-mono-${WINE_MONO_VERSION}-x86.msi \
         -P /home/user/.cache/wine
+RUN chown -R user:user /home/user/.cache
 
 FROM wine-base
 
@@ -89,5 +90,8 @@ RUN chmod +x /bin/zwift-auth
 
 COPY --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/runfromprocess-rs.exe /bin/runfromprocess-rs.exe
 RUN chmod +x /bin/runfromprocess-rs.exe
+
+RUN mkdir -p /home/user/.wine/drive_c/users/user/Documents
+RUN chown -R user:user /home/user/.wine
 
 ENTRYPOINT ["entrypoint"]

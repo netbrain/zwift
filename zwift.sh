@@ -27,13 +27,14 @@ ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
 
 # Define Base Container Parameters
 GENERAL_FLAGS=(
-    -d
+    -it
     --rm
     --privileged
     --network $NETWORKING
     --name zwift-$USER
     --security-opt label=disable
 
+    -e CONTAINERTYPE=$CONTAINER_TOOL
     -e DISPLAY=$DISPLAY
     -e WINE_EXPERIMENTAL_WAYLAND=$WINE_EXPERIMENTAL_WAYLAND
     -e ZWIFT_UID=$ZWIFT_UID
@@ -122,7 +123,6 @@ then
             -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
             -e WINE_EXPERIMENTAL_WAYLAND=1
         )
-        DISPLAY=
     fi
 fi
 
@@ -137,12 +137,12 @@ then
     fi
     
     PODMAN_FLAGS=(
-        --entrypoint /bin/run_zwift.sh
+        --entrypoint /bin/entrypoint
         --userns keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID
     )
 fi
 
-CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
+$CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $ZWIFT_CONFIG_FLAG \
         $ZWIFT_USER_CONFIG_FLAG \
         $VGA_DEVICE_FLAG \
@@ -150,7 +150,6 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         ${WAYLAND_FLAGS[@]} \
         ${PODMAN_FLAGS[@]} \
         $IMAGE:$VERSION
-    )
     
 if [[ -z $WAYLAND_DISPLAY ]]
 then
