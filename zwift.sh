@@ -27,14 +27,13 @@ ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
 
 # Define Base Container Parameters
 GENERAL_FLAGS=(
-    -it
+    -d
     --rm
     --privileged
     --network $NETWORKING
     --name zwift-$USER
     --security-opt label=disable
 
-    -e CONTAINERTYPE=$CONTAINER_TOOL
     -e DISPLAY=$DISPLAY
     -e WINE_EXPERIMENTAL_WAYLAND=$WINE_EXPERIMENTAL_WAYLAND
     -e ZWIFT_UID=$ZWIFT_UID
@@ -142,7 +141,7 @@ then
     )
 fi
 
-$CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
+CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $ZWIFT_CONFIG_FLAG \
         $ZWIFT_USER_CONFIG_FLAG \
         $VGA_DEVICE_FLAG \
@@ -150,7 +149,8 @@ $CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         ${WAYLAND_FLAGS[@]} \
         ${PODMAN_FLAGS[@]} \
         $IMAGE:$VERSION
-    
+)
+
 if [[ -z $WAYLAND_DISPLAY ]]
 then
     # Allow container to connect to X
