@@ -2,8 +2,20 @@
 set -e
 set -x
 
+# Check whetehr we are running in Docker/ Podman
+# Docker has the file /.dockerenv 
+# Podman exposes itself in /run/.containerenv
+if [[ -f "/.dockerenv" ]]; then
+    CONTAINER="docker"
+elif [[ ! -z $(cat /run/.containerenv | grep "podman") ]]; then
+    CONTAINER="podman"
+else
+    echo "Unknown Container."
+    exit 1
+fi
+
 # Check what container we are in:
-if [[ -z $(cat /run/.containerenv | grep "podman") ]]; then
+if [[ "$CONTAINER" == "docker" ]]; then
     # This script runs as the root user in Docker so need to do this to find the
     # home directory of the "user" user.
     ZWIFT_USER_HOME=$( getent passwd "user" | cut -d: -f6 )
@@ -36,8 +48,8 @@ if [[ -z $(cat /run/.containerenv | grep "podman") ]]; then
     if [ ! -d "/run/user/${USER_ID}" ]; then
         mkdir -p /run/user/${USER_UID}
         chown -R user:user /run/user/${USER_UID}
-        sed -i "s/1000/${USER_UID}/g" /etc/pulse/client.conf
     fi 
+    sed -i "s/1000/${USER_UID}/g" /etc/pulse/client.conf
 
     # Run update if that's the first argument or if zwift directory is empty
     if [ "$1" = "update" ] || [ ! "$(ls -A .)" ] ; then
@@ -46,6 +58,7 @@ if [[ -z $(cat /run/.containerenv | grep "podman") ]]; then
        gosu user:user /bin/run_zwift.sh "$@"
     fi
 else
+    # We are running in podman.
     ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
     mkdir -p "$ZWIFT_HOME"
     cd "$ZWIFT_HOME"

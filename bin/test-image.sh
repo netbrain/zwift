@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -x
-set -e
+
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ZWIFT_UID=$(id -u)
@@ -52,12 +52,22 @@ then
     )
 fi
 
+# Cleanup on error
+trap cleanup ERR
+cleanup()
+{
+  $CONTAINER_TOOL container rm zwift
+  exit
+}
+
+
 $CONTAINER_TOOL build --force-rm -t $BUILD_NAME $SCRIPT_DIR/../.
 $CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
     $VGA_DEVICE_FLAG \
     ${PODMAN_FLAGS[@]} \
     $IMAGE:latest \
     $@
+
 
 $CONTAINER_TOOL commit zwift $BUILD_NAME:latest
 $CONTAINER_TOOL container rm zwift

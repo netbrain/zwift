@@ -42,7 +42,7 @@ GENERAL_FLAGS=(
 
     -v /tmp/.X11-unix:/tmp/.X11-unix
     -v /run/user/$UID:/run/user/$ZWIFT_UID
-    -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/ZwiftX
+    -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift
 )
 
 # Check for other zwift configuration, sourced here and passed on to container aswell
