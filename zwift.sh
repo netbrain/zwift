@@ -38,7 +38,7 @@ GENERAL_FLAGS=(
     -e WINE_EXPERIMENTAL_WAYLAND=$WINE_EXPERIMENTAL_WAYLAND
     -e ZWIFT_UID=$ZWIFT_UID
     -e ZWIFT_GID=$ZWIFT_GID
-    -e XAUTHORITY=$XAUTHORITY
+    -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
 
     -v /tmp/.X11-unix:/tmp/.X11-unix
     -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse
@@ -110,7 +110,7 @@ then
     then
         DBUS_CONFIG_FLAGS=(
             -e DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
-            -v $DBUS_UNIX_SOCKET:$DBUS_UNIX_SOCKET
+            -v $DBUS_UNIX_SOCKET:$(echo $DBUS_UNIX_SOCKET | sed 's/'$UID'/'$ZWIFT_UID'/')
         )
     fi
 fi
@@ -128,9 +128,10 @@ then
             -e WINE_EXPERIMENTAL_WAYLAND=1
         )
     else
+
         WAYLAND_FLAGS=(
             -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
-            -v /run/user/$UID:/run/user/$ZWIFT_UID
+            -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
         )
     fi
 fi
