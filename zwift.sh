@@ -27,7 +27,7 @@ ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
 
 # Define Base Container Parameters
 GENERAL_FLAGS=(
-    -it
+    -d
     --rm
     --privileged
     --network $NETWORKING
