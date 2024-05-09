@@ -109,7 +109,7 @@ then
     if [[ -n "$DBUS_UNIX_SOCKET" ]]
     then
         DBUS_CONFIG_FLAGS=(
-            -e DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
+            -e DBUS_SESSION_BUS_ADDRESS=$(echo $DBUS_SESSION_BUS_ADDRESS | sed 's/'$UID'/'$ZWIFT_UID'/')
             -v $DBUS_UNIX_SOCKET:$(echo $DBUS_UNIX_SOCKET | sed 's/'$UID'/'$ZWIFT_UID'/')
         )
     fi
