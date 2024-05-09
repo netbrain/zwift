@@ -27,7 +27,7 @@ ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
 
 # Define Base Container Parameters
 GENERAL_FLAGS=(
-    -d
+    -it
     --rm
     --privileged
     --network $NETWORKING
@@ -41,7 +41,7 @@ GENERAL_FLAGS=(
     -e XAUTHORITY=$XAUTHORITY
 
     -v /tmp/.X11-unix:/tmp/.X11-unix
-    -v /run/user/$UID:/run/user/$ZWIFT_UID
+    -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift
 )
 
@@ -126,6 +126,11 @@ then
             -e XDG_RUNTIME_DIR=/run/user/$ZWIFT_UID 
             -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
             -e WINE_EXPERIMENTAL_WAYLAND=1
+        )
+    else
+        WAYLAND_FLAGS=(
+            -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
+            -v /run/user/$UID:/run/user/$ZWIFT_UID
         )
     fi
 fi
