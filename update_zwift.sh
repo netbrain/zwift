@@ -54,14 +54,6 @@ function wait_for_zwift_game_update() {
     rm -rf "$HOME/.wine/drive_c/users/user/Documents/Zwift"
 }
 
-if [ "$1" = "update" ]
-then
-    wait_for_zwift_game_update
-
-    wineserver -k
-    exit 0
-fi
-
 if [ ! "$(ls -A .)" ] # is directory empty?
 then
     # install dotnet 20 (to prevent error dialog with CloseLauncher.exe)
@@ -90,3 +82,12 @@ then
     rm -rf "$HOME/.cache/wine*"
     exit 0
 fi
+
+if [ "$1" = "update" ]
+then
+    wait_for_zwift_game_update
+
+    wineserver -k
+    exit 0
+fi
+
