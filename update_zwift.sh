@@ -49,6 +49,9 @@ function wait_for_zwift_game_update() {
 
     echo "updating done, waiting 5 seconds..."
     sleep 5
+
+    # Remove as causes PODMAN Save Permisison issues.
+    rm -rf "$HOME/.wine/drive_c/users/user/Documents/Zwift"
 }
 
 if [ "$1" = "update" ]
