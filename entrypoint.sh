@@ -45,11 +45,16 @@ if [[ "$CONTAINER" == "docker" ]]; then
     groupmod -o -g ${USER_GID} user
     chown -R ${USER_UID}:${USER_GID} /home/user
 
+    # Only make the directory if not there.
     if [ ! -d "/run/user/${USER_ID}" ]; then
         mkdir -p /run/user/${USER_UID}
-        chown -R user:user /run/user/${USER_UID}
     fi 
-    sed -i "s/1000/${USER_UID}/g" /etc/pulse/client.conf
+
+    # Only alter pulse if the user id changes.
+    if [ $ZWIFT_UID -ne 1000 ]; then
+        chown -R user:user /run/user/${USER_UID}
+        sed -i "s/1000/${USER_UID}/g" /etc/pulse/client.conf
+    fi
 
     # Run update if that's the first argument or if zwift directory is empty
     if [ "$1" = "update" ] || [ ! "$(ls -A .)" ] ; then
