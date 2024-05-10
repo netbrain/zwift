@@ -151,7 +151,7 @@ then
     )
 fi
 
-CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
+$CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $ZWIFT_CONFIG_FLAG \
         $ZWIFT_USER_CONFIG_FLAG \
         $VGA_DEVICE_FLAG \
@@ -159,10 +159,3 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         ${WAYLAND_FLAGS[@]} \
         ${PODMAN_FLAGS[@]} \
         $IMAGE:$VERSION $@
-)
-
-if [[ -z $WAYLAND_DISPLAY ]]
-then
-    # Allow container to connect to X
-    xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
-fi
