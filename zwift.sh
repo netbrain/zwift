@@ -151,12 +151,7 @@ then
     )
 fi
 
-# If we are using a different user enable xhost.
-if [ $ZWIFT_UID -ne 1000 ]; then
-    xhost +
-fi
-
-CONTAINER = $($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
+CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $ZWIFT_CONFIG_FLAG \
         $ZWIFT_USER_CONFIG_FLAG \
         $VGA_DEVICE_FLAG \
@@ -167,7 +162,7 @@ CONTAINER = $($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
 )
 
 # Allow container to connect to X, has to be set for different UID
-if [[ $ZWIFT_UID -ne 1000 ]]
+if [[ -z $WAYLAND_DISPLAY && $ZWIFT_UID -ne $(id -u) ]]
 then
     xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
 fi
