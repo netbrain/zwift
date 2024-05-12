@@ -25,6 +25,20 @@ NETWORKING=${NETWORKING:-bridge}
 ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
 ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
 
+# Check for other zwift configuration, sourced here and passed on to container aswell
+if [[ -f "$HOME/.config/zwift/config" ]]
+then
+    ZWIFT_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
+    source $HOME/.config/zwift/config
+fi
+
+# Check for $USER specific zwift configuration, sourced here and passed on to container aswell
+if [[ -f "$HOME/.config/zwift/$USER-config" ]]
+then
+    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
+    source $HOME/.config/zwift/config
+fi
+
 # Define Base Container Parameters
 GENERAL_FLAGS=(
     -d
@@ -44,20 +58,6 @@ GENERAL_FLAGS=(
     -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift
 )
-
-# Check for other zwift configuration, sourced here and passed on to container aswell
-if [[ -f "$HOME/.config/zwift/config" ]]
-then
-    ZWIFT_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
-    source $HOME/.config/zwift/config
-fi
-
-# Check for $USER specific zwift configuration, sourced here and passed on to container aswell
-if [[ -f "$HOME/.config/zwift/$USER-config" ]]
-then
-    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
-    source $HOME/.config/zwift/config
-fi
 
 ### UPD SCRIPTS and CONTAINER ###
 # Check for updated zwift.sh
