@@ -22,6 +22,14 @@ fi
 
 NETWORKING=${NETWORKING:-bridge}
 
+# If we are running wayland and ZWIFT_UID provided exit
+if [ ! -z $ZWIFT_UID ] || [ ! -z $ZWIFT_GID ]; then
+    if [ ! -z $WAYLAND_DISPLAY ]; then 
+        echo "Wayland not supported with ZWIFT_UID/ ZWIFT_GID"
+        exit 0
+    fi
+fi
+
 ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
 ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
 
