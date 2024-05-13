@@ -92,7 +92,7 @@ or
 docker volume rm zwift-xxxxx
 ```
 
-NOTE: if you see a weird volume e.g. zwift-naeva it also a hange up from the past, delete it.
+NOTE: if you see a weird volume e.g. zwift-naeva it is a hang up from the past, delete it.
 
 ## I sometimes get a popup Not responding why?
 
