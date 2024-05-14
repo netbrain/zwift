@@ -41,6 +41,8 @@ do
     sleep 1
 done
 
+[[ -n "${DBUS_SESSION_BUS_ADDRESS}" ]] && watch -n 30 xdg-screensaver reset &
+
 echo "Killing uneccesary applications"
 pkill ZwiftLauncher
 pkill ZwiftWindowsCra
