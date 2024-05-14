@@ -41,7 +41,7 @@ do
     sleep 1
 done
 
-[[ -n "${DBUS_SESSION_BUS_ADDRESS}" ]] && watch -n 30 xdg-screensaver reset &
+[[ -n "${DBUS_SESSION_BUS_ADDRESS}" ]] && while true; do sleep 30; xdg-screensaver reset; done &
 
 echo "Killing uneccesary applications"
 pkill ZwiftLauncher
