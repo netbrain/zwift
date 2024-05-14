@@ -131,7 +131,7 @@ then
         # Using Experimental Wayland, setup required parameters
         # To force wayland DISPLAY must be blank.
         WAYLAND_FLAGS=(
-            -e XDG_RUNTIME_DIR=/run/user/$ZWIFT_UID 
+            -e XDG_RUNTIME_DIR=/run/user/$ZWIFT_UID
             -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
             -e WINE_EXPERIMENTAL_WAYLAND=1
         )
@@ -151,9 +151,9 @@ then
     # if left to the run command the directory can get the wrong permissions
     if [[ -z $(podman volume ls | grep zwift-$USER) ]]
     then
-        $CONTAINER_TOOL volume create zwift-$USER 
+        $CONTAINER_TOOL volume create zwift-$USER
     fi
-    
+
     PODMAN_FLAGS=(
         --userns keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID
     )
@@ -170,7 +170,7 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
 )
 
 # Allow container to connect to X, has to be set for different UID
-if [[ -z $WAYLAND_DISPLAY && $ZWIFT_UID -ne $(id -u) ]]
+if [[ -z $WAYLAND_DISPLAY ]]
 then
     xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
 fi
