@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -x
 
+### FORMATTING ###
+RED='\033[0;31m'
+NC='\033[0m'
+BOLD='\033[1m'
+UNDERLINE='\033[4m'
+
 ### DEFAULT CONFIGURATION ###
 
 # Set the container image to use
@@ -21,6 +27,14 @@ then
 fi
 
 NETWORKING=${NETWORKING:-bridge}
+
+# If we are running wayland and ZWIFT_UID provided exit
+if [ ! -z $ZWIFT_UID ] || [ ! -z $ZWIFT_GID ]; then
+    if [ ! -z $WAYLAND_DISPLAY ]; then 
+        echo "Wayland not supported with ZWIFT_UID/ ZWIFT_GID"
+        exit 0
+    fi
+fi
 
 ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
 ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
@@ -70,10 +84,6 @@ then
     if [ "$REMOTE_SUM" = "$THIS_SUM" ]; then
         echo "You are running latest zwift.sh 👏"
     else
-        RED='\033[0;31m'
-        NC='\033[0m'
-        BOLD='\033[1m'
-        UNDERLINE='\033[4m'
         echo -e "${RED}${BOLD}${UNDERLINE}You are not running the latest zwift.sh 😭, please update!${NC}"
         sleep 5
     fi
@@ -160,9 +170,12 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         ${PODMAN_FLAGS[@]} \
         $IMAGE:$VERSION $@
 )
+if [ $? -ne 0 ]; then
+    echo -e "${RED}${BOLD}${UNDERLINE}Error can't run zwift, check variables!${NC}"
+    exit 0
+fi
 
 # Allow container to connect to X, has to be set for different UID
-if [[ -z $WAYLAND_DISPLAY ]]
-then
+if [[ -z $WINE_EXPERIMENTAL_WAYLAND ]]; then
     xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
 fi

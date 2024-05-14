@@ -63,7 +63,7 @@ Examples:
 
 `NETWORKING=host zwift` will use host networking which may be needed to have Zwift talk to WiFi enabled trainers.
 
-`ZWIFT_UID=123 ZWIFT_GID=123 zwift` will run Zwift as the given uid and gid.  By default Zwift runs with the uid and gid of the user that started the container. You should not need to change this except in rare cases.
+`ZWIFT_UID=123 ZWIFT_GID=123 zwift` will run Zwift as the given uid and gid.  By default Zwift runs with the uid and gid of the user that started the container. You should not need to change this except in rare cases.  NOTE: This does not work in wayland only X11.
 
 You can also set these in `~/.config/zwift/config` to be sourced by the zwift.sh script on execution.
 
@@ -80,6 +80,27 @@ where `username` is your Zwift account email, and `password` your Zwift account 
 The credentials will be used to authenticate before launching the Zwift app, and the user should be logged in automatically in the game.
 
 Note: This will be loaded by zwift.sh in cleartext as environment variables into the container.
+
+## Where are the saves and why do I get a popup can't write to Document Folder?
+
+This is a hang up from previous versions, mainly with podman. delete the volumes and after re-creation it should work fine.
+```
+podman volume rm zwift-xxxxx
+
+or
+
+docker volume rm zwift-xxxxx
+```
+
+NOTE: if you see a weird volume e.g. zwift-naeva it is a hang up from the past, delete it.
+
+## I sometimes get a popup Not responding why?
+
+For Gnome it is just timing out before zwift responds, just extend the timeout.
+
+```
+gsettings set org.gnome.mutter check-alive-timeout 60000
+```
 
 ## How do I connect my trainer, heart rate monitor, etc?
 
