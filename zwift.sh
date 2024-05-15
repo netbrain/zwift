@@ -30,7 +30,7 @@ NETWORKING=${NETWORKING:-bridge}
 
 # If we are running wayland and ZWIFT_UID provided exit
 if [ ! -z $ZWIFT_UID ] || [ ! -z $ZWIFT_GID ]; then
-    if [ ! -z $WAYLAND_DISPLAY ]; then 
+    if [ ! -z $WAYLAND_DISPLAY ]; then
         echo "Wayland not supported with ZWIFT_UID/ ZWIFT_GID"
         exit 0
     fi
@@ -144,6 +144,10 @@ then
             -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
         )
     fi
+else
+    X11_FLAGS=(
+        -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+    )
 fi
 
 # Initiate podman Volume with correct permissions
@@ -167,6 +171,7 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $VGA_DEVICE_FLAG \
         ${DBUS_CONFIG_FLAGS[@]} \
         ${WAYLAND_FLAGS[@]} \
+        ${X11_FLAGS[@]} \
         ${PODMAN_FLAGS[@]} \
         $IMAGE:$VERSION $@
 )
@@ -176,6 +181,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # Allow container to connect to X, has to be set for different UID
-if [[ -z $WINE_EXPERIMENTAL_WAYLAND ]]; then
+if [[ -z $WINE_EXPERIMENTAL_WAYLAND && $ZWIFT_UID -ne $(id -u) ]]; then
     xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
 fi
