@@ -1,38 +1,61 @@
 #!/usr/bin/env bash
-set -x
+if [ ! -z $DEBUG ]; then set -x; fi
 
-### FORMATTING ###
-RED='\033[0;31m'
-NC='\033[0m'
-BOLD='\033[1m'
-UNDERLINE='\033[4m'
+DONT_PULL=1
+IMAGE=localhost/zwift
 
-### DEFAULT CONFIGURATION ###
+# MSG BOX use Zenity if available.
+msgbox() {
+    TYPE=$1             # Type, info, warning or error
+    MSG="$2"            # Message to Display
+    TIMEOUT=${3:-0}     # Timeout for message, default no timeout.
 
-# Set the container image to use
-IMAGE=${IMAGE:-docker.io/netbrain/zwift}
+    if [ -x "$(command -v zenity)" ]; then
+        zenity --$1 --title="Zwift" --text="$MSG" --timeout=$TIMEOUT
+        return $?
+    else
+        RED='\033[0;31m'
+        NC='\033[0m'
+        BOLD='\033[1m'
+        UNDERLINE='\033[4m'
 
-# The container version
-VERSION=${VERSION:-latest}
+        case $1 in
+            error) echo -e "${RED}${BOLD}${UNDERLINE}Error - $MSG${NC}";;
+            warning) echo -e "${BOLD}${UNDERLINE}Warning - $MSG${NC}";;
+            question)
+                if [ $TIMEOUT -ne 0 ]; then TIMEOUT="-t $TIMEOUT"; else TIMEOUT=""; fi
 
-# Use podman if available
-if [[ ! $CONTAINER_TOOL ]]
-then
-    if [[ -x "$(command -v podman)" ]]
-    then
+                read $TIMEOUT -n 1 -p "Question - $MSG (y/n) " yn
+                echo
+                case $yn in 
+                    y) return 0;;
+                    n) return 1;;
+                    *) return 5;;
+                esac
+            ;;
+            *) echo "$MSG";;
+        esac
+        if [ $TIMEOUT -eq 0 ]; then
+            read -p "Press key to continue.. " -n1 -s
+        else
+            sleep $TIMEOUT
+        fi
+    fi
+}
+
+########################################
+###### Default Setup and Settings ######
+WM_MANAGER="Other"                          # XOrg, XWayland, Wayland, Other
+IMAGE=${IMAGE:-docker.io/netbrain/zwift}    # Set the container image to use
+VERSION=${VERSION:-latest}                  # The container version
+NETWORKING=${NETWORKING:-bridge}            # Default Docker Network is Bridge
+
+# CONTAINER_TOOL, Use podman if available
+if [ ! $CONTAINER_TOOL ]; then
+    if [ -x "$(command -v podman)" ]; then
         CONTAINER_TOOL=podman
     else
         CONTAINER_TOOL=docker
-    fi
-fi
-
-NETWORKING=${NETWORKING:-bridge}
-
-# If we are running wayland and ZWIFT_UID provided exit
-if [ ! -z $ZWIFT_UID ] || [ ! -z $ZWIFT_GID ]; then
-    if [ ! -z $WAYLAND_DISPLAY ]; then
-        echo "Wayland not supported with ZWIFT_UID/ ZWIFT_GID"
-        exit 0
     fi
 fi
 
@@ -53,27 +76,29 @@ then
     source $HOME/.config/zwift/config
 fi
 
-# Define Base Container Parameters
-GENERAL_FLAGS=(
-    -d
-    --rm
-    --privileged
-    --network $NETWORKING
-    --name zwift-$USER
-    --security-opt label=disable
+########################################
+###### OS and WM Manager Settings ######
+if [  "$XDG_SESSION_TYPE" == "wayland" ]; then
+    # System is using wayland or xwayland.
+    if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
+        WM_MANAGER="XWayland"
+    else
+        WM_MANAGER="Wayland"
+    fi
 
-    -e DISPLAY=$DISPLAY
-    -e WINE_EXPERIMENTAL_WAYLAND=$WINE_EXPERIMENTAL_WAYLAND
-    -e ZWIFT_UID=$ZWIFT_UID
-    -e ZWIFT_GID=$ZWIFT_GID
-    -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+    # ZWIFT_UID/ GID does not work on Wayland
+    if [ $ZWIFT_UID -ne $(id -u) ] || [ $ZWIFT_GID -ne $(id -g) ]; then
+        msgbox warning "Wayland does not support ZWIFT_UID/ ZWIFT_GID." 5
+        exit 0
+    fi
+elif [ "$XDG_SESSION_TYPE" == "x11" ]; then
+    WM_MANAGER="XOrg"
+    unset WINE_EXPERIMENTAL_WAYLAND
+fi
 
-    -v /tmp/.X11-unix:/tmp/.X11-unix
-    -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse
-    -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift
-)
+#######################################
+###### UPD SCRIPTS and CONTAINER ######
 
-### UPD SCRIPTS and CONTAINER ###
 # Check for updated zwift.sh
 if [[ ! $DONT_CHECK ]]
 then
@@ -84,8 +109,11 @@ then
     if [ "$REMOTE_SUM" = "$THIS_SUM" ]; then
         echo "You are running latest zwift.sh 👏"
     else
-        echo -e "${RED}${BOLD}${UNDERLINE}You are not running the latest zwift.sh 😭, please update!${NC}"
-        sleep 5
+        msgbox question "You are not running the latest zwift.sh 😭, update now?" 5
+        if [ $? -eq 0 ]; then
+            pkexec env PATH=$PATH bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+            exec "$0" "${@}"
+        fi
     fi
 fi
 
@@ -95,8 +123,27 @@ then
     $CONTAINER_TOOL pull $IMAGE:$VERSION
 fi
 
+#############################
+##### PREPARE ALL FLAGS #####
 
-### SPECIFIC CONFIGURATIONS ###
+# Define Base Container Parameters
+GENERAL_FLAGS=(
+    -d
+    --rm
+    --privileged
+    --network $NETWORKING
+    --name zwift-$USER
+    --security-opt label=disable
+
+    -e DISPLAY=$DISPLAY
+    -e ZWIFT_UID=$ZWIFT_UID
+    -e ZWIFT_GID=$ZWIFT_GID
+
+    -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift
+)
+
+###################################
+##### SPECIFIC CONFIGURATIONS #####
 
 # Check for proprietary nvidia driver and set correct device to use
 if [[ -f "/proc/driver/nvidia/version" ]]
@@ -125,38 +172,41 @@ then
     fi
 fi
 
-# Setup Wayland Usage.
-if [[ ! -z $WAYLAND_DISPLAY ]]
-then
-    if [[ ! -z $WINE_EXPERIMENTAL_WAYLAND ]]
-    then
-        # Using Experimental Wayland, setup required parameters
-        # To force wayland DISPLAY must be blank.
-        WAYLAND_FLAGS=(
-            -e XDG_RUNTIME_DIR=/run/user/$ZWIFT_UID
-            -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
-            -e WINE_EXPERIMENTAL_WAYLAND=1
-        )
-    else
+# Setup Flags for Window Managers
+if [ $WM_MANAGER == "Wayland" ]; then
+    WM_FLAGS=(
+        -e WINE_EXPERIMENTAL_WAYLAND=1
+        -e XDG_RUNTIME_DIR=/run/user/$ZWIFT_UID
+        -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
+        -e $WAYLAND_DISPLAY=$WAYLAND_DISPLAY
 
-        WAYLAND_FLAGS=(
-            -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
-            -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
-        )
-    fi
-else
-    X11_FLAGS=(
+        -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse
+        -v $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY:$(echo $XDG_RUNTIME_DIR | sed 's/'$UID'/'$ZWIFT_UID'/')/$WAYLAND_DISPLAY
+    )
+elif [ $WM_MANAGER == "XWayland" ]; then
+    WM_FLAGS=(
+        -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
+        -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+
         -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+        -v /tmp/.X11-unix:/tmp/.X11-unix
+        -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse
+    )
+elif [ $WM_MANAGER == "XOrg" ]; then
+    WM_FLAGS=(
+        -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+        -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+        
+        -v /tmp/.X11-unix:/tmp/.X11-unix
+        -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse
     )
 fi
 
 # Initiate podman Volume with correct permissions
-if [[ "$CONTAINER_TOOL" == "podman" ]]
-then
+if [ $CONTAINER_TOOL == "podman" ]; then
     # Create a volume if not already exists, this is done now as
     # if left to the run command the directory can get the wrong permissions
-    if [[ -z $(podman volume ls | grep zwift-$USER) ]]
-    then
+    if [[ -z $(podman volume ls | grep zwift-$USER) ]]; then
         $CONTAINER_TOOL volume create zwift-$USER
     fi
 
@@ -165,22 +215,23 @@ then
     )
 fi
 
+#########################
+##### RUN CONTAINER #####
 CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $ZWIFT_CONFIG_FLAG \
         $ZWIFT_USER_CONFIG_FLAG \
         $VGA_DEVICE_FLAG \
         ${DBUS_CONFIG_FLAGS[@]} \
-        ${WAYLAND_FLAGS[@]} \
-        ${X11_FLAGS[@]} \
+        ${WM_FLAGS[@]} \
         ${PODMAN_FLAGS[@]} \
         $IMAGE:$VERSION $@
 )
 if [ $? -ne 0 ]; then
-    echo -e "${RED}${BOLD}${UNDERLINE}Error can't run zwift, check variables!${NC}"
+    msgbox error "Error can't run zwift, check variables!" 10
     exit 0
 fi
 
 # Allow container to connect to X, has to be set for different UID
-if [[ -z $WINE_EXPERIMENTAL_WAYLAND && $ZWIFT_UID -ne $(id -u) ]]; then
+if [ $ZWIFT_UID -ne $(id -u) ]; then
     xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
 fi

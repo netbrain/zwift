@@ -63,7 +63,13 @@ if [[ "$CONTAINER" == "docker" ]]; then
     else
         # Volume is mounted as root so always re-own.
         chown -R ${USER_UID}:${USER_GID} /home/user/.wine/drive_c/users/user/Documents/Zwift
-        gosu user:user /bin/run_zwift.sh "$@"
+       
+        # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
+        if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
+            gosu user:user /bin/run_zwift.sh "$@"
+        else
+            gosu user:user bash -c 'DISPLAY= /bin/run_zwift.sh "$@"'
+        fi  
     fi
 else
     # We are running in podman.
@@ -74,6 +80,11 @@ else
     if [ "$1" = "update" ] || [ ! "$(ls -A .)" ] ; then
         /bin/update_zwift.sh "$@"
     else
-        /bin/run_zwift.sh "$@"
+        # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
+        if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
+            /bin/run_zwift.sh "$@"
+        else
+            DISPLAY= /bin/run_zwift.sh "$@"
+        fi
     fi
 fi

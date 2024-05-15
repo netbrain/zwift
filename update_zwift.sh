@@ -66,6 +66,9 @@ then
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
     wine webview2-setup.exe /silent /install
 
+    # Enable Wayland Support, still requires DISPLAY to be blank to use Wayland.
+    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
+
     # install zwift
     wget https://cdn.zwift.com/app/ZwiftSetup.exe
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL

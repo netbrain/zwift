@@ -11,14 +11,6 @@ fi
 
 cd "$ZWIFT_HOME"
 
-# Do this in the run script in case a user sets this option post-install.
-if [[ ! -z "$WINE_EXPERIMENTAL_WAYLAND" ]];
-then
-    echo "enabling wayland support in wine 9.0"
-    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
-    DISPLAY=
-fi
-
 echo "starting zwift..."
 wine start ZwiftLauncher.exe SilentLaunch
 
