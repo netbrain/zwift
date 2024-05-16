@@ -14,6 +14,11 @@ else
     exit 1
 fi
 
+# If Wayland Experimental need to blank DISPLAY here to enable Wayland.
+# NOTE: DISPLAY must be unset here before run_swift to work
+#       Registry entrys are set in the container install or won't work.
+if [ ! -z $WINE_EXPERIMENTAL_WAYLAND ]; then unset DISPLAY; fi
+
 # Check what container we are in:
 if [[ "$CONTAINER" == "docker" ]]; then
     # This script runs as the root user in Docker so need to do this to find the
@@ -63,13 +68,7 @@ if [[ "$CONTAINER" == "docker" ]]; then
     else
         # Volume is mounted as root so always re-own.
         chown -R ${USER_UID}:${USER_GID} /home/user/.wine/drive_c/users/user/Documents/Zwift
-       
-        # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
-        if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
-            gosu user:user /bin/run_zwift.sh "$@"
-        else
-            gosu user:user bash -c 'DISPLAY= /bin/run_zwift.sh "$@"'
-        fi  
+        gosu user:user /bin/run_zwift.sh "$@"
     fi
 else
     # We are running in podman.
@@ -80,11 +79,6 @@ else
     if [ "$1" = "update" ] || [ ! "$(ls -A .)" ] ; then
         /bin/update_zwift.sh "$@"
     else
-        # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
-        if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
-            /bin/run_zwift.sh "$@"
-        else
-            DISPLAY= /bin/run_zwift.sh "$@"
-        fi
+        /bin/run_zwift.sh "$@"
     fi
 fi

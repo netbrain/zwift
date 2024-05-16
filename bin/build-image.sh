@@ -32,6 +32,7 @@ GENERAL_FLAGS=(
     --network bridge
     --name zwift
     --security-opt label=disable
+    --hostname $HOSTNAME
 
     -e DISPLAY=$DISPLAY
     -e XAUTHORITY=$XAUTHORITY

@@ -10,7 +10,8 @@ cd "$ZWIFT_HOME"
 function get_current_version() {
     if [ -f Zwift_ver_cur_filename.txt ]; then
         # If Zwift_ver_cur_filename.txt exists, use it
-        CUR_FILENAME=$(cat Zwift_ver_cur_filename.txt)
+        # Remove Null to remove warning.
+        CUR_FILENAME=$(cat Zwift_ver_cur_filename.txt | tr '\0' '\n')
     else
         # Default to Zwift_ver_cur.xml if Zwift_ver_cur_filename.txt doesn't exist
         CUR_FILENAME="Zwift_ver_cur.xml"
@@ -25,7 +26,8 @@ function get_current_version() {
 }
 
 function get_latest_version() {
-    ZWIFT_VERSION_LATEST=$(wget --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+    # Don't cache so we don't pick old versions.
+    ZWIFT_VERSION_LATEST=$(wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
 }
 
 function wait_for_zwift_game_update() {
