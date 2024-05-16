@@ -140,12 +140,14 @@ then
     else
 
         WAYLAND_FLAGS=(
+            --hostname $HOSTNAME
             -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
             -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
         )
     fi
 else
     X11_FLAGS=(
+        --hostname $HOSTNAME
         -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
     )
 fi
