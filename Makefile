@@ -2,7 +2,7 @@ DESTDIR=/
 PREFIX=/usr/
 DATADIR?=${PREFIX}/share
 
-.PHONY: all install uninstall zwift icons desktop
+.PHONY: all install uninstall install_zwift install_icons install_desktop uninstall_zwift uninstall_icons uninstall_desktop
 
 all:
 	@echo "Call \"make install\" to install this program."
