@@ -11,7 +11,7 @@ body:
   attributes:
     label: Checklist
     options:
-      - label: I have given details of my install including Distribution, Wayland/ XOrg, Parameters Used etc.
+      - label: I have given details of my install including Distribution, Wayland/ XOrg, Parameters Used, echo $XAUTHORITY, etc.
         required: true
       - label: I have provided logs showing any errors, if available (use `DEBUG=1 zwift`)
         required: true
