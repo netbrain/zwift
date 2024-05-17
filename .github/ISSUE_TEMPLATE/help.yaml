@@ -1,9 +1,8 @@
 ---
 name: "Help (Not Launching)"
-about: "When zwift won't run or launch properly."
-title: "[HELP]"
+description: "When zwift won't run or launch properly."
+title: "[HELP (Not Launching/ Crashing)]"
 labels: "Support"
-assignees: ""
 body:
 - type: markdown
   attributes:
