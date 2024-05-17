@@ -1,20 +1,44 @@
 ---
-name: Help
+name: Help (Not Launching)
 about: When zwift won't run or launch properly.
 title: "[HELP]"
 labels: support
 assignees: ''
-
----
-
-**Host information**
-> i.e ùname -a`
-
-**Container information**
-> i.e `docker --version`
-
-**Hardware information**
-> i.e `lspci | egrep -i "(vga|3d)"`
-
-## Issue details
-> i.e Having issues with launching zwift, tried running the gl example (https://github.com/netbrain/zwift/issues/54#issuecomment-1877155180) to no avail, which leads me to think I don't have a correct gl setup on host or container level.
+body:
+- type: markdown
+  attributes:
+    value: Before you open a new issue, search through the existing issues to see if others have had the same problem.
+- type: checkboxes
+  attributes:
+    label: Checklist
+    options:
+      - label: I have given details of my install including Distribution, Wayland/ XOrg, Parameters Used etc.
+        required: true
+      - label: I have provided logs showing any errors, if available (use `DEBUG=1 zwift`)
+        required: true
+      - label: I have filled out the issue template to the best of my ability.
+        required: true
+      - label: This issue only contains 1 issue (if you have multiple issues, open one issue for each issue).
+        required: true
+      - label: This issue is not a duplicate issue of previous issue.
+- type: textarea
+  attributes:
+    label: "Describe the issue"
+    description: "A clear and concise description of what the issue is."
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: "Distribution Details"
+    description: "Detail your distribtuion, whether you are using XOrg or Wayland, Any Variables to launch zwift and also check `echo $XAUTHORITY` from a terminal."
+- type: textarea
+  attributes:
+    label: Reproduction steps
+    description: "Without steps to reproduce, it will be hard to fix, it is very important that you fill out this part."
+    value: |
+      1.
+      2.
+      3.
+      ...
+  validations:
+    required: true
