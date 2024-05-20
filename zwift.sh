@@ -179,12 +179,19 @@ if [ $WINDOW_MANAGER == "Wayland" ]; then
         -v $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY:$(echo $XDG_RUNTIME_DIR | sed 's/'$UID'/'$ZWIFT_UID'/')/$WAYLAND_DISPLAY
     )
 elif [ $WINDOW_MANAGER == "XWayland" ]; then
-    WM_FLAGS=(
-        -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+    # If not XAuthority set then don't pass, hyprland is one that does not use it.
+    if [ -z $XAUTHORITY ]; then
+        WM_FLAGS=(
+            -v /tmp/.X11-unix:/tmp/.X11-unix
+        )
+    else
+        WM_FLAGS=(
+            -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
 
-        -v /tmp/.X11-unix:/tmp/.X11-unix
-        -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
-    )
+            -v /tmp/.X11-unix:/tmp/.X11-unix
+            -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+        )
+    fi
 elif [ $WINDOW_MANAGER == "XOrg" ]; then
     WM_FLAGS=(
         -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
