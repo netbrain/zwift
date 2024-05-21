@@ -79,9 +79,9 @@ if [  "$XDG_SESSION_TYPE" == "wayland" ]; then
         WINDOW_MANAGER="Wayland"
     fi
 
-    # ZWIFT_UID/ GID does not work on Wayland
-    if [ $ZWIFT_UID -ne $(id -u) ] || [ $ZWIFT_GID -ne $(id -g) ]; then
-        msgbox warning "Wayland does not support ZWIFT_UID/ ZWIFT_GID." 5
+    # ZWIFT_UID does not work on XWayland
+    if [ $ZWIFT_UID -ne $(id -u) ]; then
+        msgbox warning "XWayland does not support ZWIFT_UID." 5
         exit 0
     fi
 elif [ "$XDG_SESSION_TYPE" == "x11" ]; then
