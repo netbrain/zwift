@@ -17,7 +17,7 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 ## Prerequisites
 - [Docker](https://docs.docker.com/get-docker) or [Podman](https://podman.io/getting-started/installation)
 - [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker) if you have nvidia proprietary driver
-- ATI, Intel and Nouveau drivers should work out of the box (not tested)
+- ATI, Intel and Nouveau drivers should work out of the box
 
 ## Install
 ```console
