@@ -14,6 +14,11 @@ else
     exit 1
 fi
 
+# If Wayland Experimental need to blank DISPLAY here to enable Wayland.
+# NOTE: DISPLAY must be unset here before run_swift to work
+#       Registry entrys are set in the container install or won't work.
+if [ ! -z $WINE_EXPERIMENTAL_WAYLAND ]; then unset DISPLAY; fi
+
 # Check what container we are in:
 if [[ "$CONTAINER" == "docker" ]]; then
     # This script runs as the root user in Docker so need to do this to find the

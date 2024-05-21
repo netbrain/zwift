@@ -50,6 +50,7 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 | NETWORKING               | bridge                  | Sets the type of container networking to use.             |
 | ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as (docker only)         |
 | ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as (docker only)         |
+| DEBUG                    |                         | If set enabled debug of zwift script "set -x"             |
 
 These environment variables can be used to alter the execution of the zwift bash script.
 
@@ -64,6 +65,8 @@ Examples:
 `NETWORKING=host zwift` will use host networking which may be needed to have Zwift talk to WiFi enabled trainers.
 
 `ZWIFT_UID=123 ZWIFT_GID=123 zwift` will run Zwift as the given uid and gid.  By default Zwift runs with the uid and gid of the user that started the container. You should not need to change this except in rare cases.  NOTE: This does not work in wayland only X11.
+
+`WINE_EXPERIMENTAL_WAYLAND=1 zwift` Note this does not work it starts zwift and displays that Zwift needs OpenGL 3.1 or higher, this is due to how wayland reports OpenGL availability which seems to be missing something Zwift wants.
 
 You can also set these in `~/.config/zwift/config` to be sourced by the zwift.sh script on execution.
 
