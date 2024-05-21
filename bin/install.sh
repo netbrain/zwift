@@ -11,6 +11,12 @@ mkdir -p /usr/local/bin
 curl -s -o /usr/local/bin/zwift https://raw.githubusercontent.com/netbrain/zwift/master/zwift.sh
 chmod +x /usr/local/bin/zwift
 
+mkdir -p /usr/local/share/icons/hicolor/scalable/apps
+curl -s -o /usr/local/bin/zwift https://raw.githubusercontent.com/netbrain/zwift/master/assets/hicolor/scalable/apps/Zwift\ Logogram.svg
+
+mkdir -p /usr/local/share/applications
+curl -s -o /usr/local/share/applications/Zwift.desktop https://raw.githubusercontent.com/netbrain/zwift/master/assets/Zwift.desktop
+
 if [ "$(echo $PATH | grep /usr/local/bin)" = "" ]; then
     echo "WARNING: Could not find /usr/local/bin on the \$PATH, you might need to add it."
 fi

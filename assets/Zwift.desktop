@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Zwift
+Exec=zwift
+Type=Application
+StartupNotify=true
+Icon=zwift
