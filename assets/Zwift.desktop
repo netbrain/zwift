@@ -1,6 +1,12 @@
 [Desktop Entry]
+Version=1.0
 Name=Zwift
+GenericName=Zwift
+Comment=Zwift Cycling
 Exec=zwift
+Icon=zwift
+Terminal=true
 Type=Application
 StartupNotify=true
-Icon=zwift
+Categories=Fitness;Game;Cycling
+Keywords=Fitness;Game;Cycling
