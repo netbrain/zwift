@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 if [ ! -z $DEBUG ]; then set -x; fi
 
-# MSG BOX use Zenity if available.
+# Message Box to simplify errors/ and questions.
 msgbox() {
     TYPE=$1             # Type, info, warning or error
     MSG="$2"            # Message to Display
