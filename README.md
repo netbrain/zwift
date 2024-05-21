@@ -25,14 +25,6 @@ sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/mast
 ```
 This will put the `zwift.sh` script on your `$PATH`
 
-You can uninstall by running:
-
-```
-wget https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh
-chmod +x install.sh
-sudo ./install.sh uninstall
-```
-
 ## RUN
 After installation, simply run:
 
