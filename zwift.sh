@@ -71,9 +71,26 @@ fi
 
 ########################################
 ###### OS and WM Manager Settings ######
-if [  "$XDG_SESSION_TYPE" == "wayland" ]; then
+case "$XDG_SESSION_TYPE" in
+    "wayland")
+        WINDOW_MANAGER="Wayland"
+    ;;
+    "x11")
+        WINDOW_MANAGER="XOrg"
+    ;;
+    *)
+        if [ ! -z $WAYLAND_DISPLAY ]; then
+            WINDOW_MANAGER="Wayland"
+        elif [ ! -z $DISPLAY ]; then
+            WINDOW_MANAGER="XOrg"
+        fi
+    ;;
+esac
+
+# Verify which system we are using for wayland and some checks.
+if [ "$WINDOW_MANAGER" = "Wayland" ]; then
     # System is using wayland or xwayland.
-    if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
+    if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then 
         WINDOW_MANAGER="XWayland"
     else
         WINDOW_MANAGER="Wayland"
@@ -83,9 +100,6 @@ if [  "$XDG_SESSION_TYPE" == "wayland" ]; then
     if [ $ZWIFT_UID -ne $(id -u) ]; then
         msgbox warning "XWayland does not support ZWIFT_UID different to your id of $(id -u), may not start." 5
     fi
-elif [ "$XDG_SESSION_TYPE" == "x11" ]; then
-    WINDOW_MANAGER="XOrg"
-    unset WINE_EXPERIMENTAL_WAYLAND
 fi
 
 #######################################
@@ -177,7 +191,9 @@ if [ $WINDOW_MANAGER == "Wayland" ]; then
 
         -v $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY:$(echo $XDG_RUNTIME_DIR | sed 's/'$UID'/'$ZWIFT_UID'/')/$WAYLAND_DISPLAY
     )
-elif [ $WINDOW_MANAGER == "XWayland" ]; then
+fi
+
+if [ $WINDOW_MANAGER == "XWayland" ] || [ $WINDOW_MANAGER == "XOrg" ]; then
     # If not XAuthority set then don't pass, hyprland is one that does not use it.
     if [ -z $XAUTHORITY ]; then
         WM_FLAGS=(
@@ -191,13 +207,10 @@ elif [ $WINDOW_MANAGER == "XWayland" ]; then
             -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
         )
     fi
-elif [ $WINDOW_MANAGER == "XOrg" ]; then
-    WM_FLAGS=(
-        -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+fi
 
-        -v /tmp/.X11-unix:/tmp/.X11-unix
-        -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
-    )
+if [ $WINDOW_MANAGER == "XOrg" ]; then
+    unset WINE_EXPERIMENTAL_WAYLAND
 fi
 
 # Initiate podman Volume with correct permissions
