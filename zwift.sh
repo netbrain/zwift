@@ -71,9 +71,26 @@ fi
 
 ########################################
 ###### OS and WM Manager Settings ######
-if [  "$XDG_SESSION_TYPE" == "wayland" ]; then
+case "$XDG_SESSION_TYPE" in
+    "wayland")
+        WINDOW_MANAGER="Wayland"
+    ;;
+    "x11")
+        WINDOW_MANAGER="XOrg"
+    ;;
+    *)
+        if [ ! -z $WAYLAND_DISPLAY ]; then
+            WINDOW_MANAGER="Wayland"
+        elif [ ! -z $DISPLAY ]; then
+            WINDOW_MANAGER="XOrg"
+        fi
+    ;;
+esac
+
+# Verify which system we are using for wayland and some checks.
+if [ "$WINDOW_MANAGER" = "Wayland" ]; then
     # System is using wayland or xwayland.
-    if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
+    if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then 
         WINDOW_MANAGER="XWayland"
     else
         WINDOW_MANAGER="Wayland"
@@ -83,9 +100,6 @@ if [  "$XDG_SESSION_TYPE" == "wayland" ]; then
     if [ $ZWIFT_UID -ne $(id -u) ]; then
         msgbox warning "XWayland does not support ZWIFT_UID different to your id of $(id -u), may not start." 5
     fi
-elif [ "$XDG_SESSION_TYPE" == "x11" ]; then
-    WINDOW_MANAGER="XOrg"
-    unset WINE_EXPERIMENTAL_WAYLAND
 fi
 
 #######################################
@@ -192,6 +206,7 @@ elif [ $WINDOW_MANAGER == "XWayland" ]; then
         )
     fi
 elif [ $WINDOW_MANAGER == "XOrg" ]; then
+    unset WINE_EXPERIMENTAL_WAYLAND
     WM_FLAGS=(
         -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
 
