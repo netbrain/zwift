@@ -191,7 +191,9 @@ if [ $WINDOW_MANAGER == "Wayland" ]; then
 
         -v $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY:$(echo $XDG_RUNTIME_DIR | sed 's/'$UID'/'$ZWIFT_UID'/')/$WAYLAND_DISPLAY
     )
-elif [ $WINDOW_MANAGER == "XWayland" ]; then
+fi
+
+if [ $WINDOW_MANAGER == "XWayland" ] || [ $WINDOW_MANAGER == "XOrg" ]; then
     # If not XAuthority set then don't pass, hyprland is one that does not use it.
     if [ -z $XAUTHORITY ]; then
         WM_FLAGS=(
@@ -205,14 +207,10 @@ elif [ $WINDOW_MANAGER == "XWayland" ]; then
             -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
         )
     fi
-elif [ $WINDOW_MANAGER == "XOrg" ]; then
-    unset WINE_EXPERIMENTAL_WAYLAND
-    WM_FLAGS=(
-        -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+fi
 
-        -v /tmp/.X11-unix:/tmp/.X11-unix
-        -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
-    )
+if [ $WINDOW_MANAGER == "XOrg" ]; then
+    unset WINE_EXPERIMENTAL_WAYLAND
 fi
 
 # Initiate podman Volume with correct permissions
