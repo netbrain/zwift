@@ -58,6 +58,9 @@ function wait_for_zwift_game_update() {
 
 if [ ! "$(ls -A .)" ] # is directory empty?
 then
+    # Prevent Wine from trying to install a different mono version
+    WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u
+
     # install dotnet 20 (to prevent error dialog with CloseLauncher.exe)
     winetricks -q dotnet20
 

@@ -15,8 +15,6 @@ RUN cargo build --target x86_64-pc-windows-gnu --release
 
 # As at May 2024 Wayland Native works only if:
 #    WINE_BRANCH="devel"
-#    WINE_MONO_VERISON=9.1.0
-# Other Updates ready to support Wayland.
 FROM debian:${DEBIAN_VERSION}-slim as wine-base
 ARG WINETRICKS_VERSION=20240105
 ARG WINE_MONO_VERSION=9.1.0
