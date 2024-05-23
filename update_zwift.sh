@@ -63,6 +63,9 @@ then
 
     # install dotnet48 for zwift
     winetricks -q dotnet48
+
+    # Install D3D Compiler to allow Vulkan Shaders.
+    winetricks d3dcompiler_47
         
     # install webview 2
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
@@ -74,6 +77,10 @@ then
     # install zwift
     wget https://cdn.zwift.com/app/ZwiftSetup.exe
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
+
+    # Sleep 5 seconds fully start the update or just stops.
+    sleep 5
+
     wine ZwiftLauncher.exe SilentLaunch
 
     # update game through zwift launcher
