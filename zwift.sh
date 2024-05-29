@@ -102,7 +102,7 @@ if [ "$WINDOW_MANAGER" = "Wayland" ]; then
 
     # ZWIFT_UID does not work on XWayland, show warning
     if [ $ZWIFT_UID -ne $(id -u) ]; then
-        msgbox warning "XWayland does not support ZWIFT_UID different to your id of $(id -u), may not start." 5
+        msgbox warning "Wayland does not support ZWIFT_UID different to your id of $(id -u), may not start." 5
     fi
 fi
 
