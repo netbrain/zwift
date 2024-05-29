@@ -65,8 +65,8 @@ fi
 # Check for $USER specific zwift configuration, sourced here and passed on to container aswell
 if [[ -f "$HOME/.config/zwift/$USER-config" ]]
 then
-    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
-    source $HOME/.config/zwift/config
+    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/$USER-config"
+    source $HOME/.config/zwift/$USER-config
 fi
 
 ########################################
