@@ -67,7 +67,7 @@ Examples:
 
 `ZWIFT_UID=123 ZWIFT_GID=123 zwift` will run Zwift as the given uid and gid.  By default Zwift runs with the uid and gid of the user that started the container. You should not need to change this except in rare cases.  NOTE: This does not work in wayland only X11.
 
-`WINE_EXPERIMENTAL_WAYLAND=1 zwift` Note this does not work it starts zwift and displays that Zwift needs OpenGL 3.1 or higher, this is due to how wayland reports OpenGL availability which seems to be missing something Zwift wants.
+`WINE_EXPERIMENTAL_WAYLAND=1 zwift` This will start zwift using Wayland and not XWayland. It will start full screen windowed.
 
 You can also set these in `~/.config/zwift/config` to be sourced by the zwift.sh script on execution.
 
