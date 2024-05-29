@@ -36,6 +36,24 @@ msgbox() {
     fi
 }
 
+#########################################################
+# Config early to allow setting of startup env files.
+# More ease of use starting from desktop icon.
+
+# Check for other zwift configuration, sourced here and passed on to container aswell
+if [[ -f "$HOME/.config/zwift/config" ]]
+then
+    ZWIFT_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
+    source $HOME/.config/zwift/config
+fi
+
+# Check for $USER specific zwift configuration, sourced here and passed on to container aswell
+if [[ -f "$HOME/.config/zwift/$USER-config" ]]
+then
+    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
+    source $HOME/.config/zwift/config
+fi
+
 ########################################
 ###### Default Setup and Settings ######
 WINDOW_MANAGER="Other"                      # XOrg, XWayland, Wayland, Other
@@ -54,20 +72,6 @@ fi
 
 ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
 ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
-
-# Check for other zwift configuration, sourced here and passed on to container aswell
-if [[ -f "$HOME/.config/zwift/config" ]]
-then
-    ZWIFT_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
-    source $HOME/.config/zwift/config
-fi
-
-# Check for $USER specific zwift configuration, sourced here and passed on to container aswell
-if [[ -f "$HOME/.config/zwift/$USER-config" ]]
-then
-    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
-    source $HOME/.config/zwift/config
-fi
 
 ########################################
 ###### OS and WM Manager Settings ######

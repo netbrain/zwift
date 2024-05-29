@@ -10,3 +10,4 @@ Type=Application
 StartupNotify=true
 Categories=Fitness;Game;Cycling
 Keywords=Fitness;Game;Cycling
+StartupWMClass=zwiftapp.exe
