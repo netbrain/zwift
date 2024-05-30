@@ -19,6 +19,8 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 - [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker) if you have nvidia proprietary driver
 - ATI, Intel and Nouveau drivers should work out of the box
 
+> :warning: **Podman Support 4.3 and Later.**: Podman before 4.3 does not support --userns=keep-id:uid=xxx,gid=xxx and will not start correctly, this impacts Ubuntu 22.04 and related builds such as PopOS 22.04.
+
 ## Install
 ```console
 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
@@ -84,6 +86,8 @@ where `username` is your Zwift account email, and `password` your Zwift account 
 The credentials will be used to authenticate before launching the Zwift app, and the user should be logged in automatically in the game.
 
 Note: This will be loaded by zwift.sh in cleartext as environment variables into the container.
+
+> :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put ZWIFT_PASSWORD="password" it tries to use "password" and not just password, same for ''.  In addition do not add a space to the end of the line it will be sent as part of the pasword or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD. 
 
 ## Where are the saves and why do I get a popup can't write to Document Folder?
 
