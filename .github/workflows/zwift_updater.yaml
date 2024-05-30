@@ -43,7 +43,7 @@ jobs:
                   -e DISPLAY=$DISPLAY \
                   --device /dev/dri \
                   -v /tmp:/tmp \
-                  netbrain/zwift:$IMAGE_VERSION update
+                  netbrain/zwift:latest update
 
           docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
             --change="LABEL org.opencontainers.image.version=$VERSION" \
