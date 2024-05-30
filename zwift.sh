@@ -50,7 +50,7 @@ fi
 # Check for $USER specific zwift configuration, sourced here and passed on to container aswell
 if [[ -f "$HOME/.config/zwift/$USER-config" ]]
 then
-    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
+    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/$USER-config"
     source $HOME/.config/zwift/config
 fi
 
@@ -247,6 +247,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # Allow container to connect to X, has to be set for different UID
-if [ -x "$(command -v xhost)" ] && [ $ZWIFT_UID -ne $(id -u) ]; then
+if [ -x "$(command -v xhost)" ] && [ $ZWIFT_UID -ne $(id -u) ] && [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
     xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
 fi
