@@ -31,22 +31,60 @@ function get_latest_version() {
 }
 
 function wait_for_zwift_game_update() {
+    function vercomp () {
+        # Return 0 if =, 1 if > and 2 if <
+        if [[ $1 == $2 ]]; then
+            return 0
+        fi
+
+        local IFS=.
+        local i ver1=($1) ver2=($2)
+        # fill empty fields in ver1 with zeros
+        for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
+            ver1[i]=0
+        done
+        for ((i=0; i<${#ver1[@]}; i++)); do
+            if [[ -z ${ver2[i]} ]]; then
+                # fill empty fields in ver2 with zeros
+                ver2[i]=0
+            fi
+            if ((10#${ver1[i]} > 10#${ver2[i]})); then
+                return 1
+            fi
+            if ((10#${ver1[i]} < 10#${ver2[i]})); then
+                return 2
+            fi
+        done
+        return 0
+    }
+
     echo "updating zwift..."
     cd "${ZWIFT_HOME}"
     get_current_version
     get_latest_version
-    if [ "$ZWIFT_VERSION_CURRENT" = "$ZWIFT_VERSION_LATEST" ]
+
+    # Disable ERR Trap so return works.
+    set +e
+    vercomp $ZWIFT_VERSION_CURRENT $ZWIFT_VERSION_LATEST
+    RESULT=$?
+    set -e
+    if [ $RESULT -ne 2 ]
     then
         echo "already at latest version..."
         exit 0
     fi
 
     wine ZwiftLauncher.exe SilentLaunch &
-    until [ "$ZWIFT_VERSION_CURRENT" = "$ZWIFT_VERSION_LATEST" ]
+    until [ $RESULT -ne 2 ]
     do
         echo "updating in progress..."
         sleep 5
         get_current_version
+
+        set +e
+        vercomp $ZWIFT_VERSION_CURRENT $ZWIFT_VERSION_LATEST
+        RESULT=$?
+        set -e
     done
 
     echo "updating done, waiting 5 seconds..."
@@ -105,4 +143,3 @@ then
     wineserver -k
     exit 0
 fi
-
