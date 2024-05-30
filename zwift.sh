@@ -36,6 +36,24 @@ msgbox() {
     fi
 }
 
+#########################################################
+# Config early to allow setting of startup env files.
+# More ease of use starting from desktop icon.
+
+# Check for other zwift configuration, sourced here and passed on to container aswell
+if [[ -f "$HOME/.config/zwift/config" ]]
+then
+    ZWIFT_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
+    source $HOME/.config/zwift/config
+fi
+
+# Check for $USER specific zwift configuration, sourced here and passed on to container aswell
+if [[ -f "$HOME/.config/zwift/$USER-config" ]]
+then
+    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/$USER-config"
+    source $HOME/.config/zwift/$USER-config
+fi
+
 ########################################
 ###### Default Setup and Settings ######
 WINDOW_MANAGER="Other"                      # XOrg, XWayland, Wayland, Other
@@ -54,20 +72,6 @@ fi
 
 ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
 ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
-
-# Check for other zwift configuration, sourced here and passed on to container aswell
-if [[ -f "$HOME/.config/zwift/config" ]]
-then
-    ZWIFT_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
-    source $HOME/.config/zwift/config
-fi
-
-# Check for $USER specific zwift configuration, sourced here and passed on to container aswell
-if [[ -f "$HOME/.config/zwift/$USER-config" ]]
-then
-    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/$USER-config"
-    source $HOME/.config/zwift/$USER-config
-fi
 
 ########################################
 ###### OS and WM Manager Settings ######
@@ -98,7 +102,7 @@ if [ "$WINDOW_MANAGER" = "Wayland" ]; then
 
     # ZWIFT_UID does not work on XWayland, show warning
     if [ $ZWIFT_UID -ne $(id -u) ]; then
-        msgbox warning "XWayland does not support ZWIFT_UID different to your id of $(id -u), may not start." 5
+        msgbox warning "Wayland does not support ZWIFT_UID different to your id of $(id -u), may not start." 5
     fi
 fi
 
@@ -243,6 +247,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # Allow container to connect to X, has to be set for different UID
-if [ -x "$(command -v xhost)" ] && [ $ZWIFT_UID -ne $(id -u) ]; then
+if [ -x "$(command -v xhost)" ] && [ $ZWIFT_UID -ne $(id -u) ] && [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
     xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
 fi

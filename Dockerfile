@@ -14,9 +14,17 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs .
 RUN cargo build --target x86_64-pc-windows-gnu --release
 
 FROM debian:${DEBIAN_VERSION}-slim as wine-base
+
+# As at May 2024 Wayland Native works wine 9.9 or later:
+#    WINE_BRANCH="devel"
+# For Specific version fix add WINE_VERSION, 
+# make sure to add "=" to the start, comment out for latest
+#    WINE_VERSION="=9.9~trixie-1"
+ARG WINE_BRANCH="devel"
+ARG WINE_VERSION="=9.9~trixie-1"
+
 ARG WINETRICKS_VERSION=20240105
-ARG WINE_MONO_VERSION=8.1.0
-ARG WINE_BRANCH=stable
+ARG WINE_MONO_VERSION=9.1.0
 ARG DEBIAN_VERSION
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
@@ -41,7 +49,8 @@ RUN DEBIAN_VERSION=${DEBIAN_VERSION} echo "deb https://dl.winehq.org/wine-builds
 RUN apt-get update
 
 RUN apt-get -y --no-install-recommends install \
-  winehq-stable wine-stable wine-stable-amd64 wine-stable-i386
+  winehq-${WINE_BRANCH}${WINE_VERSION} wine-${WINE_BRANCH}${WINE_VERSION} \
+  wine-${WINE_BRANCH}-amd64${WINE_VERSION} wine-${WINE_BRANCH}-i386${WINE_VERSION}
 
 RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
   echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
