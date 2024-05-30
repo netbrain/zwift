@@ -24,7 +24,6 @@ ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~trixie-1"
 
 ARG WINETRICKS_VERSION=20240105
-ARG WINE_MONO_VERSION=9.1.0
 ARG DEBIAN_VERSION
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
@@ -69,10 +68,6 @@ RUN \
 RUN adduser --disabled-password --gecos ''  user && \
   adduser user sudo && \
   echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-RUN wget https://dl.winehq.org/wine/wine-mono/${WINE_MONO_VERSION}/wine-mono-${WINE_MONO_VERSION}-x86.msi \
-        -P /home/user/.cache/wine
-RUN chown -R user:user /home/user/.cache
 
 FROM wine-base
 
