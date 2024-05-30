@@ -51,7 +51,7 @@ fi
 if [[ -f "$HOME/.config/zwift/$USER-config" ]]
 then
     ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/$USER-config"
-    source $HOME/.config/zwift/config
+    source $HOME/.config/zwift/$USER-config
 fi
 
 ########################################
