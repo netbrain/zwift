@@ -188,6 +188,11 @@ Check out our [Show and tell](https://github.com/netbrain/zwift/discussions/cate
   * https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF
   * https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher (if you have a nvidia card you can eat your cake, and have it too by creating vgpus for vm's that leverage the host gpu, no dedicated gpu required)
 
+## Star History (for fun and giggles)
+
+[![Star History Chart](https://api.star-history.com/svg?repos=netbrain/zwift&type=Date)](https://star-history.com/#netbrain/zwift&Date)
+
+
 [zwift-updater-src]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg
 [zwift-updater-href]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml
 [image-version-src]:https://img.shields.io/docker/v/netbrain/zwift/latest?logo=docker&logoColor=white
