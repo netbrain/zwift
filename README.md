@@ -164,7 +164,15 @@ The `zwift.sh` script will update zwift by checking for new image versions on ev
 
 There is a github action in place that will update zwift on a scheduled basis and publish new versions to docker hub.
 
-## Contibute
+## Contributors ✨
+
+Thanks go to these wonderful people:
+
+<a href="https://github.com/quivrhq/quivr/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=netbrain/zwift" />
+</a>
+
+### Contibute 👋
 
 If you would like to contribute, then please by all means I'll accept PR's. A good starting point would be to see if there's any open issues that you feel capable of doing. Let me know if I can help with anything.
 
@@ -188,7 +196,7 @@ Check out our [Show and tell](https://github.com/netbrain/zwift/discussions/cate
   * https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF
   * https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher (if you have a nvidia card you can eat your cake, and have it too by creating vgpus for vm's that leverage the host gpu, no dedicated gpu required)
 
-## Star History (for fun and giggles)
+## ⭐ Star History (for fun and giggles)
 
 [![Star History Chart](https://api.star-history.com/svg?repos=netbrain/zwift&type=Date)](https://star-history.com/#netbrain/zwift&Date)
 
