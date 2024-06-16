@@ -19,7 +19,7 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 - [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker) if you have nvidia proprietary driver
 - ATI, Intel and Nouveau drivers should work out of the box
 
-> :warning: **Podman Support 4.3 and Later.**: Podman before 4.3 does not support --userns=keep-id:uid=xxx,gid=xxx and will not start correctly, this impacts Ubuntu 22.04 and related builds such as PopOS 22.04.
+> :warning: **Podman Support 4.3 and Later.**: Podman before 4.3 does not support --userns=keep-id:uid=xxx,gid=xxx and will not start correctly, this impacts Ubuntu 22.04 and related builds such as PopOS 22.04. See Podman Section below.
 
 ## Install
 ```console
@@ -88,6 +88,16 @@ The credentials will be used to authenticate before launching the Zwift app, and
 Note: This will be loaded by zwift.sh in cleartext as environment variables into the container.
 
 > :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put ZWIFT_PASSWORD="password" it tries to use "password" and not just password, same for ''.  In addition do not add a space to the end of the line it will be sent as part of the pasword or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD. 
+
+## Podman Support
+
+When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need to map the container id's 1000 to the host id's using uidmap and gidmap.  
+
+For example if the host uid/gid is 1001/1001 then we need to map the host resources from /run/user/1001 to the container resource /run/user/1000 and map the user and group id's the same. This had to be done manually on the host posman start using --uidmap and --gidmap (not covered here)
+
+From Podman 4.3 this became automatic by providing the Container UID/ GID and podman automatically sets up this maping.
+
+NOTE: Using ZWIFT_UID/ GID will only work if the user starting podman has access to the /run/user/$ZWIFT_UID resources and does not work the same way as in Docker so is not supported.
 
 ## Where are the saves and why do I get a popup can't write to Document Folder?
 

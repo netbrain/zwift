@@ -61,6 +61,9 @@ IMAGE=${IMAGE:-docker.io/netbrain/zwift}    # Set the container image to use
 VERSION=${VERSION:-latest}                  # The container version
 NETWORKING=${NETWORKING:-bridge}            # Default Docker Network is Bridge
 
+ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
+ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
+
 # CONTAINER_TOOL, Use podman if available
 if [ ! $CONTAINER_TOOL ]; then
     if [ -x "$(command -v podman)" ]; then
@@ -70,8 +73,19 @@ if [ ! $CONTAINER_TOOL ]; then
     fi
 fi
 
-ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
-ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
+if [ $CONTAINER_TOOL == "podman" ]; then
+    # Podman has to use container id 1000
+    # Local user is mapped to the container id
+    LOCAL_UID=$ZWIFT_UID
+    LOCAL_GID=$ZWIFT_GID
+    CONTAINER_UID=1000
+    CONTAINER_GID=1000
+else
+    # Docker will run as the id's provided.
+    LOCAL_UID=$UID
+    CONTAINER_UID=$ZWIFT_UID
+    CONTAINER_GID=$ZWIFT_GID
+fi
 
 ########################################
 ###### OS and WM Manager Settings ######
@@ -148,12 +162,12 @@ GENERAL_FLAGS=(
     --hostname $HOSTNAME
 
     -e DISPLAY=$DISPLAY
-    -e ZWIFT_UID=$ZWIFT_UID
-    -e ZWIFT_GID=$ZWIFT_GID
-    -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native
+    -e ZWIFT_UID=$CONTAINER_UID
+    -e ZWIFT_GID=$CONTAINER_GID
+    -e PULSE_SERVER=/run/user/$CONTAINER_UID/pulse/native
 
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift
-    -v /run/user/$UID/pulse:/run/user/$ZWIFT_UID/pulse
+    -v /run/user/$LOCAL_UID/pulse:/run/user/$CONTAINER_UID/pulse
 )
 
 ###################################
@@ -180,8 +194,8 @@ then
     if [[ -n "$DBUS_UNIX_SOCKET" ]]
     then
         DBUS_CONFIG_FLAGS=(
-            -e DBUS_SESSION_BUS_ADDRESS=$(echo $DBUS_SESSION_BUS_ADDRESS | sed 's/'$UID'/'$ZWIFT_UID'/')
-            -v $DBUS_UNIX_SOCKET:$(echo $DBUS_UNIX_SOCKET | sed 's/'$UID'/'$ZWIFT_UID'/')
+            -e DBUS_SESSION_BUS_ADDRESS=$(echo $DBUS_SESSION_BUS_ADDRESS | sed 's/'$LOCAL_UID'/'$CONTAINER_UID'/')
+            -v $DBUS_UNIX_SOCKET:$(echo $DBUS_UNIX_SOCKET | sed 's/'$LOCAL_UID'/'$CONTAINER_UID'/')
         )
     fi
 fi
@@ -190,10 +204,10 @@ fi
 if [ $WINDOW_MANAGER == "Wayland" ]; then
     WM_FLAGS=(
         -e WINE_EXPERIMENTAL_WAYLAND=1
-        -e XDG_RUNTIME_DIR=/run/user/$ZWIFT_UID
+        -e XDG_RUNTIME_DIR=/run/user/$CONTAINER_UID
         -e $WAYLAND_DISPLAY=$WAYLAND_DISPLAY
 
-        -v $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY:$(echo $XDG_RUNTIME_DIR | sed 's/'$UID'/'$ZWIFT_UID'/')/$WAYLAND_DISPLAY
+        -v $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY:$(echo $XDG_RUNTIME_DIR | sed 's/'$LOCAL_UID'/'$CONTAINER_UID'/')/$WAYLAND_DISPLAY
     )
 fi
 
@@ -205,10 +219,10 @@ if [ $WINDOW_MANAGER == "XWayland" ] || [ $WINDOW_MANAGER == "XOrg" ]; then
         )
     else
         WM_FLAGS=(
-            -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+            -e XAUTHORITY=$(echo $XAUTHORITY | sed 's/'$LOCAL_UID'/'$CONTAINER_UID'/')
 
             -v /tmp/.X11-unix:/tmp/.X11-unix
-            -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$UID'/'$ZWIFT_UID'/')
+            -v $XAUTHORITY:$(echo $XAUTHORITY | sed 's/'$LOCAL_UID'/'$CONTAINER_UID'/')
         )
     fi
 fi
@@ -226,7 +240,7 @@ if [ $CONTAINER_TOOL == "podman" ]; then
     fi
 
     PODMAN_FLAGS=(
-        --userns keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID
+        --userns keep-id:uid=$CONTAINER_UID,gid=$CONTAINER_GID
     )
 fi
 
