@@ -17,10 +17,10 @@ jobs:
         with:
           token: ${{ secrets.SPONSORS_PAT }}
           file: 'README.md'
+          active-only: false
 
       - name: Deploy to GitHub Pages 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: master
           folder: '.'
-          active-only: false
