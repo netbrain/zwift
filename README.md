@@ -174,6 +174,12 @@ The `zwift.sh` script will update zwift by checking for new image versions on ev
 
 There is a github action in place that will update zwift on a scheduled basis and publish new versions to docker hub.
 
+## Sponsors 💖
+
+These are our really cool sponsors!
+
+<!-- sponsors --><!-- sponsors -->
+
 ## Contributors ✨
 
 Thanks go to these wonderful people:
