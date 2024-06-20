@@ -178,7 +178,7 @@ There is a github action in place that will update zwift on a scheduled basis an
 
 These are our really cool sponsors!
 
-<!-- sponsors --><!-- sponsors -->
+<!-- sponsors --><a href="https://github.com/nibbles-bytes"><img src="https://github.com/nibbles-bytes.png" width="60px" alt="" /></a><!-- sponsors -->
 
 ## Contributors ✨
 
