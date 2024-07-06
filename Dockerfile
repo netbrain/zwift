@@ -40,9 +40,10 @@ RUN dpkg --add-architecture i386
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
 # - gamemode for freedesktop screensaver inhibit
+# - xdg-utils seems to be a dependency of wayland
 
 RUN apt-get update
-RUN apt-get install -y wget curl sudo winbind libgl1 libvulkan1 procps gosu gamemode
+RUN apt-get install -y wget curl sudo winbind libgl1 libvulkan1 procps gosu gamemode xdg-utils
 RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key
 RUN DEBIAN_VERSION=${DEBIAN_VERSION} echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list
 RUN apt-get update
