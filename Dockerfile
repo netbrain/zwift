@@ -17,7 +17,7 @@ FROM debian:${DEBIAN_VERSION}-slim as wine-base
 
 # As at May 2024 Wayland Native works wine 9.9 or later:
 #    WINE_BRANCH="devel"
-# For Specific version fix add WINE_VERSION, 
+# For Specific version fix add WINE_VERSION,
 # make sure to add "=" to the start, comment out for latest
 #    WINE_VERSION="=9.9~trixie-1"
 ARG WINE_BRANCH="devel"
@@ -39,10 +39,11 @@ RUN dpkg --add-architecture i386
 # - libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
-# - xdg-utils for xdg-screensaver
+# - gamemode for freedesktop screensaver inhibit
+# - xdg-utils seems to be a dependency of wayland
 
 RUN apt-get update
-RUN apt-get install -y wget curl sudo winbind libgl1 libvulkan1 procps gosu xdg-utils
+RUN apt-get install -y wget curl sudo winbind libgl1 libvulkan1 procps gosu gamemode xdg-utils
 RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key
 RUN DEBIAN_VERSION=${DEBIAN_VERSION} echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list
 RUN apt-get update

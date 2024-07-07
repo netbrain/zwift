@@ -33,11 +33,9 @@ do
     sleep 1
 done
 
-[[ -n "${DBUS_SESSION_BUS_ADDRESS}" ]] && while true; do sleep 30; xdg-screensaver reset; done &
-
 echo "Killing uneccesary applications"
 pkill ZwiftLauncher
 pkill ZwiftWindowsCra
 pkill -f MicrosoftEdgeUpdate
 
-wineserver -w
+/usr/games/gamemoderun wineserver -w
