@@ -29,7 +29,6 @@ fi
 GENERAL_FLAGS=(
     -it
     --privileged
-    --ipc host
     --network bridge
     --name zwift
     --security-opt label=disable
@@ -52,10 +51,11 @@ else
 fi
 
 # Initiate podman Volume with correct permissions
-if [[ "$CONTAINER_TOOL" == "podman" ]]
-then   
+if [[ "$CONTAINER_TOOL" == "podman" ]]; then 
+    # Add ipc host to deal with an SHM issue on some machines.
     PODMAN_FLAGS=(
         --userns keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID
+        --ipc host 
     )
 fi
 
