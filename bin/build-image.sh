@@ -29,6 +29,7 @@ fi
 GENERAL_FLAGS=(
     -it
     --privileged
+    --ipc host
     --network bridge
     --name zwift
     --security-opt label=disable

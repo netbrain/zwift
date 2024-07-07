@@ -82,19 +82,19 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /bin/entrypoint
-RUN chmod +x /bin/entrypoint
+RUN chmod +rx /bin/entrypoint
 
 COPY update_zwift.sh /bin/update_zwift.sh
-RUN chmod +x /bin/update_zwift.sh
+RUN chmod +rx /bin/update_zwift.sh
 
 COPY run_zwift.sh /bin/run_zwift.sh
-RUN chmod +x /bin/run_zwift.sh
+RUN chmod +rx /bin/run_zwift.sh
 
 COPY zwift-auth.sh /bin/zwift-auth
-RUN chmod +x /bin/zwift-auth
+RUN chmod +rx /bin/zwift-auth
 
 COPY --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/runfromprocess-rs.exe /bin/runfromprocess-rs.exe
-RUN chmod +x /bin/runfromprocess-rs.exe
+RUN chmod +rx /bin/runfromprocess-rs.exe
 
 ENTRYPOINT ["entrypoint"]
 CMD [$@]
