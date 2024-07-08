@@ -25,9 +25,6 @@ ARG WINE_VERSION="=9.9~trixie-1"
 
 ARG WINETRICKS_VERSION=20240105
 ARG DEBIAN_VERSION
-ENV NVIDIA_VISIBLE_DEVICES=all
-ENV NVIDIA_DRIVER_CAPABILITIES=all
-ENV WINEDEBUG=fixme-all
 
 RUN dpkg --add-architecture i386
 
@@ -71,6 +68,11 @@ RUN adduser --disabled-password --gecos ''  user && \
   echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 FROM wine-base
+
+# Moved Environments into wine-base build part.
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+ENV WINEDEBUG=fixme-all
 
 LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"
