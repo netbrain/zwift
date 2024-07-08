@@ -49,6 +49,7 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 | CONTAINER_TOOL           |                         | Defaults to podman if installed, else docker              |
 | ZWIFT_USERNAME           |                         | If set, try to login to zwift automatically               |
 | ZWIFT_PASSWORD           |                         | "                                                         |
+| ZWIFT_WORKOUT_DIR        |                         | Set the Workout Directory locaiton                        |
 | WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
 | NETWORKING               | bridge                  | Sets the type of container networking to use.             |
 | ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as (docker only)         |
@@ -128,31 +129,14 @@ For example, your Wahoo Kickr and Apple Watch conect to the Zwift Companion app 
 iPhone; then the Companion app connects over wifi to your PC running Zwift.
 
 ## How can I add custom .zwo files?
+You can map the Zwift Workout folder using the environment variable ZWIFT_WORKOUT_DIR, for example if your workout directory is in $HOME/zwift_workouts then you would provide the environment variable, you can add this variable into $HOME/.config/zwift/config or $HOME/.config/zwift/$USER-config.
 
-The folder's name that receives .zwo files is dynamic based on your user's numeric ID. This example works considering you have a single user in the same docker volume.
-After you've downloaded/created your .zwo files use the following script to copy it to the correct folder:
+```ZWIFT_WORKOUT_DIR=$HOME/zwift_workouts```
 
-```console
-# docker
-docker run -v zwift-$USER:/data --name zwift-copy-op busybox ls /data/Workouts | xargs -I {} docker cp my-workouts-file.zwo zwift-copy-op:/data/Workouts/{}
-docker rm zwift-copy-op
-
-#podman
-@TBD
-```
-
-If you have multiple users at the same volume you might want to find out which IDs exist in your setup and map the ID for each user to copy correctly to the corresponding user.
-An example of this would be:
-
-```console
-# docker
-docker run -v zwift-$USER:/data --name zwift-copy-op busybox true
-docker cp my-workouts-file.zwo zwift-copy-op:/data/Workouts/1234
-docker rm zwift-copy-op
-
-#podman
-@TBD
-```
+NOTES: 
+- Any workouts created already will be copied into this folder on first start
+- To add a new workout just copy the zwo file to this directory
+- Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the zwift menu.
 
 ## How can I build the image myself?
 

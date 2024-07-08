@@ -41,8 +41,7 @@ msgbox() {
 # More ease of use starting from desktop icon.
 
 # Check for other zwift configuration, sourced here and passed on to container aswell
-if [[ -f "$HOME/.config/zwift/config" ]]
-then
+if [[ -f "$HOME/.config/zwift/config" ]]; then
     ZWIFT_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
     source $HOME/.config/zwift/config
 fi
@@ -52,6 +51,11 @@ if [[ -f "$HOME/.config/zwift/$USER-config" ]]
 then
     ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/$USER-config"
     source $HOME/.config/zwift/$USER-config
+fi
+
+# If a workout directory is specified then map to that directory.
+if [[ ! -z $ZWIFT_WORKOUT_DIR ]]; then
+    ZWIFT_WORKOUT_VOL="-v $ZWIFT_WORKOUT_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Workouts"
 fi
 
 ########################################
@@ -249,6 +253,7 @@ fi
 CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $ZWIFT_CONFIG_FLAG \
         $ZWIFT_USER_CONFIG_FLAG \
+        $ZWIFT_WORKOUT_VOL \
         $VGA_DEVICE_FLAG \
         ${DBUS_CONFIG_FLAGS[@]} \
         ${WM_FLAGS[@]} \
