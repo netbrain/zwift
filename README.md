@@ -90,6 +90,16 @@ Note: This will be loaded by zwift.sh in cleartext as environment variables into
 
 > :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put ZWIFT_PASSWORD="password" it tries to use "password" and not just password, same for ''.  In addition do not add a space to the end of the line it will be sent as part of the pasword or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD. 
 
+NOTE: You can also add other environment variable from the table to make starting easier:
+```
+ZWIFT_USERNAME=username
+ZWIFT_PASSWORD=password
+
+ZWIFT_WORKOUT_DIR=~/.config/zwift/workouts
+WINE_EXPERIMENTAL_WAYLAND=1
+```
+
+
 ## Podman Support
 
 When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need to map the container id's 1000 to the host id's using uidmap and gidmap.  
