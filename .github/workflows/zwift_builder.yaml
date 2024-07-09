@@ -1,0 +1,42 @@
+# Test what to build on push or push request.
+name: Zwift Docker Update Script
+
+on:
+  push:
+    branches:
+      - sHedC/issue64
+
+jobs:
+  zwift_builder:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/chnaged-files@v44
+        with:
+          docker:
+            - Dockerfile
+          scripts:
+            - entrypoint.sh
+            - run_zwift.sh
+            - update_zwift.sh
+            - zwift-auth.sh
+
+      - name: Docker to Rebuild
+        if: steps.changed-files-yaml.outputs.docker_any_changed == 'true'
+        env:
+          DOCKER_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.docker_all_changed_files }}
+        run: |
+          echo "Docker files changed: $DOCKER_CHANGED_FILES"
+
+
+      - name: Scripts to Update
+        if: ${{ steps.changed-files-yaml.outputs.docker_any_changed != 'true' && steps.changed-files-yaml.outputs.scripts_any_changed == 'true' }}
+        env:
+          SCRIPT_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.scripts_all_changed_files }}
+        run: |
+          echo "Script files changed: $SCRIPT_CHANGED_FILES"
+
