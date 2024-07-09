@@ -10,6 +10,7 @@ jobs:
   zwift_builder:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    concurrency: zwift
 
     steps:
       - name: Checkout
