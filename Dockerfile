@@ -21,7 +21,7 @@ FROM debian:${DEBIAN_VERSION}-slim as wine-base
 # make sure to add "=" to the start, comment out for latest
 #    WINE_VERSION="=9.9~trixie-1"
 ARG WINE_BRANCH="devel"
-ARG WINE_VERSION="=9.9~trixie-1"
+ARG WINE_VERSION="=9.12~trixie-1"
 
 ARG WINETRICKS_VERSION=20240105
 ARG DEBIAN_VERSION
