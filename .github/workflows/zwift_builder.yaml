@@ -91,7 +91,8 @@ jobs:
           files_map["/bin/run_zwift.sh"]="run_zwift.sh"
 
           for container_path in "${!files_map[@]}"; do
-            docker cp "${local_file}" "zwift:${container_path}"
+             local_file="${files_map[${container_path}]}"
+             docker cp "${local_file}" "zwift:${container_path}"
           done
 
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
