@@ -9,7 +9,17 @@ on:
 jobs:
   zwift_builder:
     runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
     steps:
+      -  uses: netbrain/free-disk-space-action@v0.0.1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -26,18 +36,71 @@ jobs:
               - update_zwift.sh
               - zwift-auth.sh
 
+      - name: Install dependencies
+        if: steps.changed-files.outputs.docker_any_changed == 'true'
+        run: sudo apt-get install -y x11-xserver-utils x11-apps
+
       - name: Docker to Rebuild
         if: steps.changed-files.outputs.docker_any_changed == 'true'
         env:
           DOCKER_CHANGED_FILES: ${{ steps.changed-files.outputs.docker_all_changed_files }}
         run: |
-          echo "Docker files changed: $DOCKER_CHANGED_FILES"
+          set -x
+          export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+          export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
+          echo "Starting build..."
+          Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &
+          sleep 3
+          export DISPLAY=:99
+          docker build -t netbrain/zwift:build .
+          xhost +
+          docker run --name zwift \
+                  --privileged \
+                  -e DISPLAY=$DISPLAY \
+                  --device /dev/dri \
+                  -v /tmp:/tmp \
+                  netbrain/zwift:build
+
+          docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
+            --change="LABEL org.opencontainers.image.version=$VERSION" \
+            --change='CMD [""]' \
+            -m "built from scratch from version $VERSION" \
+            zwift \
+            netbrain/zwift:$VERSION
+
+          echo 'docker tag netbrain/zwift:$VERSION netbrain/zwift:latest'
+          echo 'docker push netbrain/zwift:$VERSION'
+          echo 'docker push netbrain/zwift:latest'
+
+          docker rm zwift
 
       - name: Scripts to Update
         if: ${{ steps.changed-files.outputs.docker_any_changed != 'true' && steps.changed-files.outputs.scripts_any_changed == 'true' }}
         env:
           SCRIPTS_CHANGED_FILES: ${{ steps.changed-files.outputs.scripts_all_changed_files }}
         run: |
-          echo "Script files changed: $SCRIPTS_CHANGED_FILES"
+          set -x
+          docker pull netbrain/zwift:latest
+          docker create --name zwift netbrain/zwift:latest
+
+          declare -A files_map
+          files_map["/bin/entrypoint"]="entrypoint.sh"
+          files_map["/bin/zwift-auth"]="zwift-auth.sh"
+          files_map["/bin/update_zwift.sh"]="update_zwift.sh"
+          files_map["/bin/run_zwift.sh"]="run_zwift.sh"
+
+          for container_path in "${!files_map[@]}"; do
+            docker cp "${local_file}" "zwift:${container_path}"
+          done
+
+          export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
+            -m "Updated script files from git ($GITHUB_SHA)" \
+            zwift \
+            netbrain/zwift:latest
+          
+          echo 'docker push "netbrain/zwift:latest"'
+          
+          docker rm zwift
 
