@@ -145,10 +145,14 @@ You can map the Zwift Workout folder using the environment variable ZWIFT_WORKOU
 
 You can add this variable into $HOME/.config/zwift/config or $HOME/.config/zwift/$USER-config.
 
+The workouts folder will contain subvolders e.g. $HOME/.config/zwift/workouts/393938.  The number is your internal zwift id and you store you zwo files in the relevant folder.  There will usually be only one ID, however if you have multiple zwift login's it may show one subfolder for each, to find the ID you can use the following link: 
+
+Webpage for finding internal ID: https://www.virtualonlinecycling.com/p/zwiftid.html
+
 NOTES: 
 - Any workouts created already will be copied into this folder on first start
 - To add a new workout just copy the zwo file to this directory
-- Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the zwift menu.
+- Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the zwift menu
 
 ## How can I build the image myself?
 
