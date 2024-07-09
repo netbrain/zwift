@@ -25,9 +25,10 @@ jobs:
               - run_zwift.sh
               - update_zwift.sh
               - zwift-auth.sh
+              - '!Dockerfile'
 
       - name: Docker to Rebuild
-        if: steps.changed-files-yaml.outputs.docker_any_changed == 'true'
+        if: steps.changed-filea.outputs.docker_any_changed == 'true'
         env:
           DOCKER_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.docker_all_changed_files }}
         run: |
@@ -35,7 +36,7 @@ jobs:
 
 
       - name: Scripts to Update
-        if: ${{ steps.changed-files-yaml.outputs.docker_any_changed != 'true' && steps.changed-files-yaml.outputs.scripts_any_changed == 'true' }}
+        if: steps.changed-files.outputs.scripts_any_changed == 'true'
         env:
           SCRIPT_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.scripts_all_changed_files }}
         run: |
