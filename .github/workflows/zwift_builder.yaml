@@ -17,13 +17,14 @@ jobs:
         id: changed-files
         uses: tj-actions/chnaged-files@v44
         with:
-          docker:
-            - Dockerfile
-          scripts:
-            - entrypoint.sh
-            - run_zwift.sh
-            - update_zwift.sh
-            - zwift-auth.sh
+          files_yaml: |
+            docker:
+              - Dockerfile
+            scripts:
+              - entrypoint.sh
+              - run_zwift.sh
+              - update_zwift.sh
+              - zwift-auth.sh
 
       - name: Docker to Rebuild
         if: steps.changed-files-yaml.outputs.docker_any_changed == 'true'
