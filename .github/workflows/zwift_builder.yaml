@@ -30,7 +30,7 @@ jobs:
       - name: Docker to Rebuild
         if: steps.changed-filea.outputs.docker_any_changed == 'true'
         env:
-          DOCKER_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.docker_all_changed_files }}
+          DOCKER_CHANGED_FILES: ${{ steps.changed-files.outputs.docker_all_changed_files }}
         run: |
           echo "Docker files changed: $DOCKER_CHANGED_FILES"
 
@@ -38,7 +38,7 @@ jobs:
       - name: Scripts to Update
         if: steps.changed-files.outputs.scripts_any_changed == 'true'
         env:
-          SCRIPT_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.scripts_all_changed_files }}
+          SCRIPTS_CHANGED_FILES: ${{ steps.changed-files.outputs.scripts_all_changed_files }}
         run: |
-          echo "Script files changed: $SCRIPT_CHANGED_FILES"
+          echo "Script files changed: $SCRIPTS_CHANGED_FILES"
 
