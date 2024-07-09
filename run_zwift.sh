@@ -1,4 +1,4 @@
-#!/bin/bash - Test
+#!/bin/bash
 set -e
 set -x
 
