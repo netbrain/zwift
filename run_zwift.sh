@@ -1,4 +1,4 @@
-#!/bin/bash - Just Script
+#!/bin/bash
 set -e
 set -x
 
