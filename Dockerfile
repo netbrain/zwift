@@ -1,4 +1,4 @@
-ARG DEBIAN_VERSION=trixie
+ARG DEBIAN_VERSION=bookworm
 
 FROM rust:1.72 as build-runfromprocess
 
@@ -19,9 +19,9 @@ FROM debian:${DEBIAN_VERSION}-slim as wine-base
 #    WINE_BRANCH="devel"
 # For Specific version fix add WINE_VERSION,
 # make sure to add "=" to the start, comment out for latest
-#    WINE_VERSION="=9.9~trixie-1"
+#    WINE_VERSION="=9.9~bookworm-1"
 ARG WINE_BRANCH="devel"
-ARG WINE_VERSION="=9.9~trixie-1"
+ARG WINE_VERSION="=9.9~bookworm-1"
 
 ARG WINETRICKS_VERSION=20240105
 ARG DEBIAN_VERSION
