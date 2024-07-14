@@ -16,7 +16,7 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 
 ## Prerequisites
 - [Docker](https://docs.docker.com/get-docker) or [Podman](https://podman.io/getting-started/installation)
-- [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-docker) if you have nvidia proprietary driver
+- [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-container-toolkit) if you have nvidia proprietary driver
 - ATI, Intel and Nouveau drivers should work out of the box
 
 > :warning: **Podman Support 4.3 and Later.**: Podman before 4.3 does not support --userns=keep-id:uid=xxx,gid=xxx and will not start correctly, this impacts Ubuntu 22.04 and related builds such as PopOS 22.04. See Podman Section below.
@@ -49,6 +49,7 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 | CONTAINER_TOOL           |                         | Defaults to podman if installed, else docker              |
 | ZWIFT_USERNAME           |                         | If set, try to login to zwift automatically               |
 | ZWIFT_PASSWORD           |                         | "                                                         |
+| ZWIFT_WORKOUT_DIR        |                         | Set the workouts directory location                       |
 | WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
 | NETWORKING               | bridge                  | Sets the type of container networking to use.             |
 | ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as (docker only)         |
@@ -89,6 +90,16 @@ Note: This will be loaded by zwift.sh in cleartext as environment variables into
 
 > :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put ZWIFT_PASSWORD="password" it tries to use "password" and not just password, same for ''.  In addition do not add a space to the end of the line it will be sent as part of the pasword or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD. 
 
+NOTE: You can also add other environment variable from the table to make starting easier:
+```
+ZWIFT_USERNAME=username
+ZWIFT_PASSWORD=password
+
+ZWIFT_WORKOUT_DIR=~/.config/zwift/workouts
+WINE_EXPERIMENTAL_WAYLAND=1
+```
+
+
 ## Podman Support
 
 When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need to map the container id's 1000 to the host id's using uidmap and gidmap.  
@@ -128,31 +139,20 @@ For example, your Wahoo Kickr and Apple Watch conect to the Zwift Companion app 
 iPhone; then the Companion app connects over wifi to your PC running Zwift.
 
 ## How can I add custom .zwo files?
+You can map the Zwift Workout folder using the environment variable ZWIFT_WORKOUT_DIR, for example if your workout directory is in $HOME/zwift_workouts then you would provide the environment variable
 
-The folder's name that receives .zwo files is dynamic based on your user's numeric ID. This example works considering you have a single user in the same docker volume.
-After you've downloaded/created your .zwo files use the following script to copy it to the correct folder:
+```ZWIFT_WORKOUT_DIR=$HOME/zwift_workouts```
 
-```console
-# docker
-docker run -v zwift-$USER:/data --name zwift-copy-op busybox ls /data/Workouts | xargs -I {} docker cp my-workouts-file.zwo zwift-copy-op:/data/Workouts/{}
-docker rm zwift-copy-op
+You can add this variable into $HOME/.config/zwift/config or $HOME/.config/zwift/$USER-config.
 
-#podman
-@TBD
-```
+The workouts folder will contain subvolders e.g. $HOME/.config/zwift/workouts/393938.  The number is your internal zwift id and you store you zwo files in the relevant folder.  There will usually be only one ID, however if you have multiple zwift login's it may show one subfolder for each, to find the ID you can use the following link: 
 
-If you have multiple users at the same volume you might want to find out which IDs exist in your setup and map the ID for each user to copy correctly to the corresponding user.
-An example of this would be:
+Webpage for finding internal ID: https://www.virtualonlinecycling.com/p/zwiftid.html
 
-```console
-# docker
-docker run -v zwift-$USER:/data --name zwift-copy-op busybox true
-docker cp my-workouts-file.zwo zwift-copy-op:/data/Workouts/1234
-docker rm zwift-copy-op
-
-#podman
-@TBD
-```
+NOTES: 
+- Any workouts created already will be copied into this folder on first start
+- To add a new workout just copy the zwo file to this directory
+- Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the zwift menu
 
 ## How can I build the image myself?
 

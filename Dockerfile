@@ -14,20 +14,16 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs .
 RUN cargo build --target x86_64-pc-windows-gnu --release
 
 FROM debian:${DEBIAN_VERSION}-slim as wine-base
+ARG DEBIAN_VERSION
 
 # As at May 2024 Wayland Native works wine 9.9 or later:
 #    WINE_BRANCH="devel"
 # For Specific version fix add WINE_VERSION,
 # make sure to add "=" to the start, comment out for latest
-#    WINE_VERSION="=9.9~trixie-1"
+#    WINE_VERSION="=9.9~bookworm-1"
 ARG WINE_BRANCH="devel"
-ARG WINE_VERSION="=9.9~trixie-1"
-
+ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=20240105
-ARG DEBIAN_VERSION
-ENV NVIDIA_VISIBLE_DEVICES=all
-ENV NVIDIA_DRIVER_CAPABILITIES=all
-ENV WINEDEBUG=fixme-all
 
 RUN dpkg --add-architecture i386
 
@@ -72,6 +68,11 @@ RUN adduser --disabled-password --gecos ''  user && \
 
 FROM wine-base
 
+# Moved Environments into wine-base build part.
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+ENV WINEDEBUG=fixme-all
+
 LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"
 LABEL org.opencontainers.image.description="Easily zwift on linux"
@@ -82,19 +83,19 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /bin/entrypoint
-RUN chmod +x /bin/entrypoint
+RUN chmod +rx /bin/entrypoint
 
 COPY update_zwift.sh /bin/update_zwift.sh
-RUN chmod +x /bin/update_zwift.sh
+RUN chmod +rx /bin/update_zwift.sh
 
 COPY run_zwift.sh /bin/run_zwift.sh
-RUN chmod +x /bin/run_zwift.sh
+RUN chmod +rx /bin/run_zwift.sh
 
 COPY zwift-auth.sh /bin/zwift-auth
-RUN chmod +x /bin/zwift-auth
+RUN chmod +rx /bin/zwift-auth
 
 COPY --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/runfromprocess-rs.exe /bin/runfromprocess-rs.exe
-RUN chmod +x /bin/runfromprocess-rs.exe
+RUN chmod +rx /bin/runfromprocess-rs.exe
 
 ENTRYPOINT ["entrypoint"]
 CMD [$@]
