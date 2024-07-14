@@ -1,4 +1,4 @@
-ARG DEBIAN_VERSION=bookworm
+ARG DEBIAN_VERSION=trixie
 
 FROM rust:1.72 as build-runfromprocess
 
@@ -14,6 +14,7 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs .
 RUN cargo build --target x86_64-pc-windows-gnu --release
 
 FROM debian:${DEBIAN_VERSION}-slim as wine-base
+ARG DEBIAN_VERSION
 
 # As at May 2024 Wayland Native works wine 9.9 or later:
 #    WINE_BRANCH="devel"
@@ -21,10 +22,8 @@ FROM debian:${DEBIAN_VERSION}-slim as wine-base
 # make sure to add "=" to the start, comment out for latest
 #    WINE_VERSION="=9.9~bookworm-1"
 ARG WINE_BRANCH="devel"
-ARG WINE_VERSION="=9.9~bookworm-1"
-
+ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=20240105
-ARG DEBIAN_VERSION
 
 RUN dpkg --add-architecture i386
 
