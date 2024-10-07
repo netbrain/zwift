@@ -157,7 +157,6 @@ fi
 
 # Define Base Container Parameters
 GENERAL_FLAGS=(
-    -d
     --rm
     --privileged
     --network $NETWORKING
@@ -202,6 +201,14 @@ then
             -v $DBUS_UNIX_SOCKET:$(echo $DBUS_UNIX_SOCKET | sed 's/'$LOCAL_UID'/'$CONTAINER_UID'/')
         )
     fi
+fi
+
+# Setup foreground/background flag
+if [[ $ZWIFT_FG -eq "1" ]]
+then
+    ZWIFT_FG_FLAG=(-it) # run in fg
+else 
+    ZWIFT_FG_FLAG=(-d) # run in bg
 fi
 
 # Setup Flags for Window Managers
@@ -251,6 +258,7 @@ fi
 #########################
 ##### RUN CONTAINER #####
 CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
+        ${ZWIFT_FG_FLAG[@]} \
         $ZWIFT_CONFIG_FLAG \
         $ZWIFT_USER_CONFIG_FLAG \
         $ZWIFT_WORKOUT_VOL \
