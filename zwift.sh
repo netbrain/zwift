@@ -266,7 +266,8 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         ${DBUS_CONFIG_FLAGS[@]} \
         ${WM_FLAGS[@]} \
         ${PODMAN_FLAGS[@]} \
-        $IMAGE:$VERSION $@
+        $@ \
+        $IMAGE:$VERSION
 )
 if [ $? -ne 0 ]; then
     msgbox error "Error can't run zwift, check variables!" 10
