@@ -51,6 +51,7 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 | ZWIFT_PASSWORD           |                         | "                                                         |
 | ZWIFT_WORKOUT_DIR        |                         | Set the workouts directory location                       |
 | ZWIFT_FG                 |                         | If set, run the process in fg (-it) instead of bg (-d)    |
+| ZWIFT_NO_GAMEMODE        |                         | If set, don't run gamemode                                |
 | WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
 | NETWORKING               | bridge                  | Sets the type of container networking to use.             |
 | ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as (docker only)         |
