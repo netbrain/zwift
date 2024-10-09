@@ -275,6 +275,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # Allow container to connect to X, has to be set for different UID
-if [ -x "$(command -v xhost)" ] && [ $ZWIFT_UID -ne $(id -u) ] && [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
+if [ -x "$(command -v xhost)" ] && [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
     xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
 fi
