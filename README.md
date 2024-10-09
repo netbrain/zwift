@@ -133,6 +133,11 @@ For Gnome it is just timing out before zwift responds, just extend the timeout.
 gsettings set org.gnome.mutter check-alive-timeout 60000
 ```
 
+## The container is slow to start, why?
+
+If your `$(id -u)` or `$(id -g)` is not equal to 1000 then this would cause the zwift container to re-map all files (chown, chgrp) within the container so there is no uid/gid conflicts. 
+So if speed is a concern of yours, consider changing your user to match the containers uid and gid using `usermod` or contribute a better solution for handling uid/gid remapping in containers :)
+
 ## How do I connect my trainer, heart rate monitor, etc?
 
 You can [use your phone as a bridge](https://support.zwift.com/using-the-zwift-companion-app-Hybn8qzPr).
