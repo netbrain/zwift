@@ -9,7 +9,7 @@ read -p "Press enter to continue"
 
 mkdir -p /usr/local/bin
 curl -s -o /usr/local/bin/zwift https://raw.githubusercontent.com/netbrain/zwift/master/zwift.sh
-chmod +x /usr/local/bin/zwift
+chmod u=rwx,go=rx /usr/local/bin/zwift
 
 mkdir -p /usr/local/share/icons/hicolor/scalable/apps
 curl -s -o /usr/local/share/icons/hicolor/scalable/apps/zwift.svg https://raw.githubusercontent.com/netbrain/zwift/master/assets/hicolor/scalable/apps/Zwift%20Logogram.svg
