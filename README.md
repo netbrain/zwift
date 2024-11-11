@@ -195,7 +195,7 @@ Thanks go to these wonderful people:
 <img src="https://contrib.rocks/image?repo=netbrain/zwift" />
 </a>
 
-### Contibute 👋
+### Contribute 👋
 
 If you would like to contribute, then please by all means I'll accept PR's. A good starting point would be to see if there's any open issues that you feel capable of doing. Let me know if I can help with anything.
 
