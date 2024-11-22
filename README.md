@@ -185,7 +185,7 @@ There is a github action in place that will update zwift on a scheduled basis an
 
 These are our really cool sponsors!
 
-<!-- sponsors --><a href="https://github.com/altheus"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;2486167?v&#x3D;4" width="60px" alt="" /></a><a href="https://github.com/nowave7"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;1130101?v&#x3D;4" width="60px" alt="" /></a><a href="https://github.com/cmuench"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;211294?u&#x3D;1596233efa01579cf80d5a98778f3a70e715fecc&amp;v&#x3D;4" width="60px" alt="Christian Münch" /></a><a href="https://github.com/nibbles-bytes"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;17076609?v&#x3D;4" width="60px" alt="" /></a><!-- sponsors -->
+<!-- sponsors --><a href="https://github.com/altheus"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;2486167?v&#x3D;4" width="60px" alt="" /></a><a href="https://github.com/nowave7"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;1130101?v&#x3D;4" width="60px" alt="" /></a><a href="https://github.com/cmuench"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;211294?u&#x3D;1596233efa01579cf80d5a98778f3a70e715fecc&amp;v&#x3D;4" width="60px" alt="Christian Münch" /></a><a href="https://github.com/nibbles-bytes"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;17076609?v&#x3D;4" width="60px" alt="" /></a><a href="https://github.com/saltymedic"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;18824694?u&#x3D;d71a78f7846954c4b31d33f2efdd40a9cb6c6526&amp;v&#x3D;4" width="60px" alt="" /></a><!-- sponsors -->
 
 ## Contributors ✨
 
