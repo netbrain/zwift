@@ -21,7 +21,7 @@ msgbox() {
             echo -n -e "${RED}${BOLD}${UNDERLINE}Question - $MSG (y/n)${NC}"
             read $TIMEOUT -n 1 -p " " yn
             echo
-            case $yn in 
+            case $yn in
                 y) return 0;;
                 n) return 1;;
                 *) return 5;;
@@ -69,7 +69,7 @@ ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
 ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
 
 # CONTAINER_TOOL, Use podman if available
-if [ ! $CONTAINER_TOOL ]; then
+if [ -z "$CONTAINER_TOOL" ]; then
     if [ -x "$(command -v podman)" ]; then
         CONTAINER_TOOL=podman
     else
@@ -94,7 +94,7 @@ if [ -n "${ZWIFT_USERNAME}" -a -z "${ZWIFT_PASSWORD}" -a -x "$(command -v secret
     fi
 fi
 
-if [ $CONTAINER_TOOL == "podman" ]; then
+if [ "$CONTAINER_TOOL" == "podman" ]; then
     # Podman has to use container id 1000
     # Local user is mapped to the container id
     LOCAL_UID=$ZWIFT_UID
@@ -129,7 +129,7 @@ esac
 # Verify which system we are using for wayland and some checks.
 if [ "$WINDOW_MANAGER" = "Wayland" ]; then
     # System is using wayland or xwayland.
-    if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then 
+    if [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
         WINDOW_MANAGER="XWayland"
     else
         WINDOW_MANAGER="Wayland"
@@ -224,7 +224,7 @@ fi
 if [[ $ZWIFT_FG -eq "1" ]]
 then
     ZWIFT_FG_FLAG=(-it) # run in fg
-else 
+else
     ZWIFT_FG_FLAG=(-d) # run in bg
 fi
 
@@ -260,7 +260,7 @@ if [ $WINDOW_MANAGER == "XOrg" ]; then
 fi
 
 # Initiate podman Volume with correct permissions
-if [ $CONTAINER_TOOL == "podman" ]; then
+if [ "$CONTAINER_TOOL" == "podman" ]; then
     # Create a volume if not already exists, this is done now as
     # if left to the run command the directory can get the wrong permissions
     if [[ -z $(podman volume ls | grep zwift-$USER) ]]; then
