@@ -77,6 +77,23 @@ if [ ! $CONTAINER_TOOL ]; then
     fi
 fi
 
+# get password from SecretService (if username is set but not password)
+if [ -n "${ZWIFT_USERNAME}" -a -z "${ZWIFT_PASSWORD}" -a -x "$(command -v secret-tool)" ]; then
+    echo "Looking up Zwift password for ${ZWIFT_USERNAME}..."
+    PASSWORD_SECRET_NAME="zwift-password-${ZWIFT_USERNAME}"
+
+    secret-tool lookup application zwift username ${ZWIFT_USERNAME} | ${CONTAINER_TOOL} secret create $([ "${CONTAINER_TOOL}" == "podman" ] && echo "--replace=true") "${PASSWORD_SECRET_NAME}" - > /dev/null
+
+    # secret will not be created if the password does not exist
+    if ${CONTAINER_TOOL} secret exists "${PASSWORD_SECRET_NAME}"; then
+        echo "Passing password to zwift container."
+        ZWIFT_PASSWORD_SECRET="--secret ${PASSWORD_SECRET_NAME},type=env,target=ZWIFT_PASSWORD"
+    else
+        echo "Password not found in the SecretService keyring, you can store it with" \
+             "\`secret-tool store --label \"Zwift password for ${ZWIFT_USERNAME}\" application zwift username ${ZWIFT_USERNAME}\`"
+    fi
+fi
+
 if [ $CONTAINER_TOOL == "podman" ]; then
     # Podman has to use container id 1000
     # Local user is mapped to the container id
@@ -260,6 +277,7 @@ fi
 CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         ${ZWIFT_FG_FLAG[@]} \
         $ZWIFT_CONFIG_FLAG \
+        $ZWIFT_PASSWORD_SECRET \
         $ZWIFT_USER_CONFIG_FLAG \
         $ZWIFT_WORKOUT_VOL \
         $VGA_DEVICE_FLAG \

@@ -90,6 +90,14 @@ The credentials will be used to authenticate before launching the Zwift app, and
 
 Note: This will be loaded by zwift.sh in cleartext as environment variables into the container.
 
+Alternatively, instead of saving your password in the file, you can save your password in the SecretService keyring like so:
+
+```
+secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwift username ${ZWIFT_USERNAME}
+```
+
+In this case the username should still be saved in the config file and the password will be read upon startup from the keyring and passed as a secret into the container (where it is an environment variable).
+
 > :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put ZWIFT_PASSWORD="password" it tries to use "password" and not just password, same for ''.  In addition do not add a space to the end of the line it will be sent as part of the pasword or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD. 
 
 NOTE: You can also add other environment variable from the table to make starting easier:
