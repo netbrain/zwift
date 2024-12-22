@@ -189,6 +189,34 @@ The `zwift.sh` script will update zwift by checking for new image versions on ev
 
 There is a github action in place that will update zwift on a scheduled basis and publish new versions to docker hub.
 
+## How can I install this on NixOS?
+
+To use the NixOS module, configure your flake.nix:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    zwift.url = "github:netbrain/zwift";
+  };
+
+  outputs = { nixpkgs, zwift, ... }: {
+    nixosConfigurations."«hostname»" = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [ zwift.nixosModules.zwift ./configuration.nix ];
+    };
+  };
+}
+```
+
+Then enable the module in your NixOS configuration:
+
+```nix
+{
+  programs.zwift.enable = true;
+}
+```
+
 ## Sponsors 💖
 
 These are our really cool sponsors!
