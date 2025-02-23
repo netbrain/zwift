@@ -58,6 +58,11 @@ if [[ ! -z $ZWIFT_WORKOUT_DIR ]]; then
     ZWIFT_WORKOUT_VOL="-v $ZWIFT_WORKOUT_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Workouts"
 fi
 
+# If an activity directory is specified then map to that directory.
+if [[ ! -z $ZWIFT_ACTIVITY_DIR ]]; then
+    ZWIFT_ACTIVITY_VOL="-v $ZWIFT_ACTIVITY_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Activities"
+fi
+
 ########################################
 ###### Default Setup and Settings ######
 WINDOW_MANAGER="Other"                      # XOrg, XWayland, Wayland, Other
@@ -280,6 +285,7 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $ZWIFT_PASSWORD_SECRET \
         $ZWIFT_USER_CONFIG_FLAG \
         $ZWIFT_WORKOUT_VOL \
+        $ZWIFT_ACTIVITY_VOL \
         $VGA_DEVICE_FLAG \
         ${DBUS_CONFIG_FLAGS[@]} \
         ${WM_FLAGS[@]} \
