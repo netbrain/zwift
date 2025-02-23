@@ -58,7 +58,7 @@ if [[ ! -z $ZWIFT_WORKOUT_DIR ]]; then
     ZWIFT_WORKOUT_VOL="-v $ZWIFT_WORKOUT_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Workouts"
 fi
 
-# If an actvity directory is specified then map to that directory.
+# If an activity directory is specified then map to that directory.
 if [[ ! -z $ZWIFT_ACTIVITY_DIR ]]; then
     ZWIFT_ACTIVITY_VOL="-v $ZWIFT_ACTIVITY_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Activities"
 fi
