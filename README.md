@@ -210,11 +210,17 @@ To use the NixOS module, configure your flake.nix:
 }
 ```
 
-Then enable the module in your NixOS configuration:
+Then enable and configure the module in your NixOS configuration. The configuration options are written analog to the environment variables in camelCase:
 
 ```nix
 {
-  programs.zwift.enable = true;
+  programs.zwift = {
+   enable = true;
+
+   #dontPull = true;
+   #dontCheck = true;
+   #version = "1.87.0";
+  }
 }
 ```
 
