@@ -94,7 +94,7 @@
                   dontPull = if dontPull then "1" else "";
                   zwiftFg = if zwiftFg then "1" else "";
                   zwiftNoGameMode = if zwiftNoGameMode then "1" else "";
-                  wineExperimentalWayland = if wineNoExperimentalGameMode then "1" else "";
+                  wineExperimentalWayland = if wineExperimentalWayland then "1" else "";
                   debug = if debug then "1" else "";
                 })];
               };
