@@ -81,7 +81,7 @@
               networking = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftUid = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftGid = lib.mkOption { type = lib.types.string; default = ""; };
-              debug = lib.mkOption { type = lib.types.bool; default = ""; };
+              debug = lib.mkOption { type = lib.types.bool; default = false; };
             };
 
             config = lib.mkIf config.programs.zwift.enable {
