@@ -51,11 +51,17 @@
           ${./zwift.sh}
         '';
 
+        nativeBuildInputs = [ pkgs.copyDesktopItems ];
+
         installPhase = ''
+          runHook preInstall
           install -Dm755 ${nixosRun} -T $out/bin/${pname}
+          install -Dm644 $src/share/icons/hicolor/scalable/apps/zwift.svg \
+              -T $out/share/icons/hicolor/scalable/apps/zwift.svg
+          runHook postInstall
         '';
 
-        desktopItems = [ "${src}/assets/Zwift.desktop" ];
+        desktopItems = [ "share/applications/Zwift.desktop" ];
       };
     in
     {
