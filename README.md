@@ -218,7 +218,7 @@ Then enable and configure the module in your NixOS configuration. The configurat
     # Enable the Zwift module and install required dependencies
     enable = true;  
     # The Docker image to use for Zwift
-    image = "docker.io/netbrain/zwift:latest";  
+    image = "docker.io/netbrain/zwift";  
     # The Zwift game version to run
     version = "1.67.0";                         
     # If true, do not pull the image (use locally cached image)
