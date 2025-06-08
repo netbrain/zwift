@@ -264,6 +264,12 @@ if [ $WINDOW_MANAGER == "XOrg" ]; then
     unset WINE_EXPERIMENTAL_WAYLAND
 fi
 
+# Setup flags for throttling CPUS
+if [[ -n "$CONTAINER_CPUS" ]]
+then
+    CPUS_FLAG=(--cpus="$CONTAINER_CPUS") # throttle to CONTAINER_CPUS many CPUs
+fi
+
 # Initiate podman Volume with correct permissions
 if [ "$CONTAINER_TOOL" == "podman" ]; then
     # Create a volume if not already exists, this is done now as
@@ -289,6 +295,7 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $VGA_DEVICE_FLAG \
         ${DBUS_CONFIG_FLAGS[@]} \
         ${WM_FLAGS[@]} \
+        ${CPUS_FLAG[@]} \
         ${PODMAN_FLAGS[@]} \
         $@ \
         $IMAGE:$VERSION
