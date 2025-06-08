@@ -47,6 +47,7 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 | DONT_CHECK               |                         | If set, don't check for updated zwift.sh                  |
 | DONT_PULL                |                         | If set, don't pull for new image version                  |
 | CONTAINER_TOOL           |                         | Defaults to podman if installed, else docker              |
+| CONTAINER_CPUS           |                         | Limits number of CPUs used by container, e.g. 1.5         |
 | ZWIFT_USERNAME           |                         | If set, try to login to zwift automatically               |
 | ZWIFT_PASSWORD           |                         | "                                                         |
 | ZWIFT_WORKOUT_DIR        |                         | Set the workouts directory location                       |
@@ -66,6 +67,8 @@ Examples:
 `DONT_PULL=1 zwift` will prevent docker/podman pull before launch
 
 `CONTAINER_TOOL=docker zwift` will launch zwift with docker even if podman is installed
+
+`CONTAINER_CPUS=1.5` will throttle Zwift to use at most 1.5 CPU cores, this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system.
 
 `USER=Fred zwift` perfect if your neighbor fred want's to try zwift, and you don't want to mess up your zwift config.
 
