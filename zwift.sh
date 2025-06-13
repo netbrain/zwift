@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ ! -z $DEBUG ]; then set -x; fi
+if [ -n "${DEBUG}" ]; then set -x; fi
 
 # Message Box to simplify errors/ and questions.
 msgbox() {
@@ -264,11 +264,6 @@ if [ $WINDOW_MANAGER == "XOrg" ]; then
     unset WINE_EXPERIMENTAL_WAYLAND
 fi
 
-# Setup flags for throttling CPUS
-if [[ -n "$CONTAINER_CPUS" ]]
-then
-    CPUS_FLAG=(--cpus="$CONTAINER_CPUS") # throttle to CONTAINER_CPUS many CPUs
-fi
 
 # Initiate podman Volume with correct permissions
 if [ "$CONTAINER_TOOL" == "podman" ]; then
@@ -278,10 +273,13 @@ if [ "$CONTAINER_TOOL" == "podman" ]; then
         $CONTAINER_TOOL volume create zwift-$USER
     fi
 
-    PODMAN_FLAGS=(
+    GENERAL_FLAGS+=(
         --userns keep-id:uid=$CONTAINER_UID,gid=$CONTAINER_GID
     )
 fi
+
+# Read the user specified extra flags if any
+read -r -a CONTAINER_EXTRA_FLAGS <<< "$CONTAINER_EXTRA_ARGS"
 
 #########################
 ##### RUN CONTAINER #####
@@ -295,8 +293,7 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $VGA_DEVICE_FLAG \
         ${DBUS_CONFIG_FLAGS[@]} \
         ${WM_FLAGS[@]} \
-        ${CPUS_FLAG[@]} \
-        ${PODMAN_FLAGS[@]} \
+        ${CONTAINER_EXTRA_FLAGS[@]} \
         $@ \
         $IMAGE:$VERSION
 )
