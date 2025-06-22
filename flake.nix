@@ -13,6 +13,7 @@
           dontCheck,
           dontPull,
           containerTool,
+          containerExtraArgs,
           zwiftUsername,
           zwiftPassword,
           zwiftWorkoutDir,
@@ -36,6 +37,7 @@
           DONT_CHECK=${dontCheck}
           DONT_PULL=${dontPull}
           CONTAINER_TOOL=${containerTool}
+          CONTAINER_EXTRA_ARGS=${containerExtraArgs}
           ZWIFT_USERNAME=${zwiftUsername}
           ZWIFT_PASSWORD=${zwiftPassword}
           ZWIFT_WOKROUT_DIR=${zwiftWorkoutDir}
@@ -77,6 +79,7 @@
               dontCheck = lib.mkOption { type = lib.types.bool; default = false; };
               dontPull = lib.mkOption { type = lib.types.bool; default = false; };
               containerTool = lib.mkOption { type = lib.types.string; default = ""; };
+              containerExtraArgs = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftUsername = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftPassword = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftWorkoutDir = lib.mkOption { type = lib.types.string; default = ""; };
@@ -94,7 +97,7 @@
               virtualisation.podman.enable = true;
               environment = {
                 systemPackages = with config.programs.zwift; [(wrapPackage {
-                  inherit image containerTool zwiftUsername zwiftPassword zwiftWorkoutDir zwiftActivityDir networking zwiftUid zwiftGid;
+                  inherit image containerTool containerExtraArgs zwiftUsername zwiftPassword zwiftWorkoutDir zwiftActivityDir networking zwiftUid zwiftGid;
                   tag = version;
                   dontCheck = if dontCheck then "1" else "" ;
                   dontPull = if dontPull then "1" else "";

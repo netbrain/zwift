@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ ! -z $DEBUG ]; then set -x; fi
+if [ -n "${DEBUG}" ]; then set -x; fi
 
 # Message Box to simplify errors/ and questions.
 msgbox() {
@@ -160,7 +160,7 @@ then
         echo "You are running latest zwift.sh 👏"
     else
         # Ask with Timeout, default is do not update.
-        msgbox question "You are not running the latest zwift.sh 😭, (Default no in 5 seconds)" 5
+        msgbox question "You are not running the latest zwift.sh 😭, download? (Default no in 5 seconds)" 5
         if [ $? -eq 0 ]; then
             pkexec env PATH=$PATH bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
             exec "$0" "${@}"
@@ -264,6 +264,7 @@ if [ $WINDOW_MANAGER == "XOrg" ]; then
     unset WINE_EXPERIMENTAL_WAYLAND
 fi
 
+
 # Initiate podman Volume with correct permissions
 if [ "$CONTAINER_TOOL" == "podman" ]; then
     # Create a volume if not already exists, this is done now as
@@ -272,10 +273,13 @@ if [ "$CONTAINER_TOOL" == "podman" ]; then
         $CONTAINER_TOOL volume create zwift-$USER
     fi
 
-    PODMAN_FLAGS=(
+    GENERAL_FLAGS+=(
         --userns keep-id:uid=$CONTAINER_UID,gid=$CONTAINER_GID
     )
 fi
+
+# Read the user specified extra flags if any
+read -r -a CONTAINER_EXTRA_FLAGS <<< "$CONTAINER_EXTRA_ARGS"
 
 #########################
 ##### RUN CONTAINER #####
@@ -289,7 +293,7 @@ CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
         $VGA_DEVICE_FLAG \
         ${DBUS_CONFIG_FLAGS[@]} \
         ${WM_FLAGS[@]} \
-        ${PODMAN_FLAGS[@]} \
+        ${CONTAINER_EXTRA_FLAGS[@]} \
         $@ \
         $IMAGE:$VERSION
 )
