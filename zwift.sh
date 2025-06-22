@@ -160,7 +160,7 @@ then
         echo "You are running latest zwift.sh 👏"
     else
         # Ask with Timeout, default is do not update.
-        msgbox question "You are not running the latest zwift.sh 😭, (Default no in 5 seconds)" 5
+        msgbox question "You are not running the latest zwift.sh 😭, download? (Default no in 5 seconds)" 5
         if [ $? -eq 0 ]; then
             pkexec env PATH=$PATH bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
             exec "$0" "${@}"
