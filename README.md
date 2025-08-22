@@ -57,6 +57,7 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 | ZWIFT_PASSWORD           |                         | "                                                         |
 | ZWIFT_WORKOUT_DIR        |                         | Set the workouts directory location                       |
 | ZWIFT_ACTIVITY_DIR       |                         | Set the activities directory location                     |
+| ZWIFT_LOG_DIR            |                         | Set the logs directory location                           |
 | ZWIFT_FG                 |                         | If set, run the process in fg (-it) instead of bg (-d)    |
 | ZWIFT_NO_GAMEMODE        |                         | If set, don't run gamemode                                |
 | WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
