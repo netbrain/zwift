@@ -5,7 +5,6 @@
 [![image-href][image-version-src]][image-href]
 [![image-href][image-size-src]][image-href]
 
-
 Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth devices (ant devices are not supported via the companion app). The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time.
 
 The container comes pre-installed with zwift, so no setup is required, simply pull and run. It should also now support all manner of graphics cards that has gl rendering.
@@ -15,6 +14,7 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 ![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/example.gif)
 
 ## Prerequisites
+
 - [Docker](https://docs.docker.com/get-docker) or [Podman](https://podman.io/getting-started/installation)
 - [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-container-toolkit) if you have nvidia proprietary driver
 - ATI, Intel and Nouveau drivers should work out of the box
@@ -22,23 +22,28 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 > :warning: **Podman Support 4.3 and Later.**: Podman before 4.3 does not support --userns=keep-id:uid=xxx,gid=xxx and will not start correctly, this impacts Ubuntu 22.04 and related builds such as PopOS 22.04. See Podman Section below.
 
 ## Install
+
 ```console
 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
 ```
+
 This will put the `zwift.sh` script on your `$PATH`, add a desktop icon to /usr/local/share/applications.
 NOTE: Icon may not show until logging off and back in.
 
 ## RUN
+
 After installation, simply run:
 
 ```console
 zwift
 ```
+
 Note you might want to disable video screenshots ([#75](https://github.com/netbrain/zwift/issues/75))
 
 If dbus is available through a unix socket, the screensaver will be inhibited every 30 seconds to prevent xscreensaver or other programs listening on the bus from inhibiting the screen.
 
 ## Configuration options
+
 | Key                      | Default                 | Description                                               |
 |--------------------------|-------------------------|-----------------------------------------------------------|
 | USER                     | $USER                   | Used in creating the zwift volume `zwift-$USER`           |
@@ -83,7 +88,8 @@ You can also set these in `~/.config/zwift/config` to be sourced by the zwift.sh
 ## How can I persist my login information so i don't need to login on every startup?
 
 To authenticate through Zwift automatically simply add the following file `~/.config/zwift/config`:
-```
+
+```text
 ZWIFT_USERNAME=username
 ZWIFT_PASSWORD=password
 ```
@@ -96,16 +102,17 @@ Note: This will be loaded by zwift.sh in cleartext as environment variables into
 
 Alternatively, instead of saving your password in the file, you can save your password in the SecretService keyring like so:
 
-```
+```text
 secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwift username ${ZWIFT_USERNAME}
 ```
 
 In this case the username should still be saved in the config file and the password will be read upon startup from the keyring and passed as a secret into the container (where it is an environment variable).
 
-> :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put ZWIFT_PASSWORD="password" it tries to use "password" and not just password, same for ''.  In addition do not add a space to the end of the line it will be sent as part of the pasword or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD. 
+> :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put ZWIFT_PASSWORD="password" it tries to use "password" and not just password, same for ''.  In addition do not add a space to the end of the line it will be sent as part of the pasword or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD.
 
 NOTE: You can also add other environment variable from the table to make starting easier:
-```
+
+```text
 ZWIFT_USERNAME=username
 ZWIFT_PASSWORD=password
 
@@ -113,10 +120,9 @@ ZWIFT_WORKOUT_DIR=~/.config/zwift/workouts
 WINE_EXPERIMENTAL_WAYLAND=1
 ```
 
-
 ## Podman Support
 
-When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need to map the container id's 1000 to the host id's using uidmap and gidmap.  
+When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need to map the container id's 1000 to the host id's using uidmap and gidmap.
 
 For example if the host uid/gid is 1001/1001 then we need to map the host resources from /run/user/1001 to the container resource /run/user/1000 and map the user and group id's the same. This had to be done manually on the host posman start using --uidmap and --gidmap (not covered here)
 
@@ -127,7 +133,8 @@ NOTE: Using ZWIFT_UID/ GID will only work if the user starting podman has access
 ## Where are the saves and why do I get a popup can't write to Document Folder?
 
 This is a hang up from previous versions, mainly with podman. delete the volumes and after re-creation it should work fine.
-```
+
+```text
 podman volume rm zwift-xxxxx
 
 or
@@ -141,13 +148,13 @@ NOTE: if you see a weird volume e.g. zwift-naeva it is a hang up from the past, 
 
 For Gnome it is just timing out before zwift responds, just extend the timeout.
 
-```
+```text
 gsettings set org.gnome.mutter check-alive-timeout 60000
 ```
 
 ## The container is slow to start, why?
 
-If your `$(id -u)` or `$(id -g)` is not equal to 1000 then this would cause the zwift container to re-map all files (chown, chgrp) within the container so there is no uid/gid conflicts. 
+If your `$(id -u)` or `$(id -g)` is not equal to 1000 then this would cause the zwift container to re-map all files (chown, chgrp) within the container so there is no uid/gid conflicts.
 So if speed is a concern of yours, consider changing your user to match the containers uid and gid using `usermod` or contribute a better solution for handling uid/gid remapping in containers :)
 
 ## How do I connect my trainer, heart rate monitor, etc?
@@ -158,17 +165,19 @@ For example, your Wahoo Kickr and Apple Watch conect to the Zwift Companion app 
 iPhone; then the Companion app connects over wifi to your PC running Zwift.
 
 ## How can I add custom .zwo files?
+
 You can map the Zwift Workout folder using the environment variable ZWIFT_WORKOUT_DIR, for example if your workout directory is in $HOME/zwift_workouts then you would provide the environment variable
 
 ```ZWIFT_WORKOUT_DIR=$HOME/zwift_workouts```
 
 You can add this variable into $HOME/.config/zwift/config or $HOME/.config/zwift/$USER-config.
 
-The workouts folder will contain subvolders e.g. $HOME/.config/zwift/workouts/393938.  The number is your internal zwift id and you store you zwo files in the relevant folder.  There will usually be only one ID, however if you have multiple zwift login's it may show one subfolder for each, to find the ID you can use the following link: 
+The workouts folder will contain subvolders e.g. $HOME/.config/zwift/workouts/393938.  The number is your internal zwift id and you store you zwo files in the relevant folder.  There will usually be only one ID, however if you have multiple zwift login's it may show one subfolder for each, to find the ID you can use the following link:
 
-Webpage for finding internal ID: https://www.virtualonlinecycling.com/p/zwiftid.html
+Webpage for finding internal ID: <https://www.virtualonlinecycling.com/p/zwiftid.html>
 
-NOTES: 
+NOTES:
+
 - Any workouts created already will be copied into this folder on first start
 - To add a new workout just copy the zwo file to this directory
 - Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the zwift menu
@@ -181,7 +190,7 @@ NOTES:
 
 ## How can I fetch the image from docker hub?
 
-https://hub.docker.com/r/netbrain/zwift
+<https://hub.docker.com/r/netbrain/zwift>
 
 ```console
 docker pull netbrain/zwift:$VERSION # or simply latest
@@ -219,39 +228,39 @@ Then enable and configure the module in your NixOS configuration. The configurat
 {
   programs.zwift = {
     # Enable the Zwift module and install required dependencies
-    enable = true;  
+    enable = true;
     # The Docker image to use for Zwift
-    image = "docker.io/netbrain/zwift";  
+    image = "docker.io/netbrain/zwift";
     # The Zwift game version to run
-    version = "1.67.0";                         
+    version = "1.67.0";
     # If true, do not pull the image (use locally cached image)
-    dontPull = false;   
-    # If true, skip new version check   
-    dontCheck = false;     
+    dontPull = false;
+    # If true, skip new version check
+    dontCheck = false;
     # Container tool to run Zwift (e.g., "podman" or "docker")
-    containerTool = "podman";   
+    containerTool = "podman";
     # Zwift account username (email address)
     zwiftUsername = "user@example.com";
     # Zwift account password
-    zwiftPassword = "xxxx";           
+    zwiftPassword = "xxxx";
     # Directory to store Zwift workout files
-    zwiftWorkoutDir = "/var/lib/zwift/workouts"; 
+    zwiftWorkoutDir = "/var/lib/zwift/workouts";
     # Directory to store Zwift activity files
-    zwiftActivityDir = "/var/lib/zwift/activities"; 
+    zwiftActivityDir = "/var/lib/zwift/activities";
     # Run Zwift in the foreground (set true for foreground mode)
-    zwiftFg = false;           
-    # Disable Linux GameMode if true  
+    zwiftFg = false;
+    # Disable Linux GameMode if true
     zwiftNoGameMode = false;
-    # Enable Wine's experimental Wayland support if using Wayland         
-    wineExperimentalWayland = false; 
+    # Enable Wine's experimental Wayland support if using Wayland
+    wineExperimentalWayland = false;
     # Networking mode for the container ("bridge" is default)
-    networking = "bridge";       
+    networking = "bridge";
     # User ID for running the container (usually your own UID)
-    zwiftUid = "1000";          
+    zwiftUid = "1000";
     # Group ID for running the container (usually your own GID)
-    zwiftGid = "100";            
+    zwiftGid = "100";
     # Enable debug output and verbose logging if true
-    debug = false;               
+    debug = false;
   };
 }
 ```
@@ -266,9 +275,7 @@ These are our really cool sponsors!
 
 Thanks go to these wonderful people:
 
-<a href="https://github.com/quivrhq/quivr/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=netbrain/zwift" />
-</a>
+[![Contributors](https://contrib.rocks/image?repo=netbrain/zwift)](https://github.com/quivrhq/quivr/graphs/contributors)
 
 ### Contribute 👋
 
@@ -280,24 +287,23 @@ Check out our [Show and tell](https://github.com/netbrain/zwift/discussions/cate
 
 ## Alternative's to this repository
 
-* Install zwift using wine directly or a framework like lutris. You will however have to manage installation and updates yourself
-* Use [scrcpy](https://github.com/Genymobile/scrcpy) to mirror android device to your linux screen
-  * [Enable developer options on your android device](https://developer.android.com/studio/debug/dev-options#enable)
-  * Pair your computer to the device using `adb pair` [documentation](https://developer.android.com/studio/command-line/adb#wireless-android11-command-line)
-    * `./srccpy.sh adb pair ip:port`  [see my container solution](https://github.com/netbrain/dockerfiles/tree/master/scrcpy)
-  * Mirror the android device screen onto your linux screen using scrcpy.
-      * `./srccpy.sh scrcpy --tcpip=ip:port`
-  * If you require sound aswell, there's also a [sndcpy](https://github.com/rom1v/sndcpy) project (doesn't support wireless though, but the abovementioned can be modified to use usb)
-* Using [redroid](https://hub.docker.com/r/redroid/redroid) to install zwift apk onto a android emulator (not tested)
-* Using a virual machine with pci passthrough
-  * https://looking-glass.io/
-  * https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF
-  * https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher (if you have a nvidia card you can eat your cake, and have it too by creating vgpus for vm's that leverage the host gpu, no dedicated gpu required)
+- Install zwift using wine directly or a framework like lutris. You will however have to manage installation and updates yourself
+- Use [scrcpy](https://github.com/Genymobile/scrcpy) to mirror android device to your linux screen
+  - [Enable developer options on your android device](https://developer.android.com/studio/debug/dev-options#enable)
+  - Pair your computer to the device using `adb pair` [documentation](https://developer.android.com/studio/command-line/adb#wireless-android11-command-line)
+    - `./srccpy.sh adb pair ip:port`  [see my container solution](https://github.com/netbrain/dockerfiles/tree/master/scrcpy)
+  - Mirror the android device screen onto your linux screen using scrcpy.
+    - `./srccpy.sh scrcpy --tcpip=ip:port`
+  - If you require sound aswell, there's also a [sndcpy](https://github.com/rom1v/sndcpy) project (doesn't support wireless though, but the abovementioned can be modified to use usb)
+- Using [redroid](https://hub.docker.com/r/redroid/redroid) to install zwift apk onto a android emulator (not tested)
+- Using a virual machine with pci passthrough
+  - <https://looking-glass.io/>
+  - <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF>
+  - <https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher> (if you have a nvidia card you can eat your cake, and have it too by creating vgpus for vm's that leverage the host gpu, no dedicated gpu required)
 
 ## ⭐ Star History (for fun and giggles)
 
 [![Star History Chart](https://api.star-history.com/svg?repos=netbrain/zwift&type=Date)](https://star-history.com/#netbrain/zwift&Date)
-
 
 [zwift-updater-src]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg
 [zwift-updater-href]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml
