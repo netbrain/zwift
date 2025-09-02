@@ -1,4 +1,4 @@
-ARG DEBIAN_VERSION=trixie
+ARG DEBIAN_VERSION=forky
 
 FROM rust:1.90-slim AS build-runfromprocess
 
