@@ -203,17 +203,17 @@ GENERAL_FLAGS=(
 ###################################
 ##### SPECIFIC CONFIGURATIONS #####
 
-# Check for proprietary nvidia driver and set correct device to use
-if [[ -f "/proc/driver/nvidia/version" ]]
-then
-    if [[ $CONTAINER_TOOL == "podman" ]]
-    then
-    	VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"
+# Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
+if [[ -z "$VGA_DEVICE_FLAG" ]]; then
+    if [[ -f "/proc/driver/nvidia/version" ]]; then
+        if [[ $CONTAINER_TOOL == "podman" ]]; then
+            VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"
+        else
+            VGA_DEVICE_FLAG="--gpus=all"
+        fi
     else
-    	VGA_DEVICE_FLAG="--gpus=all"
+        VGA_DEVICE_FLAG="--device=/dev/dri:/dev/dri"
     fi
-else
-    VGA_DEVICE_FLAG="--device=/dev/dri:/dev/dri"
 fi
 
 if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]

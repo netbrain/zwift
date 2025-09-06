@@ -65,8 +65,15 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 | ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as (docker only)         |
 | ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as (docker only)         |
 | DEBUG                    |                         | If set enabled debug of zwift script "set -x"             |
+| VGA_DEVICE_FLAG           |                         | Override GPU/device flags for container (e.g., '--gpus=all' for Docker, '--device=nvidia.com/gpu=all' for Podman, or '--device=/dev/dri:/dev/dri') |
 
 These environment variables can be used to alter the execution of the zwift bash script.
+
+Short note on NVIDIA Container Toolkit device flags:
+- Podman: prefer setting VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all" (CDI device request).
+- Docker: prefer setting VGA_DEVICE_FLAG="--gpus=all". If Docker ≥ 25 is configured with CDI (nvidia-ctk runtime configure --enable-cdi), VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all" also works.
+
+See #208 for context.
 
 Examples:
 
