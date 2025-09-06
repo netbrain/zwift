@@ -24,6 +24,7 @@
           networking,
           zwiftUid,
           zwiftGid,
+          vgaDeviceFlag,
           debug
         }: pkgs.stdenv.mkDerivation rec {
         pname = "zwift";
@@ -49,6 +50,7 @@
           ZWIFT_UID=${zwiftUid}
           ZWIFT_GID=${zwiftGid}
           DEBUG=${debug}
+          VGA_DEVICE_FLAG=${vgaDeviceFlag}
 
           ${./zwift.sh}
         '';
@@ -90,6 +92,7 @@
               networking = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftUid = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftGid = lib.mkOption { type = lib.types.string; default = ""; };
+              vgaDeviceFlag = lib.mkOption { type = lib.types.string; default = ""; };
               debug = lib.mkOption { type = lib.types.bool; default = false; };
             };
 
@@ -97,7 +100,7 @@
               virtualisation.podman.enable = true;
               environment = {
                 systemPackages = with config.programs.zwift; [(wrapPackage {
-                  inherit image containerTool containerExtraArgs zwiftUsername zwiftPassword zwiftWorkoutDir zwiftActivityDir networking zwiftUid zwiftGid;
+                  inherit image containerTool containerExtraArgs zwiftUsername zwiftPassword zwiftWorkoutDir zwiftActivityDir networking zwiftUid zwiftGid vgaDeviceFlag;
                   tag = version;
                   dontCheck = if dontCheck then "1" else "" ;
                   dontPull = if dontPull then "1" else "";
