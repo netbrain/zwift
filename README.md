@@ -73,6 +73,8 @@ Short note on NVIDIA Container Toolkit device flags:
 - Podman: prefer setting VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all" (CDI device request).
 - Docker: prefer setting VGA_DEVICE_FLAG="--gpus=all". If Docker ≥ 25 is configured with CDI (nvidia-ctk runtime configure --enable-cdi), VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all" also works.
 
+If you're running Docker with CDI and Zwift fails to launch, try the long form VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all" (instead of "--gpus=all").
+
 See #208 for context.
 
 Examples:
