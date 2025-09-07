@@ -269,6 +269,8 @@ Then enable and configure the module in your NixOS configuration. The configurat
     zwiftUid = "1000";
     # Group ID for running the container (usually your own GID)
     zwiftGid = "100";
+    # GPU/device flags override (Docker: "--gpus=all", Podman/CDI: "--device=nvidia.com/gpu=all")
+    vgaDeviceFlag = "--device=nvidia.com/gpu=all";
     # Enable debug output and verbose logging if true
     debug = false;
   };
