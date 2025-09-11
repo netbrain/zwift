@@ -238,6 +238,13 @@ else
     ZWIFT_FG_FLAG=(-d) # run in bg
 fi
 
+# INTERACTIVE mode: force foreground and provide a shell entrypoint for debugging
+if [[ -n "$INTERACTIVE" ]]
+then
+    ZWIFT_FG_FLAG=(-it)
+    INTERACTIVE_FLAGS=(--entrypoint bash)
+fi
+
 # Setup Flags for Window Managers
 if [ $WINDOW_MANAGER == "Wayland" ]; then
     WM_FLAGS=(
@@ -286,29 +293,69 @@ fi
 # Read the user specified extra flags if any
 read -r -a CONTAINER_EXTRA_FLAGS <<< "$CONTAINER_EXTRA_ARGS"
 
+# Normalize single-string flags into arrays for safe command construction
+read -r -a ZWIFT_CONFIG_FLAG_ARR <<< "$ZWIFT_CONFIG_FLAG"
+read -r -a ZWIFT_PASSWORD_SECRET_ARR <<< "$ZWIFT_PASSWORD_SECRET"
+read -r -a ZWIFT_USER_CONFIG_FLAG_ARR <<< "$ZWIFT_USER_CONFIG_FLAG"
+read -r -a ZWIFT_WORKOUT_VOL_ARR <<< "$ZWIFT_WORKOUT_VOL"
+read -r -a ZWIFT_ACTIVITY_VOL_ARR <<< "$ZWIFT_ACTIVITY_VOL"
+read -r -a ZWIFT_LOG_VOL_ARR <<< "$ZWIFT_LOG_VOL"
+read -r -a VGA_DEVICE_FLAG_ARR <<< "$VGA_DEVICE_FLAG"
+POSITIONAL_ARGS=("$@")
+
 #########################
 ##### RUN CONTAINER #####
-CONTAINER=$($CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
-        ${ZWIFT_FG_FLAG[@]} \
-        $ZWIFT_CONFIG_FLAG \
-        $ZWIFT_PASSWORD_SECRET \
-        $ZWIFT_USER_CONFIG_FLAG \
-        $ZWIFT_WORKOUT_VOL \
-        $ZWIFT_ACTIVITY_VOL \
-        $ZWIFT_LOG_VOL \
-        $VGA_DEVICE_FLAG \
-        ${DBUS_CONFIG_FLAGS[@]} \
-        ${WM_FLAGS[@]} \
-        ${CONTAINER_EXTRA_FLAGS[@]} \
-        $@ \
-        $IMAGE:$VERSION
+CMD=(
+    "$CONTAINER_TOOL" run
+    "${GENERAL_FLAGS[@]}"
+    "${ZWIFT_FG_FLAG[@]}"
+    "${ZWIFT_CONFIG_FLAG_ARR[@]}"
+    "${ZWIFT_PASSWORD_SECRET_ARR[@]}"
+    "${ZWIFT_USER_CONFIG_FLAG_ARR[@]}"
+    "${ZWIFT_WORKOUT_VOL_ARR[@]}"
+    "${ZWIFT_ACTIVITY_VOL_ARR[@]}"
+    "${ZWIFT_LOG_VOL_ARR[@]}"
+    "${VGA_DEVICE_FLAG_ARR[@]}"
+    "${DBUS_CONFIG_FLAGS[@]}"
+    "${WM_FLAGS[@]}"
+    "${CONTAINER_EXTRA_FLAGS[@]}"
+    "${INTERACTIVE_FLAGS[@]}"
+    "${POSITIONAL_ARGS[@]}"
+    "$IMAGE:$VERSION"
 )
-if [ $? -ne 0 ]; then
+
+# DRYRUN: print the exact command that would be executed, then exit
+if [[ -n "$DRYRUN" ]]; then
+    echo "DRYRUN: would execute:"
+    printf '%q ' "${CMD[@]}"
+    echo
+    exit 0
+fi
+
+# Execute: interactive (-it) should not be captured
+if [[ " ${ZWIFT_FG_FLAG[*]} " == *" -it "* ]]; then
+    # In interactive mode we don't have a container ID to run xhost against later.
+    # If using X11/XWayland, show instructions so users can enable X access manually.
+    if [ -x "$(command -v xhost)" ] && [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
+        echo "INTERACTIVE mode: xhost is not automatically enabled for this container."
+        echo "If you need X11 apps inside the container to display, run this in another terminal:"
+        echo "  xhost +local:$HOSTNAME"
+        echo "After you're done, you can revoke access with:"
+        echo "  xhost -local:$HOSTNAME"
+    fi
+    "${CMD[@]}"
+    RC=$?
+else
+    CONTAINER=$("${CMD[@]}")
+    RC=$?
+fi
+
+if [ $RC -ne 0 ]; then
     msgbox error "Error can't run zwift, check variables!" 10
     exit 0
 fi
 
 # Allow container to connect to X, has to be set for different UID
-if [ -x "$(command -v xhost)" ] && [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
+if [ -n "$CONTAINER" ] && [ -x "$(command -v xhost)" ] && [ -z $WINE_EXPERIMENTAL_WAYLAND ]; then
     xhost +local:$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' $CONTAINER)
 fi

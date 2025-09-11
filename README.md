@@ -44,28 +44,30 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 
 ## Configuration options
 
-| Key                      | Default                 | Description                                               |
-|--------------------------|-------------------------|-----------------------------------------------------------|
-| USER                     | $USER                   | Used in creating the zwift volume `zwift-$USER`           |
-| IMAGE                    | docker.io/netbrain/zwift| The image to use                                          |
-| VERSION                  | latest                  | The image version/tag to use                              |
-| DONT_CHECK               |                         | If set, don't check for updated zwift.sh                  |
-| DONT_PULL                |                         | If set, don't pull for new image version                  |
-| CONTAINER_TOOL           |                         | Defaults to podman if installed, else docker              |
-| CONTAINER_EXTRA_ARGS     |                         | Extra args passed to docker/podman (--cpus=1.5)           |
-| ZWIFT_USERNAME           |                         | If set, try to login to zwift automatically               |
-| ZWIFT_PASSWORD           |                         | "                                                         |
-| ZWIFT_WORKOUT_DIR        |                         | Set the workouts directory location                       |
-| ZWIFT_ACTIVITY_DIR       |                         | Set the activities directory location                     |
-| ZWIFT_LOG_DIR            |                         | Set the logs directory location                           |
-| ZWIFT_FG                 |                         | If set, run the process in fg (-it) instead of bg (-d)    |
-| ZWIFT_NO_GAMEMODE        |                         | If set, don't run gamemode                                |
-| WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
-| NETWORKING               | bridge                  | Sets the type of container networking to use.             |
-| ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as (docker only)         |
-| ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as (docker only)         |
-| DEBUG                    |                         | If set enabled debug of zwift script "set -x"             |
-| VGA_DEVICE_FLAG          |                         | Override GPU/device flags for container (--gpus=all)      |
+|| Key                      | Default                 | Description                                               |
+||--------------------------|-------------------------|-----------------------------------------------------------|
+|| USER                     | $USER                   | Used in creating the zwift volume `zwift-$USER`           |
+|| IMAGE                    | docker.io/netbrain/zwift| The image to use                                          |
+|| VERSION                  | latest                  | The image version/tag to use                              |
+|| DONT_CHECK               |                         | If set, don't check for updated zwift.sh                  |
+|| DONT_PULL                |                         | If set, don't pull for new image version                  |
+|| DRYRUN                   |                         | If set, print the full container run command and exit     |
+|| INTERACTIVE              |                         | If set, force -it and use --entrypoint bash for debugging |
+|| CONTAINER_TOOL           |                         | Defaults to podman if installed, else docker              |
+|| CONTAINER_EXTRA_ARGS     |                         | Extra args passed to docker/podman (--cpus=1.5)           |
+|| ZWIFT_USERNAME           |                         | If set, try to login to zwift automatically               |
+|| ZWIFT_PASSWORD           |                         | "                                                         |
+|| ZWIFT_WORKOUT_DIR        |                         | Set the workouts directory location                       |
+|| ZWIFT_ACTIVITY_DIR       |                         | Set the activities directory location                     |
+|| ZWIFT_LOG_DIR            |                         | Set the logs directory location                           |
+|| ZWIFT_FG                 |                         | If set, run the process in fg (-it) instead of bg (-d)    |
+|| ZWIFT_NO_GAMEMODE        |                         | If set, don't run gamemode                                |
+|| WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
+|| NETWORKING               | bridge                  | Sets the type of container networking to use.             |
+|| ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as (docker only)         |
+|| ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as (docker only)         |
+|| DEBUG                    |                         | If set enabled debug of zwift script "set -x"             |
+|| VGA_DEVICE_FLAG          |                         | Override GPU/device flags for container (--gpus=all)      |
 
 These environment variables can be used to alter the execution of the zwift bash script.
 
@@ -80,6 +82,10 @@ See https://github.com/netbrain/zwift/issues/208 for context.
 Examples:
 
 `DONT_PULL=1 zwift` will prevent docker/podman pull before launch
+
+`DRYRUN=1 zwift` will print the underlying container run command and exit (no container is started)
+
+`INTERACTIVE=1 zwift` will force foreground `-it` and set `--entrypoint bash` for step-by-step debugging inside the container
 
 `CONTAINER_TOOL=docker zwift` will launch zwift with docker even if podman is installed
 
