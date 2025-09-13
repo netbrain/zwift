@@ -34,7 +34,10 @@ do
 done
 
 echo "Killing uneccesary applications"
-pkill ZwiftLauncher
+# ZwiftLauncher can exit on it's own before getting this far, so try to kill it
+# and then always return 0 so the script does not exit non 0 here and cause the
+# container to exit.  See https://github.com/netbrain/zwift/issues/210
+pkill ZwiftLauncher || true
 pkill ZwiftWindowsCra
 pkill -f MicrosoftEdgeUpdate
 
