@@ -33,9 +33,9 @@ LAUNCHER_PID=$((16#$LAUNCHER_PID_HEX))
 
 if [[ -n $ZWIFT_USERNAME ]] && [[ -n $ZWIFT_PASSWORD ]]; then
     echo "authenticating with zwift..."
-    WINEDEBUG=+wgl wine start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe --token="$(zwift-auth)" &> /home/user/.wine/drive_c/users/user/Documents/Zwift/Logs/wine.log
+    wine start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe --token="$(zwift-auth)"
 else
-    WINEDEBUG=+wgl wine start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe &> /home/user/.wine/drive_c/users/user/Documents/Zwift/Logs/wine.log
+    wine start /exec /bin/runfromprocess-rs.exe $LAUNCHER_PID ZwiftApp.exe
 fi
 
 sleep 3
