@@ -34,6 +34,7 @@ ARG WINETRICKS_VERSION=20260125
 ARG WINETRICKS_CHECKSUM=431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc45179312a7b
 
 # Install prerequisites
+# - bluez for bluetooth
 # - ca-certificates for wget and curl
 # - cabextract for winetricks
 # - curl used in zwift authentication script
@@ -49,6 +50,7 @@ ARG WINETRICKS_CHECKSUM=431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc451
 RUN dpkg --add-architecture i386 \
  && DEBIAN_FRONTEND="noninteractive" apt-get update \
  && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
+        bluez \
         ca-certificates \
         cabextract \
         curl \
