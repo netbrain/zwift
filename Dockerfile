@@ -31,7 +31,9 @@ ARG WINE_VERSION="=10.15~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=20250102
 
 # Install prerequisites
+# - bluez for bluetooth
 # - ca-certificates for wget and curl
+# - cabextract to install vcrun2015 with winetricks
 # - curl used in zwift authentication script
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
@@ -45,7 +47,9 @@ ARG WINETRICKS_VERSION=20250102
 RUN dpkg --add-architecture i386 \
  && apt-get update \
  && apt-get install --no-install-recommends -y \
+        bluez \
         ca-certificates \
+        cabextract \
         curl \
         gamemode \
         gosu \

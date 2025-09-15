@@ -107,6 +107,9 @@ then
     # install dotnet48 for zwift
     winetricks -q dotnet48
 
+    # install vc++ 2015 redistributable for zwift
+    winetricks -q vcrun2015
+
     # Install D3D Compiler to allow Vulkan Shaders.
     winetricks d3dcompiler_47
 
