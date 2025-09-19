@@ -68,6 +68,11 @@ if [[ ! -z $ZWIFT_LOG_DIR ]]; then
     ZWIFT_LOG_VOL="-v $ZWIFT_LOG_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Logs"
 fi
 
+if [[ ! -z $ZWIFT_PROFILE_DIR ]]; then
+    ZWIFT_PROFILE_DEST="/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs"
+    ZWIFT_PROFILE_VOL="--mount dst=$ZWIFT_PROFILE_DEST,volume-opt=device=$ZWIFT_PROFILE_DIR,type=volume,volume-driver=local,volume-opt=type=none,volume-opt=o=bind"
+fi
+
 ########################################
 ###### Default Setup and Settings ######
 WINDOW_MANAGER="Other"                      # XOrg, XWayland, Wayland, Other
@@ -300,6 +305,7 @@ read -r -a ZWIFT_USER_CONFIG_FLAG_ARR <<< "$ZWIFT_USER_CONFIG_FLAG"
 read -r -a ZWIFT_WORKOUT_VOL_ARR <<< "$ZWIFT_WORKOUT_VOL"
 read -r -a ZWIFT_ACTIVITY_VOL_ARR <<< "$ZWIFT_ACTIVITY_VOL"
 read -r -a ZWIFT_LOG_VOL_ARR <<< "$ZWIFT_LOG_VOL"
+read -a ZWIFT_PROFILE_VOL_ARR <<< "$ZWIFT_PROFILE_VOL"
 read -r -a VGA_DEVICE_FLAG_ARR <<< "$VGA_DEVICE_FLAG"
 POSITIONAL_ARGS=("$@")
 
@@ -315,6 +321,7 @@ CMD=(
     "${ZWIFT_WORKOUT_VOL_ARR[@]}"
     "${ZWIFT_ACTIVITY_VOL_ARR[@]}"
     "${ZWIFT_LOG_VOL_ARR[@]}"
+    "${ZWIFT_PROFILE_VOL_ARR[@]}"
     "${VGA_DEVICE_FLAG_ARR[@]}"
     "${DBUS_CONFIG_FLAGS[@]}"
     "${WM_FLAGS[@]}"
