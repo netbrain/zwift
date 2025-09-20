@@ -238,7 +238,7 @@ fi
 # Setup foreground/background flag
 if [[ $ZWIFT_FG -eq "1" ]]
 then
-    ZWIFT_FG_FLAG=(-it) # run in fg
+    ZWIFT_FG_FLAG=() # run in fg
 else
     ZWIFT_FG_FLAG=(-d) # run in bg
 fi
