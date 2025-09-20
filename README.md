@@ -302,7 +302,7 @@ These are our really cool sponsors!
 
 Thanks go to these wonderful people:
 
-[![Contributors](https://contrib.rocks/image?repo=netbrain/zwift)](https://github.com/quivrhq/quivr/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=netbrain/zwift)](https://github.com/netbrain/zwift/graphs/contributors)
 
 ### Contribute 👋
 
