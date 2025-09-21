@@ -51,11 +51,11 @@ else
 fi
 
 # Initiate podman Volume with correct permissions
-if [[ "$CONTAINER_TOOL" == "podman" ]]; then 
+if [[ "$CONTAINER_TOOL" == "podman" ]]; then
     # Add ipc host to deal with an SHM issue on some machines.
     PODMAN_FLAGS=(
         --userns keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID
-        --ipc host 
+        --ipc host
     )
 fi
 
@@ -75,8 +75,18 @@ $CONTAINER_TOOL run ${GENERAL_FLAGS[@]} \
     $IMAGE:latest \
     $@
 
-
 $CONTAINER_TOOL commit zwift $BUILD_NAME:latest
+$CONTAINER_TOOL container rm zwift
+
+# Backup zwift graphics config files
+$CONTAINER_TOOL run --name zwift --entrypoint /bin/bash $BUILD_NAME:latest -c "\
+    mkdir /home/user/zwift-profiles && \
+    cp /home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/* \
+       /home/user/zwift-profiles \
+"
+
+# Reset entrypoint and cmd to the original
+$CONTAINER_TOOL commit --change='ENTRYPOINT ["entrypoint"]' --change='CMD [""]' zwift $BUILD_NAME:latest
 $CONTAINER_TOOL container rm zwift
 
 export IMAGE=$IMAGE
