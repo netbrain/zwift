@@ -9,6 +9,11 @@ if [ ! -d "$ZWIFT_HOME" ]; then
   exit 1
 fi
 
+# Restore zwift graphics profiles if the directory is mounted and empty
+if mount | grep -q "$ZWIFT_HOME/data/configs" && [ -z "$(ls -A "$ZWIFT_HOME/data/configs")" ]; then
+    cp /home/user/zwift-profiles/* "$ZWIFT_HOME/data/configs"
+fi
+
 cd "$ZWIFT_HOME"
 
 echo "starting zwift..."
