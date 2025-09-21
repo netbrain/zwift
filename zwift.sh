@@ -68,9 +68,9 @@ if [[ ! -z $ZWIFT_LOG_DIR ]]; then
     ZWIFT_LOG_VOL="-v $ZWIFT_LOG_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Logs"
 fi
 
+# If a profile directory is specified then map to that directory.
 if [[ ! -z $ZWIFT_PROFILE_DIR ]]; then
-    ZWIFT_PROFILE_DEST="/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs"
-    ZWIFT_PROFILE_VOL="--mount dst=$ZWIFT_PROFILE_DEST,volume-opt=device=$ZWIFT_PROFILE_DIR,type=volume,volume-driver=local,volume-opt=type=none,volume-opt=o=bind"
+    ZWIFT_PROFILE_VOL="-v $ZWIFT_PROFILE_DIR:/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs"
 fi
 
 ########################################
