@@ -70,7 +70,7 @@ fi
 
 if [[ ! -z $ZWIFT_PROFILE_DIR ]]; then
     ZWIFT_PROFILE_DEST="/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs"
-    ZWIFT_PROFILE_VOL="--mount dst=$ZWIFT_PROFILE_DEST,volume-opt=device=$ZWIFT_PROFILE_DIR,type=volume,volume-driver=local,volume-opt=type=none,volume-opt=o=bind"
+    ZWIFT_PROFILE_VOL="--mount dst=$ZWIFT_PROFILE_DEST,volume-opt=device=$ZWIFT_PROFILE_DIR,type=volume,volume-opt=type=none,volume-opt=o=bind"
 fi
 
 ########################################
