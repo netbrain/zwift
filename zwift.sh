@@ -295,6 +295,13 @@ if [ "$CONTAINER_TOOL" == "podman" ]; then
     )
 fi
 
+# If custom resolution is requested, pass environment variable to container
+if [[ ! -z $ZWIFT_OVERRIDE_RESOLUTION ]]; then
+    GENERAL_FLAGS+=(
+        -e ZWIFT_OVERRIDE_RESOLUTION="$ZWIFT_OVERRIDE_RESOLUTION"
+    )
+fi
+
 # Read the user specified extra flags if any
 read -r -a CONTAINER_EXTRA_FLAGS <<< "$CONTAINER_EXTRA_ARGS"
 
