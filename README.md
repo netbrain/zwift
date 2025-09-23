@@ -44,41 +44,43 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 
 ## Configuration options
 
-| Key                      | Default                 | Description                                               |
-|--------------------------|-------------------------|-----------------------------------------------------------|
-| USER                     | $USER                   | Used in creating the zwift volume `zwift-$USER`           |
-| IMAGE                    | docker.io/netbrain/zwift| The image to use                                          |
-| VERSION                  | latest                  | The image version/tag to use                              |
-| DONT_CHECK               |                         | If set, don't check for updated zwift.sh                  |
-| DONT_PULL                |                         | If set, don't pull for new image version                  |
-| DRYRUN                   |                         | If set, print the full container run command and exit     |
-| INTERACTIVE              |                         | If set, force -it and use --entrypoint bash for debugging |
-| CONTAINER_TOOL           |                         | Defaults to podman if installed, else docker              |
-| CONTAINER_EXTRA_ARGS     |                         | Extra args passed to docker/podman (--cpus=1.5)           |
-| ZWIFT_USERNAME           |                         | If set, try to login to zwift automatically               |
-| ZWIFT_PASSWORD           |                         | "                                                         |
-| ZWIFT_WORKOUT_DIR        |                         | Set the workouts directory location                       |
-| ZWIFT_ACTIVITY_DIR       |                         | Set the activities directory location                     |
-| ZWIFT_PROFILE_DIR        |                         | Set the (graphics) profile directory location             |
-| ZWIFT_LOG_DIR            |                         | Set the logs directory location                           |
-| ZWIFT_FG                 |                         | If set, run the process in fg instead of bg (-d)          |
-| ZWIFT_NO_GAMEMODE        |                         | If set, don't run gamemode                                |
-| WINE_EXPERIMENTAL_WAYLAND|                         | If set, try to use experimental wayland support in wine 9 |
-| NETWORKING               | bridge                  | Sets the type of container networking to use.             |
-| ZWIFT_UID                | current users id        | Sets the UID that Zwift will run as (docker only)         |
-| ZWIFT_GID                | current users group id  | Sets the GID that Zwift will run as (docker only)         |
-| DEBUG                    |                         | If set enabled debug of zwift script "set -x"             |
-| VGA_DEVICE_FLAG          |                         | Override GPU/device flags for container (--gpus=all)      |
+| Key                       | Default                 | Description                                                |
+|---------------------------|-------------------------|------------------------------------------------------------|
+| USER                      | $USER                   | Used in creating the zwift volume `zwift-$USER`            |
+| IMAGE                     | docker.io/netbrain/zwift| The image to use                                           |
+| VERSION                   | latest                  | The image version/tag to use                               |
+| DONT_CHECK                |                         | If set, don't check for updated zwift.sh                   |
+| DONT_PULL                 |                         | If set, don't pull for new image version                   |
+| DRYRUN                    |                         | If set, print the full container run command and exit      |
+| INTERACTIVE               |                         | If set, force -it and use --entrypoint bash for debugging  |
+| CONTAINER_TOOL            |                         | Defaults to podman if installed, else docker               |
+| CONTAINER_EXTRA_ARGS      |                         | Extra args passed to docker/podman (--cpus=1.5)            |
+| ZWIFT_USERNAME            |                         | If set, try to login to zwift automatically                |
+| ZWIFT_PASSWORD            |                         | "                                                          |
+| ZWIFT_WORKOUT_DIR         |                         | Set the workouts directory location                        |
+| ZWIFT_ACTIVITY_DIR        |                         | Set the activities directory location                      |
+| ZWIFT_PROFILE_DIR         |                         | Set the (graphics) profile directory location              |
+| ZWIFT_LOG_DIR             |                         | Set the logs directory location                            |
+| ZWIFT_OVERRIDE_RESOLUTION |                         | If set, change game resolution (2560x1440, 3840x2160, ...) |
+| ZWIFT_FG                  |                         | If set, run the process in fg instead of bg (-d)           |
+| ZWIFT_NO_GAMEMODE         |                         | If set, don't run gamemode                                 |
+| WINE_EXPERIMENTAL_WAYLAND |                         | If set, try to use experimental wayland support in wine 9  |
+| NETWORKING                | bridge                  | Sets the type of container networking to use.              |
+| ZWIFT_UID                 | current users id        | Sets the UID that Zwift will run as (docker only)          |
+| ZWIFT_GID                 | current users group id  | Sets the GID that Zwift will run as (docker only)          |
+| DEBUG                     |                         | If set enabled debug of zwift script "set -x"              |
+| VGA_DEVICE_FLAG           |                         | Override GPU/device flags for container (--gpus=all)       |
 
 These environment variables can be used to alter the execution of the zwift bash script.
 
 Short note on NVIDIA Container Toolkit device flags:
+
 - Podman: prefer setting `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"` (CDI device request).
 - Docker: prefer setting `VGA_DEVICE_FLAG="--gpus=all"`. If Docker ≥ 25 is configured with CDI (`nvidia-ctk runtime configure --enable-cdi`), `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"` also works.
 
 If you're running Docker with CDI and Zwift fails to launch, try the long form `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"` (instead of `"--gpus=all"`).
 
-See https://github.com/netbrain/zwift/issues/208 for context.
+See <https://github.com/netbrain/zwift/issues/208> for context.
 
 Examples:
 
@@ -125,7 +127,7 @@ secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwi
 
 In this case the username should still be saved in the config file and the password will be read upon startup from the keyring and passed as a secret into the container (where it is an environment variable).
 
-> :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put ZWIFT_PASSWORD="password" it tries to use "password" and not just password, same for ''.  In addition do not add a space to the end of the line it will be sent as part of the pasword or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD.
+> :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put ZWIFT_PASSWORD="password" it tries to use "password" and not just password, same for ''.  In addition do not add a space to the end of the line it will be sent as part of the password or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD.
 
 NOTE: You can also add other environment variable from the table to make starting easier:
 
@@ -178,7 +180,7 @@ So if speed is a concern of yours, consider changing your user to match the cont
 
 You can [use your phone as a bridge](https://support.zwift.com/using-the-zwift-companion-app-Hybn8qzPr).
 
-For example, your Wahoo Kickr and Apple Watch conect to the Zwift Companion app on your
+For example, your Wahoo Kickr and Apple Watch connect to the Zwift Companion app on your
 iPhone; then the Companion app connects over wifi to your PC running Zwift.
 
 ## How can I add custom .zwo files?
@@ -189,7 +191,7 @@ You can map the Zwift Workout folder using the environment variable ZWIFT_WORKOU
 
 You can add this variable into $HOME/.config/zwift/config or $HOME/.config/zwift/$USER-config.
 
-The workouts folder will contain subvolders e.g. $HOME/.config/zwift/workouts/393938.  The number is your internal zwift id and you store you zwo files in the relevant folder.  There will usually be only one ID, however if you have multiple zwift login's it may show one subfolder for each, to find the ID you can use the following link:
+The workouts folder will contain subfolders e.g. $HOME/.config/zwift/workouts/393938.  The number is your internal zwift id and you store you zwo files in the relevant folder.  There will usually be only one ID, however if you have multiple zwift login's it may show one subfolder for each, to find the ID you can use the following link:
 
 Webpage for finding internal ID: <https://www.virtualonlinecycling.com/p/zwiftid.html>
 
@@ -201,11 +203,42 @@ NOTES:
 
 ## How can I access/modify the graphics settings?
 
-By default, Zwift loads a set of graphics settings based on the selected game resolution. The resolutions available in the UI are determined by the graphics card detected, and sometimes those options aren't optimal. You can tweak the graphics settings by modifying the configuration files for the current profile selected. To modify your profile you can set `ZWIFT_PROFILE_DIR` to a directory on your host machine, find the file corresponding to your profile (e.g. `medium.txt`), and edit the settings as you see fit.
+By default, zwift assigns a graphics profile based on your graphics card. This profile can be either `basic`, `medium`, `high`, or `ultra`. This profile determines the level of detail and the quality of the textures you get in game. It is not possible to change which graphics profile the game uses. When the default options of the profile aren't optimal (for example when zwift doesn't recognize your graphics card and you only get the `medium` profile or when your cpu is the bottleneck and your fps is on the low side because zwift assigned the `ultra` profile), it is possible to manually tweak the graphics settings by modifying the configuration file for your graphics profile. To modify your profile you can set `ZWIFT_PROFILE_DIR` to a directory on your host machine, find the file corresponding to your profile (e.g. `medium.txt`), and edit the settings as you see fit. To find out which profile zwift assigned, you can upload your zwift log to <https://zwiftalizer.com>.
 
-You can find more information about these settings in this [Zwift Insider](https://zwiftinsider.com/config-file-tweaks/) article.
+The default settings for the different profiles are:
+
+| key                | description                                            | basic        | medium       | high         | ultra         |
+|--------------------|--------------------------------------------------------|--------------|--------------|--------------|---------------|
+| res                | texture resolution (independent from game resolution)  | 1024x576(0x) | 1280x720(0x) | 1280x720(0x) | 1920x1080(0x) |
+| sres               | shadow resolution                                      | 512x512      | 1024x1024    | 1024x1024    | 2048x2048     |
+| gSSAO              | enable high-quality lighting and shadows               | 0            | 0            | 1            | 1             |
+| gFXAA              | enable anti-aliasing                                   | 1            | 1            | 1            | 1             |
+| gSunRays           | enable sun rays (default 1)                            | 0            | 0            |              |               |
+| gHeadLight         | enable bike headlights (default 1)                     | 0            | 0            |              |               |
+| gFoliagePercent    | reduce/increase auto-generated foliage (default 1.0)   | 0.5          | 0.5          |              |               |
+| gSimpleReflections | lower quality reflections (default 0)                  | 1            | 1            |              |               |
+| gLODBias           | lower polygon count (higher value is lower, default 0) | 1            | 1            |              |               |
+| gShowFPS           | display fps in the top left corner (default 0)         |              |              |              |               |
+
+The number in parentheses after the texture resolution (for example `(0x)` after `1920x1080`) is the anti-aliasing setting. This number can be modified to for example `1920x1080(4x)` or `1920x1080(8x)` to increase anti-aliasing.
+
+You can find more information about these settings in this [Zwift Insider](https://zwiftinsider.com/config-file-tweaks/) article. Note that this is an older article and as such some of the information in it is outdated. The default values of the different profiles have changed to what is in the table listed above and for example the `aniso` setting does not exist anymore.
 
 NOTE: The profiles are generated by Zwift, so if your directory is empty, start Zwift once to generate the profiles.
+
+Aside from the graphics profile which is assigned by zwift and cannot be changed, there is also the in-game setting to change the display resolution. Changing this resolution does not change the graphics profile and as such does not affect the quality of the textures, shadows, and other graphics options. It only affects the resolution of the game itself. Which resolutions are available in the zwift in-game setting is dependent on the graphics profile assigned based on your graphics card. If zwift does not recognize your graphics card or you have a WQHD or UHD display and zwift does not offer the higher resolutions, it is possible to manually override the game resolution by setting the `ZWIFT_OVERRIDE_RESOLUTION` option. For example to force zwift to use UHD you can launch it using `ZWIFT_OVERRIDE_RESOLUTION=3840x2160 zwift`.
+
+The full list of available resolutions is:
+
+| name   | resolution | pixels    |
+|--------|------------|-----------|
+| Low    | 576p       | 720x576   |
+| Medium | 720p       | 1280x720  |
+| High   | 1080p      | 1920x1080 |
+| Ultra  | 1440p      | 2560x1440 |
+| 4k UHD | 2160p      | 3840x2160 |
+
+> :warning: **Before using ZWIFT_OVERRIDE_RESOLUTION**: This option requires that the `prefs.xml` file exists. Make sure to launch zwift at least once so it creates the `prefs.xml` file before using the `ZWIFT_OVERRIDE_RESOLUTION` option.
 
 ## How can I build the image myself?
 

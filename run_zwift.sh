@@ -3,10 +3,24 @@ set -e
 set -x
 
 ZWIFT_HOME="$HOME/.wine/drive_c/Program Files (x86)/Zwift"
+ZWIFT_PREFS="$HOME/.wine/drive_c/users/user/Documents/Zwift/prefs.xml"
 
 if [ ! -d "$ZWIFT_HOME" ]; then
-  echo "Directory $ZWIFT_HOME does not exist.  Has Zwift been installed?"
-  exit 1
+    echo "Directory $ZWIFT_HOME does not exist.  Has Zwift been installed?"
+    exit 1
+fi
+
+if [ ! -z $ZWIFT_OVERRIDE_RESOLUTION ]; then
+    if [ -f "$ZWIFT_PREFS" ]; then
+        echo "Setting zwift resolution to $ZWIFT_OVERRIDE_RESOLUTION."
+        UPDATED_PREFS=$(awk -v resolution="$ZWIFT_OVERRIDE_RESOLUTION" '{
+            gsub(/<USER_RESOLUTION_PREF>.*<\/USER_RESOLUTION_PREF>/,
+                 "<USER_RESOLUTION_PREF>" resolution "</USER_RESOLUTION_PREF>")
+        } 1' "$ZWIFT_PREFS")
+        echo "$UPDATED_PREFS" > "$ZWIFT_PREFS"
+    else
+        echo "Warning: Preferences file does not exist yet. Resolution $ZWIFT_OVERRIDE_RESOLUTION cannot be set."
+    fi
 fi
 
 cd "$ZWIFT_HOME"
