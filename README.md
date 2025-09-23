@@ -218,6 +218,7 @@ The default settings for the different profiles are:
 | gFoliagePercent    | reduce/increase auto-generated foliage (default 1.0)   | 0.5          | 0.5          |              |               |
 | gSimpleReflections | lower quality reflections (default 0)                  | 1            | 1            |              |               |
 | gLODBias           | lower polygon count (higher value is lower, default 0) | 1            | 1            |              |               |
+| gShowFPS           | display fps in the top left corner (default 0)         |              |              |              |               |
 
 You can find more information about these settings in this [Zwift Insider](https://zwiftinsider.com/config-file-tweaks/) article. Note that this is an older article and as such some of the information in it is outdated. The default values of the different profiles have changed to what is in the table listed above and for example the `aniso` setting does not exist anymore.
 
