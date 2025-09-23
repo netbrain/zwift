@@ -11,13 +11,17 @@ if [ ! -d "$ZWIFT_HOME" ]; then
 fi
 
 if [ ! -z $ZWIFT_OVERRIDE_RESOLUTION ]; then
-    echo "Setting zwift resolution to $ZWIFT_OVERRIDE_RESOLUTION."
-    TMP_PREFS_FILE="/tmp/zwift_prefs.xml"
-    awk -v resolution="$ZWIFT_OVERRIDE_RESOLUTION" '{
-        gsub(/<USER_RESOLUTION_PREF>.*<\/USER_RESOLUTION_PREF>/,
-             "<USER_RESOLUTION_PREF>" resolution "</USER_RESOLUTION_PREF>")
-    } 1' "$ZWIFT_PREFS" > "$TMP_PREFS_FILE"
-    mv "$TMP_PREFS_FILE" "$ZWIFT_PREFS"
+    if [ -f "$ZWIFT_PREFS" ]; then
+        echo "Setting zwift resolution to $ZWIFT_OVERRIDE_RESOLUTION."
+        TMP_PREFS_FILE="/tmp/zwift_prefs.xml"
+        awk -v resolution="$ZWIFT_OVERRIDE_RESOLUTION" '{
+            gsub(/<USER_RESOLUTION_PREF>.*<\/USER_RESOLUTION_PREF>/,
+                "<USER_RESOLUTION_PREF>" resolution "</USER_RESOLUTION_PREF>")
+        } 1' "$ZWIFT_PREFS" > "$TMP_PREFS_FILE"
+        mv "$TMP_PREFS_FILE" "$ZWIFT_PREFS"
+    else
+        echo "Warning: Preferences file does not exist yet. Resolution $ZWIFT_OVERRIDE_RESOLUTION cannot be set."
+    fi
 fi
 
 cd "$ZWIFT_HOME"

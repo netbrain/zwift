@@ -236,6 +236,8 @@ The full list of available resolutions is:
 | Ultra  | 1440p      | 2560x1440 |
 | 4k UHD | 2160p      | 3840x2160 |
 
+> :warning: **Before using ZWIFT_OVERRIDE_RESOLUTION**: This option requires that the `prefs.xml` file exists. Make sure to launch zwift at least once so it creates the `prefs.xml` file before using the `ZWIFT_OVERRIDE_RESOLUTION` option.
+
 ## How can I build the image myself?
 
 ```console
