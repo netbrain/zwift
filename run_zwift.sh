@@ -3,10 +3,21 @@ set -e
 set -x
 
 ZWIFT_HOME="$HOME/.wine/drive_c/Program Files (x86)/Zwift"
+ZWIFT_PREFS="$HOME/.wine/drive_c/users/user/Documents/Zwift/prefs.xml"
 
 if [ ! -d "$ZWIFT_HOME" ]; then
-  echo "Directory $ZWIFT_HOME does not exist.  Has Zwift been installed?"
-  exit 1
+    echo "Directory $ZWIFT_HOME does not exist.  Has Zwift been installed?"
+    exit 1
+fi
+
+if [ ! -z $ZWIFT_OVERRIDE_RESOLUTION ]; then
+    echo "Setting zwift resolution to $ZWIFT_OVERRIDE_RESOLUTION."
+    TMP_PREFS_FILE="/tmp/zwift_prefs.xml"
+    awk -v resolution="$ZWIFT_OVERRIDE_RESOLUTION" '{
+        gsub(/<USER_RESOLUTION_PREF>.*<\/USER_RESOLUTION_PREF>/,
+             "<USER_RESOLUTION_PREF>" resolution "</USER_RESOLUTION_PREF>")
+    } 1' "$ZWIFT_PREFS" > "$TMP_PREFS_FILE"
+    mv "$TMP_PREFS_FILE" "$ZWIFT_PREFS"
 fi
 
 cd "$ZWIFT_HOME"
