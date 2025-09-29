@@ -68,14 +68,15 @@ if [[ ! -z $ZWIFT_LOG_DIR ]]; then
     ZWIFT_LOG_VOL="-v $ZWIFT_LOG_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Logs"
 fi
 
-# Create graphics.txt file if it does not exist
-if [ ! -f "$HOME/.config/zwift/graphics.txt" ]; then
-    mkdir -p "$HOME/.config/zwift"
-    echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "$HOME/.config/zwift/graphics.txt"
-fi
-
 # If overriding a zwift graphics profile, map to the corresponding file.
 if [ ! -z $ZWIFT_OVERRIDE_GRAPHICS ]; then
+    # Create graphics.txt file if it does not exist.
+    if [ ! -f "$HOME/.config/zwift/graphics.txt" ]; then
+        mkdir -p "$HOME/.config/zwift"
+        echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "$HOME/.config/zwift/graphics.txt"
+    fi
+
+    # Validate setting and map to the corresponding zwift profile file.
     declare -A VALID_PROFILES=([basic]=1 [medium]=1 [high]=1 [ultra]=1)
     if [ ! -n "${VALID_PROFILES[$ZWIFT_OVERRIDE_GRAPHICS]}" ]; then
         msgbox error "ZWIFT_OVERRIDE_GRAPHICS must be one of: basic, medium, high, ultra!" 10
