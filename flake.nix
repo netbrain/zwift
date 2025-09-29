@@ -12,12 +12,17 @@
           tag,
           dontCheck,
           dontPull,
+          dryRun,
+          interactive,
           containerTool,
           containerExtraArgs,
           zwiftUsername,
           zwiftPassword,
           zwiftWorkoutDir,
           zwiftActivityDir,
+          zwiftLogDir,
+          zwiftOverrideGraphics,
+          zwiftOverrideResolution,
           zwiftFg,
           zwiftNoGameMode,
           wineExperimentalWayland,
@@ -37,12 +42,17 @@
           VERSION=${tag}
           DONT_CHECK=${dontCheck}
           DONT_PULL=${dontPull}
+          DRYRUN=${dryRun}
+          INTERACTIVE=${interactive}
           CONTAINER_TOOL=${containerTool}
           CONTAINER_EXTRA_ARGS=${containerExtraArgs}
           ZWIFT_USERNAME=${zwiftUsername}
           ZWIFT_PASSWORD=${zwiftPassword}
-          ZWIFT_WOKROUT_DIR=${zwiftWorkoutDir}
+          ZWIFT_WORKOUT_DIR=${zwiftWorkoutDir}
           ZWIFT_ACTIVITY_DIR=${zwiftActivityDir}
+          ZWIFT_LOG_DIR=${zwiftLogDir}
+          ZWIFT_OVERRIDE_GRAPHICS=${zwiftOverrideGraphics}
+          ZWIFT_OVERRIDE_RESOLUTION=${zwiftOverrideResolution}
           ZWIFT_FG=${zwiftFg}
           ZWIFT_NO_GAMEMODE=${zwiftNoGameMode}
           WINE_EXPERIMENTAL_WAYLAND=${wineExperimentalWayland}
@@ -80,12 +90,17 @@
               version = lib.mkOption { type = lib.types.string; default = ""; };
               dontCheck = lib.mkOption { type = lib.types.bool; default = false; };
               dontPull = lib.mkOption { type = lib.types.bool; default = false; };
+              dryRun = lib.mkOption { type = lib.types.bool; default = false; };
+              interactive = lib.mkOption { type = lib.types.bool; default = false; };
               containerTool = lib.mkOption { type = lib.types.string; default = ""; };
               containerExtraArgs = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftUsername = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftPassword = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftWorkoutDir = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftActivityDir = lib.mkOption { type = lib.types.string; default = ""; };
+              zwiftLogDir = lib.mkOption { type = lib.types.string; default = ""; };
+              zwiftOverrideGraphics = lib.mkOption { type = lib.types.string; default = ""; };
+              zwiftOverrideResolution = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftFg = lib.mkOption { type = lib.types.bool; default = false; };
               zwiftNoGameMode = lib.mkOption { type = lib.types.bool; default = false; };
               wineExperimentalWayland = lib.mkOption { type = lib.types.bool; default = false; };
@@ -100,10 +115,12 @@
               virtualisation.podman.enable = true;
               environment = {
                 systemPackages = with config.programs.zwift; [(wrapPackage {
-                  inherit image containerTool containerExtraArgs zwiftUsername zwiftPassword zwiftWorkoutDir zwiftActivityDir networking zwiftUid zwiftGid vgaDeviceFlag;
+                  inherit image containerTool containerExtraArgs zwiftUsername zwiftPassword zwiftWorkoutDir zwiftActivityDir zwiftLogDir zwiftOverrideGraphics zwiftOverrideResolution networking zwiftUid zwiftGid vgaDeviceFlag;
                   tag = version;
                   dontCheck = if dontCheck then "1" else "" ;
                   dontPull = if dontPull then "1" else "";
+                  dryRun = if dryRun then "1" else "";
+                  interactive = if interactive then "1" else "";
                   zwiftFg = if zwiftFg then "1" else "";
                   zwiftNoGameMode = if zwiftNoGameMode then "1" else "";
                   wineExperimentalWayland = if wineExperimentalWayland then "1" else "";
