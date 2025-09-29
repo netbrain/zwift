@@ -69,7 +69,7 @@ if [[ ! -z $ZWIFT_LOG_DIR ]]; then
 fi
 
 # If overriding a zwift graphics profile, map to the corresponding file.
-if [ ! -z $ZWIFT_OVERRIDE_GRAPHICS ]; then
+if [ "$ZWIFT_OVERRIDE_GRAPHICS" -eq "1" ]; then
     ZWIFT_GRAPHICS_CONFIG="$HOME/.config/zwift/graphics.txt"
 
     # Check for $USER specific graphics config file.
@@ -82,13 +82,13 @@ if [ ! -z $ZWIFT_OVERRIDE_GRAPHICS ]; then
         echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "$ZWIFT_GRAPHICS_CONFIG"
     fi
 
-    # Validate setting and map to the corresponding zwift profile file.
-    declare -A VALID_PROFILES=([basic]=1 [medium]=1 [high]=1 [ultra]=1)
-    if [ ! -n "${VALID_PROFILES[$ZWIFT_OVERRIDE_GRAPHICS]}" ]; then
-        msgbox error "ZWIFT_OVERRIDE_GRAPHICS must be one of: basic, medium, high, ultra!" 10
-        exit 0
-    fi
-    ZWIFT_PROFILE_VOL="-v $ZWIFT_GRAPHICS_CONFIG:/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/$ZWIFT_OVERRIDE_GRAPHICS.txt"
+    # Override all zwift graphics profiles with the custom config file.
+    ZWIFT_PROFILE_VOL_ARR=(
+        -v $ZWIFT_GRAPHICS_CONFIG:/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/basic.txt:ro
+        -v $ZWIFT_GRAPHICS_CONFIG:/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/medium.txt:ro
+        -v $ZWIFT_GRAPHICS_CONFIG:/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/high.txt:ro
+        -v $ZWIFT_GRAPHICS_CONFIG:/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/ultra.txt:ro
+    )
 fi
 
 ########################################
@@ -330,7 +330,6 @@ read -r -a ZWIFT_USER_CONFIG_FLAG_ARR <<< "$ZWIFT_USER_CONFIG_FLAG"
 read -r -a ZWIFT_WORKOUT_VOL_ARR <<< "$ZWIFT_WORKOUT_VOL"
 read -r -a ZWIFT_ACTIVITY_VOL_ARR <<< "$ZWIFT_ACTIVITY_VOL"
 read -r -a ZWIFT_LOG_VOL_ARR <<< "$ZWIFT_LOG_VOL"
-read -a ZWIFT_PROFILE_VOL_ARR <<< "$ZWIFT_PROFILE_VOL"
 read -r -a VGA_DEVICE_FLAG_ARR <<< "$VGA_DEVICE_FLAG"
 POSITIONAL_ARGS=("$@")
 

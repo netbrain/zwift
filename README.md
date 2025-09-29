@@ -203,7 +203,7 @@ NOTES:
 
 ## How can I access/modify the graphics settings?
 
-By default, zwift assigns a graphics profile based on your graphics card. This profile can be either `basic`, `medium`, `high`, or `ultra`. This profile determines the level of detail and the quality of the textures you get in game. It is not possible to change which graphics profile the game uses. When the default options of the profile aren't optimal (for example when zwift doesn't recognize your graphics card and you only get the `medium` profile or when your cpu is the bottleneck and your fps is on the low side because zwift assigned the `ultra` profile), it is possible to manually tweak the graphics settings by modifying the configuration file for your graphics profile. To modify your profile you can set `ZWIFT_OVERRIDE_GRAPHICS` to the name of your graphics profile (`basic`, `medium`, `high` or `ultra`), and edit the settings in the `~/.config/zwift/graphics.txt` or `~/.config/zwift/$USER-graphics.txt` file as you see fit. To find out which profile zwift assigned, you can upload your zwift log to <https://zwiftalizer.com>.
+By default, zwift assigns a graphics profile based on your graphics card. This profile can be either `basic`, `medium`, `high`, or `ultra`. This profile determines the level of detail and the quality of the textures you get in game. It is not possible to change which graphics profile the game uses. When the default options of the profile aren't optimal (for example when zwift doesn't recognize your graphics card and you only get the `medium` profile or when your cpu is the bottleneck and your fps is on the low side because zwift assigned the `ultra` profile), it is possible to manually tweak the graphics settings by setting `ZWIFT_OVERRIDE_GRAPHICS=1`, and editing the settings in the `~/.config/zwift/graphics.txt` or `~/.config/zwift/$USER-graphics.txt` file as you see fit. To find out which profile zwift assigned, you can upload your zwift log to <https://zwiftalizer.com>.
 
 The default settings for the different profiles are:
 
@@ -232,7 +232,7 @@ set gFXAA=1
 set gShowFPS=1
 ```
 
-If zwift assigned the `medium` profile, start zwift with the `ZWIFT_OVERRIDE_GRAPHICS=medium zwift` command to use the settings from the `graphics.txt` file.
+Start zwift with the `ZWIFT_OVERRIDE_GRAPHICS=1 zwift` command to use the settings from the `graphics.txt` file.
 
 You can find more information about these settings in this [Zwift Insider](https://zwiftinsider.com/config-file-tweaks/) article. Note that this is an older article and as such some of the information in it is outdated. The default values of the different profiles have changed to what is in the table listed above and for example the `aniso` setting does not exist anymore.
 
