@@ -27,7 +27,7 @@ msgbox() {
                 *) return 5;;
             esac
         ;;
-        *) echo "$MSG";;
+        *) echo -e "${BOLD}Info - $MSG${NC}";;
     esac
     if [ $TIMEOUT -eq 0 ]; then
         read -p "Press key to continue.. " -n1 -s
@@ -68,9 +68,28 @@ if [[ ! -z $ZWIFT_LOG_DIR ]]; then
     ZWIFT_LOG_VOL="-v $ZWIFT_LOG_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Logs"
 fi
 
-if [[ ! -z $ZWIFT_PROFILE_DIR ]]; then
-    ZWIFT_PROFILE_DEST="/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs"
-    ZWIFT_PROFILE_VOL="--mount dst=$ZWIFT_PROFILE_DEST,volume-opt=device=$ZWIFT_PROFILE_DIR,type=volume,volume-opt=type=none,volume-opt=o=bind"
+# If overriding a zwift graphics profile, map to the corresponding file.
+if [ "$ZWIFT_OVERRIDE_GRAPHICS" -eq "1" ]; then
+    ZWIFT_GRAPHICS_CONFIG="$HOME/.config/zwift/graphics.txt"
+
+    # Check for $USER specific graphics config file.
+    ZWIFT_USER_GRAPHICS_CONFIG="$HOME/.config/zwift/$USER-graphics.txt"
+    if [ -f "$ZWIFT_USER_GRAPHICS_CONFIG" ]; then
+        ZWIFT_GRAPHICS_CONFIG="$ZWIFT_USER_GRAPHICS_CONFIG"
+    # Create graphics.txt file if it does not exist.
+    elif [ ! -f "$ZWIFT_GRAPHICS_CONFIG" ]; then
+        mkdir -p "$HOME/.config/zwift"
+        echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "$ZWIFT_GRAPHICS_CONFIG"
+        msgbox info "Created $ZWIFT_GRAPHICS_CONFIG with default values, edit this file to tweak the zwift graphics settings."
+    fi
+
+    # Override all zwift graphics profiles with the custom config file.
+    ZWIFT_PROFILE_VOL_ARR=(
+        -v $ZWIFT_GRAPHICS_CONFIG:/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/basic.txt:ro
+        -v $ZWIFT_GRAPHICS_CONFIG:/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/medium.txt:ro
+        -v $ZWIFT_GRAPHICS_CONFIG:/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/high.txt:ro
+        -v $ZWIFT_GRAPHICS_CONFIG:/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/ultra.txt:ro
+    )
 fi
 
 ########################################
@@ -312,7 +331,6 @@ read -r -a ZWIFT_USER_CONFIG_FLAG_ARR <<< "$ZWIFT_USER_CONFIG_FLAG"
 read -r -a ZWIFT_WORKOUT_VOL_ARR <<< "$ZWIFT_WORKOUT_VOL"
 read -r -a ZWIFT_ACTIVITY_VOL_ARR <<< "$ZWIFT_ACTIVITY_VOL"
 read -r -a ZWIFT_LOG_VOL_ARR <<< "$ZWIFT_LOG_VOL"
-read -a ZWIFT_PROFILE_VOL_ARR <<< "$ZWIFT_PROFILE_VOL"
 read -r -a VGA_DEVICE_FLAG_ARR <<< "$VGA_DEVICE_FLAG"
 POSITIONAL_ARGS=("$@")
 
