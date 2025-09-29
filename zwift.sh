@@ -27,7 +27,7 @@ msgbox() {
                 *) return 5;;
             esac
         ;;
-        *) echo "$MSG";;
+        *) echo -e "${BOLD}Info - $MSG${NC}";;
     esac
     if [ $TIMEOUT -eq 0 ]; then
         read -p "Press key to continue.. " -n1 -s
@@ -80,6 +80,7 @@ if [ "$ZWIFT_OVERRIDE_GRAPHICS" -eq "1" ]; then
     elif [ ! -f "$ZWIFT_GRAPHICS_CONFIG" ]; then
         mkdir -p "$HOME/.config/zwift"
         echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "$ZWIFT_GRAPHICS_CONFIG"
+        msgbox info "Created $ZWIFT_GRAPHICS_CONFIG with default values, edit this file to tweak the zwift graphics settings."
     fi
 
     # Override all zwift graphics profiles with the custom config file.
