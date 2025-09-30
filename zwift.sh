@@ -69,7 +69,7 @@ if [[ ! -z $ZWIFT_LOG_DIR ]]; then
 fi
 
 # If overriding a zwift graphics profile, map to the corresponding file.
-if [ "$ZWIFT_OVERRIDE_GRAPHICS" -eq "1" ]; then
+if [[ $ZWIFT_OVERRIDE_GRAPHICS -eq "1" ]]; then
     ZWIFT_GRAPHICS_CONFIG="$HOME/.config/zwift/graphics.txt"
 
     # Check for $USER specific graphics config file.
