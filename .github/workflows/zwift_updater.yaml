@@ -39,8 +39,8 @@ jobs:
           export DISPLAY=:99
           xhost +
           docker run --name zwift \
-                  --privileged \
                   -e DISPLAY=$DISPLAY \
+                  -e CONTAINER=docker \
                   --device /dev/dri \
                   -v /tmp:/tmp \
                   netbrain/zwift:latest update

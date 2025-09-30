@@ -209,16 +209,15 @@ fi
 # Define Base Container Parameters
 GENERAL_FLAGS=(
     --rm
-    --privileged
     --network $NETWORKING
     --name zwift-$USER
-    --security-opt label=disable
     --hostname $HOSTNAME
 
     -e DISPLAY=$DISPLAY
     -e ZWIFT_UID=$CONTAINER_UID
     -e ZWIFT_GID=$CONTAINER_GID
     -e PULSE_SERVER=/run/user/$CONTAINER_UID/pulse/native
+    -e CONTAINER=$CONTAINER_TOOL
 
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift
     -v /run/user/$LOCAL_UID/pulse:/run/user/$CONTAINER_UID/pulse
@@ -226,6 +225,14 @@ GENERAL_FLAGS=(
 
 ###################################
 ##### SPECIFIC CONFIGURATIONS #####
+
+# Setup container security flags
+if [[ $PRIVILEGED_CONTAINER -eq "1" ]]
+then
+    CONT_SEC_FLAG=(--privileged --security-opt label=disable) # privileged container, less secure
+else
+    CONT_SEC_FLAG=(--security-opt label=type:container_runtime_t) # more secure
+fi
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
 if [[ -z "$VGA_DEVICE_FLAG" ]]; then
@@ -339,6 +346,7 @@ POSITIONAL_ARGS=("$@")
 CMD=(
     "$CONTAINER_TOOL" run
     "${GENERAL_FLAGS[@]}"
+    "${CONT_SEC_FLAG[@]}"
     "${ZWIFT_FG_FLAG[@]}"
     "${ZWIFT_CONFIG_FLAG_ARR[@]}"
     "${ZWIFT_PASSWORD_SECRET_ARR[@]}"

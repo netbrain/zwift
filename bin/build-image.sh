@@ -28,14 +28,15 @@ fi
 
 GENERAL_FLAGS=(
     -it
-    --privileged
     --network bridge
     --name zwift
-    --security-opt label=disable
+    --security-opt label=type:container_runtime_t
+    --device /dev/dri
     --hostname $HOSTNAME
 
     -e DISPLAY=$DISPLAY
     -e XAUTHORITY=$XAUTHORITY
+    -e CONTAINER=$CONTAINER_TOOL
 
     -v /tmp/.X11-unix:/tmp/.X11-unix
     -v /run/user/$UID:/run/user/$ZWIFT_UID
@@ -55,7 +56,6 @@ if [[ "$CONTAINER_TOOL" == "podman" ]]; then
     # Add ipc host to deal with an SHM issue on some machines.
     PODMAN_FLAGS=(
         --userns keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID
-        --ipc host 
     )
 fi
 
