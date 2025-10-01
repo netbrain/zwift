@@ -68,8 +68,8 @@ if [[ ! -z $ZWIFT_LOG_DIR ]]; then
     ZWIFT_LOG_VOL="-v $ZWIFT_LOG_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Logs"
 fi
 
-# If overriding a zwift graphics profile, map to the corresponding file.
-if [ "$ZWIFT_OVERRIDE_GRAPHICS" -eq "1" ]; then
+# If overriding zwift graphics then map custom config to the graphics profiles.
+if [[ $ZWIFT_OVERRIDE_GRAPHICS -eq "1" ]]; then
     ZWIFT_GRAPHICS_CONFIG="$HOME/.config/zwift/graphics.txt"
 
     # Check for $USER specific graphics config file.
