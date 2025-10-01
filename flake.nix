@@ -99,7 +99,7 @@
               zwiftWorkoutDir = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftActivityDir = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftLogDir = lib.mkOption { type = lib.types.string; default = ""; };
-              zwiftOverrideGraphics = lib.mkOption { type = lib.types.bool; default = false };
+              zwiftOverrideGraphics = lib.mkOption { type = lib.types.bool; default = false; };
               zwiftOverrideResolution = lib.mkOption { type = lib.types.string; default = ""; };
               zwiftFg = lib.mkOption { type = lib.types.bool; default = false; };
               zwiftNoGameMode = lib.mkOption { type = lib.types.bool; default = false; };
