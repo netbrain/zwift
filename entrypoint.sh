@@ -5,13 +5,15 @@ set -x
 # Check whetehr we are running in Docker/ Podman
 # Docker has the file /.dockerenv 
 # Podman exposes itself in /run/.containerenv
-if [[ -f "/.dockerenv" ]]; then
-    CONTAINER="docker"
-elif [[ ! -z $(cat /run/.containerenv | grep "podman") ]]; then
-    CONTAINER="podman"
-else
-    echo "Unknown Container."
-    exit 1
+if ! ( [[ "$CONTAINER" == "docker" ]] || [[ "$CONTAINER" == "podman" ]] ); then
+    if [[ -f "/.dockerenv" ]]; then
+        CONTAINER="docker"
+    elif [[ ! -z $(cat /run/.containerenv | grep "podman") ]]; then
+        CONTAINER="podman"
+    else
+        echo "Unknown Container."
+        exit 1
+    fi
 fi
 
 # If Wayland Experimental need to blank DISPLAY here to enable Wayland.

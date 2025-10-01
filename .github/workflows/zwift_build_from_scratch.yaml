@@ -36,8 +36,8 @@ jobs:
           docker build -t netbrain/zwift:build .
           xhost +
           docker run --name zwift \
-                  --privileged \
                   -e DISPLAY=$DISPLAY \
+                  -e CONTAINER=docker \
                   --device /dev/dri \
                   -v /tmp:/tmp \
                   netbrain/zwift:build
