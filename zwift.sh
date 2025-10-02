@@ -120,8 +120,9 @@ if [ -n "${ZWIFT_USERNAME}" -a -z "${ZWIFT_PASSWORD}" -a -x "$(command -v secret
 
     # secret will not be created if the password does not exist
     if ${CONTAINER_TOOL} secret exists "${PASSWORD_SECRET_NAME}"; then
-        echo "Passing password to zwift container."
+        echo "Passing password and username to zwift container."
         ZWIFT_PASSWORD_SECRET="--secret ${PASSWORD_SECRET_NAME},type=env,target=ZWIFT_PASSWORD"
+        ZWIFT_USERNAME_FLAG="-e ZWIFT_USERNAME=${ZWIFT_USERNAME}"
     else
         echo "Password not found in the SecretService keyring, you can store it with" \
              "\`secret-tool store --label \"Zwift password for ${ZWIFT_USERNAME}\" application zwift username ${ZWIFT_USERNAME}\`"
@@ -333,6 +334,7 @@ read -r -a CONTAINER_EXTRA_FLAGS <<< "$CONTAINER_EXTRA_ARGS"
 
 # Normalize single-string flags into arrays for safe command construction
 read -r -a ZWIFT_CONFIG_FLAG_ARR <<< "$ZWIFT_CONFIG_FLAG"
+read -r -a ZWIFT_USERNAME_FLAG_ARR <<< "$ZWIFT_USERNAME_FLAG"
 read -r -a ZWIFT_PASSWORD_SECRET_ARR <<< "$ZWIFT_PASSWORD_SECRET"
 read -r -a ZWIFT_USER_CONFIG_FLAG_ARR <<< "$ZWIFT_USER_CONFIG_FLAG"
 read -r -a ZWIFT_WORKOUT_VOL_ARR <<< "$ZWIFT_WORKOUT_VOL"
@@ -349,6 +351,7 @@ CMD=(
     "${CONT_SEC_FLAG[@]}"
     "${ZWIFT_FG_FLAG[@]}"
     "${ZWIFT_CONFIG_FLAG_ARR[@]}"
+    "${ZWIFT_USERNAME_FLAG_ARR[@]}"
     "${ZWIFT_PASSWORD_SECRET_ARR[@]}"
     "${ZWIFT_USER_CONFIG_FLAG_ARR[@]}"
     "${ZWIFT_WORKOUT_VOL_ARR[@]}"
