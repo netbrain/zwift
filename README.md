@@ -44,34 +44,34 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 
 ## Configuration options
 
-| Key                       | Default                 | Description                                                                                                                           |
-|---------------------------|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
-| USER                      | $USER                   | Used in creating the zwift volume `zwift-$USER`                                                                                       |
-| IMAGE                     | docker.io/netbrain/zwift| The image to use                                                                                                                      |
-| VERSION                   | latest                  | The image version/tag to use                                                                                                          |
-| DONT_CHECK                |                         | If set, don't check for updated zwift.sh                                                                                              |
-| DONT_PULL                 |                         | If set, don't pull for new image version                                                                                              |
-| DRYRUN                    |                         | If set, print the full container run command and exit                                                                                 |
-| INTERACTIVE               |                         | If set, force -it and use --entrypoint bash for debugging                                                                             |
-| CONTAINER_TOOL            |                         | Defaults to podman if installed, else docker                                                                                          |
-| CONTAINER_EXTRA_ARGS      |                         | Extra args passed to docker/podman (--cpus=1.5)                                                                                       |
-| ZWIFT_USERNAME            |                         | If set, try to login to zwift automatically                                                                                           |
-| ZWIFT_PASSWORD            |                         | "                                                                                                                                     |
-| ZWIFT_WORKOUT_DIR         |                         | Set the workouts directory location                                                                                                   |
-| ZWIFT_ACTIVITY_DIR        |                         | Set the activities directory location                                                                                                 |
-| ZWIFT_LOG_DIR             |                         | Set the logs directory location                                                                                                       |
-| ZWIFT_SCREENSHOTS_DIR     |                         | Set the screenshots directory location, recommended to set `ZWIFT_SCREENSHOTS_DIR=$(xdg-user-dir PICTURES)/Zwift`                     |
-| ZWIFT_OVERRIDE_GRAPHICS   |                         | If set, override the default zwift graphics profiles                                                                                  |
-| ZWIFT_OVERRIDE_RESOLUTION |                         | If set, change game resolution (2560x1440, 3840x2160, ...)                                                                            |
-| ZWIFT_FG                  |                         | If set, run the process in fg instead of bg (-d)                                                                                      |
-| ZWIFT_NO_GAMEMODE         |                         | If set, don't run gamemode                                                                                                            |
-| WINE_EXPERIMENTAL_WAYLAND |                         | If set, try to use experimental wayland support in wine 9                                                                             |
-| NETWORKING                | bridge                  | Sets the type of container networking to use.                                                                                         |
-| ZWIFT_UID                 | current users id        | Sets the UID that Zwift will run as (docker only)                                                                                     |
-| ZWIFT_GID                 | current users group id  | Sets the GID that Zwift will run as (docker only)                                                                                     |
-| DEBUG                     |                         | If set enabled debug of zwift script "set -x"                                                                                         |
-| VGA_DEVICE_FLAG           |                         | Override GPU/device flags for container (--gpus=all)                                                                                  |
-| PRIVILEGED_CONTAINER      | 0                       | If set, container will run in priviledged mode, SELinux label separation will be disabled (--privileged --security-opt label=disable) |
+| Key                       | Default                 | Description                                                                                                                          |
+|---------------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| USER                      | $USER                   | Used in creating the zwift volume `zwift-$USER`                                                                                      |
+| IMAGE                     | docker.io/netbrain/zwift| The image to use                                                                                                                     |
+| VERSION                   | latest                  | The image version/tag to use                                                                                                         |
+| DONT_CHECK                |                         | If set, don't check for updated zwift.sh                                                                                             |
+| DONT_PULL                 |                         | If set, don't pull for new image version                                                                                             |
+| DRYRUN                    |                         | If set, print the full container run command and exit                                                                                |
+| INTERACTIVE               |                         | If set, force -it and use --entrypoint bash for debugging                                                                            |
+| CONTAINER_TOOL            |                         | Defaults to podman if installed, else docker                                                                                         |
+| CONTAINER_EXTRA_ARGS      |                         | Extra args passed to docker/podman (--cpus=1.5)                                                                                      |
+| ZWIFT_USERNAME            |                         | If set, try to login to zwift automatically                                                                                          |
+| ZWIFT_PASSWORD            |                         | "                                                                                                                                    |
+| ZWIFT_WORKOUT_DIR         |                         | Set the workouts directory location                                                                                                  |
+| ZWIFT_ACTIVITY_DIR        |                         | Set the activities directory location                                                                                                |
+| ZWIFT_LOG_DIR             |                         | Set the logs directory location                                                                                                      |
+| ZWIFT_SCREENSHOTS_DIR     |                         | Set the screenshots directory location, recommended to set `ZWIFT_SCREENSHOTS_DIR=$(xdg-user-dir PICTURES)/Zwift`                    |
+| ZWIFT_OVERRIDE_GRAPHICS   |                         | If set, override the default zwift graphics profiles                                                                                 |
+| ZWIFT_OVERRIDE_RESOLUTION |                         | If set, change game resolution (2560x1440, 3840x2160, ...)                                                                           |
+| ZWIFT_FG                  |                         | If set, run the process in fg instead of bg (-d)                                                                                     |
+| ZWIFT_NO_GAMEMODE         |                         | If set, don't run gamemode                                                                                                           |
+| WINE_EXPERIMENTAL_WAYLAND |                         | If set, try to use experimental wayland support in wine 9                                                                            |
+| NETWORKING                | bridge                  | Sets the type of container networking to use.                                                                                        |
+| ZWIFT_UID                 | current users id        | Sets the UID that Zwift will run as (docker only)                                                                                    |
+| ZWIFT_GID                 | current users group id  | Sets the GID that Zwift will run as (docker only)                                                                                    |
+| DEBUG                     |                         | If set enabled debug of zwift script "set -x"                                                                                        |
+| VGA_DEVICE_FLAG           |                         | Override GPU/device flags for container (--gpus=all)                                                                                 |
+| PRIVILEGED_CONTAINER      | 0                       | If set, container will run in privileged mode, SELinux label separation will be disabled (--privileged --security-opt label=disable) |
 
 These environment variables can be used to alter the execution of the zwift bash script.
 
