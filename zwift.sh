@@ -68,6 +68,11 @@ if [[ ! -z $ZWIFT_LOG_DIR ]]; then
     ZWIFT_LOG_VOL="-v $ZWIFT_LOG_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift/Logs"
 fi
 
+# If a screenshots directory is specified then map to that directory.
+if [[ ! -z $ZWIFT_SCREENSHOTS_DIR ]]; then
+    ZWIFT_SCREENSHOTS_VOL="-v $ZWIFT_SCREENSHOTS_DIR:/home/user/.wine/drive_c/users/user/Pictures/Zwift"
+fi
+
 # If overriding zwift graphics then map custom config to the graphics profiles.
 if [[ $ZWIFT_OVERRIDE_GRAPHICS -eq "1" ]]; then
     ZWIFT_GRAPHICS_CONFIG="$HOME/.config/zwift/graphics.txt"
@@ -340,6 +345,7 @@ read -r -a ZWIFT_USER_CONFIG_FLAG_ARR <<< "$ZWIFT_USER_CONFIG_FLAG"
 read -r -a ZWIFT_WORKOUT_VOL_ARR <<< "$ZWIFT_WORKOUT_VOL"
 read -r -a ZWIFT_ACTIVITY_VOL_ARR <<< "$ZWIFT_ACTIVITY_VOL"
 read -r -a ZWIFT_LOG_VOL_ARR <<< "$ZWIFT_LOG_VOL"
+read -r -a ZWIFT_SCREENSHOTS_VOL_ARR <<< "$ZWIFT_SCREENSHOTS_VOL"
 read -r -a VGA_DEVICE_FLAG_ARR <<< "$VGA_DEVICE_FLAG"
 POSITIONAL_ARGS=("$@")
 
@@ -357,6 +363,7 @@ CMD=(
     "${ZWIFT_WORKOUT_VOL_ARR[@]}"
     "${ZWIFT_ACTIVITY_VOL_ARR[@]}"
     "${ZWIFT_LOG_VOL_ARR[@]}"
+    "${ZWIFT_SCREENSHOTS_VOL_ARR[@]}"
     "${ZWIFT_PROFILE_VOL_ARR[@]}"
     "${VGA_DEVICE_FLAG_ARR[@]}"
     "${DBUS_CONFIG_FLAGS[@]}"
