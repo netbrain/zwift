@@ -207,9 +207,6 @@ fi
 #############################
 ##### PREPARE ALL FLAGS #####
 
-USER_PICTURES_DIR="$(xdg-user-dir PICTURES)/Zwift"
-mkdir -p "$USER_PICTURES_DIR"
-
 # Define Base Container Parameters
 GENERAL_FLAGS=(
     --rm
@@ -225,7 +222,6 @@ GENERAL_FLAGS=(
 
     -v zwift-$USER:/home/user/.wine/drive_c/users/user/Documents/Zwift
     -v /run/user/$LOCAL_UID/pulse:/run/user/$CONTAINER_UID/pulse
-    -v $USER_PICTURES_DIR:/home/user/.wine/drive_c/users/user/Pictures/Zwift
 )
 
 ###################################
