@@ -60,6 +60,7 @@ If dbus is available through a unix socket, the screensaver will be inhibited ev
 | ZWIFT_WORKOUT_DIR         |                         | Set the workouts directory location                                                                                                   |
 | ZWIFT_ACTIVITY_DIR        |                         | Set the activities directory location                                                                                                 |
 | ZWIFT_LOG_DIR             |                         | Set the logs directory location                                                                                                       |
+| ZWIFT_SCREENSHOTS_DIR     |                         | Set the screenshots directory location, recommended to set `ZWIFT_SCREENSHOTS_DIR=$(xdg-user-dir PICTURES)/Zwift`                     |
 | ZWIFT_OVERRIDE_GRAPHICS   |                         | If set, override the default zwift graphics profiles                                                                                  |
 | ZWIFT_OVERRIDE_RESOLUTION |                         | If set, change game resolution (2560x1440, 3840x2160, ...)                                                                            |
 | ZWIFT_FG                  |                         | If set, run the process in fg instead of bg (-d)                                                                                      |
