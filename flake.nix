@@ -82,33 +82,37 @@
       nixosModules = {
         zwift =
           { config, lib, ... }:
+          let
+            inherit (lib.types) str bool;
+            inherit (lib) mkEnableOption mkOption;
+          in
           {
             options.programs.zwift = {
-              enable = lib.mkEnableOption "zwift on linux";
+              enable = mkEnableOption "zwift on linux";
 
-              image = lib.mkOption { type = lib.types.string; default = ""; };
-              version = lib.mkOption { type = lib.types.string; default = ""; };
-              dontCheck = lib.mkOption { type = lib.types.bool; default = false; };
-              dontPull = lib.mkOption { type = lib.types.bool; default = false; };
-              dryRun = lib.mkOption { type = lib.types.bool; default = false; };
-              interactive = lib.mkOption { type = lib.types.bool; default = false; };
-              containerTool = lib.mkOption { type = lib.types.string; default = ""; };
-              containerExtraArgs = lib.mkOption { type = lib.types.string; default = ""; };
-              zwiftUsername = lib.mkOption { type = lib.types.string; default = ""; };
-              zwiftPassword = lib.mkOption { type = lib.types.string; default = ""; };
-              zwiftWorkoutDir = lib.mkOption { type = lib.types.string; default = ""; };
-              zwiftActivityDir = lib.mkOption { type = lib.types.string; default = ""; };
-              zwiftLogDir = lib.mkOption { type = lib.types.string; default = ""; };
-              zwiftOverrideGraphics = lib.mkOption { type = lib.types.bool; default = false; };
-              zwiftOverrideResolution = lib.mkOption { type = lib.types.string; default = ""; };
-              zwiftFg = lib.mkOption { type = lib.types.bool; default = false; };
-              zwiftNoGameMode = lib.mkOption { type = lib.types.bool; default = false; };
-              wineExperimentalWayland = lib.mkOption { type = lib.types.bool; default = false; };
-              networking = lib.mkOption { type = lib.types.string; default = ""; };
-              zwiftUid = lib.mkOption { type = lib.types.string; default = ""; };
-              zwiftGid = lib.mkOption { type = lib.types.string; default = ""; };
-              vgaDeviceFlag = lib.mkOption { type = lib.types.string; default = ""; };
-              debug = lib.mkOption { type = lib.types.bool; default = false; };
+              image = lib.mkOption { type = str; default = ""; };
+              version = mkOption { type = str; default = ""; };
+              dontCheck = mkOption { type = lib.types.bool; default = false; };
+              dontPull = mkOption { type = bool; default = false; };
+              dryRun = mkOption { type = bool; default = false; };
+              interactive = mkOption { type = bool; default = false; };
+              containerTool = mkOption { type = str; default = ""; };
+              containerExtraArgs = mkOption { type = str; default = ""; };
+              zwiftUsername = mkOption { type = str; default = ""; };
+              zwiftPassword = mkOption { type = str; default = ""; };
+              zwiftWorkoutDir = mkOption { type = str; default = ""; };
+              zwiftActivityDir = mkOption { type = str; default = ""; };
+              zwiftLogDir = mkOption { type = str; default = ""; };
+              zwiftOverrideGraphics = mkOption { type = bool; default = false; };
+              zwiftOverrideResolution = mkOption { type = str; default = ""; };
+              zwiftFg = mkOption { type = bool; default = false; };
+              zwiftNoGameMode = mkOption { type = bool; default = false; };
+              wineExperimentalWayland = mkOption { type = bool; default = false; };
+              networking = mkOption { type = str; default = ""; };
+              zwiftUid = mkOption { type = str; default = ""; };
+              zwiftGid = mkOption { type = str; default = ""; };
+              vgaDeviceFlag = mkOption { type = str; default = ""; };
+              debug = mkOption { type = bool; default = false; };
             };
 
             config = lib.mkIf config.programs.zwift.enable {
