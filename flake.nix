@@ -31,7 +31,8 @@
           zwiftUid,
           zwiftGid,
           vgaDeviceFlag,
-          debug
+          debug,
+          privilegedContainer
         }: pkgs.stdenv.mkDerivation rec {
         pname = "zwift";
         version = "0-unstable";
@@ -63,6 +64,7 @@
           ZWIFT_GID=${zwiftGid}
           DEBUG=${debug}
           VGA_DEVICE_FLAG=${vgaDeviceFlag}
+          PRIVILEGED_CONTAINER=${privilegedContainer}
 
           ${./zwift.sh}
         '';
@@ -116,6 +118,7 @@
               zwiftGid = mkOption { type = str; default = ""; };
               vgaDeviceFlag = mkOption { type = str; default = ""; };
               debug = mkOption { type = bool; default = false; };
+              privilegedContainer = mkOption { type = bool; default = false; };
             };
 
             config = lib.mkIf config.programs.zwift.enable {
@@ -133,6 +136,7 @@
                   zwiftNoGameMode = if zwiftNoGameMode then "1" else "";
                   wineExperimentalWayland = if wineExperimentalWayland then "1" else "";
                   debug = if debug then "1" else "";
+                  privilegedContainer = if privilegedContainer then "1" else "";
                 })];
               };
             };
