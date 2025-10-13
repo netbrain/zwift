@@ -21,6 +21,7 @@
           zwiftWorkoutDir,
           zwiftActivityDir,
           zwiftLogDir,
+          zwiftScreenshotsDir,
           zwiftOverrideGraphics,
           zwiftOverrideResolution,
           zwiftFg,
@@ -30,7 +31,8 @@
           zwiftUid,
           zwiftGid,
           vgaDeviceFlag,
-          debug
+          debug,
+          privilegedContainer
         }: pkgs.stdenv.mkDerivation rec {
         pname = "zwift";
         version = "0-unstable";
@@ -51,6 +53,7 @@
           ZWIFT_WORKOUT_DIR=${zwiftWorkoutDir}
           ZWIFT_ACTIVITY_DIR=${zwiftActivityDir}
           ZWIFT_LOG_DIR=${zwiftLogDir}
+          ZWIFT_SCREENSHOTS_DIR=${zwiftScreenshotsDir}
           ZWIFT_OVERRIDE_GRAPHICS=${zwiftOverrideGraphics}
           ZWIFT_OVERRIDE_RESOLUTION=${zwiftOverrideResolution}
           ZWIFT_FG=${zwiftFg}
@@ -61,6 +64,7 @@
           ZWIFT_GID=${zwiftGid}
           DEBUG=${debug}
           VGA_DEVICE_FLAG=${vgaDeviceFlag}
+          PRIVILEGED_CONTAINER=${privilegedContainer}
 
           ${./zwift.sh}
         '';
@@ -103,6 +107,7 @@
               zwiftWorkoutDir = mkOption { type = str; default = ""; };
               zwiftActivityDir = mkOption { type = str; default = ""; };
               zwiftLogDir = mkOption { type = str; default = ""; };
+              zwiftScreenshotsDir = mkOption { type = str; default = "" };
               zwiftOverrideGraphics = mkOption { type = bool; default = false; };
               zwiftOverrideResolution = mkOption { type = str; default = ""; };
               zwiftFg = mkOption { type = bool; default = false; };
@@ -113,13 +118,14 @@
               zwiftGid = mkOption { type = str; default = ""; };
               vgaDeviceFlag = mkOption { type = str; default = ""; };
               debug = mkOption { type = bool; default = false; };
+              privilegedContainer = mkOption { type = bool; default = false; };
             };
 
             config = lib.mkIf config.programs.zwift.enable {
               virtualisation.podman.enable = true;
               environment = {
                 systemPackages = with config.programs.zwift; [(wrapPackage {
-                  inherit image containerTool containerExtraArgs zwiftUsername zwiftPassword zwiftWorkoutDir zwiftActivityDir zwiftLogDir zwiftOverrideResolution networking zwiftUid zwiftGid vgaDeviceFlag;
+                  inherit image containerTool containerExtraArgs zwiftUsername zwiftPassword zwiftWorkoutDir zwiftActivityDir zwiftLogDir zwiftScreenshotsDir zwiftOverrideResolution networking zwiftUid zwiftGid vgaDeviceFlag;
                   tag = version;
                   dontCheck = if dontCheck then "1" else "" ;
                   dontPull = if dontPull then "1" else "";
@@ -130,6 +136,7 @@
                   zwiftNoGameMode = if zwiftNoGameMode then "1" else "";
                   wineExperimentalWayland = if wineExperimentalWayland then "1" else "";
                   debug = if debug then "1" else "";
+                  privilegedContainer = if privilegedContainer then "1" else "";
                 })];
               };
             };
