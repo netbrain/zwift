@@ -1,11 +1,7 @@
 name: Validate nix flake
 on:
   push:
-    paths:
-      - '**.nix'
   pull_request:
-    paths:
-      - '**.nix'
 jobs:
   lint-nix-flake:
     runs-on: ubuntu-latest
@@ -14,6 +10,10 @@ jobs:
     steps:
       - name: Install dependencies
         run: nix-env -iA nixpkgs.nodejs
+      - name: List installed Nix packages
+        run: nix-env -q
+      - name: Verify node.js installation
+        run: node --version
       - name: Checkout repository code
         uses: actions/checkout@v5
       - name: Run nix linter
