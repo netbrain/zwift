@@ -107,7 +107,7 @@
               zwiftWorkoutDir = mkOption { type = str; default = ""; };
               zwiftActivityDir = mkOption { type = str; default = ""; };
               zwiftLogDir = mkOption { type = str; default = ""; };
-              zwiftScreenshotsDir = mkOption { type = str; default = "" };
+              zwiftScreenshotsDir = mkOption { type = str; default = ""; };
               zwiftOverrideGraphics = mkOption { type = bool; default = false; };
               zwiftOverrideResolution = mkOption { type = str; default = ""; };
               zwiftFg = mkOption { type = bool; default = false; };
