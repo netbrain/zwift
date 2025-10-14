@@ -5,16 +5,12 @@ on:
 jobs:
   lint-nix-flake:
     runs-on: ubuntu-latest
-    container:
-      image: docker.io/nixos/nix:latest
     steps:
-      - name: Install dependencies
-        run: nix-env -iA nixpkgs.nodejs
-      - name: List installed Nix packages
-        run: nix-env -q
-      - name: Verify node.js installation
-        run: node --version
       - name: Checkout repository code
         uses: actions/checkout@v5
+      - name: Install node
+        uses: actions/setup-node@v6
+      - name: Install nix
+        uses: cachix/install-nix-action@v31
       - name: Run nix linter
         run: nix run github:nix-community/nixpkgs-lint
