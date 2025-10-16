@@ -20,7 +20,7 @@
           zwiftPassword,
           zwiftWorkoutDir,
           zwiftActivityDir,
-          zwiftLogDir,
+          zwiftLogDir
           zwiftScreenshotsDir,
           zwiftOverrideGraphics,
           zwiftOverrideResolution,
@@ -43,7 +43,7 @@
           IMAGE=${image}
           VERSION=${tag}
           DONT_CHECK=${dontCheck}
-          DONT_PULL=${dontPull}
+          DONT_PULL=${dontPull
           DRYRUN=${dryRun}
           INTERACTIVE=${interactive}
           CONTAINER_TOOL=${containerTool}
@@ -114,7 +114,7 @@
               zwiftNoGameMode = mkOption { type = bool; default = false; };
               wineExperimentalWayland = mkOption { type = bool; default = false; };
               networking = mkOption { type = str; default = ""; };
-              zwiftUid = mkOption { type = str; default = ""; };
+              zwiftUid = mkOption { type = str; default = "" };
               zwiftGid = mkOption { type = str; default = ""; };
               vgaDeviceFlag = mkOption { type = str; default = ""; };
               debug = mkOption { type = bool; default = false; };
