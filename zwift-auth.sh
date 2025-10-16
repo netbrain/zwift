@@ -1,4 +1,4 @@
-##!/usr/bin/env bash
+#!/bin/bash
 
 set -e
 
@@ -52,4 +52,4 @@ AUTH_TOKEN_JSON=$(curl -sS --cookie "$COOKIE" --cookie-jar "$COOKIE" \
 
 rm $COOKIE
 
-echo $AUTH_TOKEN_JSON
+echo "$AUTH_TOKEN_JSON"
