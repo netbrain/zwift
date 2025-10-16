@@ -12,3 +12,5 @@ jobs:
         uses: cachix/install-nix-action@v31
       - name: Check nix flake for errors
         run: nix run github:oxalica/nil -- diagnostics *.nix
+#     - name: Run nix linter
+#       run: nix run github:nix-community/nixpkgs-lint -- *.nix
