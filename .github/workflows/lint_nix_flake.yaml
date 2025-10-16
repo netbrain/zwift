@@ -1,0 +1,20 @@
+name: Validate nix flake
+on:
+  pull_request:
+    paths:
+      - '**.nix'
+  push:
+    paths:
+      - '**.nix'
+jobs:
+  validate-nix-flake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v5
+      - name: Install nix
+        uses: cachix/install-nix-action@v31
+      - name: Install nix language tools
+        run: nix profile add github:oxalica/nil
+      - name: Check nix flake for errors
+        run: nil diagnostics *.nix
