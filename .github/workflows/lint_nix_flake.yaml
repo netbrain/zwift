@@ -1,7 +1,11 @@
 name: Validate nix flake
 on:
-  push:
   pull_request:
+    paths:
+      - '**.nix'
+  push:
+    paths:
+      - '**.nix'
 jobs:
   validate-nix-flake:
     runs-on: ubuntu-latest
