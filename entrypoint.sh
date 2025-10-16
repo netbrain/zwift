@@ -2,13 +2,13 @@
 set -e
 set -x
 
-# Check whetehr we are running in Docker/ Podman
-# Docker has the file /.dockerenv 
+# Check whether we are running in Docker/ Podman
+# Docker has the file /.dockerenv
 # Podman exposes itself in /run/.containerenv
-if ! ( [[ "$CONTAINER" == "docker" ]] || [[ "$CONTAINER" == "podman" ]] ); then
+if [[ ! "$CONTAINER" == "docker" ]] && [[ ! "$CONTAINER" == "podman" ]]; then
     if [[ -f "/.dockerenv" ]]; then
         CONTAINER="docker"
-    elif [[ ! -z $(cat /run/.containerenv | grep "podman") ]]; then
+    elif grep -q "podman" /run/.containerenv; then
         CONTAINER="podman"
     else
         echo "Unknown Container."
@@ -18,8 +18,10 @@ fi
 
 # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
 # NOTE: DISPLAY must be unset here before run_swift to work
-#       Registry entrys are set in the container install or won't work.
-if [ ! -z $WINE_EXPERIMENTAL_WAYLAND ]; then unset DISPLAY; fi
+#       Registry entries are set in the container install or won't work.
+if [[ -n $WINE_EXPERIMENTAL_WAYLAND ]]; then
+    unset DISPLAY
+fi
 
 # Check what container we are in:
 if [[ "$CONTAINER" == "docker" ]]; then
@@ -30,8 +32,8 @@ if [[ "$CONTAINER" == "docker" ]]; then
     mkdir -p "$ZWIFT_HOME"
     cd "$ZWIFT_HOME"
 
-    USER_UID=`id -u user`
-    USER_GID=`id -g user`
+    USER_UID=$(id -u user)
+    USER_GID=$(id -g user)
 
     # Test that it exists and is a number, and only if different to existing.
     if [ "$ZWIFT_UID" -eq "$ZWIFT_UID" ] && [ "$USER_UID" -ne "$ZWIFT_UID" ]; then
@@ -43,23 +45,23 @@ if [[ "$CONTAINER" == "docker" ]]; then
     if [ "$ZWIFT_GID" -eq "$ZWIFT_GID" ] && [ "$USER_GID" -ne "$ZWIFT_GID" ]; then
         USER_GID=$ZWIFT_GID
         SWITCH_IDS=1
-    else 
+    else
         echo "ZWIFT_GID is not set or not a number: ''$ZWIFT_GID'"
     fi
 
     # This section is only run if we are switching either UID or GID.
-    if [ ! -z $SWITCH_IDS ]; then
-        usermod -o -u ${USER_UID} user
-        groupmod -o -g ${USER_GID} user
-        chown -R ${USER_UID}:${USER_GID} /home/user
+    if [[ -n $SWITCH_IDS ]]; then
+        usermod -o -u "$USER_UID" user
+        groupmod -o -g "$USER_GID" user
+        chown -R "$USER_UID":"$USER_GID" /home/user
 
         # Only make the directory if not there.
-        if [ ! -d "/run/user/${USER_ID}" ]; then
-            mkdir -p /run/user/${USER_UID}
-        fi 
+        if [ ! -d "/run/user/$USER_UID" ]; then
+            mkdir -p "/run/user/$USER_GID"
+        fi
 
-        chown -R user:user /run/user/${USER_UID}
-        sed -i "s/1000/${USER_UID}/g" /etc/pulse/client.conf
+        chown -R user:user "/run/user/$USER_UID"
+        sed -i "s/1000/$USER_UID/g" /etc/pulse/client.conf
     fi
 
     # Run update if that's the first argument or if zwift directory is empty
@@ -69,7 +71,7 @@ if [[ "$CONTAINER" == "docker" ]]; then
         gosu user:user /bin/update_zwift.sh "$@"
     else
         # Volume is mounted as root so always re-own.
-        chown -R ${USER_UID}:${USER_GID} /home/user/.wine/drive_c/users/user/Documents/Zwift
+        chown -R "$USER_UID":"$USER_GID" /home/user/.wine/drive_c/users/user/Documents/Zwift
         gosu user:user /bin/run_zwift.sh "$@"
     fi
 else
