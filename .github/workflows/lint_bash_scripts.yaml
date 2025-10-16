@@ -1,7 +1,11 @@
 name: Validate bash scripts
 on:
   pull_request:
+    paths:
+      - '**.sh'
   push:
+    paths:
+      - '**.sh'
 jobs:
   validate-shell-scripts:
     runs-on: ubuntu-latest
