@@ -39,21 +39,17 @@ GENERAL_FLAGS=(
     -v /run/user/$UID:"/run/user/$ZWIFT_UID"
 )
 
-
 # Check for proprietary nvidia driver and set correct device to use
-if [[ -f "/proc/driver/nvidia/version" ]]
-then
-    VGA_DEVICE_FLAG="--gpus all"
+if [[ -f "/proc/driver/nvidia/version" ]]; then
+    VGA_DEVICE_FLAG=(--gpus all)
 else
-    VGA_DEVICE_FLAG="--device /dev/dri:/dev/dri"
+    VGA_DEVICE_FLAG=(--device /dev/dri:/dev/dri)
 fi
 
 # Initiate podman Volume with correct permissions
 if [[ "$CONTAINER_TOOL" == "podman" ]]; then
     # Add ipc host to deal with an SHM issue on some machines.
-    PODMAN_FLAGS=(
-        --userns "keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID"
-    )
+    PODMAN_FLAGS=(--userns "keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID")
 fi
 
 # Cleanup on error
@@ -64,15 +60,8 @@ cleanup()
     exit
 }
 
-
 $CONTAINER_TOOL build --force-rm -t "$BUILD_NAME" "$SCRIPT_DIR/../."
-$CONTAINER_TOOL run "${GENERAL_FLAGS[@]}" \
-    "$VGA_DEVICE_FLAG" \
-    "${PODMAN_FLAGS[@]}" \
-    "$IMAGE:latest" \
-    "$@"
-
-
+$CONTAINER_TOOL run "${GENERAL_FLAGS[@]}" "${VGA_DEVICE_FLAG[@]}" "${PODMAN_FLAGS[@]}" "$IMAGE:latest" "$@"
 $CONTAINER_TOOL commit zwift "$BUILD_NAME:latest"
 $CONTAINER_TOOL container rm zwift
 
