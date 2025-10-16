@@ -11,14 +11,14 @@ function get_current_version() {
     if [ -f Zwift_ver_cur_filename.txt ]; then
         # If Zwift_ver_cur_filename.txt exists, use it
         # Remove Null to remove warning.
-        CUR_FILENAME=$(cat Zwift_ver_cur_filename.txt | tr '\0' '\n')
+        CUR_FILENAME=$(tr '\0' '\n' < Zwift_ver_cur_filename.txt)
     else
         # Default to Zwift_ver_cur.xml if Zwift_ver_cur_filename.txt doesn't exist
         CUR_FILENAME="Zwift_ver_cur.xml"
     fi
 
-    if grep -q sversion $CUR_FILENAME; then
-        ZWIFT_VERSION_CURRENT=$(cat $CUR_FILENAME | grep -oP 'sversion="\K.*?(?=\s)' | cut -f 1 -d ' ')
+    if grep -q sversion "$CUR_FILENAME"; then
+        ZWIFT_VERSION_CURRENT=$(grep -oP 'sversion="\K.*?(?=\s)' "$CUR_FILENAME" | cut -f 1 -d ' ')
     else
         # Basic install only, needs initial update
         ZWIFT_VERSION_CURRENT="0.0.0"
@@ -33,12 +33,14 @@ function get_latest_version() {
 function wait_for_zwift_game_update() {
     function vercomp () {
         # Return 0 if =, 1 if > and 2 if <
-        if [[ $1 == $2 ]]; then
+        if [[ $1 == "$2" ]]; then
             return 0
         fi
 
         local IFS=.
-        local i ver1=($1) ver2=($2)
+        local i ver1 ver2
+        read -ra ver1 <<< "$1"
+        read -ra ver2 <<< "$2"
         # fill empty fields in ver1 with zeros
         for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
             ver1[i]=0
@@ -65,7 +67,7 @@ function wait_for_zwift_game_update() {
 
     # Disable ERR Trap so return works.
     set +e
-    vercomp $ZWIFT_VERSION_CURRENT $ZWIFT_VERSION_LATEST
+    vercomp "$ZWIFT_VERSION_CURRENT" "$ZWIFT_VERSION_LATEST"
     RESULT=$?
     set -e
     if [ $RESULT -ne 2 ]
@@ -82,7 +84,7 @@ function wait_for_zwift_game_update() {
         get_current_version
 
         set +e
-        vercomp $ZWIFT_VERSION_CURRENT $ZWIFT_VERSION_LATEST
+        vercomp "$ZWIFT_VERSION_CURRENT" "$ZWIFT_VERSION_LATEST"
         RESULT=$?
         set -e
     done
@@ -107,7 +109,7 @@ then
 
     # Install D3D Compiler to allow Vulkan Shaders.
     winetricks d3dcompiler_47
-        
+
     # install webview 2
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
     wine webview2-setup.exe /silent /install
@@ -127,7 +129,7 @@ then
     # update game through zwift launcher
     wait_for_zwift_game_update
     wineserver -k
-    
+
     # cleanup
     rm "$ZWIFT_HOME/ZwiftSetup.exe"
     rm "$ZWIFT_HOME/webview2-setup.exe"
