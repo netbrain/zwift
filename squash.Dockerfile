@@ -1,4 +1,4 @@
-FROM netbrain/zwift:latest as latest
+FROM netbrain/zwift:latest AS latest
 FROM scratch
 
 LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
