@@ -5,7 +5,7 @@ set -x
 # Check whether we are running in Docker/ Podman
 # Docker has the file /.dockerenv
 # Podman exposes itself in /run/.containerenv
-if [[ ! "$CONTAINER" == "docker" ]] && [[ ! "$CONTAINER" == "podman" ]]; then
+if [[ "$CONTAINER" != "docker" ]] && [[ "$CONTAINER" != "podman" ]]; then
     if [[ -f "/.dockerenv" ]]; then
         CONTAINER="docker"
     elif grep -q "podman" /run/.containerenv; then
