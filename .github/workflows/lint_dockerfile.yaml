@@ -1,0 +1,23 @@
+name: Validate Dockerfile
+on:
+  pull_request:
+  push:
+jobs:
+  validate-dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v5
+      - name: Check Dockerfile for errors
+        uses: hadolint/hadolint-action@master
+        with:
+          dockerfile: "Dockerfile"
+  validate-squash-dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v5
+      - name: Check squash.Dockerfile for errors
+        uses: hadolint/hadolint-action@master
+        with:
+          dockerfile: "squash.Dockerfile"
