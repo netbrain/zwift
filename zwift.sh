@@ -403,5 +403,5 @@ fi
 
 # Allow container to connect to X, has to be set for different UID
 if [ -n "$CONTAINER" ] && [ -x "$(command -v xhost)" ] && [ -z "$WINE_EXPERIMENTAL_WAYLAND" ]; then
-    xhost +local:"$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname  }}' "$CONTAINER")"
+    xhost +local:"$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname }}' "$CONTAINER")"
 fi
