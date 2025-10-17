@@ -1,7 +1,13 @@
 name: Validate Dockerfile
 on:
   pull_request:
+    paths:
+      - 'Dockerfile'
+      - 'squash.Dockerfile'
   push:
+    paths:
+      - 'Dockerfile'
+      - 'squash.Dockerfile'
 jobs:
   validate-dockerfile:
     runs-on: ubuntu-latest
