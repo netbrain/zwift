@@ -20,6 +20,13 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           call: check
+  validate-squash-dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v5
+      - name: Install docker buildx
+        uses: docker/setup-buildx-action@v3
       - name: Check squash.Dockerfile for errors
         uses: docker/build-push-action@v6
         with:
