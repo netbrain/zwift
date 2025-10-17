@@ -61,7 +61,11 @@ cleanup()
 }
 
 $CONTAINER_TOOL build --force-rm -t "$BUILD_NAME" "$SCRIPT_DIR/../."
-$CONTAINER_TOOL run "${GENERAL_FLAGS[@]}" "${VGA_DEVICE_FLAG[@]}" "${PODMAN_FLAGS[@]}" "$IMAGE:latest" "$@"
+$CONTAINER_TOOL run "${GENERAL_FLAGS[@]}" \
+    "${VGA_DEVICE_FLAG[@]}" \
+    "${PODMAN_FLAGS[@]}" \
+    "$IMAGE:latest" \
+    "$@"
 $CONTAINER_TOOL commit zwift "$BUILD_NAME:latest"
 $CONTAINER_TOOL container rm zwift
 
