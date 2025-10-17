@@ -10,7 +10,12 @@ jobs:
         uses: actions/checkout@v5
       - name: Install docker buildx
         uses: docker/setup-buildx-action@v3
-      - name: Check dockerfiles for errors
-        run: |
-          docker buildx build --check --file Dockerfile .
-          docker buildx build --check --file squash.Dockerfile .
+      - name: Check Dockerfile for errors
+        uses: docker/build-push-action@v6
+        with:
+          call: check
+      - name: Check squash.Dockerfile for errors
+        uses: docker/build-push-action@v6
+        with:
+          call: check
+          file: squash.Dockerfile
