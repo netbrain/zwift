@@ -20,6 +20,16 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           call: check
+  lint-dockerfile:
+    runs-on: ubuntu-latest
+    needs: validate-dockerfile
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v5
+      - name: Check Dockerfile for errors
+        uses: hadolint/hadolint-action@master
+        with:
+          dockerfile: "Dockerfile"
   validate-squash-dockerfile:
     runs-on: ubuntu-latest
     steps:
@@ -32,3 +42,13 @@ jobs:
         with:
           call: check
           file: squash.Dockerfile
+  lint-squash-dockerfile:
+    runs-on: ubuntu-latest
+    needs: validate-squash-dockerfile
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v5
+      - name: Check Dockerfile for errors
+        uses: hadolint/hadolint-action@master
+        with:
+          dockerfile: "squash.Dockerfile"
