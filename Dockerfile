@@ -19,32 +19,45 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs . \
  && cargo build --target x86_64-pc-windows-gnu --release
 
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
-ARG DEBIAN_VERSION
 
 # As at May 2024 Wayland Native works wine 9.9 or later:
 #    WINE_BRANCH="devel"
 # For Specific version fix add WINE_VERSION,
 # make sure to add "=" to the start, comment out for latest
 #    WINE_VERSION="=9.9~bookworm-1"
+ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=20240105
 
-RUN dpkg --add-architecture i386
-
-# prerequisites
-# - wget for downloading winehq key
+# Install prerequisites
+# - ca-certificates for wget and curl
 # - curl used in zwift authentication script
-# - sudo for normal user installation
-# - winbind for ntml_auth required by zwift/wine
+# - gamemode for freedesktop screensaver inhibit
+# - gosu for invoking scripts in entrypoint
 # - libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
-# - gamemode for freedesktop screensaver inhibit
+# - sudo for normal user installation
+# - wget for downloading winehq key
+# - winbind for ntml_auth required by zwift/wine
 # - xdg-utils seems to be a dependency of wayland
+RUN dpkg --add-architecture i386 \
+ && apt-get update \
+ && apt-get install --no-install-recommends -y \
+        ca-certificates \
+        curl \
+        gamemode \
+        gosu \
+        libgl1 \
+        libvulkan1 \
+        procps \
+        sudo \
+        wget \
+        winbind \
+        xdg-utils \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update
-RUN apt-get install -y wget curl sudo winbind libgl1 libvulkan1 procps gosu gamemode xdg-utils
 RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key
 RUN DEBIAN_VERSION=${DEBIAN_VERSION} echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list
 RUN apt-get update
