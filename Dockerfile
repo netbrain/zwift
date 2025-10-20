@@ -83,10 +83,6 @@ LABEL org.opencontainers.image.title="netbrain/zwift"
 LABEL org.opencontainers.image.description="Easily zwift on linux"
 LABEL org.opencontainers.image.url="https://github.com/netbrain/zwift"
 
-RUN apt-get update && \
-    apt-get install -y curl && \
-    rm -rf /var/lib/apt/lists/*
-
 COPY entrypoint.sh /bin/entrypoint
 RUN chmod +rx /bin/entrypoint
 
