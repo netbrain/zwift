@@ -182,7 +182,7 @@ or
 docker volume rm zwift-xxxxx
 ```
 
-NOTE: if you see a weird volume e.g. zwift-naeva it is a hang up from the past, delete it.
+NOTE: if you see a weird volume e.g. `zwift-naeva` it is a hang up from the past, delete it.
 
 ## I sometimes get a popup Not responding why?
 
@@ -409,7 +409,7 @@ any open issues that you feel capable of doing. Let me know if I can help with a
 ### Show and tell 🙌
 
 Check out our [Show and tell](https://github.com/netbrain/zwift/discussions/categories/show-and-tell) category in discussions
-and see how other people are using this solution, feel free to contribute your own tips and tricks :)
+and see how other people are using this solution, feel free to contribute your own tips and tricks :smiley:
 
 ## Alternative's to this repository
 
