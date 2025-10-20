@@ -73,7 +73,6 @@ RUN adduser --disabled-password --gecos ''  user && \
 
 FROM wine-base
 
-# Moved Environments into wine-base build part.
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV WINEDEBUG=fixme-all
