@@ -10,5 +10,13 @@
     ],
     "files": [
         "README.md"
+    ],
+    "languageSettings": [
+        {
+            "languageId": "markdown",
+            "ignoreRegExpList": [
+                "/^\\s*```[\\s\\S]*?^\\s*```/gm"
+            ]
+        }
     ]
 }
