@@ -1,6 +1,6 @@
 ARG DEBIAN_VERSION=trixie
 
-FROM rust:1.72 AS build-runfromprocess
+FROM rust:1.90-slim AS build-runfromprocess
 
 RUN apt update && apt upgrade -y
 RUN apt install -y g++-mingw-w64-x86-64 git
