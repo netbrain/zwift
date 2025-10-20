@@ -2,16 +2,21 @@ ARG DEBIAN_VERSION=trixie
 
 FROM rust:1.90-slim AS build-runfromprocess
 
-RUN apt update && apt upgrade -y
-RUN apt install -y g++-mingw-w64-x86-64 git
+# Install prerequisites
+# - mingw to cross-compile for windows
+# - git to fetch runfromprocess source code
+# - rust cross-compiler for windows
+RUN apt-get update \
+ && apt-get install --no-install-recommends -y \
+        g++-mingw-w64-x86-64 \
+        git \
+ && rm -rf /var/lib/apt/lists/* \
+ && rustup target add x86_64-pc-windows-gnu
 
-RUN rustup target add x86_64-pc-windows-gnu
-RUN rustup toolchain install stable-x86_64-pc-windows-gnu
-
+# Build runfromprocess
 WORKDIR /usr/src
-RUN git clone https://github.com/quietvoid/runfromprocess-rs .
-
-RUN cargo build --target x86_64-pc-windows-gnu --release
+RUN git clone https://github.com/quietvoid/runfromprocess-rs . \
+ && cargo build --target x86_64-pc-windows-gnu --release
 
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 ARG DEBIAN_VERSION
