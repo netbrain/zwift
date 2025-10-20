@@ -5,11 +5,15 @@
 [![image-href][image-version-src]][image-href]
 [![image-href][image-size-src]][image-href]
 
-Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up smart trainers and other bluetooth devices (ant devices are not supported via the companion app). The reason why I made this solution was so i could run multiple zwift instances on one machine at the same time.
+Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up
+smart trainers and other bluetooth devices (ant devices are not supported via the companion app). The reason why I made this
+solution was so i could run multiple zwift instances on one machine at the same time.
 
-The container comes pre-installed with zwift, so no setup is required, simply pull and run. It should also now support all manner of graphics cards that has gl rendering.
+The container comes pre-installed with zwift, so no setup is required, simply pull and run. It should also now support all
+manner of graphics cards that has gl rendering.
 
-If you find this image useful, then feel free add [me on zwift](https://www.zwift.com/eu/athlete/4e3c5880-1edd-4c5d-a1b8-0974ce3874f0) and give me a ride on from time to time.
+If you find this image useful, then feel free add
+[me on zwift](https://www.zwift.com/eu/athlete/4e3c5880-1edd-4c5d-a1b8-0974ce3874f0) and give me a ride on from time to time.
 
 ![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/example.gif)
 
@@ -19,7 +23,8 @@ If you find this image useful, then feel free add [me on zwift](https://www.zwif
 - [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-container-toolkit) if you have nvidia proprietary driver
 - ATI, Intel and Nouveau drivers should work out of the box
 
-> :warning: **Podman Support 4.3 and Later.**: Podman before 4.3 does not support --userns=keep-id:uid=xxx,gid=xxx and will not start correctly, this impacts Ubuntu 22.04 and related builds such as PopOS 22.04. See Podman Section below.
+> :warning: **Podman Support 4.3 and Later.**: Podman before 4.3 does not support --userns=keep-id:uid=xxx,gid=xxx and will not
+  start correctly, this impacts Ubuntu 22.04 and related builds such as PopOS 22.04. See Podman Section below.
 
 ## Install
 
@@ -40,7 +45,8 @@ zwift
 
 Note you might want to disable video screenshots ([#75](https://github.com/netbrain/zwift/issues/75))
 
-If dbus is available through a unix socket, the screensaver will be inhibited every 30 seconds to prevent xscreensaver or other programs listening on the bus from inhibiting the screen.
+If dbus is available through a unix socket, the screensaver will be inhibited every 30 seconds to prevent xscreensaver or other
+programs listening on the bus from inhibiting the screen.
 
 ## Configuration options
 
@@ -78,9 +84,11 @@ These environment variables can be used to alter the execution of the zwift bash
 Short note on NVIDIA Container Toolkit device flags:
 
 - Podman: prefer setting `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"` (CDI device request).
-- Docker: prefer setting `VGA_DEVICE_FLAG="--gpus=all"`. If Docker ≥ 25 is configured with CDI (`nvidia-ctk runtime configure --enable-cdi`), `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"` also works.
+- Docker: prefer setting `VGA_DEVICE_FLAG="--gpus=all"`. If Docker ≥ 25 is configured with CDI
+  (`nvidia-ctk runtime configure --enable-cdi`), `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"` also works.
 
-If you're running Docker with CDI and Zwift fails to launch, try the long form `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"` (instead of `"--gpus=all"`).
+If you're running Docker with CDI and Zwift fails to launch, try the long form `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"`
+(instead of `"--gpus=all"`).
 
 See <https://github.com/netbrain/zwift/issues/208> for context.
 
@@ -94,13 +102,16 @@ Examples:
 
 `CONTAINER_TOOL=docker zwift` will launch zwift with docker even if podman is installed
 
-`CONTAINER_EXTRA_ARGS=--cpus=1.5` will pass --cpus=1.5 as extra argument to docker/podman (will use at most 1.5 CPU cores, this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
+`CONTAINER_EXTRA_ARGS=--cpus=1.5` will pass --cpus=1.5 as extra argument to docker/podman (will use at most 1.5 CPU cores, this
+is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
 
 `USER=Fred zwift` perfect if your neighbor fred want's to try zwift, and you don't want to mess up your zwift config.
 
 `NETWORKING=host zwift` will use host networking which may be needed to have Zwift talk to WiFi enabled trainers.
 
-`ZWIFT_UID=123 ZWIFT_GID=123 zwift` will run Zwift as the given uid and gid.  By default Zwift runs with the uid and gid of the user that started the container. You should not need to change this except in rare cases.  NOTE: This does not work in wayland only X11.
+`ZWIFT_UID=123 ZWIFT_GID=123 zwift` will run Zwift as the given uid and gid.  By default Zwift runs with the uid and gid of the
+user that started the container. You should not need to change this except in rare cases. NOTE: This does not work in wayland
+only X11.
 
 `WINE_EXPERIMENTAL_WAYLAND=1 zwift` This will start zwift using Wayland and not XWayland. It will start full screen windowed.
 
@@ -117,7 +128,8 @@ ZWIFT_PASSWORD=password
 
 where `username` is your Zwift account email, and `password` your Zwift account password, respectively.
 
-The credentials will be used to authenticate before launching the Zwift app, and the user should be logged in automatically in the game.
+The credentials will be used to authenticate before launching the Zwift app, and the user should be logged in automatically in
+the game.
 
 Note: This will be loaded by zwift.sh in cleartext as environment variables into the container.
 
@@ -127,9 +139,12 @@ Alternatively, instead of saving your password in the file, you can save your pa
 secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwift username ${ZWIFT_USERNAME}
 ```
 
-In this case the username should still be saved in the config file and the password will be read upon startup from the keyring and passed as a secret into the container (where it is an environment variable).
+In this case the username should still be saved in the config file and the password will be read upon startup from the keyring
+and passed as a secret into the container (where it is an environment variable).
 
-> :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put ZWIFT_PASSWORD="password" it tries to use "password" and not just password, same for ''.  In addition do not add a space to the end of the line it will be sent as part of the password or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD.
+> :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put
+`ZWIFT_PASSWORD="password"` it tries to use "password" and not just password, same for ''.  In addition do not add a space to
+the end of the line it will be sent as part of the password or username. This applies to ZWIFT_USERNAME and ZWIFT_PASSWORD.
 
 NOTE: You can also add other environment variable from the table to make starting easier:
 
@@ -143,13 +158,17 @@ WINE_EXPERIMENTAL_WAYLAND=1
 
 ## Podman Support
 
-When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need to map the container id's 1000 to the host id's using uidmap and gidmap.
+When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need
+to map the container id's 1000 to the host id's using uidmap and gidmap.
 
-For example if the host uid/gid is 1001/1001 then we need to map the host resources from /run/user/1001 to the container resource /run/user/1000 and map the user and group id's the same. This had to be done manually on the host posman start using --uidmap and --gidmap (not covered here)
+For example if the host uid/gid is 1001/1001 then we need to map the host resources from /run/user/1001 to the container
+resource `/run/user/1000` and map the user and group id's the same. This had to be done manually on the host posman start using
+`--uidmap` and `--gidmap` (not covered here).
 
 From Podman 4.3 this became automatic by providing the Container UID/ GID and podman automatically sets up this maping.
 
-NOTE: Using ZWIFT_UID/ GID will only work if the user starting podman has access to the /run/user/$ZWIFT_UID resources and does not work the same way as in Docker so is not supported.
+NOTE: Using ZWIFT_UID/ GID will only work if the user starting podman has access to the /run/user/$ZWIFT_UID resources and does
+not work the same way as in Docker so is not supported.
 
 ## Where are the saves and why do I get a popup can't write to Document Folder?
 
@@ -175,8 +194,10 @@ gsettings set org.gnome.mutter check-alive-timeout 60000
 
 ## The container is slow to start, why?
 
-If your `$(id -u)` or `$(id -g)` is not equal to 1000 then this would cause the zwift container to re-map all files (chown, chgrp) within the container so there is no uid/gid conflicts.
-So if speed is a concern of yours, consider changing your user to match the containers uid and gid using `usermod` or contribute a better solution for handling uid/gid remapping in containers :)
+If your `$(id -u)` or `$(id -g)` is not equal to 1000 then this would cause the zwift container to re-map all files (`chown`,
+`chgrp`) within the container so there is no uid/gid conflicts. So if speed is a concern of yours, consider changing your user
+to match the containers uid and gid using `usermod` or contribute a better solution for handling uid/gid remapping in containers
+:smiley:
 
 ## How do I connect my trainer, heart rate monitor, etc?
 
@@ -187,13 +208,16 @@ iPhone; then the Companion app connects over wifi to your PC running Zwift.
 
 ## How can I add custom .zwo files?
 
-You can map the Zwift Workout folder using the environment variable ZWIFT_WORKOUT_DIR, for example if your workout directory is in $HOME/zwift_workouts then you would provide the environment variable
+You can map the Zwift Workout folder using the environment variable ZWIFT_WORKOUT_DIR, for example if your workout directory is
+in `$HOME/zwift_workouts` then you would provide the environment variable
 
 ```ZWIFT_WORKOUT_DIR=$HOME/zwift_workouts```
 
-You can add this variable into $HOME/.config/zwift/config or $HOME/.config/zwift/$USER-config.
+You can add this variable into `$HOME/.config/zwift/config` or `$HOME/.config/zwift/$USER-config`.
 
-The workouts folder will contain subfolders e.g. $HOME/.config/zwift/workouts/393938.  The number is your internal zwift id and you store you zwo files in the relevant folder.  There will usually be only one ID, however if you have multiple zwift login's it may show one subfolder for each, to find the ID you can use the following link:
+The workouts folder will contain subfolders e.g. $HOME/.config/zwift/workouts/393938.  The number is your internal zwift id and
+you store you zwo files in the relevant folder. There will usually be only one ID, however if you have multiple zwift login's it
+may show one subfolder for each, to find the ID you can use the following link:
 
 Webpage for finding internal ID: <https://www.virtualonlinecycling.com/p/zwiftid.html>
 
@@ -201,11 +225,19 @@ NOTES:
 
 - Any workouts created already will be copied into this folder on first start
 - To add a new workout just copy the zwo file to this directory
-- Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the zwift menu
+- Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the
+  zwift menu
 
 ## How can I access/modify the graphics settings?
 
-By default, zwift assigns a graphics profile based on your graphics card. This profile can be either `basic`, `medium`, `high`, or `ultra`. This profile determines the level of detail and the quality of the textures you get in game. It is not possible to change which graphics profile the game uses. When the default options of the profile aren't optimal (for example when zwift doesn't recognize your graphics card and you only get the `medium` profile or when your cpu is the bottleneck and your fps is on the low side because zwift assigned the `ultra` profile), it is possible to manually tweak the graphics settings by setting `ZWIFT_OVERRIDE_GRAPHICS=1`, and editing the settings in the `~/.config/zwift/graphics.txt` or `~/.config/zwift/$USER-graphics.txt` file as you see fit. To find out which profile zwift assigned, you can upload your zwift log to <https://zwiftalizer.com>.
+By default, zwift assigns a graphics profile based on your graphics card. This profile can be either `basic`, `medium`, `high`,
+or `ultra`. This profile determines the level of detail and the quality of the textures you get in game. It is not possible to
+change which graphics profile the game uses. When the default options of the profile aren't optimal (for example when zwift
+doesn't recognize your graphics card and you only get the `medium` profile or when your cpu is the bottleneck and your fps is
+on the low side because zwift assigned the `ultra` profile), it is possible to manually tweak the graphics settings by setting
+`ZWIFT_OVERRIDE_GRAPHICS=1`, and editing the settings in the `~/.config/zwift/graphics.txt` or
+`~/.config/zwift/$USER-graphics.txt` file as you see fit. To find out which profile zwift assigned, you can upload your zwift
+log to <https://zwiftalizer.com>.
 
 The default settings for the different profiles are:
 
@@ -222,7 +254,8 @@ The default settings for the different profiles are:
 | gLODBias           | lower polygon count (higher value is lower, default 0) | 1            | 1            |              |               |
 | gShowFPS           | display fps in the top left corner (default 0)         |              |              |              |               |
 
-The number in parentheses after the texture resolution (for example `(0x)` after `1920x1080`) is the anti-aliasing setting. This number can be modified to for example `1920x1080(4x)` or `1920x1080(8x)` to increase anti-aliasing.
+The number in parentheses after the texture resolution (for example `(0x)` after `1920x1080`) is the anti-aliasing setting. This
+number can be modified to for example `1920x1080(4x)` or `1920x1080(8x)` to increase anti-aliasing.
 
 Example `~/.config/zwift/graphics.txt` (settings from the `ultra` profile, with in-game fps counter enabled):
 
@@ -236,11 +269,21 @@ set gShowFPS=1
 
 Start zwift with the `ZWIFT_OVERRIDE_GRAPHICS=1 zwift` command to use the settings from the `graphics.txt` file.
 
-You can find more information about these settings in this [Zwift Insider](https://zwiftinsider.com/config-file-tweaks/) article. Note that this is an older article and as such some of the information in it is outdated. The default values of the different profiles have changed to what is in the table listed above and for example the `aniso` setting does not exist anymore.
+You can find more information about these settings in this [Zwift Insider](https://zwiftinsider.com/config-file-tweaks/)
+article. Note that this is an older article and as such some of the information in it is outdated. The default values of the
+different profiles have changed to what is in the table listed above and for example the `aniso` setting does not exist anymore.
 
-> :warning: **Before using ZWIFT_OVERRIDE_GRAPHICS**: This option requires that the `~/.config/zwift/graphics.txt` file exists. If a `graphics.txt` does not exist and the `ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically the first time zwift is launched.
+> :warning: **Before using ZWIFT_OVERRIDE_GRAPHICS**: This option requires that the `~/.config/zwift/graphics.txt` file exists.
+If a `graphics.txt` does not exist and the `ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically the first
+time zwift is launched.
 
-Aside from the graphics profile which is assigned by zwift and cannot be changed, there is also the in-game setting to change the display resolution. Changing this resolution does not change the graphics profile and as such does not affect the quality of the textures, shadows, and other graphics options. It only affects the resolution of the game itself. Which resolutions are available in the zwift in-game setting is dependent on the graphics profile assigned based on your graphics card. If zwift does not recognize your graphics card or you have a WQHD or UHD display and zwift does not offer the higher resolutions, it is possible to manually override the game resolution by setting the `ZWIFT_OVERRIDE_RESOLUTION` option. For example to force zwift to use UHD you can launch it using `ZWIFT_OVERRIDE_RESOLUTION=3840x2160 zwift`.
+Aside from the graphics profile which is assigned by zwift and cannot be changed, there is also the in-game setting to change
+the display resolution. Changing this resolution does not change the graphics profile and as such does not affect the quality of
+the textures, shadows, and other graphics options. It only affects the resolution of the game itself. Which resolutions are
+available in the zwift in-game setting is dependent on the graphics profile assigned based on your graphics card. If zwift does
+not recognize your graphics card or you have a WQHD or UHD display and zwift does not offer the higher resolutions, it is
+possible to manually override the game resolution by setting the `ZWIFT_OVERRIDE_RESOLUTION` option. For example to force zwift
+to use UHD you can launch it using `ZWIFT_OVERRIDE_RESOLUTION=3840x2160 zwift`.
 
 The full list of available resolutions is:
 
@@ -252,7 +295,8 @@ The full list of available resolutions is:
 | Ultra  | 1440p      | 2560x1440 |
 | 4k UHD | 2160p      | 3840x2160 |
 
-> :warning: **Before using ZWIFT_OVERRIDE_RESOLUTION**: This option requires that the `prefs.xml` file exists. Make sure to launch zwift at least once so it creates the `prefs.xml` file before using the `ZWIFT_OVERRIDE_RESOLUTION` option.
+> :warning: **Before using ZWIFT_OVERRIDE_RESOLUTION**: This option requires that the `prefs.xml` file exists. Make sure to
+  launch zwift at least once so it creates the `prefs.xml` file before using the `ZWIFT_OVERRIDE_RESOLUTION` option.
 
 ## How can I build the image myself?
 
@@ -270,7 +314,8 @@ docker pull netbrain/zwift:$VERSION # or simply latest
 
 ## How can I update Zwift?
 
-The `zwift.sh` script will update zwift by checking for new image versions on every launch, however if you are not using this then you will have to pull netbrain/zwift:latest from time to time in order to be on the latest version.
+The `zwift.sh` script will update zwift by checking for new image versions on every launch, however if you are not using this
+then you will have to pull netbrain/zwift:latest from time to time in order to be on the latest version.
 
 There is a github action in place that will update zwift on a scheduled basis and publish new versions to docker hub.
 
@@ -294,7 +339,8 @@ To use the NixOS module, configure your flake.nix:
 }
 ```
 
-Then enable and configure the module in your NixOS configuration. The configuration options are written analog to the environment variables in camelCase:
+Then enable and configure the module in your NixOS configuration. The configuration options are written analog to the
+environment variables in camelCase:
 
 ```nix
 {
@@ -357,27 +403,33 @@ Thanks go to these wonderful people:
 
 ### Contribute 👋
 
-If you would like to contribute, then please by all means I'll accept PR's. A good starting point would be to see if there's any open issues that you feel capable of doing. Let me know if I can help with anything.
+If you would like to contribute, then please by all means I'll accept PR's. A good starting point would be to see if there's
+any open issues that you feel capable of doing. Let me know if I can help with anything.
 
 ### Show and tell 🙌
 
-Check out our [Show and tell](https://github.com/netbrain/zwift/discussions/categories/show-and-tell) category in discussions and see how other people are using this solution, feel free to contribute your own tips and tricks :)
+Check out our [Show and tell](https://github.com/netbrain/zwift/discussions/categories/show-and-tell) category in discussions
+and see how other people are using this solution, feel free to contribute your own tips and tricks :)
 
 ## Alternative's to this repository
 
-- Install zwift using wine directly or a framework like lutris. You will however have to manage installation and updates yourself
+- Install zwift using wine directly or a framework like lutris. You will however have to manage installation and updates
+  yourself
 - Use [scrcpy](https://github.com/Genymobile/scrcpy) to mirror android device to your linux screen
   - [Enable developer options on your android device](https://developer.android.com/studio/debug/dev-options#enable)
-  - Pair your computer to the device using `adb pair` [documentation](https://developer.android.com/studio/command-line/adb#wireless-android11-command-line)
+  - Pair your computer to the device using `adb pair`
+    [documentation](https://developer.android.com/studio/command-line/adb#wireless-android11-command-line)
     - `./srccpy.sh adb pair ip:port`  [see my container solution](https://github.com/netbrain/dockerfiles/tree/master/scrcpy)
   - Mirror the android device screen onto your linux screen using scrcpy.
     - `./srccpy.sh scrcpy --tcpip=ip:port`
-  - If you require sound aswell, there's also a [sndcpy](https://github.com/rom1v/sndcpy) project (doesn't support wireless though, but the abovementioned can be modified to use usb)
+  - If you require sound aswell, there's also a [sndcpy](https://github.com/rom1v/sndcpy) project (doesn't support wireless
+    though, but the abovementioned can be modified to use usb)
 - Using [redroid](https://hub.docker.com/r/redroid/redroid) to install zwift apk onto a android emulator (not tested)
 - Using a virual machine with pci passthrough
   - <https://looking-glass.io/>
   - <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF>
-  - <https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher> (if you have a nvidia card you can eat your cake, and have it too by creating vgpus for vm's that leverage the host gpu, no dedicated gpu required)
+  - <https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher> (if you have a nvidia card you can eat your cake, and have
+    it too by creating vgpus for vm's that leverage the host gpu, no dedicated gpu required)
 
 ## ⭐ Star History (for fun and giggles)
 
