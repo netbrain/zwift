@@ -1,0 +1,20 @@
+name: Validate markdown
+on:
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'LICENSE'
+  push:
+    paths:
+      - 'README.md'
+      - 'LICENSE'
+jobs:
+  validate-readme-markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v5
+      - name: Install docker buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Check README.md file for errors
+        run: docker run -v $PWD:/workdir davidanson/markdownlint-cli2:v0.18.1 "README.md"
