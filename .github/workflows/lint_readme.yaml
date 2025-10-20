@@ -17,4 +17,14 @@ jobs:
       - name: Install docker buildx
         uses: docker/setup-buildx-action@v3
       - name: Check README.md file for errors
-        run: docker run -v $PWD:/workdir davidanson/markdownlint-cli2:v0.18.1 "README.md"
+        run: docker run -v $PWD:/workdir davidanson/markdownlint-cli2:v0.18.1
+  spellcheck-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v5
+      - name: Spellcheck README.md
+        uses: streetsidesoftware/cspell-action@v7
+        with:
+          config: '.cspell.json'
+          suggestions: true
