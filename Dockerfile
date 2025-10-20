@@ -58,13 +58,19 @@ RUN dpkg --add-architecture i386 \
         xdg-utils \
  && rm -rf /var/lib/apt/lists/*
 
-RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key
-RUN DEBIAN_VERSION=${DEBIAN_VERSION} echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list
-RUN apt-get update
-
-RUN apt-get -y --no-install-recommends install \
-  winehq-${WINE_BRANCH}${WINE_VERSION} wine-${WINE_BRANCH}${WINE_VERSION} \
-  wine-${WINE_BRANCH}-amd64${WINE_VERSION} wine-${WINE_BRANCH}-i386${WINE_VERSION}
+# Install wine and winetricks (including recommends, which appear to be required)
+# hadolint ignore=DL3015
+RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key \
+ && echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list \
+ && apt-get update \
+ && apt-get install -y \
+        wine-${WINE_BRANCH}${WINE_VERSION} \
+        wine-${WINE_BRANCH}-amd64${WINE_VERSION} \
+        wine-${WINE_BRANCH}-i386${WINE_VERSION} \
+        winehq-${WINE_BRANCH}${WINE_VERSION} \
+ && rm -rf /var/lib/apt/lists/* \
+ && wget -qO /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
+ && chmod +x /usr/local/bin/winetricks
 
 RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
   echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
@@ -73,12 +79,6 @@ RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
 
 COPY pulse-client.conf /etc/pulse/client.conf
-
-RUN \
-  wget \
-  https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
-  -O /usr/local/bin/winetricks && \
-  chmod +x /usr/local/bin/winetricks
 
 RUN adduser --disabled-password --gecos ''  user && \
   adduser user sudo && \
