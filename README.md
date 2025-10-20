@@ -60,7 +60,7 @@ programs listening on the bus from inhibiting the screen.
 | DRYRUN                    |                         | If set, print the full container run command and exit                                                                                |
 | INTERACTIVE               |                         | If set, force -it and use --entrypoint bash for debugging                                                                            |
 | CONTAINER_TOOL            |                         | Defaults to podman if installed, else docker                                                                                         |
-| CONTAINER_EXTRA_ARGS      |                         | Extra args passed to docker/podman (--cpus=1.5)                                                                                      |
+| CONTAINER_EXTRA_ARGS      |                         | Extra args passed to docker/podman (`--cpus=1.5`)                                                                                    |
 | ZWIFT_USERNAME            |                         | If set, try to login to zwift automatically                                                                                          |
 | ZWIFT_PASSWORD            |                         | "                                                                                                                                    |
 | ZWIFT_WORKOUT_DIR         |                         | Set the workouts directory location                                                                                                  |
@@ -70,7 +70,7 @@ programs listening on the bus from inhibiting the screen.
 | ZWIFT_OVERRIDE_GRAPHICS   |                         | If set, override the default zwift graphics profiles                                                                                 |
 | ZWIFT_OVERRIDE_RESOLUTION |                         | If set, change game resolution (2560x1440, 3840x2160, ...)                                                                           |
 | ZWIFT_FG                  |                         | If set, run the process in fg instead of bg (-d)                                                                                     |
-| ZWIFT_NO_GAMEMODE         |                         | If set, don't run gamemode                                                                                                           |
+| ZWIFT_NO_GAMEMODE         |                         | If set, don't run game mode                                                                                                          |
 | WINE_EXPERIMENTAL_WAYLAND |                         | If set, try to use experimental wayland support in wine 9                                                                            |
 | NETWORKING                | bridge                  | Sets the type of container networking to use.                                                                                        |
 | ZWIFT_UID                 | current users id        | Sets the UID that Zwift will run as (docker only)                                                                                    |
@@ -102,8 +102,8 @@ Examples:
 
 `CONTAINER_TOOL=docker zwift` will launch zwift with docker even if podman is installed
 
-`CONTAINER_EXTRA_ARGS=--cpus=1.5` will pass --cpus=1.5 as extra argument to docker/podman (will use at most 1.5 CPU cores, this
-is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
+`CONTAINER_EXTRA_ARGS=--cpus=1.5` will pass `--cups=1.5` as extra argument to docker/podman (will use at most 1.5 CPU cores,
+this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
 
 `USER=Fred zwift` perfect if your neighbor fred want's to try zwift, and you don't want to mess up your zwift config.
 
@@ -162,10 +162,10 @@ When running Zwift with podman, the user and group in the container is 1000 (use
 to map the container id's 1000 to the host id's using uidmap and gidmap.
 
 For example if the host uid/gid is 1001/1001 then we need to map the host resources from /run/user/1001 to the container
-resource `/run/user/1000` and map the user and group id's the same. This had to be done manually on the host posman start using
+resource `/run/user/1000` and map the user and group id's the same. This had to be done manually on the host podman start using
 `--uidmap` and `--gidmap` (not covered here).
 
-From Podman 4.3 this became automatic by providing the Container UID/ GID and podman automatically sets up this maping.
+From Podman 4.3 this became automatic by providing the Container UID/ GID and podman automatically sets up this mapping.
 
 NOTE: Using ZWIFT_UID/ GID will only work if the user starting podman has access to the /run/user/$ZWIFT_UID resources and does
 not work the same way as in Docker so is not supported.
@@ -420,16 +420,16 @@ and see how other people are using this solution, feel free to contribute your o
   - Pair your computer to the device using `adb pair`
     [documentation](https://developer.android.com/studio/command-line/adb#wireless-android11-command-line)
     - `./srccpy.sh adb pair ip:port`  [see my container solution](https://github.com/netbrain/dockerfiles/tree/master/scrcpy)
-  - Mirror the android device screen onto your linux screen using scrcpy.
+  - Mirror the android device screen onto your linux screen using `scrcpy`.
     - `./srccpy.sh scrcpy --tcpip=ip:port`
-  - If you require sound aswell, there's also a [sndcpy](https://github.com/rom1v/sndcpy) project (doesn't support wireless
-    though, but the abovementioned can be modified to use usb)
+  - If you require sound as well, there's also a [sndcpy](https://github.com/rom1v/sndcpy) project (doesn't support wireless
+    though, but the aforementioned can be modified to use usb)
 - Using [redroid](https://hub.docker.com/r/redroid/redroid) to install zwift apk onto a android emulator (not tested)
-- Using a virual machine with pci passthrough
+- Using a virtual machine with pci passthrough
   - <https://looking-glass.io/>
   - <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF>
   - <https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher> (if you have a nvidia card you can eat your cake, and have
-    it too by creating vgpus for vm's that leverage the host gpu, no dedicated gpu required)
+    it too by creating `vgpus` for vm's that leverage the host gpu, no dedicated gpu required)
 
 ## ⭐ Star History (for fun and giggles)
 
