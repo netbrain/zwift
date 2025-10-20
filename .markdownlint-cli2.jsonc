@@ -1,0 +1,6 @@
+{
+    "gitignore": true,
+    "globs": [
+        "README.md"
+    ]
+}
