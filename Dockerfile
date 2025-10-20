@@ -72,17 +72,18 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
  && wget -qO /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
  && chmod +x /usr/local/bin/winetricks
 
-RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
-  echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+# Create passwordless user and make nvidia libraries discoverable
+RUN adduser --disabled-password --gecos '' user \
+ && adduser user sudo \
+ && echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
+ && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
+ && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
-# Required for non-glvnd setups.
+# Required for non-glvnd setups
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
 
+# Configure audio driver
 COPY pulse-client.conf /etc/pulse/client.conf
-
-RUN adduser --disabled-password --gecos ''  user && \
-  adduser user sudo && \
-  echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 FROM wine-base
 
