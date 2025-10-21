@@ -347,12 +347,18 @@ environment variables in camelCase:
     image = "docker.io/netbrain/zwift";
     # The zwift game version to run
     version = "1.67.0";
+    # Container tool to run zwift (e.g., "podman" or "docker")
+    containerTool = "podman";
     # If true, do not pull the image (use locally cached image)
     dontPull = false;
     # If true, skip new version check
     dontCheck = false;
-    # Container tool to run zwift (e.g., "podman" or "docker")
-    containerTool = "podman";
+    # If true, print the container run command and exit
+    dryRun = false;
+    # If set, launch container with "-it --entrypoint bash" for debugging
+    interactive = false;
+    # Extra args passed to docker/podman (e.g. "--cpus=1.5")
+    containerExtraArgs = "";
     # Zwift account username (email address)
     zwiftUsername = "user@example.com";
     # Zwift account password
@@ -361,6 +367,10 @@ environment variables in camelCase:
     zwiftWorkoutDir = "/var/lib/zwift/workouts";
     # Directory to store zwift activity files
     zwiftActivityDir = "/var/lib/zwift/activities";
+    # Directory to store zwift log files
+    zwiftLogDir = "/var/lib/zwift/logs";
+    # Directory to store zwift screenshots
+    zwiftScreenshotsDir = "/var/lib/zwift/screenshots";
     # Run zwift in the foreground (set true for foreground mode)
     zwiftFg = false;
     # Disable Linux GameMode if true
@@ -372,11 +382,13 @@ environment variables in camelCase:
     # User ID for running the container (usually your own UID)
     zwiftUid = "1000";
     # Group ID for running the container (usually your own GID)
-    zwiftGid = "100";
+    zwiftGid = "1000";
     # GPU/device flags override (Docker: "--gpus=all", Podman/CDI: "--device=nvidia.com/gpu=all")
     vgaDeviceFlag = "--device=nvidia.com/gpu=all";
     # Enable debug output and verbose logging if true
     debug = false;
+    # If set, run container in privileged mode ("--privileged --security-opt label=disable")
+    privilegedContainer = false;
   };
 }
 ```
