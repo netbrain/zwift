@@ -397,7 +397,7 @@ Thanks go to these wonderful people:
 
 ### Contribute 👋
 
-If you would like to contribute, then please by all means I'll accept PR's. A good starting point would be to see if there's
+If you would like to contribute, then please by all means I'll accept PRs. A good starting point would be to see if there's
 any open issues that you feel capable of doing. Let me know if I can help with anything.
 
 ### Show and tell 🙌

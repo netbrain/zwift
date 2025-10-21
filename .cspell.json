@@ -15,7 +15,7 @@
         {
             "languageId": "markdown",
             "ignoreRegExpList": [
-                "/```\\s*[\\s\\S]*?```/gm"
+                "/(?:```[\\s\\S]*?```|`[^`]+`)/g"
             ]
         }
     ]
