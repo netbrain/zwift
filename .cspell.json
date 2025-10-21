@@ -2,9 +2,9 @@
     "version": "0.2",
     "language": "en",
     "words": [
-        "lutris",
+        "Kickr",
         "netbrain",
-        "redroid",
+        "WQHD",
         "zwift",
         "zwifters"
     ],
@@ -15,7 +15,7 @@
         {
             "languageId": "markdown",
             "ignoreRegExpList": [
-                "/^\\s*```[\\s\\S]*?^\\s*```/gm"
+                "/```\\s*[\\s\\S]*?```/gm"
             ]
         }
     ]
