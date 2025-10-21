@@ -4,8 +4,7 @@
         "line_length": 128,
         "stern": true,
         "code_blocks": false,
-        "tables": false,
-        "headings": false
+        "tables": false
     },
     "no-duplicate-heading": {
         "siblings_only": true
