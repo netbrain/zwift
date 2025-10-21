@@ -16,6 +16,8 @@ jobs:
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
           config: '.markdownlint-cli2.jsonc'
+          globs: |
+            README.md
   spellcheck-readme:
     runs-on: ubuntu-latest
     steps:
