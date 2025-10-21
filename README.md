@@ -109,12 +109,12 @@ Examples:
   wayland only X11.
 - `WINE_EXPERIMENTAL_WAYLAND=1 zwift` This will start zwift using Wayland and not XWayland. It will start full screen windowed.
 
-You can also set these in `~/.config/zwift/config` or `~/.config/zwift/$USER-config` to be sourced by the `zwift.sh` script on
-execution.
+You can also set these in `$HOME/.config/zwift/config` or `$HOME/.config/zwift/$USER-config` to be sourced by the `zwift.sh`
+script on execution.
 
 ## How can I persist my login information so i don't need to login on every startup?
 
-To authenticate through Zwift automatically simply add the following file `~/.config/zwift/config`:
+To authenticate through Zwift automatically simply add the following file `$HOME/.config/zwift/config`:
 
 ```text
 ZWIFT_USERNAME=username
@@ -231,9 +231,9 @@ ultra. This profile determines the level of detail and the quality of the textur
 which graphics profile the game uses. When the default options of the profile aren't optimal (for example when zwift doesn't
 recognize your graphics card and you only get the `medium` profile or when your cpu is the bottleneck and your fps is on the low
 side because zwift assigned the ultra profile), it is possible to manually tweak the graphics settings by setting
-`ZWIFT_OVERRIDE_GRAPHICS=1`, and editing the settings in the `~/.config/zwift/graphics.txt` or
-`~/.config/zwift/$USER-graphics.txt` file as you see fit. To find out which profile zwift assigned, you can upload your zwift
-log to <https://zwiftalizer.com>.
+`ZWIFT_OVERRIDE_GRAPHICS=1`, and editing the settings in the `$HOME/.config/zwift/graphics.txt` or
+`$HOME/.config/zwift/$USER-graphics.txt` file as you see fit. To find out which profile zwift assigned, you can upload your
+zwift log to <https://zwiftalizer.com>.
 
 The default settings for the different profiles are:
 
@@ -253,7 +253,7 @@ The default settings for the different profiles are:
 The number in parentheses after the texture resolution (for example `(0x)` after `1920x1080`) is the anti-aliasing setting. This
 number can be modified to for example `1920x1080(4x)` or `1920x1080(8x)` to increase anti-aliasing.
 
-Example `~/.config/zwift/graphics.txt` (settings from the ultra profile, with in-game fps counter enabled):
+Example `$HOME/.config/zwift/graphics.txt` (settings from the ultra profile, with in-game fps counter enabled):
 
 ```text
 res 1920x1080(0x)
@@ -269,9 +269,9 @@ You can find more information about these settings in this [Zwift Insider](https
 article. Note that this is an older article and as such some of the information in it is outdated. The default values of the
 different profiles have changed to what is in the table listed above and for example the `aniso` setting does not exist anymore.
 
-> :warning: **Before using ZWIFT_OVERRIDE_GRAPHICS**: This option requires that the `~/.config/zwift/graphics.txt` file exists.
-If a `graphics.txt` does not exist and the `ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically the first
-time zwift is launched.
+> :warning: **Before using ZWIFT_OVERRIDE_GRAPHICS**: This option requires that the `$HOME/.config/zwift/graphics.txt` file
+exists. If a `graphics.txt` does not exist and the `ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically
+the first time zwift is launched.
 
 Aside from the graphics profile which is assigned by zwift and cannot be changed, there is also the in-game setting to change
 the display resolution. Changing this resolution does not change the graphics profile and as such does not affect the quality of
