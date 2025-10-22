@@ -1,0 +1,22 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "words": [
+        "Kickr",
+        "netbrain",
+        "WQHD",
+        "zwift",
+        "zwifters"
+    ],
+    "files": [
+        "README.md"
+    ],
+    "languageSettings": [
+        {
+            "languageId": "markdown",
+            "ignoreRegExpList": [
+                "/(?:```[\\s\\S]*?```|`[^`]+`)/g"
+            ]
+        }
+    ]
+}
