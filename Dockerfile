@@ -1,6 +1,6 @@
 ARG DEBIAN_VERSION=trixie
 
-FROM rust:1.72 as build-runfromprocess
+FROM rust:1.72 AS build-runfromprocess
 
 RUN apt update && apt upgrade -y
 RUN apt install -y g++-mingw-w64-x86-64 git
@@ -13,7 +13,7 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs .
 
 RUN cargo build --target x86_64-pc-windows-gnu --release
 
-FROM debian:${DEBIAN_VERSION}-slim as wine-base
+FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 ARG DEBIAN_VERSION
 
 # As at May 2024 Wayland Native works wine 9.9 or later:
@@ -52,7 +52,7 @@ RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
   echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
 # Required for non-glvnd setups.
-ENV LD_LIBRARY_PATH /usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
 
 COPY pulse-client.conf /etc/pulse/client.conf
 
@@ -98,4 +98,3 @@ COPY --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/r
 RUN chmod +rx /bin/runfromprocess-rs.exe
 
 ENTRYPOINT ["entrypoint"]
-CMD [$@]
