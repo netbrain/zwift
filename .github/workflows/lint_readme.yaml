@@ -15,7 +15,7 @@ jobs:
       - name: Check README.md file for errors
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
-          config: '.markdownlint-cli2.jsonc'
+          config: '.config/.markdownlint-cli2.jsonc'
           globs: ""
   spellcheck-readme:
     runs-on: ubuntu-latest
@@ -25,5 +25,5 @@ jobs:
       - name: Spellcheck README.md
         uses: streetsidesoftware/cspell-action@v7
         with:
-          config: '.cspell.json'
+          config: '.config/.cspell.json'
           suggestions: true
