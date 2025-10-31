@@ -73,6 +73,7 @@
 
         installPhase = ''
           runHook preInstall
+          patchShebangs .
           install -Dm755 ${nixosRun} -T $out/bin/${pname}
           install -Dm644 $src/share/icons/hicolor/scalable/apps/zwift.svg \
               -T $out/share/icons/hicolor/scalable/apps/zwift.svg
