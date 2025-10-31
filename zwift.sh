@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 if [ -n "${DEBUG}" ]; then set -x; fi
 
 # Message Box to simplify errors/ and questions.
