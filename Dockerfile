@@ -38,11 +38,11 @@ ARG WINETRICKS_VERSION=20250102
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
 # - gpg for adding the winehq repository key
-# - libgl1 for GL library
+# - libegl1 and libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
 # - sudo for normal user installation
-# - wget for downloading winehq key
+# - wget for downloading winehq key and winetricks
 # - winbind for ntml_auth required by zwift/wine
 # - xdg-utils seems to be a dependency of wayland
 RUN apt-get update \
@@ -54,6 +54,7 @@ RUN apt-get update \
         gamemode \
         gosu \
         gpg \
+        libegl1 \
         libgl1 \
         libvulkan1 \
         procps \
