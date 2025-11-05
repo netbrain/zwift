@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ $EUID -eq 0 ]]; then
   ROOT_BIN=/usr/local/bin
