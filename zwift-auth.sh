@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -e
 
 LAUNCHER_CLIENT_ID="Game_Launcher"
