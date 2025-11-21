@@ -173,8 +173,6 @@ if [ "$WINDOW_MANAGER" = "Wayland" ]; then
     # System is using wayland or xwayland.
     if [ -z "$WINE_EXPERIMENTAL_WAYLAND" ]; then
         WINDOW_MANAGER="XWayland"
-    else
-        WINDOW_MANAGER="Wayland"
     fi
 
     # ZWIFT_UID does not work on XWayland, show warning
