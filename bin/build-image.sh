@@ -32,18 +32,24 @@ GENERAL_FLAGS=(
     --hostname "$HOSTNAME"
 
     -e DISPLAY="$DISPLAY"
-    -e XAUTHORITY="$XAUTHORITY"
     -e CONTAINER="$CONTAINER_TOOL"
+    -e WINE_EXPERIMENTAL_WAYLAND=1
+    -e XDG_RUNTIME_DIR="/run/user/$ZWIFT_UID"
+    -e WAYLAND_DISPLAY="$WAYLAND_DISPLAY"
 
-    -v /tmp/.X11-unix:/tmp/.X11-unix
     -v /run/user/$UID:"/run/user/$ZWIFT_UID"
+    -v "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY":"$XDG_RUNTIME_DIR/$ZWIFT_UID/$WAYLAND_DISPLAY"
 )
 
 # Check for proprietary nvidia driver and set correct device to use
 if [[ -f "/proc/driver/nvidia/version" ]]; then
-    VGA_DEVICE_FLAG=(--gpus all)
+    if [[ $CONTAINER_TOOL == "podman" ]]; then
+        VGA_DEVICE_FLAG=("--device=nvidia.com/gpu=all")
+    else
+        VGA_DEVICE_FLAG=("--gpus=all")
+    fi
 else
-    VGA_DEVICE_FLAG=(--device /dev/dri:/dev/dri)
+    VGA_DEVICE_FLAG=("--device=/dev/dri:/dev/dri")
 fi
 
 # Initiate podman Volume with correct permissions
@@ -71,4 +77,5 @@ $CONTAINER_TOOL container rm zwift
 
 export IMAGE="$IMAGE"
 export DONT_PULL=1
+export WINE_EXPERIMENTAL_WAYLAND=1
 "$SCRIPT_DIR/../zwift.sh"

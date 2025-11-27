@@ -38,7 +38,7 @@ ARG WINETRICKS_VERSION=20250102
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
 # - gpg for adding the winehq repository key
-# - libegl1 and libgl1 for GL library
+# - libegl1, libgl1 and libnvidia-egl-wayland1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
 # - sudo for normal user installation
@@ -56,6 +56,7 @@ RUN apt-get update \
         gpg \
         libegl1 \
         libgl1 \
+        libnvidia-egl-wayland1 \
         libvulkan1 \
         procps \
         sudo \
