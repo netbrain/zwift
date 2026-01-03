@@ -30,6 +30,9 @@ ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=11.0~rc4~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=20250102
 
+# https://docs.docker.com/build/building/best-practices/#using-pipes
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Install prerequisites
 # - bluez for bluetooth
 # - ca-certificates for wget and curl
@@ -64,10 +67,10 @@ RUN apt-get update \
         xdg-utils \
  && rm -rf /var/lib/apt/lists/*
 
-# Install wine and winetricks (including recommends, which appear to be required)
+# Install wine and winetricks (including recommends, see https://gitlab.winehq.org/wine/wine/-/wikis/Debian-Ubuntu)
 # hadolint ignore=DL3015
-RUN mkdir -pm 755 /etc/apt/keyrings \
- && wget -O - https://dl.winehq.org/wine-builds/winehq.key | gpg --dearmor -o /etc/apt/keyrings/winehq-archive.key - \
+RUN mkdir -p /etc/apt/keyrings \
+ && wget -qO - https://dl.winehq.org/wine-builds/winehq.key | gpg --dearmor -o /etc/apt/keyrings/winehq-archive.key - \
  && wget -qNP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/debian/dists/${DEBIAN_VERSION}/winehq-${DEBIAN_VERSION}.sources \
  && apt-get update \
  && apt-get install --install-recommends -y \
