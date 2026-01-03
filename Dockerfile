@@ -38,7 +38,7 @@ ARG WINETRICKS_VERSION=20250102
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
 # - gpg for adding the winehq repository key
-# - libegl1, libgl1 and libnvidia-egl-wayland1 for GL library
+# - libegl1 and libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
 # - sudo for normal user installation
@@ -56,7 +56,6 @@ RUN apt-get update \
         gpg \
         libegl1 \
         libgl1 \
-        libnvidia-egl-wayland1 \
         libvulkan1 \
         procps \
         sudo \
@@ -96,6 +95,7 @@ FROM wine-base
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV WINEDEBUG=fixme-all
+ENV WINE_EGL=0
 
 LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"
