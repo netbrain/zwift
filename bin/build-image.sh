@@ -41,9 +41,13 @@ GENERAL_FLAGS=(
 
 # Check for proprietary nvidia driver and set correct device to use
 if [[ -f "/proc/driver/nvidia/version" ]]; then
-    VGA_DEVICE_FLAG=(--gpus all)
+    if [[ $CONTAINER_TOOL == "podman" ]]; then
+        VGA_DEVICE_FLAG=(--device=nvidia.com/gpu=all)
+    else
+        VGA_DEVICE_FLAG=(--gpus=all)
+    fi
 else
-    VGA_DEVICE_FLAG=(--device /dev/dri:/dev/dri)
+    VGA_DEVICE_FLAG=(--device=/dev/dri:/dev/dri)
 fi
 
 # Initiate podman Volume with correct permissions
