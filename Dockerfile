@@ -95,7 +95,6 @@ FROM wine-base
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV WINEDEBUG=fixme-all
-ENV WINE_EGL=0
 
 LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"

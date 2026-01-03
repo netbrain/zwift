@@ -120,6 +120,9 @@ then
     # Enable Wayland Support, still requires DISPLAY to be blank to use Wayland.
     wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
 
+    # Use glx instead of egl
+    wine reg.exe add "HKCU\\Software\\Wine\\X11 Driver" /v UseEGL /d N
+
     # install zwift
     wget https://cdn.zwift.com/app/ZwiftSetup.exe
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
