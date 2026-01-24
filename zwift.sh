@@ -152,9 +152,13 @@ if [ -n "$ZWIFT_USERNAME" ]; then
     elif [[ $HAS_PLAINTEXT_PASSWORD -eq "1" ]]; then
         ZWIFT_PASSWORD_SECRET="-e ZWIFT_PASSWORD=$ZWIFT_PASSWORD"
     else
-        echo "No password found for $ZWIFT_USERNAME..."
-        echo "To avoid manually entering your zwift password every time, either start zwift with \`ZWIFT_PASSWORD=\"hunter2\" zwift\` or store it in the secret-store"
-        echo "\`secret-tool store --label \"Zwift password for $ZWIFT_USERNAME\" application zwift username $ZWIFT_USERNAME\`"
+        msgbox info \
+"No password found for **$ZWIFT_USERNAME**.
+To avoid manually entering your Zwift password each time, you can either:
+1. Start Zwift using the command:
+   ZWIFT_PASSWORD=\"hunter2\" zwift
+2. Store your password securely in the secret store with the following command:
+   secret-tool store --label \"Zwift password for $ZWIFT_USERNAME\" application zwift username $ZWIFT_USERNAME" 1
     fi
 else
     echo "No Zwift credentials found..."
