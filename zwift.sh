@@ -120,13 +120,14 @@ if [ -z "$CONTAINER_TOOL" ]; then
 fi
 
 # Lookup zwift password and create secret to pass to the container
+# Note: can't use the docker secret store since it requires swarm
 if [ -n "$ZWIFT_USERNAME" ]; then
     echo "Looking up Zwift password for $ZWIFT_USERNAME..."
     PASSWORD_SECRET_NAME="zwift-password-$ZWIFT_USERNAME"
 
     # ZWIFT_PASSWORD not set, check if secret already exists or if password is stored in secret-tool
     if [ -z "$ZWIFT_PASSWORD" ]; then
-        if $CONTAINER_TOOL secret inspect "$PASSWORD_SECRET_NAME" &> /dev/null; then
+        if [ "$CONTAINER_TOOL" == "podman" ] && $CONTAINER_TOOL secret exists "$PASSWORD_SECRET_NAME"; then
             echo "Password found in $CONTAINER_TOOL secret store"
             HAS_PASSWORD_SECRET="1"
         elif [ -x "$(command -v secret-tool)" ]; then
@@ -138,7 +139,7 @@ if [ -n "$ZWIFT_USERNAME" ]; then
     # ZWIFT_PASSWORD set or found in secret-tool, create/update secret
     if [ -n "$ZWIFT_PASSWORD" ]; then
         HAS_PLAINTEXT_PASSWORD="1"
-        if echo "$ZWIFT_PASSWORD" | $CONTAINER_TOOL secret create "$([ "$CONTAINER_TOOL" == "podman" ] && echo "--replace=true")" "$PASSWORD_SECRET_NAME" - > /dev/null; then
+        if [ "$CONTAINER_TOOL" == "podman" ] && echo "$ZWIFT_PASSWORD" | $CONTAINER_TOOL secret create --replace=true "$PASSWORD_SECRET_NAME" - > /dev/null; then
             echo "Stored password in $CONTAINER_TOOL secret store"
             HAS_PASSWORD_SECRET="1"
         fi
