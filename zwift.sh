@@ -72,13 +72,11 @@ load_config_file() {
     msgbox info "Looking for config file $CONFIG_FILE"
     if [[ -f "$CONFIG_FILE" ]]; then
         # shellcheck source=/dev/null
-        ERROR_OUTPUT=$(source "$CONFIG_FILE" 2>&1 1>/dev/null)
-        if [[ $? -eq 0 ]]; then
+        if source "$CONFIG_FILE"; then
             msgbox ok "Loaded $CONFIG_FILE"
             ZWIFT_CONFIG_FLAG_ARR+=(--env-file "$CONFIG_FILE")
         else
             msgbox error "Failed to load $CONFIG_FILE"
-            while IFS= read -r line; do msgbox error "  $line"; done <<< "$ERROR_OUTPUT"
         fi
     fi
 }
