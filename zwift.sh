@@ -182,7 +182,7 @@ if [ -n "$ZWIFT_USERNAME" ]; then
     if [ -n "$ZWIFT_PASSWORD" ]; then
         msgbox ok "Password found for $ZWIFT_USERNAME"
         HAS_PLAINTEXT_PASSWORD="1"
-        if [ "$CONTAINER_TOOL" == "podman" ] && echo "$ZWIFT_PASSWORD" | "$CONTAINER_TOOL" secret create --replace=true "$PASSWORD_SECRET_NAME" - > /dev/null; then
+        if [ "$CONTAINER_TOOL" == "podman" ] && printf "%s" "$ZWIFT_PASSWORD" | $CONTAINER_TOOL secret create --replace=true "$PASSWORD_SECRET_NAME" - > /dev/null; then
             msgbox ok "Stored password in $CONTAINER_TOOL secret store"
             HAS_PASSWORD_SECRET="1"
         else
