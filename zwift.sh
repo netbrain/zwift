@@ -478,4 +478,4 @@ if [ -n "$CONTAINER" ] && [ -x "$(command -v xhost)" ] && [ -z "$WINE_EXPERIMENT
     xhost +local:"$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname }}' "$CONTAINER")" > /dev/null
 fi
 
-msgbox ok "Launched Zwift!"
+msgbox ok "Launched Zwift! 🚀"
