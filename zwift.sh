@@ -298,8 +298,7 @@ GENERAL_FLAGS=(
 ##### SPECIFIC CONFIGURATIONS #####
 
 # Setup container security flags
-if [[ $PRIVILEGED_CONTAINER -eq "1" ]]
-then
+if [[ $PRIVILEGED_CONTAINER -eq "1" ]]; then
     CONT_SEC_FLAG=(--privileged --security-opt label=disable) # privileged container, less secure
 else
     CONT_SEC_FLAG=(--security-opt label=type:container_runtime_t) # more secure
