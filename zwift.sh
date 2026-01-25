@@ -8,7 +8,6 @@ if [ -t 1 ]; then
     BLUE="\033[0;34m"
     YELLOW="\033[0;33m"
     BOLD="\033[1m"
-    UNDERLINE="\033[4m"
     RESET_STYLE="\033[0m"
 else
     WHITE=""
@@ -17,11 +16,8 @@ else
     BLUE=""
     YELLOW=""
     BOLD=""
-    UNDERLINE=""
     RESET_STYLE=""
 fi
-
-trap 'echo -e "${YELLOW}${UNDERLINE}Need help? Check github issues: ${BLUE}https://github.com/netbrain/zwift/issues${RESET_STYLE}"' EXIT
 
 # Message Box to simplify errors and questions.
 msgbox() {
@@ -68,17 +64,27 @@ msgbox() {
 # More ease of use starting from desktop icon.
 
 # Check for other zwift configuration, sourced here and passed on to container as well
+msgbox info "Looking for config file $HOME/.config/zwift/config"
 if [[ -f "$HOME/.config/zwift/config" ]]; then
     ZWIFT_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
     # shellcheck source=/dev/null
-    source "$HOME/.config/zwift/config"
+    if source "$HOME/.config/zwift/config"; then
+        msgbox ok "Loaded $HOME/.config/zwift/config"
+    else
+        msgbox error "Failed to load $HOME/.config/zwift/config, check for syntax errors"
+    fi
 fi
 
 # Check for $USER specific zwift configuration, sourced here and passed on to container as well
+msgbox info "Looking for config file $HOME/.config/zwift/$USER-config"
 if [[ -f "$HOME/.config/zwift/$USER-config" ]]; then
     ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/$USER-config"
     # shellcheck source=/dev/null
-    source "$HOME/.config/zwift/$USER-config"
+    if source "$HOME/.config/zwift/$USER-config"; then
+        msgbox ok "Loaded $HOME/.config/zwift/$USER-config"
+    else
+        msgbox error "Failed to load $HOME/.config/zwift/$USER-config, check for syntax errors"
+    fi
 fi
 
 # If a workout directory is specified then map to that directory.
@@ -117,6 +123,7 @@ if [[ $ZWIFT_OVERRIDE_GRAPHICS -eq "1" ]]; then
     fi
 
     # Override all zwift graphics profiles with the custom config file.
+    msgbox info "Overriding zwift graphics profiles with $ZWIFT_GRAPHICS_CONFIG"
     ZWIFT_PROFILE_VOL_ARR=(
         -v "$ZWIFT_GRAPHICS_CONFIG":/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/basic.txt:ro
         -v "$ZWIFT_GRAPHICS_CONFIG":/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/medium.txt:ro
@@ -136,12 +143,21 @@ ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
 ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
 
 # CONTAINER_TOOL, Use podman if available
+msgbox info "Looking for container tool"
 if [ -z "$CONTAINER_TOOL" ]; then
     if [ -x "$(command -v podman)" ]; then
         CONTAINER_TOOL=podman
     else
         CONTAINER_TOOL=docker
     fi
+fi
+if [ -x "$(command -v "$CONTAINER_TOOL")" ]; then
+    msgbox ok "Found container tool: $CONTAINER_TOOL"
+else
+    msgbox error "Container tool $CONTAINER_TOOL not found"
+    msgbox error "  To install podman, see: https://podman.io/docs/installation#installing-on-linux"
+    msgbox error "  To install docker, see: https://docs.docker.com/desktop/setup/install/linux/"
+    exit 1
 fi
 
 # Lookup zwift password and create secret to pass to the container
@@ -173,19 +189,16 @@ if [ -n "$ZWIFT_USERNAME" ]; then
     # prefer passing secret, otherwise pass ZWIFT_PASSWORD as plain text
     ZWIFT_USERNAME_FLAG="-e ZWIFT_USERNAME=$ZWIFT_USERNAME"
     if [[ $HAS_PASSWORD_SECRET -eq "1" ]]; then
-        msgbox info "Passing zwift password as a secret"
         ZWIFT_PASSWORD_SECRET="--secret $PASSWORD_SECRET_NAME,type=env,target=ZWIFT_PASSWORD"
     elif [[ $HAS_PLAINTEXT_PASSWORD -eq "1" ]]; then
-        msgbox info "Passing zwift password as environment variable"
         ZWIFT_PASSWORD_SECRET="-e ZWIFT_PASSWORD=$ZWIFT_PASSWORD"
     else
-        msgbox info \
-"No password found for **$ZWIFT_USERNAME**.
-To avoid manually entering your Zwift password each time, you can either:
-1. Start Zwift using the command:
-   ZWIFT_PASSWORD=\"hunter2\" zwift
-2. Store your password securely in the secret store with the following command:
-   secret-tool store --label \"Zwift password for $ZWIFT_USERNAME\" application zwift username $ZWIFT_USERNAME"
+        msgbox info "No password found for $ZWIFT_USERNAME"
+        msgbox info "  To avoid manually entering your Zwift password each time, you can either:"
+        msgbox info "  1. Start Zwift using the command:"
+        msgbox info "     ZWIFT_PASSWORD=\"hunter2\" zwift"
+        msgbox info "  2. Store your password securely in the secret store with the following command:"
+        msgbox info "     secret-tool store --label \"Zwift password for $ZWIFT_USERNAME\" application zwift username $ZWIFT_USERNAME"
     fi
 else
     msgbox warning "No Zwift credentials found..."
@@ -248,7 +261,7 @@ if [[ ! $DONT_CHECK ]]; then
     THIS_SUM=$(sha256sum "$0" | awk '{print $1}')
 
     if [ "$REMOTE_SUM" == "$THIS_SUM" ]; then
-        msgbox ok "You are running latest zwift.sh 👏"
+        msgbox ok "You are running the latest zwift.sh 👏"
     elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
         pkexec env PATH="$PATH" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
         exec "$0" "${@}"
@@ -257,8 +270,12 @@ fi
 
 # Check for updated container image
 if [[ ! $DONT_PULL ]]; then
-    msgbox info "Checking for updated zwift image"
-    $CONTAINER_TOOL pull "$IMAGE":"$VERSION"
+    msgbox info "Checking for updated container image"
+    if $CONTAINER_TOOL pull "$IMAGE":"$VERSION"; then
+        msgbox ok "Container image is up to date"
+    else
+        msgbox error "Failed to update container image"
+    fi
 fi
 
 #############################
@@ -366,7 +383,7 @@ fi
 if [ "$CONTAINER_TOOL" == "podman" ]; then
     # Create a volume if not already exists, this is done now as
     # if left to the run command the directory can get the wrong permissions
-    if ! podman volume ls | grep "zwift-$USER"; then
+    if ! podman volume ls | grep "zwift-$USER" > /dev/null; then
         $CONTAINER_TOOL volume create "zwift-$USER"
     fi
 
@@ -424,9 +441,8 @@ CMD=(
 
 # DRYRUN: print the exact command that would be executed, then exit
 if [[ -n "$DRYRUN" ]]; then
-    msgbox info \
-"DRYRUN: would execute:
-$(printf '%q ' "${CMD[@]}")"
+    msgbox info "DRYRUN: would execute:"
+    msgbox info "  $(printf '%q ' "${CMD[@]}")"
     exit 0
 fi
 
@@ -435,12 +451,11 @@ if [[ " ${ZWIFT_FG_FLAG[*]} " == *" -it "* ]]; then
     # In interactive mode we don't have a container ID to run xhost against later.
     # If using X11/XWayland, show instructions so users can enable X access manually.
     if [ -x "$(command -v xhost)" ] && [ -z "$WINE_EXPERIMENTAL_WAYLAND" ]; then
-        msgbox info \
-"INTERACTIVE mode: xhost is not automatically enabled for this container.
-If you need X11 apps inside the container to display, run this in another terminal:
-  xhost +local:$HOSTNAME
-After you're done, you can revoke access with:
-  xhost -local:$HOSTNAME"
+        msgbox info "INTERACTIVE mode: xhost is not automatically enabled for this container."
+        msgbox info "  If you need X11 apps inside the container to display, run this in another terminal:"
+        msgbox info "    xhost +local:$HOSTNAME"
+        msgbox info "  After you're done, you can revoke access with:"
+        msgbox info "    xhost -local:$HOSTNAME"
     fi
     "${CMD[@]}"
     RC=$?
@@ -450,8 +465,8 @@ else
 fi
 
 if [ $RC -ne 0 ]; then
-    msgbox error "Can't run zwift, check variables!" 10
-    exit 0
+    msgbox error "Failed to start Zwift, check variables!" 10
+    exit 1
 fi
 
 # Allow container to connect to X, has to be set for different UID
