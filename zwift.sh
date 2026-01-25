@@ -34,11 +34,11 @@ msgbox() {
         error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2;;
         question)
             if [ -n "$TIMEOUT" ] && [[ $TIMEOUT -gt 0 ]]; then
-                echo -ne "${YELLOW}${BOLD}${UNDERLINE}[?] $MSG (Default no in $TIMEOUT seconds.) [y/N]:${RESET_STYLE} "
+                echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}$MSG (Default no in $TIMEOUT seconds.) [y/N]:${RESET_STYLE} "
                 read -rt "$TIMEOUT" -n 1 ans
                 echo
             else
-                echo -ne "${YELLOW}${BOLD}${UNDERLINE}[?] $MSG [y/N]:${RESET_STYLE} "
+                echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}$MSG [y/N]:${RESET_STYLE} "
                 read -rn 1 ans
                 echo
             fi
@@ -54,12 +54,17 @@ msgbox() {
         if [[ $TIMEOUT -gt 0 ]]; then
             sleep "$TIMEOUT"
         else
-            echo -ne "${YELLOW}${BOLD}${UNDERLINE}[*] Press any key to continue...${RESET_STYLE}"
+            echo -ne "${YELLOW}[*] ${BOLD}${UNDERLINE}Press any key to continue...${RESET_STYLE}"
             read -rsn1
             echo
         fi
     fi
 }
+
+echo -e "${YELLOW}[!] ${BOLD}Easily Zwift on linux!${RESET_STYLE}"
+echo -e "${YELLOW}[!] ${UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
+
+msgbox info "Preparing to launch Zwift"
 
 #########################################################
 # Config early to allow setting of startup env files.
@@ -115,11 +120,11 @@ if [[ $ZWIFT_OVERRIDE_GRAPHICS -eq "1" ]]; then
     elif [ ! -f "$ZWIFT_GRAPHICS_CONFIG" ]; then
         mkdir -p "$HOME/.config/zwift"
         echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "$ZWIFT_GRAPHICS_CONFIG"
-        msgbox info "Created $ZWIFT_GRAPHICS_CONFIG with default values, edit this file to tweak the zwift graphics settings." 0
+        msgbox warning "Created $ZWIFT_GRAPHICS_CONFIG with default values, edit this file to tweak the zwift graphics settings" 0
     fi
 
     # Override all zwift graphics profiles with the custom config file.
-    msgbox info "Overriding zwift graphics profiles with $ZWIFT_GRAPHICS_CONFIG"
+    msgbox ok "Overriding zwift graphics profiles with $ZWIFT_GRAPHICS_CONFIG"
     ZWIFT_PROFILE_VOL_ARR=(
         -v "$ZWIFT_GRAPHICS_CONFIG":/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/basic.txt:ro
         -v "$ZWIFT_GRAPHICS_CONFIG":/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/medium.txt:ro
@@ -165,7 +170,7 @@ if [ -n "$ZWIFT_USERNAME" ]; then
     # ZWIFT_PASSWORD not set, check if secret already exists or if password is stored in secret-tool
     if [ -z "$ZWIFT_PASSWORD" ]; then
         if [ "$CONTAINER_TOOL" == "podman" ] && $CONTAINER_TOOL secret exists "$PASSWORD_SECRET_NAME"; then
-            msgbox ok "Password found in $CONTAINER_TOOL secret store"
+            msgbox ok "Password for $ZWIFT_USERNAME found in $CONTAINER_TOOL secret store"
             HAS_PASSWORD_SECRET="1"
         elif [ -x "$(command -v secret-tool)" ]; then
             msgbox info "Looking for password in secret-tool (application zwift username $ZWIFT_USERNAME)"
@@ -175,10 +180,13 @@ if [ -n "$ZWIFT_USERNAME" ]; then
 
     # ZWIFT_PASSWORD set or found in secret-tool, create/update secret
     if [ -n "$ZWIFT_PASSWORD" ]; then
+        msgbox ok "Password found for $ZWIFT_USERNAME"
         HAS_PLAINTEXT_PASSWORD="1"
-        if [ "$CONTAINER_TOOL" == "podman" ] && echo "$ZWIFT_PASSWORD" | $CONTAINER_TOOL secret create --replace=true "$PASSWORD_SECRET_NAME" - > /dev/null; then
+        if [ "$CONTAINER_TOOL" == "podman" ] && echo "$ZWIFT_PASSWORD" | "$CONTAINER_TOOL" secret create --replace=true "$PASSWORD_SECRET_NAME" - > /dev/null; then
             msgbox ok "Stored password in $CONTAINER_TOOL secret store"
             HAS_PASSWORD_SECRET="1"
+        else
+            msgbox info "Could not create secret for password, using environment variable instead"
         fi
     fi
 
@@ -259,8 +267,11 @@ if [[ ! $DONT_CHECK ]]; then
     if [ "$REMOTE_SUM" == "$THIS_SUM" ]; then
         msgbox ok "You are running the latest zwift.sh 👏"
     elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
+        msgbox info "Downloading latest zwift.sh"
         pkexec env PATH="$PATH" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
         exec "$0" "${@}"
+    else
+        msgbox warning "Continuing with old zwift.sh"
     fi
 fi
 
@@ -463,5 +474,8 @@ fi
 
 # Allow container to connect to X, has to be set for different UID
 if [ -n "$CONTAINER" ] && [ -x "$(command -v xhost)" ] && [ -z "$WINE_EXPERIMENTAL_WAYLAND" ]; then
-    xhost +local:"$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname }}' "$CONTAINER")"
+    msgbox info "Allowing container to connect to X"
+    xhost +local:"$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname }}' "$CONTAINER")" > /dev/null
 fi
+
+msgbox ok "Launched Zwift!"
