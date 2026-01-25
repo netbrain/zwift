@@ -8,6 +8,7 @@ if [ -t 1 ]; then
     BLUE="\033[0;34m"
     YELLOW="\033[0;33m"
     BOLD="\033[1m"
+    UNDERLINE="\033[4m"
     RESET_STYLE="\033[0m"
 else
     WHITE=""
@@ -16,6 +17,7 @@ else
     BLUE=""
     YELLOW=""
     BOLD=""
+    UNDERLINE=""
     RESET_STYLE=""
 fi
 
@@ -32,11 +34,11 @@ msgbox() {
         error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2;;
         question)
             if [ -n "$TIMEOUT" ] && [[ $TIMEOUT -gt 0 ]]; then
-                echo -ne "${YELLOW}${BOLD}[?] $MSG (Default no in $TIMEOUT seconds.) [y/N]: ${RESET_STYLE}"
+                echo -ne "${YELLOW}${BOLD}${UNDERLINE}[?] $MSG (Default no in $TIMEOUT seconds.) [y/N]:${RESET_STYLE} "
                 read -rt "$TIMEOUT" -n 1 ans
                 echo
             else
-                echo -ne "${YELLOW}${BOLD}[?] $MSG [y/N]: ${RESET_STYLE}"
+                echo -ne "${YELLOW}${BOLD}${UNDERLINE}[?] $MSG [y/N]:${RESET_STYLE} "
                 read -rn 1 ans
                 echo
             fi
@@ -52,7 +54,7 @@ msgbox() {
         if [[ $TIMEOUT -gt 0 ]]; then
             sleep "$TIMEOUT"
         else
-            echo -ne "${BLUE}${BOLD}[*] Press any key to continue...${RESET_STYLE}"
+            echo -ne "${YELLOW}${BOLD}${UNDERLINE}[*] Press any key to continue...${RESET_STYLE}"
             read -rsn1
             echo
         fi
