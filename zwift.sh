@@ -1,40 +1,65 @@
 #!/usr/bin/env bash
 if [ -n "${DEBUG}" ]; then set -x; fi
 
-# Message Box to simplify errors/ and questions.
-msgbox() {
-    TYPE=$1             # Type, info, warning or error
-    MSG="$2"            # Message to Display
-    TIMEOUT=${3:-0}     # Timeout for message, default no timeout.
+if [ -t 1 ]; then
+    WHITE="\033[0;37m"
+    RED="\033[0;31m"
+    GREEN="\033[0;32m"
+    BLUE="\033[0;34m"
+    YELLOW="\033[0;33m"
+    BOLD="\033[1m"
+    UNDERLINE="\033[4m"
+    RESET_STYLE="\033[0m"
+else
+    WHITE=""
+    RED=""
+    GREEN=""
+    BLUE=""
+    YELLOW=""
+    BOLD=""
+    UNDERLINE=""
+    RESET_STYLE=""
+fi
 
-    RED='\033[0;31m'
-    NC='\033[0m'
-    BOLD='\033[1m'
-    UNDERLINE='\033[4m'
+trap 'echo -e "${YELLOW}${UNDERLINE}Need help? Check github issues: ${BLUE}https://github.com/netbrain/zwift/issues${RESET_STYLE}"' EXIT
+
+# Message Box to simplify errors and questions.
+msgbox() {
+    TYPE="$1"       # Type: info, ok, warning, error, confirm
+    MSG="$2"        # Message: the message to display
+    TIMEOUT="$3"    # Optional timeout: if explicitly set to 0, wait for user input to continue.
 
     case $TYPE in
-        error) echo -e "${RED}${BOLD}${UNDERLINE}Error - $MSG${NC}";;
-        warning) echo -e "${BOLD}${UNDERLINE}Warning - $MSG${NC}";;
+        info) echo -e "${BLUE}[*] ${WHITE}$MSG${RESET_STYLE}";;
+        ok) echo -e "${GREEN}[✓] $MSG${RESET_STYLE}";;
+        warning) echo -e "${YELLOW}[!] $MSG${RESET_STYLE}";;
+        error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2;;
         question)
-            echo -n -e "${RED}${BOLD}${UNDERLINE}Question - $MSG (y/n)${NC}"
-            if [[ $TIMEOUT -ne 0 ]]; then
-                read -r -t "$TIMEOUT" -n 1 -p " " yn
+            if [ -n "$TIMEOUT" ] && [[ $TIMEOUT -gt 0 ]]; then
+                echo -ne "${YELLOW}${BOLD}[?] $MSG (Default no in $TIMEOUT seconds.) [y/N]: ${RESET_STYLE}"
+                read -rt "$TIMEOUT" -n 1 ans
+                echo
             else
-                read -r -n 1 -p " " yn
+                echo -ne "${YELLOW}${BOLD}[?] $MSG [y/N]: ${RESET_STYLE}"
+                read -rn 1 ans
+                echo
             fi
-            echo
-            case $yn in
-                y) return 0;;
-                n) return 1;;
-                *) return 5;;
+            case "$ans" in
+                [yY] | [yY][eE][sS]) return 0;;
+                *) return 1;;
             esac
         ;;
-        *) echo -e "${BOLD}Info - $MSG${NC}";;
+        *) echo -e "${WHITE}[*] $MSG${RESET_STYLE}";;
     esac
-    if [[ $TIMEOUT -eq 0 ]]; then
-        read -r -p "Press key to continue.. " -n1 -s
-    else
-        sleep "$TIMEOUT"
+
+    if [ -n "$TIMEOUT" ]; then
+        if [[ $TIMEOUT -gt 0 ]]; then
+            sleep "$TIMEOUT"
+        else
+            echo -ne "${BLUE}${BOLD}[*] ${WHITE}${BOLD}Press any key to continue...${RESET_STYLE}"
+            read -rsn1
+            echo
+        fi
     fi
 }
 
@@ -88,7 +113,7 @@ if [[ $ZWIFT_OVERRIDE_GRAPHICS -eq "1" ]]; then
     elif [ ! -f "$ZWIFT_GRAPHICS_CONFIG" ]; then
         mkdir -p "$HOME/.config/zwift"
         echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "$ZWIFT_GRAPHICS_CONFIG"
-        msgbox info "Created $ZWIFT_GRAPHICS_CONFIG with default values, edit this file to tweak the zwift graphics settings."
+        msgbox info "Created $ZWIFT_GRAPHICS_CONFIG with default values, edit this file to tweak the zwift graphics settings." 0
     fi
 
     # Override all zwift graphics profiles with the custom config file.
@@ -158,7 +183,7 @@ To avoid manually entering your Zwift password each time, you can either:
 1. Start Zwift using the command:
    ZWIFT_PASSWORD=\"hunter2\" zwift
 2. Store your password securely in the secret store with the following command:
-   secret-tool store --label \"Zwift password for $ZWIFT_USERNAME\" application zwift username $ZWIFT_USERNAME" 1
+   secret-tool store --label \"Zwift password for $ZWIFT_USERNAME\" application zwift username $ZWIFT_USERNAME"
     fi
 else
     echo "No Zwift credentials found..."
@@ -223,7 +248,7 @@ if [[ ! $DONT_CHECK ]]; then
         echo "You are running latest zwift.sh 👏"
     else
         # Ask with Timeout, default is do not update.
-        if msgbox question "You are not running the latest zwift.sh 😭, download? (Default no in 5 seconds)" 5; then
+        if msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
             pkexec env PATH="$PATH" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
             exec "$0" "${@}"
         fi
@@ -424,7 +449,7 @@ else
 fi
 
 if [ $RC -ne 0 ]; then
-    msgbox error "Error can't run zwift, check variables!" 10
+    msgbox error "Can't run zwift, check variables!" 10
     exit 0
 fi
 
