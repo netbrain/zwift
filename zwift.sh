@@ -147,16 +147,16 @@ fi
 # Lookup zwift password and create secret to pass to the container
 # Note: can't use the docker secret store since it requires swarm
 if [ -n "$ZWIFT_USERNAME" ]; then
-    echo "Looking up Zwift password for $ZWIFT_USERNAME..."
+    msgbox info "Looking up Zwift password for $ZWIFT_USERNAME"
     PASSWORD_SECRET_NAME="zwift-password-$ZWIFT_USERNAME"
 
     # ZWIFT_PASSWORD not set, check if secret already exists or if password is stored in secret-tool
     if [ -z "$ZWIFT_PASSWORD" ]; then
         if [ "$CONTAINER_TOOL" == "podman" ] && $CONTAINER_TOOL secret exists "$PASSWORD_SECRET_NAME"; then
-            echo "Password found in $CONTAINER_TOOL secret store"
+            msgbox ok "Password found in $CONTAINER_TOOL secret store"
             HAS_PASSWORD_SECRET="1"
         elif [ -x "$(command -v secret-tool)" ]; then
-            echo "Looking for password in secret-tool (application zwift username $ZWIFT_USERNAME)"
+            msgbox info "Looking for password in secret-tool (application zwift username $ZWIFT_USERNAME)"
             ZWIFT_PASSWORD=$(secret-tool lookup application zwift username "$ZWIFT_USERNAME")
         fi
     fi
@@ -165,7 +165,7 @@ if [ -n "$ZWIFT_USERNAME" ]; then
     if [ -n "$ZWIFT_PASSWORD" ]; then
         HAS_PLAINTEXT_PASSWORD="1"
         if [ "$CONTAINER_TOOL" == "podman" ] && echo "$ZWIFT_PASSWORD" | $CONTAINER_TOOL secret create --replace=true "$PASSWORD_SECRET_NAME" - > /dev/null; then
-            echo "Stored password in $CONTAINER_TOOL secret store"
+            msgbox ok "Stored password in $CONTAINER_TOOL secret store"
             HAS_PASSWORD_SECRET="1"
         fi
     fi
@@ -173,8 +173,10 @@ if [ -n "$ZWIFT_USERNAME" ]; then
     # prefer passing secret, otherwise pass ZWIFT_PASSWORD as plain text
     ZWIFT_USERNAME_FLAG="-e ZWIFT_USERNAME=$ZWIFT_USERNAME"
     if [[ $HAS_PASSWORD_SECRET -eq "1" ]]; then
+        msgbox info "Passing zwift password as a secret"
         ZWIFT_PASSWORD_SECRET="--secret $PASSWORD_SECRET_NAME,type=env,target=ZWIFT_PASSWORD"
     elif [[ $HAS_PLAINTEXT_PASSWORD -eq "1" ]]; then
+        msgbox info "Passing zwift password as environment variable"
         ZWIFT_PASSWORD_SECRET="-e ZWIFT_PASSWORD=$ZWIFT_PASSWORD"
     else
         msgbox info \
@@ -186,7 +188,7 @@ To avoid manually entering your Zwift password each time, you can either:
    secret-tool store --label \"Zwift password for $ZWIFT_USERNAME\" application zwift username $ZWIFT_USERNAME"
     fi
 else
-    echo "No Zwift credentials found..."
+    msgbox warning "No Zwift credentials found..."
 fi
 
 if [ "$CONTAINER_TOOL" == "podman" ]; then
@@ -221,7 +223,7 @@ case "$XDG_SESSION_TYPE" in
 esac
 
 # Verify which system we are using for wayland and some checks.
-if [ "$WINDOW_MANAGER" = "Wayland" ]; then
+if [ "$WINDOW_MANAGER" == "Wayland" ]; then
     # System is using wayland or xwayland.
     if [ -z "$WINE_EXPERIMENTAL_WAYLAND" ]; then
         WINDOW_MANAGER="XWayland"
@@ -238,26 +240,24 @@ fi
 #######################################
 ###### UPD SCRIPTS and CONTAINER ######
 
-# Check for updated zwift.sh
+# Check for updated zwift.sh by comparing checksums
 if [[ ! $DONT_CHECK ]]; then
+    msgbox info "Checking for updated zwift.sh"
+
     REMOTE_SUM=$(curl -s https://raw.githubusercontent.com/netbrain/zwift/master/zwift.sh | sha256sum | awk '{print $1}')
     THIS_SUM=$(sha256sum "$0" | awk '{print $1}')
 
-    # Compare the checksums
-    if [ "$REMOTE_SUM" = "$THIS_SUM" ]; then
-        echo "You are running latest zwift.sh 👏"
-    else
-        # Ask with Timeout, default is do not update.
-        if msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
-            pkexec env PATH="$PATH" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
-            exec "$0" "${@}"
-        fi
+    if [ "$REMOTE_SUM" == "$THIS_SUM" ]; then
+        msgbox ok "You are running latest zwift.sh 👏"
+    elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
+        pkexec env PATH="$PATH" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+        exec "$0" "${@}"
     fi
 fi
 
 # Check for updated container image
-if [[ ! $DONT_PULL ]]
-then
+if [[ ! $DONT_PULL ]]; then
+    msgbox info "Checking for updated zwift image"
     $CONTAINER_TOOL pull "$IMAGE":"$VERSION"
 fi
 
@@ -424,9 +424,9 @@ CMD=(
 
 # DRYRUN: print the exact command that would be executed, then exit
 if [[ -n "$DRYRUN" ]]; then
-    echo "DRYRUN: would execute:"
-    printf '%q ' "${CMD[@]}"
-    echo
+    msgbox info \
+"DRYRUN: would execute:
+$(printf '%q ' "${CMD[@]}")"
     exit 0
 fi
 
@@ -435,11 +435,12 @@ if [[ " ${ZWIFT_FG_FLAG[*]} " == *" -it "* ]]; then
     # In interactive mode we don't have a container ID to run xhost against later.
     # If using X11/XWayland, show instructions so users can enable X access manually.
     if [ -x "$(command -v xhost)" ] && [ -z "$WINE_EXPERIMENTAL_WAYLAND" ]; then
-        echo "INTERACTIVE mode: xhost is not automatically enabled for this container."
-        echo "If you need X11 apps inside the container to display, run this in another terminal:"
-        echo "  xhost +local:$HOSTNAME"
-        echo "After you're done, you can revoke access with:"
-        echo "  xhost -local:$HOSTNAME"
+        msgbox info \
+"INTERACTIVE mode: xhost is not automatically enabled for this container.
+If you need X11 apps inside the container to display, run this in another terminal:
+  xhost +local:$HOSTNAME
+After you're done, you can revoke access with:
+  xhost -local:$HOSTNAME"
     fi
     "${CMD[@]}"
     RC=$?
