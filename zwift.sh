@@ -64,28 +64,24 @@ msgbox() {
 # More ease of use starting from desktop icon.
 
 # Check for other zwift configuration, sourced here and passed on to container as well
-msgbox info "Looking for config file $HOME/.config/zwift/config"
-if [[ -f "$HOME/.config/zwift/config" ]]; then
-    ZWIFT_CONFIG_FLAG="--env-file $HOME/.config/zwift/config"
-    # shellcheck source=/dev/null
-    if source "$HOME/.config/zwift/config"; then
-        msgbox ok "Loaded $HOME/.config/zwift/config"
-    else
-        msgbox error "Failed to load $HOME/.config/zwift/config, check for syntax errors"
+ZWIFT_CONFIG_FLAG_ARR=()
+load_config_file() {
+    CONFIG_FILE="$1"
+    msgbox info "Looking for config file $CONFIG_FILE"
+    if [[ -f "$CONFIG_FILE" ]]; then
+        # shellcheck source=/dev/null
+        ERROR_OUTPUT=$(source "$CONFIG_FILE" 2>&1 1>/dev/null)
+        if [[ $? -eq 0 ]]; then
+            msgbox ok "Loaded $CONFIG_FILE"
+            ZWIFT_CONFIG_FLAG_ARR+=(--env-file "$CONFIG_FILE")
+        else
+            msgbox error "Failed to load $CONFIG_FILE"
+            while IFS= read -r line; do msgbox error "  $line"; done <<< "$ERROR_OUTPUT"
+        fi
     fi
-fi
-
-# Check for $USER specific zwift configuration, sourced here and passed on to container as well
-msgbox info "Looking for config file $HOME/.config/zwift/$USER-config"
-if [[ -f "$HOME/.config/zwift/$USER-config" ]]; then
-    ZWIFT_USER_CONFIG_FLAG="--env-file $HOME/.config/zwift/$USER-config"
-    # shellcheck source=/dev/null
-    if source "$HOME/.config/zwift/$USER-config"; then
-        msgbox ok "Loaded $HOME/.config/zwift/$USER-config"
-    else
-        msgbox error "Failed to load $HOME/.config/zwift/$USER-config, check for syntax errors"
-    fi
-fi
+}
+load_config_file "$HOME/.config/zwift/config"
+load_config_file "$HOME/.config/zwift/$USER-config"
 
 # If a workout directory is specified then map to that directory.
 if [[ -n $ZWIFT_WORKOUT_DIR ]]; then
@@ -403,10 +399,8 @@ fi
 read -r -a CONTAINER_EXTRA_FLAGS <<< "$CONTAINER_EXTRA_ARGS"
 
 # Normalize single-string flags into arrays for safe command construction
-read -r -a ZWIFT_CONFIG_FLAG_ARR <<< "$ZWIFT_CONFIG_FLAG"
 read -r -a ZWIFT_USERNAME_FLAG_ARR <<< "$ZWIFT_USERNAME_FLAG"
 read -r -a ZWIFT_PASSWORD_SECRET_ARR <<< "$ZWIFT_PASSWORD_SECRET"
-read -r -a ZWIFT_USER_CONFIG_FLAG_ARR <<< "$ZWIFT_USER_CONFIG_FLAG"
 read -r -a ZWIFT_WORKOUT_VOL_ARR <<< "$ZWIFT_WORKOUT_VOL"
 read -r -a ZWIFT_ACTIVITY_VOL_ARR <<< "$ZWIFT_ACTIVITY_VOL"
 read -r -a ZWIFT_LOG_VOL_ARR <<< "$ZWIFT_LOG_VOL"
@@ -424,7 +418,6 @@ CMD=(
     "${ZWIFT_CONFIG_FLAG_ARR[@]}"
     "${ZWIFT_USERNAME_FLAG_ARR[@]}"
     "${ZWIFT_PASSWORD_SECRET_ARR[@]}"
-    "${ZWIFT_USER_CONFIG_FLAG_ARR[@]}"
     "${ZWIFT_WORKOUT_VOL_ARR[@]}"
     "${ZWIFT_ACTIVITY_VOL_ARR[@]}"
     "${ZWIFT_LOG_VOL_ARR[@]}"
