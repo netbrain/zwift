@@ -26,7 +26,7 @@ msgbox() {
     TIMEOUT="$3"    # Optional timeout: if explicitly set to 0, wait for user input to continue.
 
     case $TYPE in
-        info) echo -e "${BLUE}[*] ${WHITE}$MSG${RESET_STYLE}";;
+        info) echo -e "${BLUE}[*] $MSG${RESET_STYLE}";;
         ok) echo -e "${GREEN}[✓] $MSG${RESET_STYLE}";;
         warning) echo -e "${YELLOW}[!] $MSG${RESET_STYLE}";;
         error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2;;
@@ -52,7 +52,7 @@ msgbox() {
         if [[ $TIMEOUT -gt 0 ]]; then
             sleep "$TIMEOUT"
         else
-            echo -ne "${BLUE}${BOLD}[*] ${WHITE}${BOLD}Press any key to continue...${RESET_STYLE}"
+            echo -ne "${BLUE}${BOLD}[*] Press any key to continue...${RESET_STYLE}"
             read -rsn1
             echo
         fi
