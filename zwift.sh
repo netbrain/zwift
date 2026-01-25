@@ -151,8 +151,8 @@ if [ -x "$(command -v "$CONTAINER_TOOL")" ]; then
     msgbox ok "Found container tool: $CONTAINER_TOOL"
 else
     msgbox error "Container tool $CONTAINER_TOOL not found"
-    msgbox error "  To install podman, see: https://podman.io/docs/installation#installing-on-linux"
-    msgbox error "  To install docker, see: https://docs.docker.com/desktop/setup/install/linux/"
+    msgbox error "  To install podman, see: https://podman.io/docs/installation"
+    msgbox error "  To install docker, see: https://docs.docker.com/get-started/get-docker/"
     exit 1
 fi
 
