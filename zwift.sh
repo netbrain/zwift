@@ -70,8 +70,10 @@ msgbox info "Preparing to launch Zwift"
 # Config early to allow setting of startup env files.
 # More ease of use starting from desktop icon.
 
-ENV_FILE="$HOME/config/zwift/.env"
-echo "" > "$ENV_FILE"
+ENV_FILE="$HOME/.config/zwift/.env"
+rm -f "$ENV_FILE"
+touch "$ENV_FILE"
+chmod 660 "$ENV_FILE"
 
 # Check for other zwift configuration, sourced here and passed on to container as well
 load_config_file() {
