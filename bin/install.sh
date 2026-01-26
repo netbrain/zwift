@@ -43,6 +43,11 @@ msgbox() {
     esac
 }
 
+exit_failure() {
+    msgbox error "Zwift install failed! 😭"
+    exit 1
+}
+
 determine_install_location() {
     if [[ $EUID -eq 0 ]]; then
         ROOT_BIN=/usr/local/bin
@@ -62,7 +67,8 @@ ask_user_confirmation() {
     if msgbox question "Are you sure you want to install Zwift?"; then
         msgbox ok "Proceeding with Zwift installation"
     else
-        msgbox warning "Aborted Zwift installation 😥"
+        msgbox info "Aborted Zwift installation"
+        msgbox warning "Zwift not installed! 😥"
         exit 0
     fi
 }
@@ -75,7 +81,7 @@ create_directories() {
 
         if ! mkdir -p "$DIRECTORY"; then
             msgbox error "Could not create $DIRECTORY, aborting"
-            exit 1
+            exit_failure
         fi
     }
 
@@ -97,7 +103,7 @@ download_zwift() {
 
         if ! curl -fsSLo "$DESTINATION" "$URL"; then
             msgbox error "Downloading $URL failed, aborting"
-            exit 1
+            exit_failure
         fi
     }
 
@@ -113,7 +119,7 @@ download_zwift() {
 
     if ! chmod 755 "$ROOT_BIN/zwift"; then
         msgbox error "Failed to set permissions for $ROOT_BIN/zwift, aborting"
-        exit 1
+        exit_failure
     fi
 
     msgbox ok "Zwift download complete"
