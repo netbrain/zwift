@@ -71,7 +71,6 @@ msgbox info "Preparing to launch Zwift"
 # More ease of use starting from desktop icon.
 
 # Check for other zwift configuration, sourced here and passed on to container as well
-ZWIFT_CONFIG_FLAG_ARR=()
 load_config_file() {
     CONFIG_FILE="$1"
     msgbox info "Looking for config file $CONFIG_FILE"
@@ -79,7 +78,6 @@ load_config_file() {
         # shellcheck source=/dev/null
         if source "$CONFIG_FILE"; then
             msgbox ok "Loaded $CONFIG_FILE"
-            ZWIFT_CONFIG_FLAG_ARR+=(--env-file "$CONFIG_FILE")
         else
             msgbox error "Failed to load $CONFIG_FILE"
         fi
@@ -425,7 +423,6 @@ CMD=(
     "${GENERAL_FLAGS[@]}"
     "${CONT_SEC_FLAG[@]}"
     "${ZWIFT_FG_FLAG[@]}"
-    "${ZWIFT_CONFIG_FLAG_ARR[@]}"
     "${ZWIFT_USERNAME_FLAG_ARR[@]}"
     "${ZWIFT_PASSWORD_SECRET_ARR[@]}"
     "${ZWIFT_WORKOUT_VOL_ARR[@]}"
