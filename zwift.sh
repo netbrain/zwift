@@ -70,10 +70,17 @@ msgbox info "Preparing to launch Zwift"
 # Config early to allow setting of startup env files.
 # More ease of use starting from desktop icon.
 
-ENV_FILE="$HOME/.config/zwift/.env"
-rm -f "$ENV_FILE"
-touch "$ENV_FILE"
-chmod 660 "$ENV_FILE"
+# Create temporary file for environment variables, automatically removed upon exit
+ENVIRONMENT_VARIABLES=()
+if ENV_FILE=$(mktemp -q /tmp/zwift-container.env.XXXXXXXXXX); then
+    trap 'rm -f -- "$ENV_FILE" && msgbox info "Removed temporary file $ENV_FILE"' EXIT
+    msgbox info "Created temporary file for environment variables:"
+    msgbox info "  $ENV_FILE"
+    msgbox info "  This file will be removed automatically when the script exits"
+else
+    msgbox error "Failed to create temporary file for environment variables"
+    exit 1
+fi
 
 # Check for other zwift configuration, sourced here
 load_config_file() {
@@ -138,6 +145,7 @@ fi
 
 ########################################
 ###### Default Setup and Settings ######
+
 WINDOW_MANAGER="Other"                      # XOrg, XWayland, Wayland, Other
 IMAGE=${IMAGE:-docker.io/netbrain/zwift}    # Set the container image to use
 VERSION=${VERSION:-latest}                  # The container version
@@ -194,11 +202,11 @@ if [ -n "$ZWIFT_USERNAME" ]; then
     fi
 
     # prefer passing secret, otherwise pass ZWIFT_PASSWORD as plain text
-    echo "ZWIFT_USERNAME=$ZWIFT_USERNAME" >> "$ENV_FILE"
+    ENVIRONMENT_VARIABLES+=(ZWIFT_USERNAME="$ZWIFT_USERNAME")
     if [[ $HAS_PASSWORD_SECRET -eq "1" ]]; then
         ZWIFT_PASSWORD_SECRET="--secret $PASSWORD_SECRET_NAME,type=env,target=ZWIFT_PASSWORD"
     elif [[ $HAS_PLAINTEXT_PASSWORD -eq "1" ]]; then
-        echo "ZWIFT_PASSWORD=$ZWIFT_PASSWORD" >> "$ENV_FILE"
+        ENVIRONMENT_VARIABLES+=(ZWIFT_PASSWORD="$ZWIFT_PASSWORD")
     else
         msgbox info "No password found for $ZWIFT_USERNAME"
         msgbox info "  To avoid manually entering your Zwift password each time, you can either:"
@@ -226,6 +234,7 @@ fi
 
 ########################################
 ###### OS and WM Manager Settings ######
+
 case "$XDG_SESSION_TYPE" in
     "wayland")
         WINDOW_MANAGER="Wayland"
@@ -291,13 +300,13 @@ fi
 #############################
 ##### PREPARE ALL FLAGS #####
 
-{
-    echo "DISPLAY=$DISPLAY"
-    echo "ZWIFT_UID=$CONTAINER_UID"
-    echo "ZWIFT_GID=$CONTAINER_GID"
-    echo "PULSE_SERVER=/run/user/$CONTAINER_UID/pulse/native"
-    echo "CONTAINER=$CONTAINER_TOOL"
-} >> "$ENV_FILE"
+ENVIRONMENT_VARIABLES+=(
+    DISPLAY="$DISPLAY"
+    ZWIFT_UID="$CONTAINER_UID"
+    ZWIFT_GID="$CONTAINER_GID"
+    PULSE_SERVER="/run/user/$CONTAINER_UID/pulse/native"
+    CONTAINER="$CONTAINER_TOOL"
+)
 
 # Define Base Container Parameters
 GENERAL_FLAGS=(
@@ -340,7 +349,7 @@ if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]; then
 
     DBUS_UNIX_SOCKET=${BASH_REMATCH[1]}
     if [[ -n "$DBUS_UNIX_SOCKET" ]]; then
-        echo "DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS//$LOCAL_UID/$CONTAINER_UID}" >> "$ENV_FILE"
+        ENVIRONMENT_VARIABLES+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//$LOCAL_UID/$CONTAINER_UID}")
         DBUS_CONFIG_FLAGS=(-v "$DBUS_UNIX_SOCKET":"${DBUS_UNIX_SOCKET//$LOCAL_UID/$CONTAINER_UID}")
     fi
 fi
@@ -360,11 +369,11 @@ fi
 
 # Setup Flags for Window Managers
 if [ $WINDOW_MANAGER == "Wayland" ]; then
-    {
-        echo "WINE_EXPERIMENTAL_WAYLAND=1"
-        echo "XDG_RUNTIME_DIR=/run/user/$CONTAINER_UID"
-        echo "WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
-    } >> "$ENV_FILE"
+    ENVIRONMENT_VARIABLES+=(
+        WINE_EXPERIMENTAL_WAYLAND="1"
+        XDG_RUNTIME_DIR="/run/user/$CONTAINER_UID"
+        WAYLAND_DISPLAY="$WAYLAND_DISPLAY"
+    )
     WM_FLAGS=(-v "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY":"${XDG_RUNTIME_DIR//$LOCAL_UID/$CONTAINER_UID}/$WAYLAND_DISPLAY")
 fi
 
@@ -373,7 +382,7 @@ if [ $WINDOW_MANAGER == "XWayland" ] || [ $WINDOW_MANAGER == "XOrg" ]; then
     if [ -z "$XAUTHORITY" ]; then
         WM_FLAGS=(-v /tmp/.X11-unix:/tmp/.X11-unix)
     else
-        echo "XAUTHORITY=${XAUTHORITY//$LOCAL_UID/$CONTAINER_UID}" >> "$ENV_FILE"
+        ENVIRONMENT_VARIABLES+=(XAUTHORITY="${XAUTHORITY//$LOCAL_UID/$CONTAINER_UID}")
         WM_FLAGS=(
             -v /tmp/.X11-unix:/tmp/.X11-unix
             -v "$XAUTHORITY":"${XAUTHORITY//$LOCAL_UID/$CONTAINER_UID}"
@@ -399,7 +408,7 @@ fi
 
 # If custom resolution is requested, pass environment variable to container
 if [[ -n $ZWIFT_OVERRIDE_RESOLUTION ]]; then
-    echo "ZWIFT_OVERRIDE_RESOLUTION=$ZWIFT_OVERRIDE_RESOLUTION" >> "$ENV_FILE"
+    ENVIRONMENT_VARIABLES+=(ZWIFT_OVERRIDE_RESOLUTION="$ZWIFT_OVERRIDE_RESOLUTION")
 fi
 
 # Read the user specified extra flags if any
@@ -416,6 +425,7 @@ POSITIONAL_ARGS=("$@")
 
 #########################
 ##### RUN CONTAINER #####
+
 CMD=(
     "$CONTAINER_TOOL" run
     "${GENERAL_FLAGS[@]}"
@@ -438,10 +448,18 @@ CMD=(
 
 # DRYRUN: print the exact command that would be executed, then exit
 if [[ -n "$DRYRUN" ]]; then
-    msgbox info "DRYRUN: would execute:"
-    msgbox info "  $(printf '%q ' "${CMD[@]}")"
+    msgbox ok "DRYRUN:"
+    msgbox ok "environment variables ($ENV_FILE):"
+    for env_var in "${ENVIRONMENT_VARIABLES[@]}"; do
+        msgbox ok "  ${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=REDACTED}"
+    done
+    msgbox ok "$CONTAINER_TOOL command:"
+    msgbox ok "  $(printf '%q ' "${CMD[@]}")"
     exit 0
 fi
+
+msgbox info "Writing environment variables to temporary file"
+printf "%s\n" "${ENVIRONMENT_VARIABLES[@]}" > "$ENV_FILE"
 
 # Execute: interactive (-it) should not be captured
 if [[ " ${ZWIFT_FG_FLAG[*]} " == *" -it "* ]]; then
