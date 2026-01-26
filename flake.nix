@@ -101,7 +101,7 @@
         zwift =
           { config, lib, ... }:
           let
-            inherit (lib.types) str bool;
+            inherit (lib.types) str bool enum;
             inherit (lib) mkEnableOption mkOption;
           in
           {
@@ -133,8 +133,11 @@
                 default = false;
               };
               containerTool = mkOption {
-                type = str;
-                default = "";
+                type = enum [
+                  "docker"
+                  "podman"
+                ];
+                default = "podman";
               };
               containerExtraArgs = mkOption {
                 type = str;
@@ -211,7 +214,8 @@
             };
 
             config = lib.mkIf config.programs.zwift.enable {
-              virtualisation.podman.enable = true;
+              virtualisation.podman.enable = lib.mkDefault (config.programs.zwift.containerTool == "podman");
+              virtualisation.docker.enable = lib.mkDefault (config.programs.zwift.containerTool == "docker");
               environment = {
                 systemPackages = with config.programs.zwift; [
                   (wrapPackage {
