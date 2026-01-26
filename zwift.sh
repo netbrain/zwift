@@ -192,11 +192,11 @@ if [ -n "$ZWIFT_USERNAME" ]; then
     fi
 
     # prefer passing secret, otherwise pass ZWIFT_PASSWORD as plain text
-    ZWIFT_USERNAME_FLAG="-e ZWIFT_USERNAME=$ZWIFT_USERNAME"
+    echo "ZWIFT_USERNAME=$ZWIFT_USERNAME" >> "$ENV_FILE"
     if [[ $HAS_PASSWORD_SECRET -eq "1" ]]; then
         ZWIFT_PASSWORD_SECRET="--secret $PASSWORD_SECRET_NAME,type=env,target=ZWIFT_PASSWORD"
     elif [[ $HAS_PLAINTEXT_PASSWORD -eq "1" ]]; then
-        ZWIFT_PASSWORD_SECRET="-e ZWIFT_PASSWORD=$ZWIFT_PASSWORD"
+        echo "ZWIFT_PASSWORD=$ZWIFT_PASSWORD" >> "$ENV_FILE"
     else
         msgbox info "No password found for $ZWIFT_USERNAME"
         msgbox info "  To avoid manually entering your Zwift password each time, you can either:"
@@ -412,7 +412,6 @@ fi
 read -r -a CONTAINER_EXTRA_FLAGS <<< "$CONTAINER_EXTRA_ARGS"
 
 # Normalize single-string flags into arrays for safe command construction
-read -r -a ZWIFT_USERNAME_FLAG_ARR <<< "$ZWIFT_USERNAME_FLAG"
 read -r -a ZWIFT_PASSWORD_SECRET_ARR <<< "$ZWIFT_PASSWORD_SECRET"
 read -r -a ZWIFT_WORKOUT_VOL_ARR <<< "$ZWIFT_WORKOUT_VOL"
 read -r -a ZWIFT_ACTIVITY_VOL_ARR <<< "$ZWIFT_ACTIVITY_VOL"
@@ -428,7 +427,6 @@ CMD=(
     "${GENERAL_FLAGS[@]}"
     "${CONT_SEC_FLAG[@]}"
     "${ZWIFT_FG_FLAG[@]}"
-    "${ZWIFT_USERNAME_FLAG_ARR[@]}"
     "${ZWIFT_PASSWORD_SECRET_ARR[@]}"
     "${ZWIFT_WORKOUT_VOL_ARR[@]}"
     "${ZWIFT_ACTIVITY_VOL_ARR[@]}"
