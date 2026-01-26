@@ -70,6 +70,9 @@ msgbox info "Preparing to launch Zwift"
 # Config early to allow setting of startup env files.
 # More ease of use starting from desktop icon.
 
+ENV_FILE="$HOME/config/zwift/.env"
+echo "" > "$ENV_FILE"
+
 # Check for other zwift configuration, sourced here and passed on to container as well
 load_config_file() {
     CONFIG_FILE="$1"
@@ -298,6 +301,8 @@ GENERAL_FLAGS=(
     -e ZWIFT_GID="$CONTAINER_GID"
     -e PULSE_SERVER="/run/user/$CONTAINER_UID/pulse/native"
     -e CONTAINER="$CONTAINER_TOOL"
+
+    --env-file "$ENV_FILE"
 
     -v "zwift-$USER":/home/user/.wine/drive_c/users/user/Documents/Zwift
     -v "/run/user/$LOCAL_UID/pulse":"/run/user/$CONTAINER_UID/pulse"
