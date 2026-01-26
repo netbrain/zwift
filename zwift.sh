@@ -289,18 +289,20 @@ fi
 #############################
 ##### PREPARE ALL FLAGS #####
 
+{
+    echo "DISPLAY=$DISPLAY"
+    echo "ZWIFT_UID=$CONTAINER_UID"
+    echo "ZWIFT_GID=$CONTAINER_GID"
+    echo "PULSE_SERVER=/run/user/$CONTAINER_UID/pulse/native"
+    echo "CONTAINER=$CONTAINER_TOOL"
+} >> "$ENV_FILE"
+
 # Define Base Container Parameters
 GENERAL_FLAGS=(
     --rm
     --network "$NETWORKING"
     --name "zwift-$USER"
     --hostname "$HOSTNAME"
-
-    -e DISPLAY="$DISPLAY"
-    -e ZWIFT_UID="$CONTAINER_UID"
-    -e ZWIFT_GID="$CONTAINER_GID"
-    -e PULSE_SERVER="/run/user/$CONTAINER_UID/pulse/native"
-    -e CONTAINER="$CONTAINER_TOOL"
 
     --env-file "$ENV_FILE"
 
@@ -336,10 +338,8 @@ if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]; then
 
     DBUS_UNIX_SOCKET=${BASH_REMATCH[1]}
     if [[ -n "$DBUS_UNIX_SOCKET" ]]; then
-        DBUS_CONFIG_FLAGS=(
-            -e DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//$LOCAL_UID/$CONTAINER_UID}"
-            -v "$DBUS_UNIX_SOCKET":"${DBUS_UNIX_SOCKET//$LOCAL_UID/$CONTAINER_UID}"
-        )
+        echo "DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS//$LOCAL_UID/$CONTAINER_UID}" >> "$ENV_FILE"
+        DBUS_CONFIG_FLAGS=(-v "$DBUS_UNIX_SOCKET":"${DBUS_UNIX_SOCKET//$LOCAL_UID/$CONTAINER_UID}")
     fi
 fi
 
@@ -358,25 +358,21 @@ fi
 
 # Setup Flags for Window Managers
 if [ $WINDOW_MANAGER == "Wayland" ]; then
-    WM_FLAGS=(
-        -e WINE_EXPERIMENTAL_WAYLAND=1
-        -e XDG_RUNTIME_DIR="/run/user/$CONTAINER_UID"
-        -e WAYLAND_DISPLAY="$WAYLAND_DISPLAY"
-
-        -v "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY":"${XDG_RUNTIME_DIR//$LOCAL_UID/$CONTAINER_UID}/$WAYLAND_DISPLAY"
-    )
+    {
+        echo "WINE_EXPERIMENTAL_WAYLAND=1"
+        echo "XDG_RUNTIME_DIR=/run/user/$CONTAINER_UID"
+        echo "WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
+    } >> "$ENV_FILE"
+    WM_FLAGS=(-v "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY":"${XDG_RUNTIME_DIR//$LOCAL_UID/$CONTAINER_UID}/$WAYLAND_DISPLAY")
 fi
 
 if [ $WINDOW_MANAGER == "XWayland" ] || [ $WINDOW_MANAGER == "XOrg" ]; then
     # If not XAuthority set then don't pass, hyprland is one that does not use it.
     if [ -z "$XAUTHORITY" ]; then
-        WM_FLAGS=(
-            -v /tmp/.X11-unix:/tmp/.X11-unix
-        )
+        WM_FLAGS=(-v /tmp/.X11-unix:/tmp/.X11-unix)
     else
+        echo "XAUTHORITY=${XAUTHORITY//$LOCAL_UID/$CONTAINER_UID}" >> "$ENV_FILE"
         WM_FLAGS=(
-            -e XAUTHORITY="${XAUTHORITY//$LOCAL_UID/$CONTAINER_UID}"
-
             -v /tmp/.X11-unix:/tmp/.X11-unix
             -v "$XAUTHORITY":"${XAUTHORITY//$LOCAL_UID/$CONTAINER_UID}"
         )
@@ -396,16 +392,12 @@ if [ "$CONTAINER_TOOL" == "podman" ]; then
         $CONTAINER_TOOL volume create "zwift-$USER"
     fi
 
-    GENERAL_FLAGS+=(
-        --userns "keep-id:uid=$CONTAINER_UID,gid=$CONTAINER_GID"
-    )
+    GENERAL_FLAGS+=(--userns "keep-id:uid=$CONTAINER_UID,gid=$CONTAINER_GID")
 fi
 
 # If custom resolution is requested, pass environment variable to container
 if [[ -n $ZWIFT_OVERRIDE_RESOLUTION ]]; then
-    GENERAL_FLAGS+=(
-        -e ZWIFT_OVERRIDE_RESOLUTION="$ZWIFT_OVERRIDE_RESOLUTION"
-    )
+    echo "ZWIFT_OVERRIDE_RESOLUTION=$ZWIFT_OVERRIDE_RESOLUTION" >> "$ENV_FILE"
 fi
 
 # Read the user specified extra flags if any
