@@ -23,7 +23,7 @@ fi
 
 # Message Box to simplify errors and questions.
 msgbox() {
-    TYPE="$1"       # Type: info, ok, warning, error, confirm
+    TYPE="$1"       # Type: info, ok, warning, error, question
     MSG="$2"        # Message: the message to display
     TIMEOUT="$3"    # Optional timeout: if explicitly set to 0, wait for user input to continue.
 
