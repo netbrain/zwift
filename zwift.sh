@@ -75,7 +75,7 @@ rm -f "$ENV_FILE"
 touch "$ENV_FILE"
 chmod 660 "$ENV_FILE"
 
-# Check for other zwift configuration, sourced here and passed on to container as well
+# Check for other zwift configuration, sourced here
 load_config_file() {
     CONFIG_FILE="$1"
     msgbox info "Looking for config file $CONFIG_FILE"
