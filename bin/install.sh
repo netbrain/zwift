@@ -74,7 +74,7 @@ create_directories() {
         msgbox info "  Creating directory $DIRECTORY"
 
         if ! mkdir -p "$DIRECTORY"; then
-            msgbox error "Could not create directory, aborting"
+            msgbox error "Could not create $DIRECTORY, aborting"
             exit 1
         fi
     }
@@ -96,7 +96,7 @@ download_zwift() {
         msgbox info "  Downloading $URL"
 
         if ! curl -fsSLo "$DESTINATION" "$URL"; then
-            msgbox error "Download failed, aborting"
+            msgbox error "Downloading $URL failed, aborting"
             exit 1
         fi
     }
