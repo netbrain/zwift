@@ -451,7 +451,9 @@ if [[ -n "$DRYRUN" ]]; then
     msgbox ok "DRYRUN:"
     msgbox ok "environment variables ($ENV_FILE):"
     for env_var in "${ENVIRONMENT_VARIABLES[@]}"; do
-        msgbox ok "  ${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=REDACTED}"
+        env_var=${env_var//\\/\\\\}                                  # escape backslashes
+        env_var=${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=REDACTED} # redact password
+        msgbox ok "  $env_var"
     done
     msgbox ok "$CONTAINER_TOOL command:"
     msgbox ok "  $(printf '%q ' "${CMD[@]}")"
