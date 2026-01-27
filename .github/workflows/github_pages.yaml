@@ -2,6 +2,8 @@ name: Build Jekyll site
 on:
   push:
     branches: ["gp-docs"]
+    paths:
+      - 'docs/**'
   workflow_dispatch:
 permissions:
   contents: read
