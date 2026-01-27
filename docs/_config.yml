@@ -1,7 +1,5 @@
 title: Zwift
 description: Easily Zwift on Linux
-baseurl: "/zwift"
-url: "https://netbrain.github.io"
 repository: netbrain/zwift
 permalink: pretty
 back_to_top: true
