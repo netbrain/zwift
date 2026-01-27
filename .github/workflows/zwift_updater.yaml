@@ -5,6 +5,7 @@ on:
     - cron: "0 * * * *"
 jobs:
   zwift_updater:
+    if: github.repository == 'netbrain/zwift'
     runs-on: ubuntu-22.04
     timeout-minutes: 360
     concurrency: zwift
@@ -55,4 +56,3 @@ jobs:
           docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
           docker push netbrain/zwift:$VERSION
           docker push netbrain/zwift:latest
-
