@@ -1,2 +1,6 @@
+title: Zwift
+description: Easily Zwift on Linux
+repository: netbrain/zwift
+remote_theme: just-the-docs/just-the-docs@v0.12.0
 plugins:
   - jemoji
