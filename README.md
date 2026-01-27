@@ -393,7 +393,7 @@ environment variables in camelCase:
 }
 ```
 
-### Firewal configuration
+### Firewall configuration
 
 You may need to adjust your firewall settings to allow multicast traffic for device (needed to communicate to the
 companion app as well as to access the Wahoo trainer and Zwift click devices).
@@ -409,6 +409,7 @@ networking = {
   };
 };
 ```
+
 ## Troubleshooting
 
 <details>
