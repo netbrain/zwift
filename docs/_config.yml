@@ -1,14 +1,14 @@
-title: Zwift Container
+title: netbrain/zwift
 description: Easily Zwift on Linux
 repository: netbrain/zwift
 permalink: pretty
 back_to_top: true
 back_to_top_text: "Back to top"
 aux_links:
-  "Zwift Container on GitHub":
+  "netbrain/zwift on GitHub":
     - "https://github.com/netbrain/zwift"
 nav_external_links:
-  - title: Zwift Container on GitHub
+  - title: netbrain/zwift on GitHub
     url: https://github.com/netbrain/zwift
 remote_theme: just-the-docs/just-the-docs@v0.12.0
 plugins:
