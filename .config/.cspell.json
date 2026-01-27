@@ -9,7 +9,7 @@
         "zwifters"
     ],
     "files": [
-        "**/*.md"
+        "**.md"
     ],
     "languageSettings": [
         {

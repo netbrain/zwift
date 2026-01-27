@@ -10,11 +10,10 @@
         "no-duplicate-heading": {
             "siblings_only": true
         },
-        "no-inline-html": false,
-        "ignore-front-matter": true
+        "no-inline-html": false
     },
     "gitignore": true,
     "globs": [
-        "**/*.md"
+        "**.md"
     ]
 }
