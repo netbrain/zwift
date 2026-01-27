@@ -6,6 +6,6 @@ description: "Easily Zwift on Linux!"
 permalink: /
 ---
 
-# Zwift
+# Zwift Container
 
 Easily Zwift on Linux! :100:
