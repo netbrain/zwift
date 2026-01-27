@@ -66,3 +66,43 @@ to allow multicast traffic on your network instead of disabling it entirely:
    ```
 
 </details>
+
+<details>
+<summary><h3>Where are the saves and why do I get a popup can't write to Document Folder?</h3></summary>
+
+This is a hang up from previous versions, mainly with podman. delete the volumes and after re-creation it should work fine.
+
+```text
+podman volume rm zwift-xxxxx
+```
+
+or
+
+```text
+docker volume rm zwift-xxxxx
+```
+
+**NOTE**: if you see a weird volume e.g. `zwift-naeva` it is a hang up from the past, delete it.
+
+</details>
+
+<details>
+<summary><h3>I sometimes get a popup Not responding why?</h3></summary>
+
+For Gnome it is just timing out before zwift responds, just extend the timeout.
+
+```text
+gsettings set org.gnome.mutter check-alive-timeout 60000
+```
+
+</details>
+
+<details>
+<summary><h3>The container is slow to start, why?</h3></summary>
+
+If your `$(id -u)` or `$(id -g)` is not equal to 1000 then this would cause the zwift container to re-map all files (`chown`,
+`chgrp`) within the container so there is no uid/gid conflicts. So if speed is a concern of yours, consider changing your user
+to match the containers uid and gid using `usermod` or contribute a better solution for handling uid/gid remapping in containers
+:smiley:
+
+</details>

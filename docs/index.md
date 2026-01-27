@@ -132,37 +132,6 @@ From Podman 4.3 this became automatic by providing the Container UID/GID and pod
 NOTE: Using ZWIFT_UID/GID will only work if the user starting podman has access to the `/run/user/$ZWIFT_UID` resources and does
 not work the same way as in Docker so is not supported.
 
-## Where are the saves and why do I get a popup can't write to Document Folder?
-
-This is a hang up from previous versions, mainly with podman. delete the volumes and after re-creation it should work fine.
-
-```text
-podman volume rm zwift-xxxxx
-```
-
-or
-
-```text
-docker volume rm zwift-xxxxx
-```
-
-NOTE: if you see a weird volume e.g. `zwift-naeva` it is a hang up from the past, delete it.
-
-## I sometimes get a popup Not responding why?
-
-For Gnome it is just timing out before zwift responds, just extend the timeout.
-
-```text
-gsettings set org.gnome.mutter check-alive-timeout 60000
-```
-
-## The container is slow to start, why?
-
-If your `$(id -u)` or `$(id -g)` is not equal to 1000 then this would cause the zwift container to re-map all files (`chown`,
-`chgrp`) within the container so there is no uid/gid conflicts. So if speed is a concern of yours, consider changing your user
-to match the containers uid and gid using `usermod` or contribute a better solution for handling uid/gid remapping in containers
-:smiley:
-
 ## How do I connect my trainer, heart rate monitor, etc?
 
 You can [use your phone as a bridge](https://support.zwift.com/using-the-zwift-companion-app-Hybn8qzPr).
