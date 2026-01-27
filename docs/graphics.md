@@ -54,6 +54,8 @@ different profiles have changed to what is in the table listed above and for exa
 exists. If a `graphics.txt` does not exist and the `ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically
 the first time zwift is launched.
 
+## How can I change the game resolution?
+
 Aside from the graphics profile which is assigned by zwift and cannot be changed, there is also the in-game setting to change
 the display resolution. Changing this resolution does not change the graphics profile and as such does not affect the quality of
 the textures, shadows, and other graphics options. It only affects the resolution of the game itself. Which resolutions are
