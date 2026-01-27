@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
 jobs:
   zwift_build:
+    if: github.repository == 'netbrain/zwift'
     runs-on: ubuntu-22.04
     timeout-minutes: 360
     strategy:

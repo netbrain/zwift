@@ -7,6 +7,7 @@ on:
 
 jobs:
   zwift_push:
+    if: github.repository == 'netbrain/zwift'
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     concurrency: zwift
