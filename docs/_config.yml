@@ -1,6 +1,11 @@
 title: Zwift
 description: Easily Zwift on Linux
+baseurl: "/zwift-linux"
+url: "https://glennvl.github.io"
 repository: netbrain/zwift
+permalink: pretty
+back_to_top: true
+back_to_top_text: "Back to top"
 remote_theme: just-the-docs/just-the-docs@v0.12.0
 plugins:
   - jemoji

@@ -10,7 +10,8 @@
         "no-duplicate-heading": {
             "siblings_only": true
         },
-        "no-inline-html": false
+        "no-inline-html": false,
+        "ignore-front-matter": true
     },
     "gitignore": true,
     "globs": [
