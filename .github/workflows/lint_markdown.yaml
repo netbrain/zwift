@@ -2,10 +2,10 @@ name: Validate markdown
 on:
   pull_request:
     paths:
-      - 'README.md'
+      - '**.md'
   push:
     paths:
-      - 'README.md'
+      - '**.md'
 jobs:
   validate-readme-markdown:
     runs-on: ubuntu-latest

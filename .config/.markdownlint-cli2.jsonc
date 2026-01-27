@@ -15,6 +15,6 @@
     },
     "gitignore": true,
     "globs": [
-        "README.md"
+        "**/*.md"
     ]
 }
