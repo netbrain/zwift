@@ -1,6 +1,7 @@
 title: netbrain/zwift
 description: Easily Zwift on Linux
 repository: netbrain/zwift
+color_scheme: dark
 permalink: pretty
 back_to_top: true
 back_to_top_text: "Back to top"
