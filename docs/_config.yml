@@ -12,5 +12,20 @@ nav_external_links:
   - title: netbrain/zwift on GitHub
     url: https://github.com/netbrain/zwift
 remote_theme: just-the-docs/just-the-docs@v0.12.0
+callouts:
+  highlight:
+    color: yellow
+  important:
+    title: Important
+    color: blue
+  new:
+    title: New
+    color: green
+  note:
+    title: Note
+    color: purple
+  warning:
+    title: Warning
+    color: red
 plugins:
   - jemoji

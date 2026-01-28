@@ -50,9 +50,10 @@ You can find more information about these settings in this [Zwift Insider](https
 article. Note that this is an older article and as such some of the information in it is outdated. The default values of the
 different profiles have changed to what is in the table listed above and for example the `aniso` setting does not exist anymore.
 
-> :warning: **Before using ZWIFT_OVERRIDE_GRAPHICS**: This option requires that the `$HOME/.config/zwift/graphics.txt` file
-exists. If a `graphics.txt` does not exist and the `ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically
-the first time zwift is launched.
+{: .important }
+**Before using ZWIFT_OVERRIDE_GRAPHICS**: This option requires that the `$HOME/.config/zwift/graphics.txt` file exists. If a
+`graphics.txt` does not exist and the `ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically the first time
+zwift is launched.
 
 ## How can I change the game resolution?
 
@@ -74,5 +75,6 @@ The full list of available resolutions is:
 | Ultra  | 1440p      | 2560x1440 |
 | 4k UHD | 2160p      | 3840x2160 |
 
-> :warning: **Before using ZWIFT_OVERRIDE_RESOLUTION**: This option requires that the `prefs.xml` file exists. Make sure to
-  launch zwift at least once so it creates the `prefs.xml` file before using the `ZWIFT_OVERRIDE_RESOLUTION` option.
+{: .important }
+**Before using ZWIFT_OVERRIDE_RESOLUTION**: This option requires that the `prefs.xml` file exists. Make sure to launch zwift at
+least once so it creates the `prefs.xml` file before using the `ZWIFT_OVERRIDE_RESOLUTION` option.

@@ -10,8 +10,9 @@ permalink: /
 
 Easily Zwift on Linux! :100:
 
-> :warning: **Podman Support 4.3 and Later.**: Podman before 4.3 does not support `--userns=keep-id:uid=xxx,gid=xxx` and will
-  not start correctly, this impacts Ubuntu 22.04 and related builds such as PopOS 22.04. See Podman Section below.
+{: .warning }
+**Podman Support 4.3 and Later.**: Podman before 4.3 does not support `--userns=keep-id:uid=xxx,gid=xxx` and will not start
+correctly, this impacts Ubuntu 22.04 and related builds such as PopOS 22.04. See Podman Section below.
 
 If `dbus` is available through a unix socket, the screensaver will be inhibited every 30 seconds to prevent `xscreensaver` or
 other programs listening on the bus from inhibiting the screen.
@@ -30,7 +31,8 @@ Where `username` is your zwift account email, and `password` your zwift account 
 The credentials will be used to authenticate before launching the zwift app, and the user should be logged in automatically in
 the game.
 
-NOTE: This will be loaded by `zwift.sh` in cleartext as environment variables into the container.
+{: .note }
+This will be loaded by `zwift.sh` in cleartext as environment variables into the container.
 
 Alternatively, instead of saving your password in the file, you can save your password in the secret service keyring like so:
 
@@ -41,12 +43,14 @@ secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwi
 In this case the username should still be saved in the config file and the password will be read upon startup from the keyring
 and passed as a secret into the container (where it is an environment variable).
 
-> :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put
-  `ZWIFT_PASSWORD="password"` it tries to use `"password"` and not just `password`, same for `''`.  In addition do not add a
-  space to the end of the line it will be sent as part of the password or username. This applies to `ZWIFT_USERNAME` and
-  `ZWIFT_PASSWORD`.
+{: .warning }
+**Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put
+`ZWIFT_PASSWORD="password"` it tries to use `"password"` and not just `password`, same for `''`.  In addition do not add a space
+to the end of the line it will be sent as part of the password or username. This applies to `ZWIFT_USERNAME` and
+`ZWIFT_PASSWORD`.
 
-NOTE: You can also add other environment variable from the table to make starting easier:
+{: .note }
+You can also add other environment variable from the table to make starting easier:
 
 ```text
 ZWIFT_USERNAME=username
@@ -90,12 +94,15 @@ logins it may show one subdirectory for each, to find the ID you can use the fol
 
 Webpage for finding internal ID: <https://www.virtualonlinecycling.com/p/zwiftid.html>
 
-NOTES:
+{: .note }
+Any workouts created already will be copied into this folder on first start
 
-- Any workouts created already will be copied into this folder on first start
-- To add a new workout just copy the zwo file to this directory
-- Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the
-  zwift menu
+{: .note }
+To add a new workout just copy the zwo file to this directory
+
+{: .note }
+Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the
+zwift menu
 
 ## How can I build the image myself?
 
