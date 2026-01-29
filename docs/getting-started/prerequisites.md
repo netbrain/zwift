@@ -8,13 +8,13 @@ nav_order: 1
 
 ## Minimum System Requirements
 
-| Component             | Minimum Requirements   |
-|-----------------------|------------------------|
-| **Operating System**  | Linux (64-bit)         |
-| **Container Runtime** | Docker or Podman 4.3+  |
-| **RAM**               | 8 GB                   |
-| **Graphics**          | OpenGL 3.1+ compatible |
-| **Storage**           | 15 GB of free space    |
+| Component             | Minimum Requirements                            |
+|-----------------------|-------------------------------------------------|
+| **Operating System**  | Linux (64-bit)                                  |
+| **Container Runtime** | Docker or Podman 4.3+                           |
+| **RAM**               | 8 GB                                            |
+| **Graphics**          | OpenGL 3.1+ compatible (integrated or discrete) |
+| **Storage**           | 15 GB of free space                             |
 
 ## Required Software
 
