@@ -29,10 +29,13 @@ nav_order: 1
 ### Additional Dependencies for NVIDIA users
 
 - **NVIDIA Container Toolkit**
-  - Install from [install guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+  - Install from [NVIDIA Container Toolkit installation guide](
+    https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+
+{: .important }
+**Podman users**: Also follow the [Container Device Interface guide](
+  https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html)
 
 {: .note }
-**Note for Podman users**: Also follow the Container Device Interface
-[guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html).
-
-[Next: Installation](/getting-started/installation){: .btn .btn-green }
+**NVIDIA Container Toolkit before v1.18.0**: The cdi specification file needs to be generated manually each time
+the NVIDIA driver is updated using the following command: `sudo nvidia-ctk cdi generate --output=/var/run/cdi/nvidia.yaml`
