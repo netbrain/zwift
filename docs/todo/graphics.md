@@ -1,6 +1,7 @@
 ---
 title: Customize Zwift graphics
-nav_order: 3
+parent: TODO
+nav_order: 1
 ---
 
 # Customize Zwift graphics

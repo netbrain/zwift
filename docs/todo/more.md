@@ -1,6 +1,7 @@
 ---
 title: More stuff
-nav_order: 6
+nav_order: 5
+parent: TODO
 ---
 
 If `dbus` is available through a unix socket, the screensaver will be inhibited every 30 seconds to prevent `xscreensaver` or
