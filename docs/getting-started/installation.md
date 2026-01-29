@@ -10,6 +10,8 @@ nav_order: 2
 
 ### One-Line Installation
 
+![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/example.gif)
+
 ```bash
 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
 ```
