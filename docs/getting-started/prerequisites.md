@@ -26,7 +26,11 @@ nav_order: 1
   - Version 4.3+ recommended
   - Install from [Podman installation guide](https://podman.io/getting-started/installation)
 
-### Additional Dependencies for NVIDIA users
+{: .warning }
+**Podman 4.3 and earlier**: Does not support `--userns=keep-id:uid=xxx,gid=xxx` and will not start correctly, this impacts
+Ubuntu 22.04 and related builds such as PopOS! 22.04.
+
+### Additional Dependencies for NVIDIA graphics cards
 
 - **NVIDIA Container Toolkit**
   - Install from [NVIDIA Container Toolkit installation guide](

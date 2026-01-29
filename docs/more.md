@@ -3,10 +3,6 @@ title: More stuff
 nav_order: 6
 ---
 
-{: .warning }
-**Podman Support 4.3 and Later.**: Podman before 4.3 does not support `--userns=keep-id:uid=xxx,gid=xxx` and will not start
-correctly, this impacts Ubuntu 22.04 and related builds such as PopOS 22.04. See Podman Section below.
-
 If `dbus` is available through a unix socket, the screensaver will be inhibited every 30 seconds to prevent `xscreensaver` or
 other programs listening on the bus from inhibiting the screen.
 
