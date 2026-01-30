@@ -51,7 +51,7 @@ These environment variables can be used to alter the execution of the zwift bash
 - `CONTAINER_TOOL="docker" zwift` will launch zwift with docker even if podman is installed
 - `CONTAINER_EXTRA_ARGS="--cpus=1.5"` will pass `--cpus=1.5` as extra argument to docker/podman (will use at most 1.5 CPU cores,
    this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
-- `USER="Fred" zwift` perfect if your neighbor Fred want's to try zwift, and you don't want to mess up your zwift config.
+- `USER="fred" zwift` perfect if your neighbor Fred want's to try zwift, and you don't want to mess up your zwift config.
 - `NETWORKING="host" zwift` will use host networking which may be needed to have zwift talk to wifi enabled trainers.
 - `ZWIFT_UID="123" ZWIFT_GID="123" zwift` will run zwift as the given uid and gid. By default zwift runs with the uid and gid of
   the user that started the container. You should not need to change this except in rare cases.
@@ -60,19 +60,39 @@ These environment variables can be used to alter the execution of the zwift bash
 
 ## Configuration files
 
-You can also set these in `$HOME/.config/zwift/config` or `$HOME/.config/zwift/$USER-config` to be sourced by the `zwift.sh`
-script on execution.
+You can also save these in a configuration file that is automatically loaded by the zwift script.
 
-### Example
+- `$HOME/.config/zwift/config`
+- `$HOME/.config/zwift/$USER-config`
 
-The `$HOME/.config/zwift/config` file could look like:
+### Example config file
 
 ```bash
 ZWIFT_USERNAME='user@mail.com'
-ZWIFT_PASSWORD='this % is \ a "special" / $(password) with ${characters}, \n is literal and not a newline'
 ZWIFT_WORKOUT_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Workouts"
 ZWIFT_LOG_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Logs"
 ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift"
 NETWORKING="host"
 ZWIFT_OVERRIDE_GRAPHICS="1"
 ```
+
+### Example: Two Zwift users sharing a single Linux user account
+
+- The `$HOME/.config/zwift/config` file could look like:
+
+  ```bash
+  ZWIFT_USERNAME='bob@mail.com'
+  ZWIFT_PASSWORD='the password for bob'
+  NETWORKING="host"
+  ZWIFT_OVERRIDE_GRAPHICS="1"
+  ```
+
+- The `$HOME/.config/zwift/fred-config` file could look like:
+
+  ```bash
+  ZWIFT_USERNAME='fred@mail.com'
+  ZWIFT_PASSWORD='the password for fred'
+  ```
+
+- Running `USER="fred" zwift` will first load the `config` file and then the `fred-config` file. The values in the `fred-config`
+  file will overwrite the values in the `config` file. So the zwift script will use Fred's username and password.
