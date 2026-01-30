@@ -39,17 +39,6 @@ and passed as a secret into the container (where it is an environment variable).
 to the end of the line it will be sent as part of the password or username. This applies to `ZWIFT_USERNAME` and
 `ZWIFT_PASSWORD`.
 
-{: .note }
-You can also add other environment variable from the table to make starting easier:
-
-```text
-ZWIFT_USERNAME=username
-ZWIFT_PASSWORD=password
-
-ZWIFT_WORKOUT_DIR=~/.config/zwift/workouts
-WINE_EXPERIMENTAL_WAYLAND=1
-```
-
 ## Podman Support
 
 When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need
@@ -74,7 +63,7 @@ over wifi to your PC running Zwift.
 ## How can I add custom .zwo files?
 
 You can map the zwift Workout folder using the environment variable `ZWIFT_WORKOUT_DIR`, for example if your workout directory
-is in `$HOME/zwift_workouts` then you would provide the environment variable `ZWIFT_WORKOUT_DIR=$HOME/zwift_workouts`.
+is in `$HOME/zwift_workouts` then you would provide the environment variable `ZWIFT_WORKOUT_DIR="$HOME/zwift_workouts"`.
 
 You can add this variable into `$HOME/.config/zwift/config` or `$HOME/.config/zwift/$USER-config`.
 

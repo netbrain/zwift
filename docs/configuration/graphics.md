@@ -13,7 +13,7 @@ ultra. This profile determines the level of detail and the quality of the textur
 which graphics profile the game uses. When the default options of the profile aren't optimal (for example when zwift doesn't
 recognize your graphics card and you only get the `medium` profile or when your cpu is the bottleneck and your fps is on the low
 side because zwift assigned the ultra profile), it is possible to manually tweak the graphics settings by setting
-`ZWIFT_OVERRIDE_GRAPHICS=1`, and editing the settings in the `$HOME/.config/zwift/graphics.txt` or
+`ZWIFT_OVERRIDE_GRAPHICS="1"`, and editing the settings in the `$HOME/.config/zwift/graphics.txt` or
 `$HOME/.config/zwift/$USER-graphics.txt` file as you see fit. To find out which profile zwift assigned, you can upload your
 zwift log to <https://trainerdx.com>.
 
@@ -45,7 +45,7 @@ set gFXAA=1
 set gShowFPS=1
 ```
 
-Start zwift with the `ZWIFT_OVERRIDE_GRAPHICS=1 zwift` command to use the settings from the graphics.txt file.
+Start zwift with the `ZWIFT_OVERRIDE_GRAPHICS="1" zwift` command to use the settings from the graphics.txt file.
 
 You can find more information about these settings in this [Zwift Insider](https://zwiftinsider.com/config-file-tweaks/)
 article. Note that this is an older article and as such some of the information in it is outdated. The default values of the
@@ -64,7 +64,7 @@ the textures, shadows, and other graphics options. It only affects the resolutio
 available in the zwift in-game setting is dependent on the graphics profile assigned based on your graphics card. If zwift does
 not recognize your graphics card or you have a WQHD or UHD display and zwift does not offer the higher resolutions, it is
 possible to manually override the game resolution by setting the `ZWIFT_OVERRIDE_RESOLUTION` option. For example to force zwift
-to use UHD you can launch it using `ZWIFT_OVERRIDE_RESOLUTION=3840x2160 zwift`.
+to use UHD you can launch it using `ZWIFT_OVERRIDE_RESOLUTION="3840x2160" zwift`.
 
 The full list of available resolutions is:
 
