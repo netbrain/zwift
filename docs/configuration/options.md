@@ -79,8 +79,6 @@ of the single value `my password`.
 > `DONT_PULL="1"`
 >
 > `CONTAINER_EXTRA_ARGS="--cups=1.5"`
->
-> `...`
 
 Most environment variables don't have special characters aside from spaces. For those variables is it enough to wrap them in
 double quotes.
@@ -94,7 +92,8 @@ happening. Using `ZWIFT_PASSWORD='Pa$word\n123'` would treat all characters lite
 {: .important }
 > Since we use single quotes around the password, passwords that contain single quotes still pose an issue. For example
 > `bob's excellent pa$$w0rd` would cause all sorts of nasty errors being spit out by the zwift script. Single quotes in the
-> password need to be replaced by a different character sequence to make them work.
+> password need to be replaced by a different character sequence to make them work. If multiple single quotes are present in the
+> password, each of them needs to be replaced according to the rules below.
 >
 > `ZWIFT_PASSWORD='bob'"'"'s excellent pa$$w0rd'`
 >
