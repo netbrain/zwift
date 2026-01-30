@@ -51,7 +51,8 @@ These environment variables can be used to alter the execution of the zwift bash
 
 - `DONT_PULL="1" zwift` will prevent docker/podman pull before launch
 - `DRYRUN="1" zwift` will print the underlying container run command and exit (no container is started)
-- `INTERACTIVE="1" zwift` will force foreground `-it` and set `--entrypoint bash` for step-by-step debugging inside the container
+- `INTERACTIVE="1" zwift` will force foreground `-it` and set `--entrypoint bash` for step-by-step debugging inside the
+   container
 - `CONTAINER_TOOL="docker" zwift` will launch zwift with docker even if podman is installed
 - `CONTAINER_EXTRA_ARGS="--cpus=1.5"` will pass `--cpus=1.5` as extra argument to docker/podman (will use at most 1.5 CPU cores,
    this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
