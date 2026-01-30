@@ -7,32 +7,6 @@ parent: TODO
 If `dbus` is available through a unix socket, the screensaver will be inhibited every 30 seconds to prevent `xscreensaver` or
 other programs listening on the bus from inhibiting the screen.
 
-## How can I persist my login information so i don't need to login on every startup?
-
-To authenticate through Zwift automatically simply add the following file `$HOME/.config/zwift/config`:
-
-```text
-ZWIFT_USERNAME=username
-ZWIFT_PASSWORD=password
-```
-
-Where `username` is your zwift account email, and `password` your zwift account password, respectively.
-
-The credentials will be used to authenticate before launching the zwift app, and the user should be logged in automatically in
-the game.
-
-{: .note }
-This will be loaded by `zwift.sh` in cleartext as environment variables into the container.
-
-Alternatively, instead of saving your password in the file, you can save your password in the secret service keyring like so:
-
-```text
-secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwift username ${ZWIFT_USERNAME}
-```
-
-In this case the username should still be saved in the config file and the password will be read upon startup from the keyring
-and passed as a secret into the container (where it is an environment variable).
-
 ## Podman Support
 
 When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need
