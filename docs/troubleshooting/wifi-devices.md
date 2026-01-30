@@ -37,7 +37,7 @@ to allow multicast traffic on your network instead of disabling it entirely:
 
    **Via CLI**:
 
-   ```console
+   ```bash
    nmcli connection modify "<network name>" connection.zone home
    ```
 
@@ -45,7 +45,7 @@ to allow multicast traffic on your network instead of disabling it entirely:
 
    The zone "home" might already be pre-configured with multicast support. If not, manually allow multicast with:
 
-   ```console
+   ```bash
    firewall-cmd --permanent --zone=home --add-rich-rule='rule family="ipv4" destination address="224.0.0.0/4" protocol value="udp" accept'
    ```
 
@@ -53,12 +53,12 @@ to allow multicast traffic on your network instead of disabling it entirely:
 
    **Reload configuration** (recommended, no service interruption):
 
-   ```console
+   ```bash
    firewall-cmd --reload
    ```
 
    **Restart the service**:
 
-   ```console
+   ```bash
    systemctl restart firewalld
    ```
