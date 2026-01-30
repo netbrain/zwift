@@ -105,7 +105,7 @@ happening. Using `ZWIFT_PASSWORD='Pa$word\n123'` would treat all characters lite
 >
 > For a password with value `'pas`, set `ZWIFT_PASSWORD="'"'pas'` (prepend `'pas'` with `"'"`)
 >
-> For a password with value `'pas`, set `ZWIFT_PASSWORD='pas'"'"` (append `'"'` to `'pas'`)
+> For a password with value `pas'`, set `ZWIFT_PASSWORD='pas'"'"` (append `'"'` to `'pas'`)
 
 ## Configuration files
 
