@@ -86,26 +86,26 @@ Most environment variables don't have special characters aside from spaces. For 
 double quotes.
 
 Passwords (and to some extend email addresses) can however contain nearly every possible character sequence. Double quotes are
-not enough to stop escape sequences and bash code from being substituted. For example writing `MY_PASSWORD="Pa$word\n123"` would
-try to substitute `$word` for the value of the variable `word`, which would most likely be empty. It would also replace `\n`
-with a new line. This is not desirable. Instead of double quotes, single quotes can be used to prevent this expansion from
-happening. Using `MY_PASSWORD='Pa$word\n123'` would treat all characters literally and behave as expected.
+not enough to stop escape sequences and bash code from being substituted. For example writing `ZWIFT_PASSWORD="Pa$word\n123"`
+would try to substitute `$word` for the value of the variable `word`, which would most likely be empty. It would also replace
+`\n` with a new line. This is not desirable. Instead of double quotes, single quotes can be used to prevent this expansion from
+happening. Using `ZWIFT_PASSWORD='Pa$word\n123'` would treat all characters literally and behave as expected.
 
 {: .important }
 > Since we use single quotes around the password, passwords that contain single quotes still pose an issue. For example
 > `bob's excellent pa$$w0rd` would cause all sorts of nasty errors being spit out by the zwift script. Single quotes in the
 > password need to be replaced by a different character sequence to make them work.
 >
-> `MY_PASSWORD='bob'"'"'s excellent pa$$w0rd'`
+> `ZWIFT_PASSWORD='bob'"'"'s excellent pa$$w0rd'`
 >
 > The sequence is a bit different depending on whether the `'` appears at the start, somewhere in the middle or at the end of
 > the password.
 >
-> For a password with value `p'as`, set `MY_PASSWORD='p'"'"'as'` (replace `'` with `'"'"'`)
+> For a password with value `p'as`, set `ZWIFT_PASSWORD='p'"'"'as'` (replace `'` with `'"'"'`)
 >
-> For a password with value `'pas`, set `MY_PASSWORD="'"'pas'` (prepend `'pas'` with `"'"`)
+> For a password with value `'pas`, set `ZWIFT_PASSWORD="'"'pas'` (prepend `'pas'` with `"'"`)
 >
-> For a password with value `'pas`, set `MY_PASSWORD='pas'"'"` (append `'"'` to `'pas'`)
+> For a password with value `'pas`, set `ZWIFT_PASSWORD='pas'"'"` (append `'"'` to `'pas'`)
 
 ## Configuration files
 
