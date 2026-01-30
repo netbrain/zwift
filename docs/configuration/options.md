@@ -58,12 +58,64 @@ These environment variables can be used to alter the execution of the zwift bash
 - `WINE_EXPERIMENTAL_WAYLAND="1" zwift` This will start zwift using Wayland and not XWayland. It will start full screen
   windowed.
 
+## Syntax
+
+Special characters in the value of environment variables need to be escaped to make sure they are interpreted literally. For
+example `ZWIFT_PASSWORD=my password` would cause the `ZWIFT_PASSWORD` variable to have two values `my` and `password` instead
+of the single value `my password`.
+
+{: .important }
+> Use single quotes to escape the value of the username and password!
+>
+> `ZWIFT_USERNAME='user@mail.com'`
+>
+> `ZWIFT_PASSWORD='my password'`
+
+{: .important }
+> Use double quotes to escape the value of all environment variables except for username and password!
+>
+> `ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift"`
+>
+> `DONT_PULL="1"`
+>
+> `CONTAINER_EXTRA_ARGS="--cups=1.5"`
+>
+> `...`
+
+Most environment variables don't have special characters aside from spaces. For those variables is it enough to wrap them in
+double quotes.
+
+Passwords (and to some extend email addresses) can however contain nearly every possible character sequence. Double quotes are
+not enough to stop escape sequences and bash code from being substituted. For example writing `MY_PASSWORD="Pa$word\n123"` would
+try to substitute `$word` for the value of the variable `word`, which would most likely be empty. It would also replace `\n`
+with a new line. This is not desirable. Instead of double quotes, single quotes can be used to prevent this expansion from
+happening. Using `MY_PASSWORD='Pa$word\n123'` would treat all characters literally and behave as expected.
+
+{: .important }
+> Since we use single quotes around the password, passwords that contain single quotes still pose an issue. For example
+> `bob's excellent pa$$w0rd` would cause all sorts of nasty errors being spit out by the zwift script. Single quotes in the
+> password need to be replaced by a different character sequence to make them work.
+>
+> `MY_PASSWORD='bob'"'"'s excellent pa$$w0rd'`
+>
+> The sequence is a bit different depending on whether the `'` appears at the start, somewhere in the middle or at the end of the
+> password.
+>
+> For a password with value `p'as`, set `MY_PASSWORD='p'"'"'as'` (replace `'` with `'"'"'`)
+>
+> For a password with value `'pas`, set `MY_PASSWORD="'"'pas'` (prepend `'pas'` with `"'"`)
+>
+> For a password with value `'pas`, set `MY_PASSWORD='pas'"'"` (append `'"'` to `'pas'`)
+
 ## Configuration files
 
 You can also save these in a configuration file that is automatically loaded by the zwift script.
 
 - `$HOME/.config/zwift/config`
 - `$HOME/.config/zwift/$USER-config`
+
+{: .note }
+The same syntax rules apply for the configuration files as for passing environment variables on the command line.
 
 ### Example config file
 

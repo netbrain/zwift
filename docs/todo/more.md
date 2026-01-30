@@ -33,12 +33,6 @@ secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwi
 In this case the username should still be saved in the config file and the password will be read upon startup from the keyring
 and passed as a secret into the container (where it is an environment variable).
 
-{: .warning }
-**Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put
-`ZWIFT_PASSWORD="password"` it tries to use `"password"` and not just `password`, same for `''`.  In addition do not add a space
-to the end of the line it will be sent as part of the password or username. This applies to `ZWIFT_USERNAME` and
-`ZWIFT_PASSWORD`.
-
 ## Podman Support
 
 When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need
