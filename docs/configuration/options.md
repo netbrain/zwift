@@ -44,6 +44,29 @@ These environment variables can be used to alter the execution of the zwift bash
 
 ### Examples
 
+<dl>
+    <dt>`DONT_PULL="1" zwift`</dt>
+    <dd>Will prevent docker/podman pull before launch</dd>
+    <dt>`DRYRUN="1" zwift`</dt>
+    <dd>Will print the underlying container run command and exit (no container is started)</dd>
+    <dt>`INTERACTIVE="1" zwift`</dt>
+    <dd>Will force foreground `-it` and set `--entrypoint bash` for step-by-step debugging inside the container</dd>
+    <dt>`CONTAINER_TOOL="docker" zwift`</dt>
+    <dd>Will launch zwift with docker even if podman is installed</dd>
+    <dt>`CONTAINER_EXTRA_ARGS="--cpus=1.5"`</dt>
+    <dd>Will pass `--cpus=1.5` as extra argument to docker/podman (will use at most 1.5 CPU cores, this is useful on laptops to
+        avoid overheating and subsequent throttling of the CPU by the system).</dd>
+    <dt>`USER="fred" zwift`</dt>
+    <dd>Perfect if your neighbor Fred want's to try zwift, and you don't want to mess up your zwift config</dd>
+    <dt>`NETWORKING="host" zwift`</dt>
+    <dd>Will use host networking which may be needed to have zwift talk to wifi enabled trainers</dd>
+    <dt>`ZWIFT_UID="123" ZWIFT_GID="123" zwift`</dt>
+    <dd>Will run zwift as the given uid and gid. By default zwift runs with the uid and gid of the user that started the
+        container. You should not need to change this except in rare cases.</dd>
+    <dt>`WINE_EXPERIMENTAL_WAYLAND="1" zwift`</dt>
+    <dd>This will start zwift using Wayland and not XWayland. It will start full screen windowed</dd>
+</dl>
+
 - `DONT_PULL="1" zwift` will prevent docker/podman pull before launch
 - `DRYRUN="1" zwift` will print the underlying container run command and exit (no container is started)
 - `INTERACTIVE="1" zwift` will force foreground `-it` and set `--entrypoint bash` for step-by-step debugging inside the
