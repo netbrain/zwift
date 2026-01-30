@@ -98,8 +98,8 @@ happening. Using `MY_PASSWORD='Pa$word\n123'` would treat all characters literal
 >
 > `MY_PASSWORD='bob'"'"'s excellent pa$$w0rd'`
 >
-> The sequence is a bit different depending on whether the `'` appears at the start, somewhere in the middle or at the end of the
-> password.
+> The sequence is a bit different depending on whether the `'` appears at the start, somewhere in the middle or at the end of
+> the password.
 >
 > For a password with value `p'as`, set `MY_PASSWORD='p'"'"'as'` (replace `'` with `'"'"'`)
 >
