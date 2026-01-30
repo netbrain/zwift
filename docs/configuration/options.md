@@ -39,7 +39,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | `VGA_DEVICE_FLAG`           |                            | Override GPU/device flags for container (`--gpus=all`)                                                                                 |
 | `PRIVILEGED_CONTAINER`      | `0`                        | If set, container will run in privileged mode, SELinux label separation will be disabled (`--privileged --security-opt label=disable`) |
 
-{: .warning }
+{: .important }
 `ZWIFT_UID` and `ZWIFT_GID` can only used in X11. They do not work in wayland!
 
 ### Examples

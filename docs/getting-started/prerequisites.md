@@ -35,17 +35,9 @@ Ubuntu 22.04 and related builds such as PopOS! 22.04.
 - **NVIDIA Container Toolkit**
   - Install from [NVIDIA Container Toolkit installation guide](
     https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
-
-{: .important }
-**Podman users**: Also follow the [Container Device Interface guide](
-  https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html)
+  - Podman: Also follow the [Container Device Interface guide](
+    https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html)
 
 {: .note }
-**NVIDIA Container Toolkit before v1.18.0**: The cdi specification file needs to be generated manually each time
-the NVIDIA driver is updated using the following command: `sudo nvidia-ctk cdi generate --output=/var/run/cdi/nvidia.yaml`
-
-{: .note }
-> If you're running Docker with CDI and Zwift fails to launch, try the long form `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"`
-> (instead of `"--gpus=all"`).
->
-> See <https://github.com/netbrain/zwift/issues/208> for context.
+**Podman and NVIDIA Container Toolkit before v1.18.0**: The cdi specification file needs to be generated manually each time the
+NVIDIA driver is updated using the following command: `sudo nvidia-ctk cdi generate --output=/var/run/cdi/nvidia.yaml`

@@ -103,3 +103,9 @@ The `zwift.sh` script will update zwift by checking for new image versions on ev
 then you will have to pull `netbrain/zwift:latest` from time to time in order to be on the latest version.
 
 There is a github action in place that will update zwift on a scheduled basis and publish new versions to docker hub.
+
+{: .note }
+> If you're running Docker with CDI and Zwift fails to launch, try the long form `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"`
+> (instead of `"--gpus=all"`).
+>
+> See <https://github.com/netbrain/zwift/issues/208> for context.
