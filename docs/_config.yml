@@ -14,14 +14,9 @@ nav_external_links:
   - title: netbrain/zwift on GitHub
     url: https://github.com/netbrain/zwift
 callouts:
-  highlight:
-    color: yellow
   important:
     title: Important
     color: yellow
-  new:
-    title: New
-    color: green
   note:
     title: Note
     color: yellow
