@@ -6,7 +6,7 @@ nav_order: 2
 
 # Installation Methods
 
-## Automatic Installation Script
+## Automatic Installation
 
 ### One-Line Installation
 
@@ -22,22 +22,6 @@ This script will:
 - Create necessary configuration files
 - Add zwift command to your system path
 - Create desktop shortcut
-
-## Manual Installation Steps
-
-### How can I build the image myself?
-
-```bash
-./bin/build-image.sh
-```
-
-### How can I fetch the image from docker hub?
-
-<https://hub.docker.com/r/netbrain/zwift>
-
-```bash
-docker pull netbrain/zwift:$VERSION # or simply latest
-```
 
 ## How can I update Zwift?
 
