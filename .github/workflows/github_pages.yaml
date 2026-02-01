@@ -30,6 +30,7 @@ jobs:
           cache-version: 0
           working-directory: '${{ github.workspace }}/docs'
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v5
       - name: Build with Jekyll
         run: |
