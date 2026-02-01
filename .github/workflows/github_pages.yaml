@@ -1,7 +1,8 @@
 name: Build Jekyll site
 on:
   push:
-    branches: ["gp-docs"]
+    branches:
+      - 'gp-docs'
     paths:
       - '.github/workflows/github_pages.yaml'
       - 'docs/**'
