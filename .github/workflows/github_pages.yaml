@@ -29,6 +29,7 @@ jobs:
       - name: Build with Jekyll
         run: |
           cd ./docs
+          bundle install
           bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
