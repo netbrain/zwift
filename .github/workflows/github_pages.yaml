@@ -31,7 +31,7 @@ jobs:
         run: |
           cd ./docs
           bundle install
-          bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+          bundle exec jekyll build
         env:
           JEKYLL_ENV: production
       - name: Upload pages artifact
