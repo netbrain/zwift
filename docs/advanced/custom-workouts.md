@@ -1,27 +1,10 @@
 ---
-title: More stuff
-nav_order: 5
-parent: TODO
+title: Custom Workouts
+nav_order: 1
+parent: Advanced
 ---
 
-If `dbus` is available through a unix socket, the screensaver will be inhibited every 30 seconds to prevent `xscreensaver` or
-other programs listening on the bus from inhibiting the screen.
-
-## Podman Support
-
-When running Zwift with podman, the user and group in the container is 1000 (user). To access the resources on the host we need
-to map the container id 1000 to the host id using `uidmap` and `gidmap`.
-
-For example if the host uid/gid is 1001/1001 then we need to map the host resources from `/run/user/1001` to the container
-resource `/run/user/1000` and map the user and group id's the same. This had to be done manually on the host podman start using
-`--uidmap` and `--gidmap` (not covered here).
-
-From Podman 4.3 this became automatic by providing the Container UID/GID and podman automatically sets up this mapping.
-
-NOTE: Using ZWIFT_UID/GID will only work if the user starting podman has access to the `/run/user/$ZWIFT_UID` resources and does
-not work the same way as in Docker so is not supported.
-
-## How can I add custom .zwo files?
+# How can I add custom .zwo files?
 
 You can map the zwift Workout folder using the environment variable `ZWIFT_WORKOUT_DIR`, for example if your workout directory
 is in `$HOME/zwift_workouts` then you would provide the environment variable `ZWIFT_WORKOUT_DIR="$HOME/zwift_workouts"`.

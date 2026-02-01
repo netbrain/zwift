@@ -1,7 +1,7 @@
 ---
 title: NixOS
-parent: TODO
-nav_order: 3
+parent: Advanced
+nav_order: 2
 ---
 
 # NixOS
