@@ -2,7 +2,6 @@
 title: Getting Started
 nav_order: 2
 description: "Learn how to set up and run Zwift on Linux using Podman or Docker"
-permalink: /getting-started
 ---
 
 # Getting Started with Zwift Docker Container
