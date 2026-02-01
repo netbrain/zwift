@@ -16,6 +16,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v6
@@ -25,12 +28,11 @@ jobs:
           ruby-version: '3.4'
           bundler-cache: true
           cache-version: 0
+          working-directory: '${{ github.workspace }}/docs'
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Build with Jekyll
         run: |
-          echo "${{ steps.pages.outputs.base_path }}"
-          cd ./docs
           bundle install
           bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
@@ -38,7 +40,7 @@ jobs:
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./docs/_site
+          path: docs/_site
   deploy:
     runs-on: ubuntu-latest
     needs: build
