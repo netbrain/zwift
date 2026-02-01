@@ -3,6 +3,7 @@ on:
   push:
     branches: ["gp-docs"]
     paths:
+      - '.github/workflows/github_pages.yaml'
       - 'docs/**'
   workflow_dispatch:
 permissions:
