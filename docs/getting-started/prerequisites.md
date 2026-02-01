@@ -41,3 +41,9 @@ Ubuntu 22.04 and related builds such as PopOS! 22.04.
 {: .note }
 **Podman and NVIDIA Container Toolkit before v1.18.0**: The cdi specification file needs to be generated manually each time the
 NVIDIA driver is updated using the following command: `sudo nvidia-ctk cdi generate --output=/var/run/cdi/nvidia.yaml`
+
+{: .note }
+> If you're running Docker with cdi and Zwift fails to launch, try the long form `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"`
+> (instead of `"--gpus=all"`).
+>
+> See <https://github.com/netbrain/zwift/issues/208> for context.

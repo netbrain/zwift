@@ -21,13 +21,6 @@ From Podman 4.3 this became automatic by providing the Container UID/GID and pod
 NOTE: Using ZWIFT_UID/GID will only work if the user starting podman has access to the `/run/user/$ZWIFT_UID` resources and does
 not work the same way as in Docker so is not supported.
 
-## How do I connect my trainer, heart rate monitor, etc?
-
-You can [use your phone as a bridge](https://support.zwift.com/using-the-zwift-companion-app-Hybn8qzPr).
-
-For example, your Wahoo Kickr and Apple Watch connect to the Zwift Companion app on your iPhone; then the Companion app connects
-over wifi to your PC running Zwift.
-
 ## How can I add custom .zwo files?
 
 You can map the zwift Workout folder using the environment variable `ZWIFT_WORKOUT_DIR`, for example if your workout directory
@@ -50,30 +43,3 @@ To add a new workout just copy the zwo file to this directory
 {: .note }
 Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the
 zwift menu
-
-## How can I build the image myself?
-
-```console
-./bin/build-image.sh
-```
-
-## How can I fetch the image from docker hub?
-
-<https://hub.docker.com/r/netbrain/zwift>
-
-```console
-docker pull netbrain/zwift:$VERSION # or simply latest
-```
-
-## How can I update Zwift?
-
-The `zwift.sh` script will update zwift by checking for new image versions on every launch, however if you are not using this
-then you will have to pull `netbrain/zwift:latest` from time to time in order to be on the latest version.
-
-There is a github action in place that will update zwift on a scheduled basis and publish new versions to docker hub.
-
-{: .note }
-> If you're running Docker with CDI and Zwift fails to launch, try the long form `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"`
-> (instead of `"--gpus=all"`).
->
-> See <https://github.com/netbrain/zwift/issues/208> for context.
