@@ -68,7 +68,7 @@ other programs listening on the bus from inhibiting the screen.
 | `ZWIFT_WORKOUT_DIR`         |                            | Set the workouts directory location                                                                                                    |
 | `ZWIFT_ACTIVITY_DIR`        |                            | Set the activities directory location                                                                                                  |
 | `ZWIFT_LOG_DIR`             |                            | Set the logs directory location                                                                                                        |
-| `ZWIFT_SCREENSHOTS_DIR`     |                            | Set the screenshots directory location, recommended to set `ZWIFT_SCREENSHOTS_DIR=$(xdg-user-dir PICTURES)/Zwift`                      |
+| `ZWIFT_SCREENSHOTS_DIR`     |                            | Set the screenshots directory location, recommended to set `ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift"`                    |
 | `ZWIFT_OVERRIDE_GRAPHICS`   |                            | If set, override the default zwift graphics profiles                                                                                   |
 | `ZWIFT_OVERRIDE_RESOLUTION` |                            | If set, change game resolution (2560x1440, 3840x2160, ...)                                                                             |
 | `ZWIFT_FG`                  |                            | If set, run the process in fg instead of bg (`-d`)                                                                                     |
@@ -96,18 +96,20 @@ See <https://github.com/netbrain/zwift/issues/208> for context.
 
 Examples:
 
-- `DONT_PULL=1 zwift` will prevent docker/podman pull before launch
-- `DRYRUN=1 zwift` will print the underlying container run command and exit (no container is started)
-- `INTERACTIVE=1 zwift` will force foreground `-it` and set `--entrypoint bash` for step-by-step debugging inside the container
-- `CONTAINER_TOOL=docker zwift` will launch zwift with docker even if podman is installed
-- `CONTAINER_EXTRA_ARGS=--cpus=1.5` will pass `--cpus=1.5` as extra argument to docker/podman (will use at most 1.5 CPU cores,
+- `DONT_PULL="1" zwift` will prevent docker/podman pull before launch
+- `DRYRUN="1" zwift` will print the underlying container run command and exit (no container is started)
+- `INTERACTIVE="1" zwift` will force foreground `-it` and set `--entrypoint bash` for step-by-step debugging inside the
+  container
+- `CONTAINER_TOOL="docker" zwift` will launch zwift with docker even if podman is installed
+- `CONTAINER_EXTRA_ARGS="--cpus=1.5"` will pass `--cpus=1.5` as extra argument to docker/podman (will use at most 1.5 CPU cores,
    this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
-- `USER=Fred zwift` perfect if your neighbor fred want's to try zwift, and you don't want to mess up your zwift config.
-- `NETWORKING=host zwift` will use host networking which may be needed to have zwift talk to wifi enabled trainers.
-- `ZWIFT_UID=123 ZWIFT_GID=123 zwift` will run zwift as the given uid and gid. By default zwift runs with the uid and gid of
+- `USER="Fred" zwift` perfect if your neighbor fred want's to try zwift, and you don't want to mess up your zwift config.
+- `NETWORKING="host" zwift` will use host networking which may be needed to have zwift talk to wifi enabled trainers.
+- `ZWIFT_UID="123" ZWIFT_GID="123" zwift` will run zwift as the given uid and gid. By default zwift runs with the uid and gid of
   the user that started the container. You should not need to change this except in rare cases. NOTE: This does not work in
   wayland only X11.
-- `WINE_EXPERIMENTAL_WAYLAND=1 zwift` This will start zwift using Wayland and not XWayland. It will start full screen windowed.
+- `WINE_EXPERIMENTAL_WAYLAND="1" zwift` This will start zwift using Wayland and not XWayland. It will start full screen
+  windowed.
 
 You can also set these in `$HOME/.config/zwift/config` or `$HOME/.config/zwift/$USER-config` to be sourced by the `zwift.sh`
 script on execution.
@@ -116,9 +118,9 @@ script on execution.
 
 To authenticate through Zwift automatically simply add the following file `$HOME/.config/zwift/config`:
 
-```text
-ZWIFT_USERNAME=username
-ZWIFT_PASSWORD=password
+```bash
+ZWIFT_USERNAME='username'
+ZWIFT_PASSWORD='password'
 ```
 
 Where `username` is your zwift account email, and `password` your zwift account password, respectively.
@@ -130,26 +132,26 @@ NOTE: This will be loaded by `zwift.sh` in cleartext as environment variables in
 
 Alternatively, instead of saving your password in the file, you can save your password in the secret service keyring like so:
 
-```text
+```console
 secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwift username ${ZWIFT_USERNAME}
 ```
 
 In this case the username should still be saved in the config file and the password will be read upon startup from the keyring
 and passed as a secret into the container (where it is an environment variable).
 
-> :warning: **Do Not Quote the variables or add spaces**: The ID and Password are read as raw format so if you put
-  `ZWIFT_PASSWORD="password"` it tries to use `"password"` and not just `password`, same for `''`.  In addition do not add a
-  space to the end of the line it will be sent as part of the password or username. This applies to `ZWIFT_USERNAME` and
-  `ZWIFT_PASSWORD`.
+> :warning: **You should quote variables!** Use double quotes around values to avoid issues with spaces `VARIABLE="my value"`.
+For values that can contain special characters other than spaces, use single quotes instead `VARIABLE='$\nice ${v@lue}'`. This
+applies vor `ZWIFT_USERNAME` and `ZWIFT_PASSWORD`. If the value itself contains single quotes `'`, replace them with `'"'"'`
+(omit the first or last `'` respectively if the single quote appears as first or last character in the value).
 
 NOTE: You can also add other environment variable from the table to make starting easier:
 
-```text
-ZWIFT_USERNAME=username
-ZWIFT_PASSWORD=password
+```bash
+ZWIFT_USERNAME='username'
+ZWIFT_PASSWORD='password'
 
-ZWIFT_WORKOUT_DIR=~/.config/zwift/workouts
-WINE_EXPERIMENTAL_WAYLAND=1
+ZWIFT_WORKOUT_DIR="$HOME/.config/zwift/workouts"
+WINE_EXPERIMENTAL_WAYLAND="1"
 ```
 
 ## Podman Support
@@ -170,13 +172,13 @@ not work the same way as in Docker so is not supported.
 
 This is a hang up from previous versions, mainly with podman. delete the volumes and after re-creation it should work fine.
 
-```text
+```console
 podman volume rm zwift-xxxxx
 ```
 
 or
 
-```text
+```console
 docker volume rm zwift-xxxxx
 ```
 
@@ -186,7 +188,7 @@ NOTE: if you see a weird volume e.g. `zwift-naeva` it is a hang up from the past
 
 For Gnome it is just timing out before zwift responds, just extend the timeout.
 
-```text
+```console
 gsettings set org.gnome.mutter check-alive-timeout 60000
 ```
 
@@ -207,7 +209,7 @@ over wifi to your PC running Zwift.
 ## How can I add custom .zwo files?
 
 You can map the zwift Workout folder using the environment variable `ZWIFT_WORKOUT_DIR`, for example if your workout directory
-is in `$HOME/zwift_workouts` then you would provide the environment variable `ZWIFT_WORKOUT_DIR=$HOME/zwift_workouts`.
+is in `$HOME/zwift_workouts` then you would provide the environment variable `ZWIFT_WORKOUT_DIR="$HOME/zwift_workouts"`.
 
 You can add this variable into `$HOME/.config/zwift/config` or `$HOME/.config/zwift/$USER-config`.
 
@@ -229,11 +231,11 @@ NOTES:
 By default, zwift assigns a graphics profile based on your graphics card. This profile can be either basic, medium, high, or
 ultra. This profile determines the level of detail and the quality of the textures you get in game. It is not possible to change
 which graphics profile the game uses. When the default options of the profile aren't optimal (for example when zwift doesn't
-recognize your graphics card and you only get the `medium` profile or when your cpu is the bottleneck and your fps is on the low
+recognize your graphics card and you only get the medium profile or when your cpu is the bottleneck and your fps is on the low
 side because zwift assigned the ultra profile), it is possible to manually tweak the graphics settings by setting
-`ZWIFT_OVERRIDE_GRAPHICS=1`, and editing the settings in the `$HOME/.config/zwift/graphics.txt` or
+`ZWIFT_OVERRIDE_GRAPHICS="1"`, and editing the settings in the `$HOME/.config/zwift/graphics.txt` or
 `$HOME/.config/zwift/$USER-graphics.txt` file as you see fit. To find out which profile zwift assigned, you can upload your
-zwift log to <https://zwiftalizer.com>.
+zwift log to <https://trainerdx.com/>.
 
 The default settings for the different profiles are:
 
@@ -263,15 +265,15 @@ set gFXAA=1
 set gShowFPS=1
 ```
 
-Start zwift with the `ZWIFT_OVERRIDE_GRAPHICS=1 zwift` command to use the settings from the graphics.txt file.
+Start zwift with the `ZWIFT_OVERRIDE_GRAPHICS="1" zwift` command to use the settings from the graphics.txt file.
 
 You can find more information about these settings in this [Zwift Insider](https://zwiftinsider.com/config-file-tweaks/)
 article. Note that this is an older article and as such some of the information in it is outdated. The default values of the
 different profiles have changed to what is in the table listed above and for example the `aniso` setting does not exist anymore.
 
 > :warning: **Before using ZWIFT_OVERRIDE_GRAPHICS**: This option requires that the `$HOME/.config/zwift/graphics.txt` file
-exists. If a `graphics.txt` does not exist and the `ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically
-the first time zwift is launched.
+exists. If `graphics.txt` does not exist and the `ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically the
+first time zwift is launched.
 
 Aside from the graphics profile which is assigned by zwift and cannot be changed, there is also the in-game setting to change
 the display resolution. Changing this resolution does not change the graphics profile and as such does not affect the quality of
@@ -279,7 +281,7 @@ the textures, shadows, and other graphics options. It only affects the resolutio
 available in the zwift in-game setting is dependent on the graphics profile assigned based on your graphics card. If zwift does
 not recognize your graphics card or you have a WQHD or UHD display and zwift does not offer the higher resolutions, it is
 possible to manually override the game resolution by setting the `ZWIFT_OVERRIDE_RESOLUTION` option. For example to force zwift
-to use UHD you can launch it using `ZWIFT_OVERRIDE_RESOLUTION=3840x2160 zwift`.
+to use UHD you can launch it using `ZWIFT_OVERRIDE_RESOLUTION="3840x2160" zwift`.
 
 The full list of available resolutions is:
 
@@ -401,10 +403,7 @@ companion app as well as to access the Wahoo trainer and Zwift click devices).
 ```nix
 networking = {
   firewall = {
-    allowedUDPPorts = [
-      3022
-      3024
-    ];
+    allowedUDPPorts = [3022 3024];
     allowedTCPPorts = [21587 21588];
   };
 };
