@@ -1,0 +1,58 @@
+{
+    "name": "netbrain-zwift-devcontainer",
+    "image": "mcr.microsoft.com/devcontainers/base:debian",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker": {
+            "version": "latest",
+            "installDockerBuildx": true,
+            "moby": false
+        },
+        "ghcr.io/devcontainers/features/nix": {
+            "version": "latest",
+            "packages": "nil,nixfmt"
+        },
+        "ghcr.io/devcontainers-extra/features/shellcheck": {
+            "version": "latest"
+        },
+        "ghcr.io/dhoeric/features/hadolint": {
+            "version": "latest"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "DavidAnson.vscode-markdownlint",
+                "docker.docker",
+                "exiasr.hadolint",
+                "jnoortheen.nix-ide",
+                "ms-azuretools.vscode-containers",
+                "streetsidesoftware.code-spell-checker",
+                "timonwong.shellcheck"
+            ],
+            "settings": {
+                "hadolint": {
+                    "cliOptions": [
+                        "--config",
+                        ".config/.hadolint.yaml"
+                    ]
+                },
+                "markdownlint": {
+                    "configFile": ".config/.markdownlint-cli2.jsonc"
+                },
+                "nix": {
+                    "enableLanguageServer": true,
+                    "serverPath": "nil",
+                    "serverSettings": {
+                        "formatting": {
+                            "command": [
+                                "nixfmt"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "postCreateCommand": "if ! docker info > /dev/null 2>&1; then sudo update-alternatives --set iptables /usr/sbin/iptables-nft; fi",
+    "remoteUser": "vscode"
+}
