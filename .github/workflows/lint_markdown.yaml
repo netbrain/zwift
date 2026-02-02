@@ -2,27 +2,27 @@ name: Validate markdown
 on:
   pull_request:
     paths:
-      - 'README.md'
+      - '**.md'
   push:
     paths:
-      - 'README.md'
+      - '**.md'
 jobs:
-  validate-readme-markdown:
+  validate-markdown:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v5
-      - name: Check README.md file for errors
+      - name: Check markdown files for errors
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
           config: '.config/.markdownlint-cli2.jsonc'
           globs: ""
-  spellcheck-readme:
+  spellcheck-markdown:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v5
-      - name: Spellcheck README.md
+      - name: Spellcheck markdown files
         uses: streetsidesoftware/cspell-action@v7
         with:
           config: '.config/.cspell.json'
