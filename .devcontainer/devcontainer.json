@@ -9,7 +9,7 @@
         },
         "ghcr.io/devcontainers/features/nix": {
             "version": "latest",
-            "packages": "nil,nixfmt"
+            "packages": "nil,nixfmt-rfc-style,shfmt,actionlint,yamllint"
         },
         "ghcr.io/devcontainers-extra/features/shellcheck": {
             "version": "latest"
@@ -24,8 +24,10 @@
                 "DavidAnson.vscode-markdownlint",
                 "docker.docker",
                 "exiasr.hadolint",
+                "foxundermoon.shell-format",
                 "jnoortheen.nix-ide",
                 "ms-azuretools.vscode-containers",
+                "redhat.vscode-yaml",
                 "streetsidesoftware.code-spell-checker",
                 "timonwong.shellcheck"
             ],
@@ -45,7 +47,7 @@
                     "serverSettings": {
                         "formatting": {
                             "command": [
-                                "nixfmt"
+                                "nixfmt-rfc-style"
                             ]
                         }
                     }
