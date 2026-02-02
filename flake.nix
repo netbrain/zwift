@@ -254,6 +254,15 @@
         default = self.nixosModules.zwift;
       };
 
+      devShells.x86_64-linux.default = pkgs.mkShell {
+        packages = with pkgs; [
+          shellcheck
+          shfmt
+          ruby
+          bundler
+        ];
+      };
+
       packages.x86_64-linux = {
         zwift = pkgs.stdenv.mkDerivation rec {
           pname = "zwift-unwrapped";
