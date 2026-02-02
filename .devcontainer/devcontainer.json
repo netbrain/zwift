@@ -9,12 +9,9 @@
         },
         "ghcr.io/devcontainers/features/nix": {
             "version": "latest",
-            "packages": "nil,nixfmt"
+            "extraNixConfig": "experimental-features = nix-command flakes"
         },
-        "ghcr.io/devcontainers-extra/features/shellcheck": {
-            "version": "latest"
-        },
-        "ghcr.io/dhoeric/features/hadolint": {
+        "ghcr.io/devcontainers-contrib/features/direnv": {
             "version": "latest"
         }
     },
@@ -24,12 +21,16 @@
                 "DavidAnson.vscode-markdownlint",
                 "docker.docker",
                 "exiasr.hadolint",
+                "foxundermoon.shell-format",
                 "jnoortheen.nix-ide",
+                "mkhl.direnv",
                 "ms-azuretools.vscode-containers",
+                "redhat.vscode-yaml",
                 "streetsidesoftware.code-spell-checker",
                 "timonwong.shellcheck"
             ],
             "settings": {
+                "direnv.restart.automatic": true,
                 "hadolint": {
                     "cliOptions": [
                         "--config",
@@ -45,7 +46,7 @@
                     "serverSettings": {
                         "formatting": {
                             "command": [
-                                "nixfmt"
+                                "nixfmt-rfc-style"
                             ]
                         }
                     }
@@ -53,6 +54,7 @@
             }
         }
     },
-    "postCreateCommand": "if ! docker info > /dev/null 2>&1; then sudo update-alternatives --set iptables /usr/sbin/iptables-nft; fi",
+    "postCreateCommand": "direnv allow",
+    "postStartCommand": "if ! docker info > /dev/null 2>&1; then sudo update-alternatives --set iptables /usr/sbin/iptables-nft; fi",
     "remoteUser": "vscode"
 }
