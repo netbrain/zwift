@@ -48,7 +48,8 @@ After installation, simply run:
 zwift
 ```
 
-**NOTE**: You might want to disable video screenshots ([#75](https://github.com/netbrain/zwift/issues/75))
+For configuration options, troubleshooting, and advanced usage, see the
+[full documentation](https://netbrain.github.io/zwift/).
 
 ## Sponsors 💖
 
