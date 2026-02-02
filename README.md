@@ -5,16 +5,18 @@
 [![image-href][image-version-src]][image-href]
 [![image-href][image-size-src]][image-href]
 
-Hello fellow zwifters, here is a docker image for running zwift on linux. It uses the companion app by zwift for linking up
-smart trainers and other bluetooth devices (ant devices are not supported via the companion app). The reason why I made this
-solution was so I could run multiple zwift instances on one machine at the same time.
+Hello fellow zwifters, here is a docker image for running zwift on linux. It
+uses the companion app by zwift for linking up smart trainers and other
+bluetooth devices (ant devices are not supported via the companion app). The
+reason why I made this solution was so I could run multiple zwift instances on
+one machine at the same time.
 
-The container comes pre-installed with zwift, so no setup is required, simply pull and run. It should also now support all
-manner of graphics cards that have gl rendering.
+The container comes pre-installed with zwift, so no setup is required, simply
+pull and run. It should also now support all manner of graphics cards that have
+gl rendering.
 
-If you find this image useful, then feel free to
-[add me on zwift](https://www.zwift.com/eu/athlete/4e3c5880-1edd-4c5d-a1b8-0974ce3874f0) and give me a ride on from time to
-time.
+If you find this image useful, then feel free to [add me on zwift][zwift-me]
+and give me a ride on from time to time.
 
 ## Getting started
 
@@ -22,8 +24,10 @@ time.
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker) or [Podman](https://podman.io/getting-started/installation)
-- [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-container-toolkit) if you have nvidia proprietary driver
+- [Docker](https://docs.docker.com/get-docker) or
+  [Podman](https://podman.io/getting-started/installation)
+- [nvidia-container-toolkit][nvidia-toolkit] if you have nvidia proprietary
+  driver
 - ATI, Intel and Nouveau drivers should work out of the box
 
 ### Install
@@ -64,33 +68,49 @@ Thanks go to these wonderful people:
 
 ### Contribute 👋
 
-If you would like to contribute, then please by all means I'll accept PRs. A good starting point would be to see if there's
-any open issues that you feel capable of doing. Let me know if I can help with anything.
+If you would like to contribute, then please by all means I'll accept PRs. See
+the [contributing guide](CONTRIBUTING.md) for development setup. A good
+starting point would be to see if there's any open issues that you feel
+capable of doing.
 
 ### Show and tell 🙌
 
-Check out our [Show and tell](https://github.com/netbrain/zwift/discussions/categories/show-and-tell) category in discussions
-and see how other people are using this solution, feel free to contribute your own tips and tricks :smiley:
+Check out our [Show and tell][show-and-tell] category in discussions and see
+how other people are using this solution, feel free to contribute your own tips
+and tricks :smiley:
 
-## Alternative's to this repository
+## Alternatives to this repository
 
-- Install zwift using wine directly or a framework like `lutris`. You will however have to manage installation and updates
-  yourself
-- Use [`scrcpy`](https://github.com/Genymobile/scrcpy) to mirror android device to your linux screen
-  - [Enable developer options on your android device](https://developer.android.com/studio/debug/dev-options#enable)
-  - Pair your computer to the device using `adb pair`
-    [documentation](https://developer.android.com/studio/command-line/adb#wireless-android11-command-line)
-    - `./srccpy.sh adb pair ip:port`  [see my container solution](https://github.com/netbrain/dockerfiles/tree/master/scrcpy)
+- Install zwift using wine directly or a framework like `lutris`. You will
+  however have to manage installation and updates yourself
+- Use [`scrcpy`](https://github.com/Genymobile/scrcpy) to mirror android device
+  to your linux screen
+  - [Enable developer options][dev-options] on your android device
+  - Pair your computer to the device using [`adb pair`][adb-docs]
+    - `./srccpy.sh adb pair ip:port` ([container solution][scrcpy-container])
   - Mirror the android device screen onto your linux screen using `scrcpy`.
     - `./srccpy.sh scrcpy --tcpip=ip:port`
-  - If you require sound as well, there's also a [`sndcpy`](https://github.com/rom1v/sndcpy) project (doesn't support wireless
-    though, but the aforementioned can be modified to use usb)
-- Using [`redroid`](https://hub.docker.com/r/redroid/redroid) to install zwift apk onto a android emulator (not tested)
+  - If you require sound as well, there's also a [`sndcpy`][sndcpy] project
+    (doesn't support wireless though, but the aforementioned can be modified
+    to use usb)
+- Using [`redroid`][redroid] to install zwift apk onto a android emulator
+  (not tested)
 - Using a virtual machine with pci passthrough
   - <https://looking-glass.io/>
   - <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF>
-  - <https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher> (if you have a nvidia card you can eat your cake, and have
-    it too by creating `vgpus` for vms that leverage the host gpu, no dedicated gpu required)
+  - [vGPU-Unlock-patcher][vgpu] - if you have a nvidia card you can eat your
+    cake, and have it too by creating `vgpus` for vms that leverage the host
+    gpu, no dedicated gpu required
+
+[zwift-me]: https://www.zwift.com/eu/athlete/4e3c5880-1edd-4c5d-a1b8-0974ce3874f0
+[nvidia-toolkit]: https://github.com/NVIDIA/nvidia-container-toolkit
+[show-and-tell]: https://github.com/netbrain/zwift/discussions/categories/show-and-tell
+[dev-options]: https://developer.android.com/studio/debug/dev-options#enable
+[adb-docs]: https://developer.android.com/studio/command-line/adb#wireless-android11-command-line
+[scrcpy-container]: https://github.com/netbrain/dockerfiles/tree/master/scrcpy
+[sndcpy]: https://github.com/rom1v/sndcpy
+[redroid]: https://hub.docker.com/r/redroid/redroid
+[vgpu]: https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher
 
 ## ⭐ Star History (for fun and giggles)
 
