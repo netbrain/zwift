@@ -2,8 +2,12 @@
     "version": "0.2",
     "language": "en",
     "words": [
+        "devcontainer",
+        "direnv",
+        "hadolint",
         "Kickr",
         "netbrain",
+        "shellcheck",
         "WQHD",
         "zwift",
         "zwifters"

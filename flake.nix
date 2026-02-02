@@ -256,10 +256,38 @@
 
       devShells.x86_64-linux.default = pkgs.mkShell {
         packages = with pkgs; [
+          # Bash
           shellcheck
           shfmt
+
+          # Nix
+          nil
+          nixfmt-rfc-style
+
+          # Docker
+          hadolint
+
+          # Markdown
+          nodePackages.markdownlint-cli2
+          nodePackages.cspell
+
+          # Documentation (Jekyll)
           ruby
           bundler
+
+          # Container runtime
+          podman
+
+          # GitHub
+          gh
+          actionlint
+
+          # YAML
+          yamllint
+
+          # Utilities
+          curl
+          jq
         ];
       };
 
