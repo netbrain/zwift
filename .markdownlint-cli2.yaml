@@ -1,3 +1,4 @@
+---
 config:
   default: true
   line-length:
