@@ -15,7 +15,7 @@ jobs:
       - name: Check markdown files for errors
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
-          config: '.config/.markdownlint-cli2.jsonc'
+          config: '.markdownlint-cli2.jsonc'
           globs: ""
   spellcheck-markdown:
     runs-on: ubuntu-latest
@@ -25,5 +25,5 @@ jobs:
       - name: Spellcheck markdown files
         uses: streetsidesoftware/cspell-action@v7
         with:
-          config: '.config/.cspell.json'
+          config: '.cspell.json'
           suggestions: true

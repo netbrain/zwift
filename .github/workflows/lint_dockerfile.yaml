@@ -30,7 +30,7 @@ jobs:
       - name: Check Dockerfile for errors
         uses: hadolint/hadolint-action@master
         with:
-          config: .config/.hadolint.yaml
+          config: .hadolint.yaml
           dockerfile: src/Dockerfile
   validate-squash-dockerfile:
     runs-on: ubuntu-latest
@@ -53,5 +53,5 @@ jobs:
       - name: Check Dockerfile for errors
         uses: hadolint/hadolint-action@master
         with:
-          config: .config/.hadolint.yaml
+          config: .hadolint.yaml
           dockerfile: src/squash.Dockerfile
