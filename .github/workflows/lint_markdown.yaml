@@ -25,5 +25,5 @@ jobs:
       - name: Spellcheck markdown files
         uses: streetsidesoftware/cspell-action@v7
         with:
-          config: '.cspell.json'
+          config: '.cspell.yaml'
           suggestions: true

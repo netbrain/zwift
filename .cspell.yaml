@@ -1,0 +1,19 @@
+version: '0.2'
+language: en
+words:
+  - devcontainer
+  - direnv
+  - hadolint
+  - kickr
+  - netbrain
+  - radeon
+  - shellcheck
+  - wqhd
+  - zwift
+  - zwifters
+files:
+  - '**/*.md'
+languageSettings:
+  - languageId: markdown
+    ignoreRegExpList:
+      - '/(?:```[\s\S]*?```|`[^`]+`)/g'
