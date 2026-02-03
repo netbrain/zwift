@@ -1,3 +1,4 @@
+---
 name: Validate Dockerfile
 on:
   pull_request:

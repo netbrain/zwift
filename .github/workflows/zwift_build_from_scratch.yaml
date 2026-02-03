@@ -1,3 +1,4 @@
+---
 name: Zwift build from scratch
 on:
   workflow_dispatch:

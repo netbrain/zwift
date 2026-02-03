@@ -1,3 +1,4 @@
+---
 name: Validate markdown
 on:
   pull_request:

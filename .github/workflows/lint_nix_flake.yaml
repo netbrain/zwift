@@ -1,3 +1,4 @@
+---
 name: Validate nix flake
 on:
   pull_request:

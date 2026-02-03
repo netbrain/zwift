@@ -1,3 +1,4 @@
+---
 name: Validate bash scripts
 on:
   pull_request:

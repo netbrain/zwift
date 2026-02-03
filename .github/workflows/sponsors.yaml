@@ -1,3 +1,4 @@
+---
 name: Generate Sponsors README
 on:
   workflow_dispatch:
