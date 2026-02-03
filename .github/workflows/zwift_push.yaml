@@ -1,11 +1,9 @@
 ---
 name: Zwift script files updater
-
 on:
   push:
     branches:
       - master
-
 jobs:
   zwift_push:
     if: github.repository == 'netbrain/zwift'
@@ -14,16 +12,13 @@ jobs:
     concurrency: zwift
     steps:
       - uses: netbrain/free-disk-space-action@v0.0.1
-
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Checkout
         uses: actions/checkout@v6
-
       - name: Get latest zwift container and diff script files
         run: |
           set -x
