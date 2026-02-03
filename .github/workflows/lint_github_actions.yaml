@@ -14,4 +14,4 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v6
       - name: Check github actions for errors
-        uses: devops-actions/actionlint@v0.1
+        uses: devops-actions/actionlint@467e2ce19b2310e93c9ffa0b50fe31f86b5a7f23
