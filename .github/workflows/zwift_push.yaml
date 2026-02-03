@@ -1,6 +1,6 @@
 ---
 name: Zwift script files updater
-on:
+on:  # yamllint disable-line rule:truthy
   push:
     branches:
       - master

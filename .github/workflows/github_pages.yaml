@@ -1,6 +1,6 @@
 ---
 name: Build Jekyll site
-on:
+on:  # yamllint disable-line rule:truthy
   push:
     branches:
       - 'master'

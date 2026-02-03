@@ -1,6 +1,6 @@
 ---
 name: Validate Dockerfile
-on:
+on:  # yamllint disable-line rule:truthy
   pull_request:
     paths:
       - '.github/workflows/lint_dockerfile.yaml'
