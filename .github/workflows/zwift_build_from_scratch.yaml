@@ -25,7 +25,7 @@ jobs:
         run: |
           set -x
           export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
-                         | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+                        | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
           echo "Starting build..."
@@ -35,7 +35,7 @@ jobs:
           docker build -t netbrain/zwift:build .
           xhost +
           docker run --name zwift \
-                  -e DISPLAY=$DISPLAY \
+                  -e DISPLAY="$DISPLAY" \
                   -e CONTAINER=docker \
                   --device /dev/dri \
                   -v /tmp:/tmp \
@@ -46,8 +46,8 @@ jobs:
             --change='CMD [""]' \
             -m "built from scratch from version $VERSION" \
             zwift \
-            netbrain/zwift:$VERSION
+            "netbrain/zwift:$VERSION"
 
-          docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
-          docker push netbrain/zwift:$VERSION
+          docker tag "netbrain/zwift:$VERSION" netbrain/zwift:latest
+          docker push "netbrain/zwift:$VERSION"
           docker push netbrain/zwift:latest

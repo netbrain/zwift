@@ -39,7 +39,7 @@ jobs:
           export DISPLAY=:99
           xhost +
           docker run --name zwift \
-                  -e DISPLAY=$DISPLAY \
+                  -e DISPLAY="$DISPLAY" \
                   -e CONTAINER=docker \
                   --device /dev/dri \
                   -v /tmp:/tmp \
@@ -50,8 +50,8 @@ jobs:
             --change='CMD [""]' \
             -m "updated to version $VERSION" \
             zwift \
-            netbrain/zwift:$VERSION
+            "netbrain/zwift:$VERSION"
 
-          docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
-          docker push netbrain/zwift:$VERSION
+          docker tag "netbrain/zwift:$VERSION" netbrain/zwift:latest
+          docker push "netbrain/zwift:$VERSION"
           docker push netbrain/zwift:latest
