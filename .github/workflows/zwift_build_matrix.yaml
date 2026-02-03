@@ -23,9 +23,11 @@ jobs:
       - name: Build zwift
         run: |
           set -x
-          export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
-                         | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
-          export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
+                  | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+          BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          export VERSION
+          export BUILD_DATE
 
           echo "Starting build..."
           Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &

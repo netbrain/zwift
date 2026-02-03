@@ -22,14 +22,16 @@ jobs:
       - name: Check for zwift update
         run: |
           set -x
-          export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
-                         | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
-          export IMAGE_VERSION=$(curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq -r '.results[1].name')
-          export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
+                  | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+          IMAGE_VERSION=$(curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq -r '.results[1].name')
+          BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          export VERSION
+          export IMAGE_VERSION
+          export BUILD_DATE
           echo "Latest zwift version is $VERSION"
           echo "Latest zwift container image version is $IMAGE_VERSION"
-          if [[ "$IMAGE_VERSION" = "$VERSION" ]]
-          then
+          if [[ "$IMAGE_VERSION" = "$VERSION" ]]; then
             exit 0
           fi
 

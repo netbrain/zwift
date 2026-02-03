@@ -49,7 +49,8 @@ jobs:
           done
 
           if [ "$has_changes" = true ]; then
-            export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+            BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+            export BUILD_DATE
             docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
               -m "Updated script files from git ($GITHUB_SHA)" \
               zwift \
