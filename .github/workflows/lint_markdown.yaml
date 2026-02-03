@@ -15,7 +15,7 @@ jobs:
       - name: Check markdown files for errors
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
-          config: '.markdownlint-cli2.jsonc'
+          config: '.markdownlint-cli2.yaml'
           globs: ""
   spellcheck-markdown:
     runs-on: ubuntu-latest
