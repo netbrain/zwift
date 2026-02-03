@@ -24,7 +24,8 @@ jobs:
       - name: Build zwift
         run: |
           set -x
-          export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+          export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
+                         | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
           export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
           echo "Starting build..."

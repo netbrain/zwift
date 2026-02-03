@@ -11,7 +11,8 @@ body:
     attributes:
       label: Checklist
       options:
-        - label: I have given details of my install including Distribution, Wayland/ XOrg, Parameters Used, echo $XAUTHORITY, etc.
+        - label:
+            I have given details of my install including Distribution, Wayland/ XOrg, Parameters Used, echo $XAUTHORITY, etc.
           required: true
         - label: I have provided logs showing any errors, if available (use `DEBUG=1 zwift`)
           required: true
@@ -29,7 +30,9 @@ body:
   - type: textarea
     attributes:
       label: "Distribution Details"
-      description: "Detail your distribtuion, whether you are using XOrg or Wayland, Any Variables to launch zwift and also check `echo $XAUTHORITY` from a terminal."
+      description:
+        "Detail your distribution, whether you are using XOrg or Wayland, Any Variables to launch zwift and also check
+        `echo $XAUTHORITY` from a terminal."
   - type: textarea
     attributes:
       label: Reproduction steps
