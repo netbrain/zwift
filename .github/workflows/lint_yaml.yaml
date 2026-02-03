@@ -1,0 +1,21 @@
+---
+name: Validate yaml
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/lint_yaml.yaml'
+      - '**.yaml'
+  push:
+    paths:
+      - '.github/workflows/lint_yaml.yaml'
+      - '**.yaml'
+jobs:
+  validate-yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v6
+      - name: Install yamllint
+        run: sudo apt-get install -y yamllint
+      - name: Check yaml files for errors
+        run: yamllint .
