@@ -19,4 +19,4 @@ jobs:
       - name: Install nix language tools
         run: nix profile add github:oxalica/nil
       - name: Check nix flake for errors
-        run: nil diagnostics *.nix
+        run: nil diagnostics -- *.nix
