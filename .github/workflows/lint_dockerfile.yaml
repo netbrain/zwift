@@ -2,10 +2,12 @@ name: Validate Dockerfile
 on:
   pull_request:
     paths:
+      - '.github/workflows/lint_dockerfile.yaml'
       - 'src/Dockerfile'
       - 'src/squash.Dockerfile'
   push:
     paths:
+      - '.github/workflows/lint_dockerfile.yaml'
       - 'src/Dockerfile'
       - 'src/squash.Dockerfile'
 jobs:

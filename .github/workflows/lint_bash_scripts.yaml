@@ -2,9 +2,11 @@ name: Validate bash scripts
 on:
   pull_request:
     paths:
+      - '.github/workflows/lint_bash_scripts.yaml'
       - '**.sh'
   push:
     paths:
+      - '.github/workflows/lint_bash_scripts.yaml'
       - '**.sh'
 jobs:
   validate-shell-scripts:

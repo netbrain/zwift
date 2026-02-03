@@ -2,9 +2,11 @@ name: Validate nix flake
 on:
   pull_request:
     paths:
+      - '.github/workflows/lint_nix_flake.yaml'
       - '**.nix'
   push:
     paths:
+      - '.github/workflows/lint_nix_flake.yaml'
       - '**.nix'
 jobs:
   validate-nix-flake:

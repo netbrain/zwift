@@ -2,9 +2,11 @@ name: Validate markdown
 on:
   pull_request:
     paths:
+      - '.github/workflows/lint_markdown.yaml'
       - '**.md'
   push:
     paths:
+      - '.github/workflows/lint_markdown.yaml'
       - '**.md'
 jobs:
   validate-markdown:
