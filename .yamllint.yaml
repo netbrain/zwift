@@ -1,0 +1,8 @@
+---
+extends: default
+rules:
+  line-length:
+    max: 128
+  truthy:  # github actions uses on as key, which is a truthy value
+    ignore:
+      - .github/workflows/*
