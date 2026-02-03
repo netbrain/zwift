@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Check markdown files for errors
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Spellcheck markdown files
         uses: streetsidesoftware/cspell-action@v7
         with:

@@ -20,7 +20,7 @@ jobs:
         run: sudo apt-get install -y x11-xserver-utils x11-apps
       - uses: netbrain/free-disk-space-action@v0.0.1
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Build zwift
         run: |
           set -x
