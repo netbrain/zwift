@@ -39,19 +39,19 @@ direnv allow
 
 The development shell includes all tools used in CI:
 
-| Tool | Purpose |
-|------|---------|
-| `shellcheck` | Bash script linting |
-| `shfmt` | Bash script formatting |
-| `nil` | Nix language diagnostics |
-| `nixfmt-rfc-style` | Nix code formatting |
-| `hadolint` | Dockerfile linting |
-| `markdownlint-cli2` | Markdown linting |
-| `cspell` | Spell checking |
-| `actionlint` | GitHub Actions workflow linting |
-| `yamllint` | YAML linting |
-| `podman` | Container runtime |
-| `gh` | GitHub CLI |
+| Tool                | Purpose                         |
+|---------------------|---------------------------------|
+| `shellcheck`        | Bash script linting             |
+| `shfmt`             | Bash script formatting          |
+| `nil`               | Nix language diagnostics        |
+| `nixfmt-rfc-style`  | Nix code formatting             |
+| `hadolint`          | Dockerfile linting              |
+| `markdownlint-cli2` | Markdown linting                |
+| `cspell`            | Spell checking                  |
+| `actionlint`        | GitHub Actions workflow linting |
+| `yamllint`          | YAML linting                    |
+| `podman`            | Container runtime               |
+| `gh`                | GitHub CLI                      |
 
 ## Option 2: VS Code Devcontainer
 
