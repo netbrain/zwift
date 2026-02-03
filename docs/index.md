@@ -12,7 +12,7 @@ Easily Zwift on Linux! :100:
 ## Quick Start
 
 ```bash
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/install/install.sh)"
 ```
 
 ![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/example.gif)

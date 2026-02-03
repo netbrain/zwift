@@ -33,7 +33,7 @@ and give me a ride on from time to time.
 ### Install
 
 ```console
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/install/install.sh)"
 ```
 
 This will put the `zwift.sh` script on your `$PATH` and add a desktop icon to `/usr/local/share/applications`.

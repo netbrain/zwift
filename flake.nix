@@ -303,12 +303,12 @@
           installPhase = ''
             runHook preInstall
             install -Dm755 zwift.sh -T $out/bin/${pname}
-            install -Dm644 $src/assets/hicolor/scalable/apps/Zwift\ Logogram.svg \
+            install -Dm644 $src/install/Zwift.svg \
               -T $out/share/icons/hicolor/scalable/apps/zwift.svg
             runHook postInstall
           '';
 
-          desktopItems = [ "assets/Zwift.desktop" ];
+          desktopItems = [ "install/Zwift.desktop" ];
         };
         default = self.packages.x86_64-linux.zwift;
       };
