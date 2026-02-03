@@ -22,7 +22,7 @@ improvements, or issue reports.
 ## Getting Started
 
 1. Fork the repository
-2. Set up the [development environment](development.html)
+2. Set up the [development environment](development)
 3. Make your changes
 4. Run the linters locally to catch issues early
 5. Submit a pull request
