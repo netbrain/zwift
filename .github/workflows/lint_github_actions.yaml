@@ -1,0 +1,17 @@
+---
+name: Validate github actions
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/*.yaml'
+  push:
+    paths:
+      - '.github/workflows/*.yaml'
+jobs:
+  validate-github-actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v6
+      - name: Check github actions for errors
+        uses: devops-actions/actionlint@v0.1
