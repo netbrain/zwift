@@ -16,15 +16,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Install dependencies
         run: sudo apt-get install -y x11-xserver-utils x11-apps
-
       - uses: netbrain/free-disk-space-action@v0.0.1
-
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Build zwift
         run: |
           set -x
