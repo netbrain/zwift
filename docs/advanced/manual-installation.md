@@ -9,7 +9,7 @@ nav_order: 5
 ## How can I build the image myself?
 
 ```bash
-./bin/build-image.sh
+./src/build-image.sh
 ```
 
 ## How can I fetch the image from docker hub?

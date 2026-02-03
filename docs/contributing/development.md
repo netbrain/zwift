@@ -91,7 +91,7 @@ nil diagnostics *.nix
 nixfmt-rfc-style --check *.nix
 
 # Dockerfile
-hadolint Dockerfile
+hadolint src/Dockerfile
 
 # Markdown
 markdownlint-cli2 "**/*.md"
@@ -123,18 +123,18 @@ Then open <http://localhost:4000> in your browser.
 podman build -t zwift:dev .
 
 # Or use the build script
-./bin/build-image.sh
+./src/build-image.sh
 ```
 
 ## Testing Changes
 
 ```bash
 # Dry run to see what would be executed
-DRYRUN=1 ./zwift.sh
+DRYRUN=1 ./src/zwift.sh
 
 # Run in foreground for debugging
-ZWIFT_FG=1 ./zwift.sh
+ZWIFT_FG=1 ./src/zwift.sh
 
 # Interactive mode (drops into container shell)
-INTERACTIVE=1 ./zwift.sh
+INTERACTIVE=1 ./src/zwift.sh
 ```

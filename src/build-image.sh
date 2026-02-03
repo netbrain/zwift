@@ -60,7 +60,7 @@ cleanup()
     exit
 }
 
-$CONTAINER_TOOL build --force-rm -t "$BUILD_NAME" "$SCRIPT_DIR/../."
+$CONTAINER_TOOL build --force-rm -t "$BUILD_NAME" "$SCRIPT_DIR"
 $CONTAINER_TOOL run "${GENERAL_FLAGS[@]}" \
     "${VGA_DEVICE_FLAG[@]}" \
     "${PODMAN_FLAGS[@]}" \
@@ -71,4 +71,4 @@ $CONTAINER_TOOL container rm zwift
 
 export IMAGE="$IMAGE"
 export DONT_PULL=1
-"$SCRIPT_DIR/../zwift.sh"
+"$SCRIPT_DIR/zwift.sh"
