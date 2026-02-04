@@ -262,7 +262,7 @@
 
           # Nix
           nil
-          nixfmt-rfc-style
+          nixfmt
 
           # Docker
           hadolint
