@@ -14,6 +14,7 @@ words:
   - zwifters
 files:
   - '**/*.md'
+  - '.github/**/*.md'
 languageSettings:
   - languageId: markdown
     ignoreRegExpList:
