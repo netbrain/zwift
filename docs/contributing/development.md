@@ -44,7 +44,7 @@ The development shell includes all tools used in CI:
 | `shellcheck`        | Bash script linting             |
 | `shfmt`             | Bash script formatting          |
 | `nil`               | Nix language diagnostics        |
-| `nixfmt-rfc-style`  | Nix code formatting             |
+| `nixfmt`            | Nix code formatting             |
 | `hadolint`          | Dockerfile linting              |
 | `markdownlint-cli2` | Markdown linting                |
 | `cspell`            | Spell checking                  |
@@ -83,25 +83,25 @@ Run these before submitting a PR to catch issues early:
 
 ```bash
 # Bash scripts
-shellcheck *.sh bin/*.sh
-shfmt -d *.sh bin/*.sh
+find . -path ./.git -prune -o -name "*.sh" -exec shellcheck {} +
+shfmt -d .
 
 # Nix files
-nil diagnostics *.nix
-nixfmt-rfc-style --check *.nix
+nil diagnostics -- *.nix
+nixfmt --check -- *.nix
 
 # Dockerfile
-hadolint src/Dockerfile
+hadolint src/Dockerfile src/squash.Dockerfile
 
 # Markdown
-markdownlint-cli2 "**/*.md"
-cspell "**/*.md"
+markdownlint-cli2
+cspell
 
 # GitHub Actions
 actionlint
 
 # YAML
-yamllint .github/workflows/
+yamllint .
 ```
 
 ## Building the Documentation Locally
@@ -119,22 +119,26 @@ Then open <http://localhost:4000> in your browser.
 ## Building the Container Image
 
 ```bash
+cd src
+
 # Build the image
 podman build -t zwift:dev .
 
 # Or use the build script
-./src/build-image.sh
+./build-image.sh
 ```
 
 ## Testing Changes
 
 ```bash
+cd src
+
 # Dry run to see what would be executed
-DRYRUN=1 ./src/zwift.sh
+DRYRUN=1 ./zwift.sh
 
 # Run in foreground for debugging
-ZWIFT_FG=1 ./src/zwift.sh
+ZWIFT_FG=1 ./zwift.sh
 
 # Interactive mode (drops into container shell)
-INTERACTIVE=1 ./src/zwift.sh
+INTERACTIVE=1 ./zwift.sh
 ```
