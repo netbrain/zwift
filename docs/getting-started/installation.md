@@ -13,7 +13,7 @@ nav_order: 2
 ![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/example.gif)
 
 ```bash
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/install/install.sh)"
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
 ```
 
 This script will:

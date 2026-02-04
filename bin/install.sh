@@ -110,8 +110,8 @@ download_zwift() {
     msgbox info "Downloading Zwift"
 
     ZWIFT_SCRIPT="https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh"
-    ZWIFT_LOGO="https://raw.githubusercontent.com/netbrain/zwift/master/install/Zwift.svg"
-    ZWIFT_DESKTOP_ENTRY="https://raw.githubusercontent.com/netbrain/zwift/master/install/Zwift.desktop"
+    ZWIFT_LOGO="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.svg"
+    ZWIFT_DESKTOP_ENTRY="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.desktop"
 
     download_asset "$ROOT_BIN/zwift" "$ZWIFT_SCRIPT"
     download_asset "$ROOT_SHARE/icons/hicolor/scalable/apps/zwift.svg" "$ZWIFT_LOGO"
