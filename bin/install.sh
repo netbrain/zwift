@@ -22,24 +22,24 @@ fi
 
 # Message Box to simplify errors and questions.
 msgbox() {
-    TYPE="$1"       # Type: info, ok, warning, error, question
-    MSG="$2"        # Message: the message to display
+    TYPE="$1" # Type: info, ok, warning, error, question
+    MSG="$2"  # Message: the message to display
 
     case $TYPE in
-        info) echo -e "${BLUE}[*] $MSG${RESET_STYLE}";;
-        ok) echo -e "${GREEN}[✓] $MSG${RESET_STYLE}";;
-        warning) echo -e "${YELLOW}[!] $MSG${RESET_STYLE}";;
-        error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2;;
+        info) echo -e "${BLUE}[*] $MSG${RESET_STYLE}" ;;
+        ok) echo -e "${GREEN}[✓] $MSG${RESET_STYLE}" ;;
+        warning) echo -e "${YELLOW}[!] $MSG${RESET_STYLE}" ;;
+        error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2 ;;
         question)
             echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}$MSG [y/N]:${RESET_STYLE} "
             read -rn 1 ans
             echo
             case "$ans" in
-                [yY] | [yY][eE][sS]) return 0;;
-                *) return 1;;
+                [yY] | [yY][eE][sS]) return 0 ;;
+                *) return 1 ;;
             esac
-        ;;
-        *) echo -e "${WHITE}[*] $MSG${RESET_STYLE}";;
+            ;;
+        *) echo -e "${WHITE}[*] $MSG${RESET_STYLE}" ;;
     esac
 }
 
@@ -128,7 +128,7 @@ download_zwift() {
 check_in_path() {
     msgbox info "Checking if 'zwift' is in PATH"
 
-    if case ":$PATH:" in *":$ROOT_BIN:"*) true ;; *) false ;; esac; then
+    if case ":$PATH:" in *":$ROOT_BIN:"*) true ;; *) false ;; esac then
         msgbox info "  $ROOT_BIN is in your PATH"
         msgbox ok "Zwift can be launched using the 'zwift' command"
     else

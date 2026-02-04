@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 ZWIFT_UID=$(id -u)
 ZWIFT_GID=$(id -g)
 
@@ -54,8 +54,7 @@ fi
 
 # Cleanup on error
 trap cleanup ERR
-cleanup()
-{
+cleanup() {
     $CONTAINER_TOOL container rm zwift
     exit
 }

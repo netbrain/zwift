@@ -23,15 +23,15 @@ fi
 
 # Message Box to simplify errors and questions.
 msgbox() {
-    TYPE="$1"       # Type: info, ok, warning, error, question
-    MSG="$2"        # Message: the message to display
-    TIMEOUT="$3"    # Optional timeout: if explicitly set to 0, wait for user input to continue.
+    TYPE="$1"    # Type: info, ok, warning, error, question
+    MSG="$2"     # Message: the message to display
+    TIMEOUT="$3" # Optional timeout: if explicitly set to 0, wait for user input to continue.
 
     case $TYPE in
-        info) echo -e "${BLUE}[*] $MSG${RESET_STYLE}";;
-        ok) echo -e "${GREEN}[✓] $MSG${RESET_STYLE}";;
-        warning) echo -e "${YELLOW}[!] $MSG${RESET_STYLE}";;
-        error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2;;
+        info) echo -e "${BLUE}[*] $MSG${RESET_STYLE}" ;;
+        ok) echo -e "${GREEN}[✓] $MSG${RESET_STYLE}" ;;
+        warning) echo -e "${YELLOW}[!] $MSG${RESET_STYLE}" ;;
+        error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2 ;;
         question)
             if [ -n "$TIMEOUT" ] && [[ $TIMEOUT -gt 0 ]]; then
                 echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}$MSG (Default no in $TIMEOUT seconds.) [y/N]:${RESET_STYLE} "
@@ -43,11 +43,11 @@ msgbox() {
                 echo
             fi
             case "$ans" in
-                [yY] | [yY][eE][sS]) return 0;;
-                *) return 1;;
+                [yY] | [yY][eE][sS]) return 0 ;;
+                *) return 1 ;;
             esac
-        ;;
-        *) echo -e "${WHITE}[*] $MSG${RESET_STYLE}";;
+            ;;
+        *) echo -e "${WHITE}[*] $MSG${RESET_STYLE}" ;;
     esac
 
     if [ -n "$TIMEOUT" ]; then
@@ -146,10 +146,10 @@ fi
 ########################################
 ###### Default Setup and Settings ######
 
-WINDOW_MANAGER="Other"                      # XOrg, XWayland, Wayland, Other
-IMAGE=${IMAGE:-docker.io/netbrain/zwift}    # Set the container image to use
-VERSION=${VERSION:-latest}                  # The container version
-NETWORKING=${NETWORKING:-bridge}            # Default Docker Network is Bridge
+WINDOW_MANAGER="Other"                   # XOrg, XWayland, Wayland, Other
+IMAGE=${IMAGE:-docker.io/netbrain/zwift} # Set the container image to use
+VERSION=${VERSION:-latest}               # The container version
+NETWORKING=${NETWORKING:-bridge}         # Default Docker Network is Bridge
 
 ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
 ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
@@ -238,17 +238,17 @@ fi
 case "$XDG_SESSION_TYPE" in
     "wayland")
         WINDOW_MANAGER="Wayland"
-    ;;
+        ;;
     "x11")
         WINDOW_MANAGER="XOrg"
-    ;;
+        ;;
     *)
         if [[ -n $WAYLAND_DISPLAY ]]; then
             WINDOW_MANAGER="Wayland"
         elif [[ -n $DISPLAY ]]; then
             WINDOW_MANAGER="XOrg"
         fi
-    ;;
+        ;;
 esac
 
 # Verify which system we are using for wayland and some checks.
@@ -393,7 +393,6 @@ fi
 if [ $WINDOW_MANAGER == "XOrg" ]; then
     unset WINE_EXPERIMENTAL_WAYLAND
 fi
-
 
 # Initiate podman Volume with correct permissions
 if [ "$CONTAINER_TOOL" == "podman" ]; then
