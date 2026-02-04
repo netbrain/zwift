@@ -9,7 +9,7 @@ insert_final_newline = true
 [*.sh]
 indent_style = space
 indent_size = 4
-simplify = false
+simplify = true
 binary_next_line = true
 switch_case_indent = true
 space_redirects = true

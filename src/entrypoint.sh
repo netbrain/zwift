@@ -5,7 +5,7 @@ set -x
 # Check whether we are running in Docker/ Podman
 # Docker has the file /.dockerenv
 # Podman exposes itself in /run/.containerenv
-if [[ "$CONTAINER" != "docker" ]] && [[ "$CONTAINER" != "podman" ]]; then
+if [[ $CONTAINER != "docker" ]] && [[ $CONTAINER != "podman" ]]; then
     if [[ -f "/.dockerenv" ]]; then
         CONTAINER="docker"
     elif grep -q "podman" /run/.containerenv; then
@@ -24,7 +24,7 @@ if [[ -n $WINE_EXPERIMENTAL_WAYLAND ]]; then
 fi
 
 # Check what container we are in:
-if [[ "$CONTAINER" == "docker" ]]; then
+if [[ $CONTAINER == "docker" ]]; then
     # This script runs as the root user in Docker so need to do this to find the
     # home directory of the "user" user.
     ZWIFT_USER_HOME=$(getent passwd "user" | cut -d: -f6)

@@ -86,7 +86,7 @@ fi
 load_config_file() {
     CONFIG_FILE="$1"
     msgbox info "Looking for config file $CONFIG_FILE"
-    if [[ -f "$CONFIG_FILE" ]]; then
+    if [[ -f $CONFIG_FILE ]]; then
         # shellcheck source=/dev/null
         if source "$CONFIG_FILE"; then
             msgbox ok "Loaded $CONFIG_FILE"
@@ -211,7 +211,7 @@ if [ -n "$ZWIFT_USERNAME" ]; then
         msgbox info "No password found for $ZWIFT_USERNAME"
         msgbox info "  To avoid manually entering your Zwift password each time, you can either:"
         msgbox info "  1. Start Zwift using the command:"
-        msgbox info "     ZWIFT_PASSWORD=\"hunter2\" zwift"
+        msgbox info '     ZWIFT_PASSWORD="hunter2" zwift'
         msgbox info "  2. Store your password securely in the secret store with the following command:"
         msgbox info "     secret-tool store --label \"Zwift password for $ZWIFT_USERNAME\" application zwift username $ZWIFT_USERNAME"
     fi
@@ -332,7 +332,7 @@ else
 fi
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
-if [[ -z "$VGA_DEVICE_FLAG" ]]; then
+if [[ -z $VGA_DEVICE_FLAG ]]; then
     if [[ -f "/proc/driver/nvidia/version" ]]; then
         if [[ $CONTAINER_TOOL == "podman" ]]; then
             VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"
@@ -344,11 +344,11 @@ if [[ -z "$VGA_DEVICE_FLAG" ]]; then
     fi
 fi
 
-if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]; then
+if [[ -n $DBUS_SESSION_BUS_ADDRESS ]]; then
     [[ $DBUS_SESSION_BUS_ADDRESS =~ ^unix:path=([^,]+) ]]
 
     DBUS_UNIX_SOCKET=${BASH_REMATCH[1]}
-    if [[ -n "$DBUS_UNIX_SOCKET" ]]; then
+    if [[ -n $DBUS_UNIX_SOCKET ]]; then
         ENVIRONMENT_VARIABLES+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//$LOCAL_UID/$CONTAINER_UID}")
         DBUS_CONFIG_FLAGS=(-v "$DBUS_UNIX_SOCKET":"${DBUS_UNIX_SOCKET//$LOCAL_UID/$CONTAINER_UID}")
     fi
@@ -362,7 +362,7 @@ else
 fi
 
 # INTERACTIVE mode: force foreground and provide a shell entrypoint for debugging
-if [[ -n "$INTERACTIVE" ]]; then
+if [[ -n $INTERACTIVE ]]; then
     ZWIFT_FG_FLAG=(-it)
     INTERACTIVE_FLAGS=(--entrypoint bash)
 fi
@@ -446,7 +446,7 @@ CMD=(
 )
 
 # DRYRUN: print the exact command that would be executed, then exit
-if [[ -n "$DRYRUN" ]]; then
+if [[ -n $DRYRUN ]]; then
     msgbox ok "DRYRUN:"
     msgbox ok "environment variables ($ENV_FILE):"
     for env_var in "${ENVIRONMENT_VARIABLES[@]}"; do
