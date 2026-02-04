@@ -7,7 +7,7 @@ ZWIFT_HOME="$HOME/.wine/drive_c/Program Files (x86)/Zwift"
 mkdir -p "$ZWIFT_HOME"
 cd "$ZWIFT_HOME"
 
-function get_current_version() {
+get_current_version() {
     if [ -f Zwift_ver_cur_filename.txt ]; then
         # If Zwift_ver_cur_filename.txt exists, use it
         # Remove Null to remove warning.
@@ -25,13 +25,13 @@ function get_current_version() {
     fi
 }
 
-function get_latest_version() {
+get_latest_version() {
     # Don't cache so we don't pick old versions.
     ZWIFT_VERSION_LATEST=$(wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
 }
 
-function wait_for_zwift_game_update() {
-    function vercomp () {
+wait_for_zwift_game_update() {
+    vercomp () {
         # Return 0 if =, 1 if > and 2 if <
         if [[ $1 == "$2" ]]; then
             return 0
