@@ -34,6 +34,7 @@
             "extensions": [
                 "DavidAnson.vscode-markdownlint",
                 "docker.docker",
+                "editorconfig.editorconfig",
                 "exiasr.hadolint",
                 "foxundermoon.shell-format",
                 "jnoortheen.nix-ide",
