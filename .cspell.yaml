@@ -1,5 +1,5 @@
 ---
-version: '0.2'
+version: "0.2"
 language: en
 words:
   - devcontainer
@@ -13,8 +13,8 @@ words:
   - zwift
   - zwifters
 files:
-  - '**/*.md'
-  - '.github/**/*.md'
+  - "**/*.md"
+  - ".github/**/*.md"
 languageSettings:
   - languageId: markdown
     ignoreRegExpList:
