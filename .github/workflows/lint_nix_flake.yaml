@@ -18,6 +18,8 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@v31
       - name: Install nix language tools
-        run: nix profile add github:oxalica/nil
+        run: nix profile add github:oxalica/nil github:nixos/nixfmt
       - name: Check nix flake for errors
         run: nil diagnostics -- *.nix
+      - name: Check if nix flake is formatted
+        run: nixfmt --check -- *.nix
