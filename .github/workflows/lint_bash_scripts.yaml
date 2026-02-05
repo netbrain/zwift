@@ -28,6 +28,7 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: ">=1.23"
+          cache: false
       - name: Install bash language tools
         run: go install mvdan.cc/sh/v3/cmd/shfmt@latest
       - name: Check if bash scripts are formatted
