@@ -17,6 +17,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | `VERSION`                   | `latest`                   | The image version/tag to use                                                                                                           |
 | `DONT_CHECK`                |                            | If set, don't check for updated `zwift.sh`                                                                                             |
 | `DONT_PULL`                 |                            | If set, don't pull for new image version                                                                                               |
+| `DONT_CLEAN`                |                            | If set, don't clean up previous image versions                                                                                         |
 | `DRYRUN`                    |                            | If set, print the full container run command and exit                                                                                  |
 | `INTERACTIVE`               |                            | If set, force `-it` and use `--entrypoint bash` for debugging                                                                          |
 | `CONTAINER_TOOL`            |                            | Defaults to podman if installed, else docker                                                                                           |

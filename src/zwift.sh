@@ -297,6 +297,21 @@ if [[ ! $DONT_PULL ]]; then
     fi
 fi
 
+# Clean previous container images (if any)
+if [[ ! $DONT_CLEAN ]]; then
+    readarray -t images < <(IFS="/" read -r -a ref <<< "$IMAGE" ; $CONTAINER_TOOL images --filter "reference=${ref[1]}/${ref[2]}" --filter "before=${ref[1]}/${ref[2]}:$VERSION" --format '{{.ID}}')
+    if [ "${#images[@]}" != "0" ]; then
+      msgbox info "Cleaning up previous container images"
+      if $CONTAINER_TOOL image rm "${images[@]}"; then
+          msgbox ok "Any previous container images have been deleted"
+      else
+          msgbox error "Failed to clean up previous container images"
+      fi
+    else
+      msgbox ok "No previous container images to clean up"
+    fi
+fi
+
 #############################
 ##### PREPARE ALL FLAGS #####
 
