@@ -273,7 +273,7 @@ fi
 if [[ ! $DONT_CHECK ]]; then
     msgbox info "Checking for updated zwift.sh"
 
-    REMOTE_SUM=$(curl -s https://raw.githubusercontent.com/netbrain/zwift/master/zwift.sh | sha256sum | awk '{print $1}')
+    REMOTE_SUM=$(curl -s https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh | sha256sum | awk '{print $1}')
     THIS_SUM=$(sha256sum "$0" | awk '{print $1}')
 
     if [ "$REMOTE_SUM" == "$THIS_SUM" ]; then

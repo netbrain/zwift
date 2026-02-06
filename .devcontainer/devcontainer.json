@@ -43,15 +43,6 @@
                 "timonwong.shellcheck"
             ],
             "settings": {
-                "hadolint": {
-                    "cliOptions": [
-                        "--config",
-                        ".config/.hadolint.yaml"
-                    ]
-                },
-                "markdownlint": {
-                    "configFile": ".config/.markdownlint-cli2.jsonc"
-                },
                 "nix": {
                     "enableLanguageServer": true,
                     "serverPath": "nil",

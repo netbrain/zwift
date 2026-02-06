@@ -30,10 +30,10 @@ jobs:
           docker create --name zwift netbrain/zwift:latest
 
           declare -A files_map
-          files_map["/bin/entrypoint"]="entrypoint.sh"
-          files_map["/bin/zwift-auth"]="zwift-auth.sh"
-          files_map["/bin/update_zwift.sh"]="update_zwift.sh"
-          files_map["/bin/run_zwift.sh"]="run_zwift.sh"
+          files_map["/bin/entrypoint"]="src/entrypoint.sh"
+          files_map["/bin/zwift-auth"]="src/zwift-auth.sh"
+          files_map["/bin/update_zwift.sh"]="src/update_zwift.sh"
+          files_map["/bin/run_zwift.sh"]="src/run_zwift.sh"
 
           has_changes=false
           for container_path in "${!files_map[@]}"; do

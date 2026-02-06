@@ -2,9 +2,11 @@ name: Validate bash scripts
 on:
   pull_request:
     paths:
+      - '.github/workflows/lint_bash_scripts.yaml'
       - '**.sh'
   push:
     paths:
+      - '.github/workflows/lint_bash_scripts.yaml'
       - '**.sh'
 jobs:
   validate-shell-scripts:
@@ -15,4 +17,4 @@ jobs:
       - name: Install bash language tools
         run: sudo apt-get install -y shellcheck
       - name: Check bash scripts for errors and warnings
-        run: find . -path ./.git -prune -o -name "*.sh" -print | xargs shellcheck
+        run: find . -path ./.git -prune -o -name "*.sh" -exec shellcheck {} +
