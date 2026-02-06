@@ -1,5 +1,6 @@
+---
 name: Zwift updater
-on:
+on: # yamllint disable-line rule:truthy
   workflow_dispatch:
   schedule:
     - cron: "0 * * * *"
@@ -15,22 +16,22 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Install dependencies
         run: sudo apt-get install -y x11-xserver-utils x11-apps
-
       - uses: netbrain/free-disk-space-action@v0.0.1
-
       - name: Check for zwift update
         run: |
           set -x
-          export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
-          export IMAGE_VERSION=$(curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq -r '.results[1].name')
-          export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
+                  | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+          IMAGE_VERSION=$(curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq -r '.results[1].name')
+          BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          export VERSION
+          export IMAGE_VERSION
+          export BUILD_DATE
           echo "Latest zwift version is $VERSION"
           echo "Latest zwift container image version is $IMAGE_VERSION"
-          if [[ "$IMAGE_VERSION" = "$VERSION" ]]
-          then
+          if [[ "$IMAGE_VERSION" = "$VERSION" ]]; then
             exit 0
           fi
 
@@ -40,7 +41,7 @@ jobs:
           export DISPLAY=:99
           xhost +
           docker run --name zwift \
-                  -e DISPLAY=$DISPLAY \
+                  -e DISPLAY="$DISPLAY" \
                   -e CONTAINER=docker \
                   --device /dev/dri \
                   -v /tmp:/tmp \
@@ -51,8 +52,8 @@ jobs:
             --change='CMD [""]' \
             -m "updated to version $VERSION" \
             zwift \
-            netbrain/zwift:$VERSION
+            "netbrain/zwift:$VERSION"
 
-          docker tag netbrain/zwift:$VERSION netbrain/zwift:latest
-          docker push netbrain/zwift:$VERSION
+          docker tag "netbrain/zwift:$VERSION" netbrain/zwift:latest
+          docker push "netbrain/zwift:$VERSION"
           docker push netbrain/zwift:latest

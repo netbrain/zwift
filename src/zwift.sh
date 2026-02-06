@@ -23,15 +23,15 @@ fi
 
 # Message Box to simplify errors and questions.
 msgbox() {
-    TYPE="$1"       # Type: info, ok, warning, error, question
-    MSG="$2"        # Message: the message to display
-    TIMEOUT="$3"    # Optional timeout: if explicitly set to 0, wait for user input to continue.
+    TYPE="$1"    # Type: info, ok, warning, error, question
+    MSG="$2"     # Message: the message to display
+    TIMEOUT="$3" # Optional timeout: if explicitly set to 0, wait for user input to continue.
 
     case $TYPE in
-        info) echo -e "${BLUE}[*] $MSG${RESET_STYLE}";;
-        ok) echo -e "${GREEN}[✓] $MSG${RESET_STYLE}";;
-        warning) echo -e "${YELLOW}[!] $MSG${RESET_STYLE}";;
-        error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2;;
+        info) echo -e "${BLUE}[*] $MSG${RESET_STYLE}" ;;
+        ok) echo -e "${GREEN}[✓] $MSG${RESET_STYLE}" ;;
+        warning) echo -e "${YELLOW}[!] $MSG${RESET_STYLE}" ;;
+        error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2 ;;
         question)
             if [ -n "$TIMEOUT" ] && [[ $TIMEOUT -gt 0 ]]; then
                 echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}$MSG (Default no in $TIMEOUT seconds.) [y/N]:${RESET_STYLE} "
@@ -43,11 +43,11 @@ msgbox() {
                 echo
             fi
             case "$ans" in
-                [yY] | [yY][eE][sS]) return 0;;
-                *) return 1;;
+                [yY] | [yY][eE][sS]) return 0 ;;
+                *) return 1 ;;
             esac
-        ;;
-        *) echo -e "${WHITE}[*] $MSG${RESET_STYLE}";;
+            ;;
+        *) echo -e "${WHITE}[*] $MSG${RESET_STYLE}" ;;
     esac
 
     if [ -n "$TIMEOUT" ]; then
@@ -86,7 +86,7 @@ fi
 load_config_file() {
     CONFIG_FILE="$1"
     msgbox info "Looking for config file $CONFIG_FILE"
-    if [[ -f "$CONFIG_FILE" ]]; then
+    if [[ -f $CONFIG_FILE ]]; then
         # shellcheck source=/dev/null
         if source "$CONFIG_FILE"; then
             msgbox ok "Loaded $CONFIG_FILE"
@@ -146,10 +146,10 @@ fi
 ########################################
 ###### Default Setup and Settings ######
 
-WINDOW_MANAGER="Other"                      # XOrg, XWayland, Wayland, Other
-IMAGE=${IMAGE:-docker.io/netbrain/zwift}    # Set the container image to use
-VERSION=${VERSION:-latest}                  # The container version
-NETWORKING=${NETWORKING:-bridge}            # Default Docker Network is Bridge
+WINDOW_MANAGER="Other"                   # XOrg, XWayland, Wayland, Other
+IMAGE=${IMAGE:-docker.io/netbrain/zwift} # Set the container image to use
+VERSION=${VERSION:-latest}               # The container version
+NETWORKING=${NETWORKING:-bridge}         # Default Docker Network is Bridge
 
 ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
 ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
@@ -211,7 +211,7 @@ if [ -n "$ZWIFT_USERNAME" ]; then
         msgbox info "No password found for $ZWIFT_USERNAME"
         msgbox info "  To avoid manually entering your Zwift password each time, you can either:"
         msgbox info "  1. Start Zwift using the command:"
-        msgbox info "     ZWIFT_PASSWORD=\"hunter2\" zwift"
+        msgbox info '     ZWIFT_PASSWORD="hunter2" zwift'
         msgbox info "  2. Store your password securely in the secret store with the following command:"
         msgbox info "     secret-tool store --label \"Zwift password for $ZWIFT_USERNAME\" application zwift username $ZWIFT_USERNAME"
     fi
@@ -238,17 +238,17 @@ fi
 case "$XDG_SESSION_TYPE" in
     "wayland")
         WINDOW_MANAGER="Wayland"
-    ;;
+        ;;
     "x11")
         WINDOW_MANAGER="XOrg"
-    ;;
+        ;;
     *)
         if [[ -n $WAYLAND_DISPLAY ]]; then
             WINDOW_MANAGER="Wayland"
         elif [[ -n $DISPLAY ]]; then
             WINDOW_MANAGER="XOrg"
         fi
-    ;;
+        ;;
 esac
 
 # Verify which system we are using for wayland and some checks.
@@ -332,7 +332,7 @@ else
 fi
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
-if [[ -z "$VGA_DEVICE_FLAG" ]]; then
+if [[ -z $VGA_DEVICE_FLAG ]]; then
     if [[ -f "/proc/driver/nvidia/version" ]]; then
         if [[ $CONTAINER_TOOL == "podman" ]]; then
             VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"
@@ -344,11 +344,11 @@ if [[ -z "$VGA_DEVICE_FLAG" ]]; then
     fi
 fi
 
-if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]; then
+if [[ -n $DBUS_SESSION_BUS_ADDRESS ]]; then
     [[ $DBUS_SESSION_BUS_ADDRESS =~ ^unix:path=([^,]+) ]]
 
     DBUS_UNIX_SOCKET=${BASH_REMATCH[1]}
-    if [[ -n "$DBUS_UNIX_SOCKET" ]]; then
+    if [[ -n $DBUS_UNIX_SOCKET ]]; then
         ENVIRONMENT_VARIABLES+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//$LOCAL_UID/$CONTAINER_UID}")
         DBUS_CONFIG_FLAGS=(-v "$DBUS_UNIX_SOCKET":"${DBUS_UNIX_SOCKET//$LOCAL_UID/$CONTAINER_UID}")
     fi
@@ -362,7 +362,7 @@ else
 fi
 
 # INTERACTIVE mode: force foreground and provide a shell entrypoint for debugging
-if [[ -n "$INTERACTIVE" ]]; then
+if [[ -n $INTERACTIVE ]]; then
     ZWIFT_FG_FLAG=(-it)
     INTERACTIVE_FLAGS=(--entrypoint bash)
 fi
@@ -393,7 +393,6 @@ fi
 if [ $WINDOW_MANAGER == "XOrg" ]; then
     unset WINE_EXPERIMENTAL_WAYLAND
 fi
-
 
 # Initiate podman Volume with correct permissions
 if [ "$CONTAINER_TOOL" == "podman" ]; then
@@ -447,7 +446,7 @@ CMD=(
 )
 
 # DRYRUN: print the exact command that would be executed, then exit
-if [[ -n "$DRYRUN" ]]; then
+if [[ -n $DRYRUN ]]; then
     msgbox ok "DRYRUN:"
     msgbox ok "environment variables ($ENV_FILE):"
     for env_var in "${ENVIRONMENT_VARIABLES[@]}"; do

@@ -1,0 +1,26 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.sh]
+indent_style = space
+indent_size = 4
+simplify = true
+binary_next_line = true
+switch_case_indent = true
+space_redirects = true
+keep_padding = false
+function_next_line = false
+minify = false
+
+[*.yaml]
+indent_style = space
+indent_size = 2
+
+[*.json]
+indent_style = space
+indent_size = 2

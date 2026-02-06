@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 ZWIFT_UID=$(id -u)
 ZWIFT_GID=$(id -g)
 
@@ -15,7 +15,7 @@ if [[ ! $CONTAINER_TOOL ]]; then
 fi
 
 # Update information based on Container Tool
-if [[ "$CONTAINER_TOOL" == "podman" ]]; then
+if [[ $CONTAINER_TOOL == "podman" ]]; then
     BUILD_NAME="zwift"
     IMAGE="localhost/zwift"
 else
@@ -47,15 +47,14 @@ else
 fi
 
 # Initiate podman Volume with correct permissions
-if [[ "$CONTAINER_TOOL" == "podman" ]]; then
+if [[ $CONTAINER_TOOL == "podman" ]]; then
     # Add ipc host to deal with an SHM issue on some machines.
     PODMAN_FLAGS=(--userns "keep-id:uid=$ZWIFT_UID,gid=$ZWIFT_GID")
 fi
 
 # Cleanup on error
 trap cleanup ERR
-cleanup()
-{
+cleanup() {
     $CONTAINER_TOOL container rm zwift
     exit
 }

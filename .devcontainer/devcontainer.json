@@ -1,62 +1,63 @@
 {
-    "name": "netbrain-zwift-devcontainer",
-    "image": "mcr.microsoft.com/devcontainers/base:debian",
-    "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker": {
-            "version": "latest",
-            "installDockerBuildx": true,
-            "moby": false
-        },
-        "ghcr.io/devcontainers/features/ruby": {
-            "version": "latest"
-        },
-        "ghcr.io/devcontainers/features/nix": {
-            "version": "latest",
-            "packages": "nil,nixfmt,shfmt,actionlint,yamllint",
-            "extraNixConfig": "experimental-features = nix-command flakes"
-        },
-        "ghcr.io/devcontainers-extra/features/shellcheck": {
-            "version": "latest"
-        },
-        "ghcr.io/dhoeric/features/hadolint": {
-            "version": "latest"
-        }
+  "name": "netbrain-zwift-devcontainer",
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker": {
+      "installDockerBuildx": true,
+      "moby": false
     },
-    "overrideFeatureInstallOrder": [
-        "ghcr.io/devcontainers/features/docker-in-docker",
-        "ghcr.io/devcontainers/features/ruby",
-        "ghcr.io/devcontainers/features/nix",
-        "ghcr.io/devcontainers-extra/features/shellcheck",
-        "ghcr.io/dhoeric/features/hadolint"
-    ],
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "DavidAnson.vscode-markdownlint",
-                "docker.docker",
-                "exiasr.hadolint",
-                "foxundermoon.shell-format",
-                "jnoortheen.nix-ide",
-                "ms-azuretools.vscode-containers",
-                "redhat.vscode-yaml",
-                "streetsidesoftware.code-spell-checker",
-                "timonwong.shellcheck"
-            ],
-            "settings": {
-                "nix": {
-                    "enableLanguageServer": true,
-                    "serverPath": "nil",
-                    "serverSettings": {
-                        "formatting": {
-                            "command": [
-                                "nixfmt"
-                            ]
-                        }
-                    }
-                }
+    "ghcr.io/devcontainers/features/ruby": {},
+    "ghcr.io/devcontainers/features/node": {},
+    "ghcr.io/devcontainers/features/nix": {
+      "packages": "nil,nixfmt",
+      "extraNixConfig": "experimental-features = nix-command flakes"
+    },
+    "ghcr.io/devcontainers-extra/features/actionlint": {},
+    "ghcr.io/devcontainers-extra/features/shellcheck": {},
+    "ghcr.io/devcontainers-extra/features/shfmt": {},
+    "ghcr.io/devcontainers-extra/features/yamllint": {},
+    "ghcr.io/dhoeric/features/hadolint": {}
+  },
+  "overrideFeatureInstallOrder": [
+    "ghcr.io/devcontainers/features/docker-in-docker",
+    "ghcr.io/devcontainers/features/ruby",
+    "ghcr.io/devcontainers/features/node",
+    "ghcr.io/devcontainers/features/nix",
+    "ghcr.io/devcontainers-extra/features/actionlint",
+    "ghcr.io/devcontainers-extra/features/shellcheck",
+    "ghcr.io/devcontainers-extra/features/shfmt",
+    "ghcr.io/devcontainers-extra/features/yamllint",
+    "ghcr.io/dhoeric/features/hadolint"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "DavidAnson.vscode-markdownlint",
+        "docker.docker",
+        "editorconfig.editorconfig",
+        "exiasr.hadolint",
+        "foxundermoon.shell-format",
+        "jnoortheen.nix-ide",
+        "ms-azuretools.vscode-containers",
+        "redhat.vscode-yaml",
+        "streetsidesoftware.code-spell-checker",
+        "timonwong.shellcheck"
+      ],
+      "settings": {
+        "nix": {
+          "enableLanguageServer": true,
+          "serverPath": "nil",
+          "serverSettings": {
+            "formatting": {
+              "command": [
+                "nixfmt"
+              ]
             }
+          }
         }
-    },
-    "postCreateCommand": "if ! docker info > /dev/null 2>&1; then sudo update-alternatives --set iptables /usr/sbin/iptables-nft; fi; gem update --system && gem install bundler",
-    "remoteUser": "vscode"
+      }
+    }
+  },
+  "postCreateCommand": "if ! docker info > /dev/null 2>&1; then sudo update-alternatives --set iptables /usr/sbin/iptables-nft; fi; npm install -g markdownlint-cli2 cspell && gem update --system && gem install bundler",
+  "remoteUser": "vscode"
 }

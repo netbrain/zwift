@@ -1,21 +1,16 @@
+---
 name: Validate Dockerfile
-on:
+on: # yamllint disable-line rule:truthy
   pull_request:
-    paths:
-      - '.github/workflows/lint_dockerfile.yaml'
-      - 'src/Dockerfile'
-      - 'src/squash.Dockerfile'
   push:
-    paths:
-      - '.github/workflows/lint_dockerfile.yaml'
-      - 'src/Dockerfile'
-      - 'src/squash.Dockerfile'
+    branches:
+      - "master"
 jobs:
   validate-dockerfile:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install docker buildx
         uses: docker/setup-buildx-action@v3
       - name: Check Dockerfile for errors
@@ -28,7 +23,7 @@ jobs:
     needs: validate-dockerfile
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Check Dockerfile for errors
         uses: hadolint/hadolint-action@master
         with:
@@ -38,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install docker buildx
         uses: docker/setup-buildx-action@v3
       - name: Check squash.Dockerfile for errors
@@ -51,7 +46,7 @@ jobs:
     needs: validate-squash-dockerfile
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Check Dockerfile for errors
         uses: hadolint/hadolint-action@master
         with:

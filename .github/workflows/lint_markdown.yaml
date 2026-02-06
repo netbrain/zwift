@@ -1,31 +1,28 @@
+---
 name: Validate markdown
-on:
+on: # yamllint disable-line rule:truthy
   pull_request:
-    paths:
-      - '.github/workflows/lint_markdown.yaml'
-      - '**.md'
   push:
-    paths:
-      - '.github/workflows/lint_markdown.yaml'
-      - '**.md'
+    branches:
+      - "master"
 jobs:
   validate-markdown:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Check markdown files for errors
         uses: DavidAnson/markdownlint-cli2-action@v20
         with:
-          config: '.markdownlint-cli2.yaml'
+          config: ".markdownlint-cli2.yaml"
           globs: ""
   spellcheck-markdown:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Spellcheck markdown files
         uses: streetsidesoftware/cspell-action@v7
         with:
-          config: '.cspell.yaml'
+          config: ".cspell.yaml"
           suggestions: true

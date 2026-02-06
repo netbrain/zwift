@@ -1,5 +1,6 @@
+---
 name: Generate Sponsors README
-on:
+on: # yamllint disable-line rule:truthy
   workflow_dispatch:
   schedule:
     - cron: 30 15 * * 0-6
@@ -11,17 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v2
-
+        uses: actions/checkout@v6
       - name: Generate Sponsors 💖
         uses: JamesIves/github-sponsors-readme-action@v1
         with:
           token: ${{ secrets.SPONSORS_PAT }}
-          file: 'README.md'
+          file: "README.md"
           active-only: false
-
       - name: Deploy to GitHub Pages 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: master
-          folder: '.'
+          folder: "."

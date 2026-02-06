@@ -1,5 +1,6 @@
+---
 name: Zwift matrix build
-on:
+on: # yamllint disable-line rule:truthy
   workflow_dispatch:
 jobs:
   zwift_build:
@@ -9,23 +10,44 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        wine-version: ["8.0.2~bookworm-1", "8.0.1~bookworm-1", "8.0.0.0~bookworm-1", "7.0.2~bookworm-1", "7.0.1~bookworm-1", "7.0.0.0~bookworm-1"]
-        winetricks-version: ["20230212", "20220521", "20220411", "20220331", "20220328", "20210825", "20210206"]
-        wine-mono-version: ["7.0.0","7.1.0","7.1.1","7.2.0","7.3.0","7.4.0","8.0.0","8.1.0"]
+        wine-version:
+          - "8.0.2~bookworm-1"
+          - "8.0.1~bookworm-1"
+          - "8.0.0.0~bookworm-1"
+          - "7.0.2~bookworm-1"
+          - "7.0.1~bookworm-1"
+          - "7.0.0.0~bookworm-1"
+        winetricks-version:
+          - "20230212"
+          - "20220521"
+          - "20220411"
+          - "20220331"
+          - "20220328"
+          - "20210825"
+          - "20210206"
+        wine-mono-version:
+          - "7.0.0"
+          - "7.1.0"
+          - "7.1.1"
+          - "7.2.0"
+          - "7.3.0"
+          - "7.4.0"
+          - "8.0.0"
+          - "8.1.0"
     steps:
       - name: Install dependencies
         run: sudo apt-get install -y x11-xserver-utils x11-apps
-
       - uses: netbrain/free-disk-space-action@v0.0.1
-
       - name: Checkout
-        uses: actions/checkout@v4
-
+        uses: actions/checkout@v6
       - name: Build zwift
         run: |
           set -x
-          export VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
-          export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
+                  | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
+          BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          export VERSION
+          export BUILD_DATE
 
           echo "Starting build..."
           Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &
