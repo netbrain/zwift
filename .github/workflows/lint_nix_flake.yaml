@@ -32,3 +32,14 @@ jobs:
         run: nix profile add github:nixos/nixfmt
       - name: Check if nix flake is formatted
         run: nixfmt --check -- *.nix
+  build-nix-flake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v6
+      - name: Install nix
+        uses: cachix/install-nix-action@v31
+      - name: Build nix flake
+        run: |
+          cd tests/nix-flake
+          nix build --no-write-lock-file --dry-run
