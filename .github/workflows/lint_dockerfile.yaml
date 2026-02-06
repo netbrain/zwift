@@ -2,15 +2,9 @@
 name: Validate Dockerfile
 on: # yamllint disable-line rule:truthy
   pull_request:
-    paths:
-      - ".github/workflows/lint_dockerfile.yaml"
-      - "src/Dockerfile"
-      - "src/squash.Dockerfile"
   push:
-    paths:
-      - ".github/workflows/lint_dockerfile.yaml"
-      - "src/Dockerfile"
-      - "src/squash.Dockerfile"
+    branches:
+      - "master"
 jobs:
   validate-dockerfile:
     runs-on: ubuntu-latest

@@ -2,13 +2,9 @@
 name: Validate yaml
 on: # yamllint disable-line rule:truthy
   pull_request:
-    paths:
-      - ".github/workflows/lint_yaml.yaml"
-      - "**.yaml"
   push:
-    paths:
-      - ".github/workflows/lint_yaml.yaml"
-      - "**.yaml"
+    branches:
+      - "master"
 jobs:
   validate-yaml:
     runs-on: ubuntu-latest
