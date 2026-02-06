@@ -1,5 +1,6 @@
+---
 name: Docker Hub prune
-on:
+on: # yamllint disable-line rule:truthy
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 0" # weekly on Sundays
