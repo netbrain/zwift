@@ -38,6 +38,7 @@ jobs:
           has_changes=false
           for container_path in "${!files_map[@]}"; do
               local_file="${files_map[${container_path}]}"
+              mkdir -p "$(dirname "/tmp/${local_file}")"
               docker cp "zwift:${container_path}" "/tmp/${local_file}"
               diff_exit_code=$(diff "${local_file}" "/tmp/${local_file}" > /dev/null; echo $?)
               if [[ $diff_exit_code -eq 1 ]]; then
