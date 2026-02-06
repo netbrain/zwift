@@ -7,6 +7,7 @@ on: # yamllint disable-line rule:truthy
       - "master"
 jobs:
   validate-dockerfile:
+    name: Check Dockerfile with docker buildx
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
@@ -19,6 +20,7 @@ jobs:
           call: check
           file: src/Dockerfile
   lint-dockerfile:
+    name: Lint Dockerfile with hadolint
     runs-on: ubuntu-latest
     needs: validate-dockerfile
     steps:
@@ -30,6 +32,7 @@ jobs:
           config: .hadolint.yaml
           dockerfile: src/Dockerfile
   validate-squash-dockerfile:
+    name: Check squash.Dockerfile with docker buildx
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
@@ -42,6 +45,7 @@ jobs:
           call: check
           file: src/squash.Dockerfile
   lint-squash-dockerfile:
+    name: Lint squash.Dockerfile with hadolint
     runs-on: ubuntu-latest
     needs: validate-squash-dockerfile
     steps:

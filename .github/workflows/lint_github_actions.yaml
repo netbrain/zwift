@@ -7,6 +7,7 @@ on: # yamllint disable-line rule:truthy
       - "master"
 jobs:
   validate-github-actions:
+    name: Lint with actionlint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
