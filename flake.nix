@@ -47,7 +47,7 @@
             ${pkgs.lib.optionalString (tag != "") "export VERSION=${tag}"}
             ${pkgs.lib.optionalString (dontCheck != "") "export DONT_CHECK=${dontCheck}"}
             ${pkgs.lib.optionalString (dontPull != "") "export DONT_PULL=${dontPull}"}
-            ${pkgs.lib.optionalString (dontClean != "") "export DONT_PULL=${dontClean}"}
+            ${pkgs.lib.optionalString (dontClean != "") "export DONT_CLEAN=${dontClean}"}
             ${pkgs.lib.optionalString (dryRun != "") "export DRYRUN=${dryRun}"}
             ${pkgs.lib.optionalString (interactive != "") "export INTERACTIVE=${interactive}"}
             ${pkgs.lib.optionalString (containerTool != "") "export CONTAINER_TOOL=${containerTool}"}
