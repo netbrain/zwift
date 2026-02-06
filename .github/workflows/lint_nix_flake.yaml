@@ -7,6 +7,7 @@ on: # yamllint disable-line rule:truthy
       - "master"
 jobs:
   validate-nix-flake:
+    name: Lint with nil
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
@@ -18,6 +19,7 @@ jobs:
       - name: Check nix flake for errors
         run: nil diagnostics -- *.nix
   check-nix-flake-formatted:
+    name: Check formatting with nixfmt
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
@@ -29,6 +31,7 @@ jobs:
       - name: Check if nix flake is formatted
         run: nixfmt --check -- *.nix
   build-nix-flake:
+    name: Build flake
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
