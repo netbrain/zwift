@@ -1,33 +1,33 @@
 ---
 name: Validate bash scripts
-on: # yamllint disable-line rule:truthy
+'on':
   pull_request:
   push:
     branches:
-      - "master"
+    - master
 jobs:
   validate-shell-scripts:
     name: Lint with shellcheck
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v6
-      - name: Install bash language tools
-        run: sudo apt-get install -y shellcheck
-      - name: Check bash scripts for errors and warnings
-        run: find . -path ./.git -prune -o -name "*.sh" -exec shellcheck {} +
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install bash language tools
+      run: sudo apt-get install -y shellcheck
+    - name: Check bash scripts for errors and warnings
+      run: find . -path ./.git -prune -o -name "*.sh" -exec shellcheck {} +
   check-shell-scripts-formatted:
     name: Check formatting with shfmt
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v6
-      - name: Install Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: ">=1.23"
-          cache: false
-      - name: Install bash language tools
-        run: go install mvdan.cc/sh/v3/cmd/shfmt@latest
-      - name: Check if bash scripts are formatted
-        run: shfmt -d .
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: '>=1.23'
+        cache: false
+    - name: Install bash language tools
+      run: go install mvdan.cc/sh/v3/cmd/shfmt@latest
+    - name: Check if bash scripts are formatted
+      run: shfmt -d .

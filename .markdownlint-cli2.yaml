@@ -1,4 +1,4 @@
 ---
 gitignore: true
 globs:
-  - "**.md"
+- '**.md'

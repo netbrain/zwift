@@ -9,4 +9,4 @@ no-duplicate-heading:
   siblings_only: true
 no-inline-html: false
 single-title:
-  front_matter_title: ""
+  front_matter_title: ''
