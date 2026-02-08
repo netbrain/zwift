@@ -25,21 +25,21 @@ msgbox() {
     TYPE="$1" # Type: info, ok, warning, error, question
     MSG="$2"  # Message: the message to display
 
-    case $TYPE in
-        info) echo -e "${BLUE}[*] $MSG${RESET_STYLE}" ;;
-        ok) echo -e "${GREEN}[✓] $MSG${RESET_STYLE}" ;;
-        warning) echo -e "${YELLOW}[!] $MSG${RESET_STYLE}" ;;
-        error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2 ;;
+    case ${TYPE} in
+        info) echo -e "${BLUE}[*] ${MSG}${RESET_STYLE}" ;;
+        ok) echo -e "${GREEN}[✓] ${MSG}${RESET_STYLE}" ;;
+        warning) echo -e "${YELLOW}[!] ${MSG}${RESET_STYLE}" ;;
+        error) echo -e "${RED}[✗] ${MSG}${RESET_STYLE}" >&2 ;;
         question)
-            echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}$MSG [y/N]:${RESET_STYLE} "
+            echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}${MSG} [y/N]:${RESET_STYLE} "
             read -rn 1 ans
             echo
-            case "$ans" in
+            case "${ans}" in
                 [yY] | [yY][eE][sS]) return 0 ;;
                 *) return 1 ;;
             esac
             ;;
-        *) echo -e "${WHITE}[*] $MSG${RESET_STYLE}" ;;
+        *) echo -e "${WHITE}[*] ${MSG}${RESET_STYLE}" ;;
     esac
 }
 
@@ -49,18 +49,18 @@ exit_failure() {
 }
 
 determine_install_location() {
-    if [[ $EUID -eq "0" ]]; then
+    if [[ ${EUID} -eq "0" ]]; then
         ROOT_BIN=/usr/local/bin
         ROOT_SHARE=/usr/local/share
     else
         # user install
-        ROOT_BIN="${XDG_BIN_HOME:-$HOME/.local/bin}"
-        ROOT_SHARE="${XDG_DATA_HOME:-$HOME/.local/share}"
+        ROOT_BIN="${XDG_BIN_HOME:-${HOME}/.local/bin}"
+        ROOT_SHARE="${XDG_DATA_HOME:-${HOME}/.local/share}"
     fi
 
     msgbox info "Installing Zwift to:"
-    msgbox info "  binaries → $ROOT_BIN"
-    msgbox info "  data     → $ROOT_SHARE"
+    msgbox info "  binaries → ${ROOT_BIN}"
+    msgbox info "  data     → ${ROOT_SHARE}"
 }
 
 ask_user_confirmation() {
@@ -77,19 +77,19 @@ create_directories() {
     create_directory() {
         DIRECTORY="$1"
 
-        msgbox info "  Creating directory $DIRECTORY"
+        msgbox info "  Creating directory ${DIRECTORY}"
 
-        if ! mkdir -p "$DIRECTORY"; then
-            msgbox error "Could not create $DIRECTORY, aborting"
+        if ! mkdir -p "${DIRECTORY}"; then
+            msgbox error "Could not create ${DIRECTORY}, aborting"
             exit_failure
         fi
     }
 
     msgbox info "Creating directories"
 
-    create_directory "$ROOT_BIN"
-    create_directory "$ROOT_SHARE/icons/hicolor/scalable/apps"
-    create_directory "$ROOT_SHARE/applications"
+    create_directory "${ROOT_BIN}"
+    create_directory "${ROOT_SHARE}/icons/hicolor/scalable/apps"
+    create_directory "${ROOT_SHARE}/applications"
 
     msgbox ok "Directories created"
 }
@@ -99,10 +99,10 @@ download_zwift() {
         DESTINATION="$1"
         URL="$2"
 
-        msgbox info "  Downloading $URL"
+        msgbox info "  Downloading ${URL}"
 
-        if ! curl -fsSLo "$DESTINATION" "$URL"; then
-            msgbox error "Downloading $URL failed, aborting"
+        if ! curl -fsSLo "${DESTINATION}" "${URL}"; then
+            msgbox error "Downloading ${URL} failed, aborting"
             exit_failure
         fi
     }
@@ -113,12 +113,12 @@ download_zwift() {
     ZWIFT_LOGO="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.svg"
     ZWIFT_DESKTOP_ENTRY="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.desktop"
 
-    download_asset "$ROOT_BIN/zwift" "$ZWIFT_SCRIPT"
-    download_asset "$ROOT_SHARE/icons/hicolor/scalable/apps/zwift.svg" "$ZWIFT_LOGO"
-    download_asset "$ROOT_SHARE/applications/Zwift.desktop" "$ZWIFT_DESKTOP_ENTRY"
+    download_asset "${ROOT_BIN}/zwift" "${ZWIFT_SCRIPT}"
+    download_asset "${ROOT_SHARE}/icons/hicolor/scalable/apps/zwift.svg" "${ZWIFT_LOGO}"
+    download_asset "${ROOT_SHARE}/applications/Zwift.desktop" "${ZWIFT_DESKTOP_ENTRY}"
 
-    if ! chmod 755 "$ROOT_BIN/zwift"; then
-        msgbox error "Failed to set permissions for $ROOT_BIN/zwift, aborting"
+    if ! chmod 755 "${ROOT_BIN}/zwift"; then
+        msgbox error "Failed to set permissions for ${ROOT_BIN}/zwift, aborting"
         exit_failure
     fi
 
@@ -128,11 +128,11 @@ download_zwift() {
 check_in_path() {
     msgbox info "Checking if 'zwift' is in PATH"
 
-    if case ":$PATH:" in *":$ROOT_BIN:"*) true ;; *) false ;; esac then
-        msgbox info "  $ROOT_BIN is in your PATH"
+    if case ":${PATH}:" in *":${ROOT_BIN}:"*) true ;; *) false ;; esac then
+        msgbox info "  ${ROOT_BIN} is in your PATH"
         msgbox ok "Zwift can be launched using the 'zwift' command"
     else
-        msgbox warning "$ROOT_BIN is not in your PATH"
+        msgbox warning "${ROOT_BIN} is not in your PATH"
         msgbox warning "You may need to add it to your PATH for the 'zwift' command to work"
     fi
 }

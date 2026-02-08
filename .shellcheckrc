@@ -5,5 +5,5 @@ enable=check-set-e-suppressed
 #enable=check-unassigned-uppercase
 enable=quote-safe-variables
 enable=require-double-brackets
-#enable=require-variable-braces
+enable=require-variable-braces
 #enable=all
