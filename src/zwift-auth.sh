@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -eo pipefail
 
 LAUNCHER_CLIENT_ID="Game_Launcher"
 LAUNCHER_HOME="https://launcher.zwift.com/launcher"
@@ -25,7 +25,8 @@ ACCESS_CODE=$(curl -sS --cookie "${COOKIE}" --cookie-jar "${COOKIE}" \
     --data-urlencode "username=${ZWIFT_USERNAME}" \
     --data-urlencode "password=${ZWIFT_PASSWORD}" \
     --write-out "%{redirect_url}" \
-    "${AUTHENTICATE_URL}" | grep -oP "code=\K.+$")
+    "${AUTHENTICATE_URL}" \
+    | grep -oP "code=\K.+$")
 
 AUTH_TOKEN_JSON=$(curl -sS --cookie "${COOKIE}" --cookie-jar "${COOKIE}" \
     --data-urlencode "client_id=${LAUNCHER_CLIENT_ID}" \
