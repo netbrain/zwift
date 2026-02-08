@@ -7,7 +7,7 @@ LAUNCHER_HOME="https://launcher.zwift.com/launcher"
 ZWIFT_REALM_URL=https://secure.zwift.com/auth/realms/zwift
 COOKIE="cookie.jar"
 
-curl -sS $LAUNCHER_HOME --cookie-jar "$COOKIE"
+curl -sS "$LAUNCHER_HOME" --cookie-jar "$COOKIE"
 REQUEST_STATE=$(grep -oP "OAuth_Token_Request_State\s+\K.*$" "$COOKIE")
 
 AUTHENTICATE_URL=$(curl -sSL --get --cookie "$COOKIE" --cookie-jar "$COOKIE" \
@@ -49,6 +49,6 @@ AUTH_TOKEN_JSON=$(curl -sS --cookie "$COOKIE" --cookie-jar "$COOKIE" \
 #   --data-urlencode "scope=openid" \
 #   "$ZWIFT_REALM_URL/protocol/openid-connect/token")
 
-rm $COOKIE
+rm "$COOKIE"
 
 echo "$AUTH_TOKEN_JSON"
