@@ -65,7 +65,7 @@ if [[ $CONTAINER == "docker" ]]; then
     fi
 
     # Run update if that's the first argument or if zwift directory is empty
-    if [[ $1 == "update" ]] || [[ ! "$(ls -A .)" ]]; then
+    if [[ $1 == "update" ]] || [[ -z "$(ls -A .)" ]]; then
         # Have to change owner for build as everything is root.
         chown -R user:user /home/user
         gosu user:user /bin/update_zwift.sh "$@"
@@ -80,7 +80,7 @@ else
     mkdir -p "$ZWIFT_HOME"
     cd "$ZWIFT_HOME"
 
-    if [[ $1 == "update" ]] || [[ ! "$(ls -A .)" ]]; then
+    if [[ $1 == "update" ]] || [[ -z "$(ls -A .)" ]]; then
         /bin/update_zwift.sh "$@"
     else
         /bin/run_zwift.sh "$@"

@@ -49,7 +49,7 @@ exit_failure() {
 }
 
 determine_install_location() {
-    if [[ $EUID -eq 0 ]]; then
+    if [[ $EUID -eq "0" ]]; then
         ROOT_BIN=/usr/local/bin
         ROOT_SHARE=/usr/local/share
     else

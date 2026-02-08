@@ -270,7 +270,7 @@ fi
 ###### UPD SCRIPTS and CONTAINER ######
 
 # Check for updated zwift.sh by comparing checksums
-if [[ ! $DONT_CHECK ]]; then
+if [[ $DONT_CHECK -ne "1" ]]; then
     msgbox info "Checking for updated zwift.sh"
 
     REMOTE_SUM=$(curl -s https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh | sha256sum | awk '{print $1}')
@@ -288,7 +288,7 @@ if [[ ! $DONT_CHECK ]]; then
 fi
 
 # Check for updated container image
-if [[ ! $DONT_PULL ]]; then
+if [[ $DONT_PULL -ne "1" ]]; then
     msgbox info "Checking for updated container image"
     if $CONTAINER_TOOL pull "$IMAGE":"$VERSION"; then
         msgbox ok "Container image is up to date"
@@ -493,7 +493,7 @@ else
     RC=$?
 fi
 
-if [[ $RC -ne 0 ]]; then
+if [[ $RC -ne "0" ]]; then
     msgbox error "Failed to start Zwift, check variables!" 10
     exit 1
 fi

@@ -6,7 +6,7 @@ ZWIFT_UID=$(id -u)
 ZWIFT_GID=$(id -g)
 
 # Use podman if available
-if [[ ! $CONTAINER_TOOL ]]; then
+if [[ -z $CONTAINER_TOOL ]]; then
     if [[ -x "$(command -v podman)" ]]; then
         CONTAINER_TOOL="podman"
     else

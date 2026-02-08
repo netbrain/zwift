@@ -70,13 +70,13 @@ wait_for_zwift_game_update() {
     vercomp "$ZWIFT_VERSION_CURRENT" "$ZWIFT_VERSION_LATEST"
     RESULT=$?
     set -e
-    if [[ $RESULT -ne 2 ]]; then
+    if [[ $RESULT -ne "2" ]]; then
         echo "already at latest version..."
         exit 0
     fi
 
     wine ZwiftLauncher.exe SilentLaunch &
-    until [[ $RESULT -ne 2 ]]; do
+    until [[ $RESULT -ne "2" ]]; do
         echo "updating in progress..."
         sleep 5
         get_current_version
@@ -94,7 +94,7 @@ wait_for_zwift_game_update() {
     rm -rf "$HOME/.wine/drive_c/users/user/Documents/Zwift"
 }
 
-if [[ ! "$(ls -A .)" ]]; then # is directory empty?
+if [[ -z "$(ls -A .)" ]]; then # is directory empty?
     # Prevent Wine from trying to install a different mono version
     WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u
 
