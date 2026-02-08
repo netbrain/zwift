@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-if [ -n "${DEBUG}" ]; then set -x; fi
+if [[ -n ${DEBUG} ]]; then set -x; fi
 
-if [ -t 1 ]; then
+if [[ -t 1 ]]; then
     WHITE="\033[0;37m"
     RED="\033[0;31m"
     GREEN="\033[0;32m"
@@ -33,7 +33,7 @@ msgbox() {
         warning) echo -e "${YELLOW}[!] $MSG${RESET_STYLE}" ;;
         error) echo -e "${RED}[✗] $MSG${RESET_STYLE}" >&2 ;;
         question)
-            if [ -n "$TIMEOUT" ] && [[ $TIMEOUT -gt 0 ]]; then
+            if [[ -n $TIMEOUT ]] && [[ $TIMEOUT -gt 0 ]]; then
                 echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}$MSG (Default no in $TIMEOUT seconds.) [y/N]:${RESET_STYLE} "
                 read -rt "$TIMEOUT" -n 1 ans
                 echo
@@ -50,7 +50,7 @@ msgbox() {
         *) echo -e "${WHITE}[*] $MSG${RESET_STYLE}" ;;
     esac
 
-    if [ -n "$TIMEOUT" ]; then
+    if [[ -n $TIMEOUT ]]; then
         if [[ $TIMEOUT -gt 0 ]]; then
             sleep "$TIMEOUT"
         else
@@ -124,10 +124,10 @@ if [[ $ZWIFT_OVERRIDE_GRAPHICS -eq "1" ]]; then
 
     # Check for $USER specific graphics config file.
     ZWIFT_USER_GRAPHICS_CONFIG="$HOME/.config/zwift/$USER-graphics.txt"
-    if [ -f "$ZWIFT_USER_GRAPHICS_CONFIG" ]; then
+    if [[ -f $ZWIFT_USER_GRAPHICS_CONFIG ]]; then
         ZWIFT_GRAPHICS_CONFIG="$ZWIFT_USER_GRAPHICS_CONFIG"
     # Create graphics.txt file if it does not exist.
-    elif [ ! -f "$ZWIFT_GRAPHICS_CONFIG" ]; then
+    elif [[ ! -f $ZWIFT_GRAPHICS_CONFIG ]]; then
         mkdir -p "$HOME/.config/zwift"
         echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "$ZWIFT_GRAPHICS_CONFIG"
         msgbox warning "Created $ZWIFT_GRAPHICS_CONFIG with default values, edit this file to tweak the zwift graphics settings" 0
@@ -156,14 +156,14 @@ ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
 
 # CONTAINER_TOOL, Use podman if available
 msgbox info "Looking for container tool"
-if [ -z "$CONTAINER_TOOL" ]; then
-    if [ -x "$(command -v podman)" ]; then
+if [[ -z $CONTAINER_TOOL ]]; then
+    if [[ -x "$(command -v podman)" ]]; then
         CONTAINER_TOOL=podman
     else
         CONTAINER_TOOL=docker
     fi
 fi
-if [ -x "$(command -v "$CONTAINER_TOOL")" ]; then
+if [[ -x "$(command -v "$CONTAINER_TOOL")" ]]; then
     msgbox ok "Found container tool: $CONTAINER_TOOL"
 else
     msgbox error "Container tool $CONTAINER_TOOL not found"
@@ -174,26 +174,26 @@ fi
 
 # Lookup zwift password and create secret to pass to the container
 # Note: can't use the docker secret store since it requires swarm
-if [ -n "$ZWIFT_USERNAME" ]; then
+if [[ -n $ZWIFT_USERNAME ]]; then
     msgbox info "Looking up Zwift password for $ZWIFT_USERNAME"
     PASSWORD_SECRET_NAME="zwift-password-$ZWIFT_USERNAME"
 
     # ZWIFT_PASSWORD not set, check if secret already exists or if password is stored in secret-tool
-    if [ -z "$ZWIFT_PASSWORD" ]; then
-        if [ "$CONTAINER_TOOL" == "podman" ] && $CONTAINER_TOOL secret exists "$PASSWORD_SECRET_NAME"; then
+    if [[ -z $ZWIFT_PASSWORD ]]; then
+        if [[ $CONTAINER_TOOL == "podman" ]] && $CONTAINER_TOOL secret exists "$PASSWORD_SECRET_NAME"; then
             msgbox ok "Password for $ZWIFT_USERNAME found in $CONTAINER_TOOL secret store"
             HAS_PASSWORD_SECRET="1"
-        elif [ -x "$(command -v secret-tool)" ]; then
+        elif [[ -x "$(command -v secret-tool)" ]]; then
             msgbox info "Looking for password in secret-tool (application zwift username $ZWIFT_USERNAME)"
             ZWIFT_PASSWORD=$(secret-tool lookup application zwift username "$ZWIFT_USERNAME")
         fi
     fi
 
     # ZWIFT_PASSWORD set or found in secret-tool, create/update secret
-    if [ -n "$ZWIFT_PASSWORD" ]; then
+    if [[ -n $ZWIFT_PASSWORD ]]; then
         msgbox ok "Password found for $ZWIFT_USERNAME"
         HAS_PLAINTEXT_PASSWORD="1"
-        if [ "$CONTAINER_TOOL" == "podman" ] && printf '%s' "$ZWIFT_PASSWORD" | $CONTAINER_TOOL secret create --replace=true "$PASSWORD_SECRET_NAME" - > /dev/null; then
+        if [[ $CONTAINER_TOOL == "podman" ]] && printf '%s' "$ZWIFT_PASSWORD" | $CONTAINER_TOOL secret create --replace=true "$PASSWORD_SECRET_NAME" - > /dev/null; then
             msgbox ok "Stored password in $CONTAINER_TOOL secret store"
             HAS_PASSWORD_SECRET="1"
         else
@@ -219,7 +219,7 @@ else
     msgbox warning "No Zwift credentials found..."
 fi
 
-if [ "$CONTAINER_TOOL" == "podman" ]; then
+if [[ $CONTAINER_TOOL == "podman" ]]; then
     # Podman has to use container id 1000
     # Local user is mapped to the container id
     LOCAL_UID=$ZWIFT_UID
@@ -252,16 +252,16 @@ case "$XDG_SESSION_TYPE" in
 esac
 
 # Verify which system we are using for wayland and some checks.
-if [ "$WINDOW_MANAGER" == "Wayland" ]; then
+if [[ $WINDOW_MANAGER == "Wayland" ]]; then
     # System is using wayland or xwayland.
-    if [ -z "$WINE_EXPERIMENTAL_WAYLAND" ]; then
+    if [[ -z $WINE_EXPERIMENTAL_WAYLAND ]]; then
         WINDOW_MANAGER="XWayland"
     else
         WINDOW_MANAGER="Wayland"
     fi
 
     # ZWIFT_UID does not work on XWayland, show warning
-    if [ "$ZWIFT_UID" -ne "$(id -u)" ]; then
+    if [[ $ZWIFT_UID -ne "$(id -u)" ]]; then
         msgbox warning "Wayland does not support ZWIFT_UID different to your id of $(id -u), may not start." 5
     fi
 fi
@@ -276,7 +276,7 @@ if [[ ! $DONT_CHECK ]]; then
     REMOTE_SUM=$(curl -s https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh | sha256sum | awk '{print $1}')
     THIS_SUM=$(sha256sum "$0" | awk '{print $1}')
 
-    if [ "$REMOTE_SUM" == "$THIS_SUM" ]; then
+    if [[ $REMOTE_SUM == "$THIS_SUM" ]]; then
         msgbox ok "You are running the latest zwift.sh 👏"
     elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
         msgbox info "Downloading latest zwift.sh"
@@ -381,7 +381,7 @@ if [[ -n $INTERACTIVE ]]; then
 fi
 
 # Setup Flags for Window Managers
-if [ $WINDOW_MANAGER == "Wayland" ]; then
+if [[ $WINDOW_MANAGER == "Wayland" ]]; then
     ENVIRONMENT_VARIABLES+=(
         WINE_EXPERIMENTAL_WAYLAND="1"
         XDG_RUNTIME_DIR="/run/user/$CONTAINER_UID"
@@ -390,9 +390,9 @@ if [ $WINDOW_MANAGER == "Wayland" ]; then
     WM_FLAGS=(-v "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY":"${XDG_RUNTIME_DIR//$LOCAL_UID/$CONTAINER_UID}/$WAYLAND_DISPLAY")
 fi
 
-if [ $WINDOW_MANAGER == "XWayland" ] || [ $WINDOW_MANAGER == "XOrg" ]; then
+if [[ $WINDOW_MANAGER == "XWayland" ]] || [[ $WINDOW_MANAGER == "XOrg" ]]; then
     # If not XAuthority set then don't pass, hyprland is one that does not use it.
-    if [ -z "$XAUTHORITY" ]; then
+    if [[ -z $XAUTHORITY ]]; then
         WM_FLAGS=(-v /tmp/.X11-unix:/tmp/.X11-unix)
     else
         ENVIRONMENT_VARIABLES+=(XAUTHORITY="${XAUTHORITY//$LOCAL_UID/$CONTAINER_UID}")
@@ -403,12 +403,12 @@ if [ $WINDOW_MANAGER == "XWayland" ] || [ $WINDOW_MANAGER == "XOrg" ]; then
     fi
 fi
 
-if [ $WINDOW_MANAGER == "XOrg" ]; then
+if [[ $WINDOW_MANAGER == "XOrg" ]]; then
     unset WINE_EXPERIMENTAL_WAYLAND
 fi
 
 # Initiate podman Volume with correct permissions
-if [ "$CONTAINER_TOOL" == "podman" ]; then
+if [[ $CONTAINER_TOOL == "podman" ]]; then
     # Create a volume if not already exists, this is done now as
     # if left to the run command the directory can get the wrong permissions
     if ! podman volume ls | grep "zwift-$USER" > /dev/null; then
@@ -479,7 +479,7 @@ printf '%s\n' "${ENVIRONMENT_VARIABLES[@]}" > "$ENV_FILE"
 if [[ " ${ZWIFT_FG_FLAG[*]} " == *" -it "* ]]; then
     # In interactive mode we don't have a container ID to run xhost against later.
     # If using X11/XWayland, show instructions so users can enable X access manually.
-    if [ -x "$(command -v xhost)" ] && [ -z "$WINE_EXPERIMENTAL_WAYLAND" ]; then
+    if [[ -x "$(command -v xhost)" ]] && [[ -z $WINE_EXPERIMENTAL_WAYLAND ]]; then
         msgbox info "INTERACTIVE mode: xhost is not automatically enabled for this container."
         msgbox info "  If you need X11 apps inside the container to display, run this in another terminal:"
         msgbox info "    xhost +local:$HOSTNAME"
@@ -493,13 +493,13 @@ else
     RC=$?
 fi
 
-if [ $RC -ne 0 ]; then
+if [[ $RC -ne 0 ]]; then
     msgbox error "Failed to start Zwift, check variables!" 10
     exit 1
 fi
 
 # Allow container to connect to X, has to be set for different UID
-if [ -n "$CONTAINER" ] && [ -x "$(command -v xhost)" ] && [ -z "$WINE_EXPERIMENTAL_WAYLAND" ]; then
+if [[ -n $CONTAINER ]] && [[ -x "$(command -v xhost)" ]] && [[ -z $WINE_EXPERIMENTAL_WAYLAND ]]; then
     msgbox info "Allowing container to connect to X"
     xhost +local:"$($CONTAINER_TOOL inspect --format='{{ .Config.Hostname }}' "$CONTAINER")" > /dev/null
 fi

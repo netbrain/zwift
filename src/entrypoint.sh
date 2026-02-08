@@ -36,13 +36,13 @@ if [[ $CONTAINER == "docker" ]]; then
     USER_GID=$(id -g user)
 
     # Test that it exists and is a number, and only if different to existing.
-    if [ "$ZWIFT_UID" -eq "$ZWIFT_UID" ] && [ "$USER_UID" -ne "$ZWIFT_UID" ]; then
+    if [[ $ZWIFT_UID -eq $ZWIFT_UID ]] && [[ $USER_UID -ne $ZWIFT_UID ]]; then
         USER_UID=$ZWIFT_UID
         SWITCH_IDS=1
     else
         echo "ZWIFT_UID is not set or not a number: '$ZWIFT_UID'"
     fi
-    if [ "$ZWIFT_GID" -eq "$ZWIFT_GID" ] && [ "$USER_GID" -ne "$ZWIFT_GID" ]; then
+    if [[ $ZWIFT_GID -eq $ZWIFT_GID ]] && [[ $USER_GID -ne $ZWIFT_GID ]]; then
         USER_GID=$ZWIFT_GID
         SWITCH_IDS=1
     else
@@ -56,7 +56,7 @@ if [[ $CONTAINER == "docker" ]]; then
         chown -R "$USER_UID":"$USER_GID" /home/user
 
         # Only make the directory if not there.
-        if [ ! -d "/run/user/$USER_UID" ]; then
+        if [[ ! -d "/run/user/$USER_UID" ]]; then
             mkdir -p "/run/user/$USER_GID"
         fi
 
@@ -65,7 +65,7 @@ if [[ $CONTAINER == "docker" ]]; then
     fi
 
     # Run update if that's the first argument or if zwift directory is empty
-    if [ "$1" = "update" ] || [ ! "$(ls -A .)" ]; then
+    if [[ $1 == "update" ]] || [[ ! "$(ls -A .)" ]]; then
         # Have to change owner for build as everything is root.
         chown -R user:user /home/user
         gosu user:user /bin/update_zwift.sh "$@"
@@ -80,7 +80,7 @@ else
     mkdir -p "$ZWIFT_HOME"
     cd "$ZWIFT_HOME"
 
-    if [ "$1" = "update" ] || [ ! "$(ls -A .)" ]; then
+    if [[ $1 == "update" ]] || [[ ! "$(ls -A .)" ]]; then
         /bin/update_zwift.sh "$@"
     else
         /bin/run_zwift.sh "$@"

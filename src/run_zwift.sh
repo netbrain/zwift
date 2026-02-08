@@ -5,13 +5,13 @@ set -x
 ZWIFT_HOME="$HOME/.wine/drive_c/Program Files (x86)/Zwift"
 ZWIFT_PREFS="$HOME/.wine/drive_c/users/user/Documents/Zwift/prefs.xml"
 
-if [ ! -d "$ZWIFT_HOME" ]; then
+if [[ ! -d $ZWIFT_HOME ]]; then
     echo "Directory $ZWIFT_HOME does not exist.  Has Zwift been installed?"
     exit 1
 fi
 
 if [[ -n $ZWIFT_OVERRIDE_RESOLUTION ]]; then
-    if [ -f "$ZWIFT_PREFS" ]; then
+    if [[ -f $ZWIFT_PREFS ]]; then
         echo "Setting zwift resolution to $ZWIFT_OVERRIDE_RESOLUTION."
         UPDATED_PREFS=$(awk -v resolution="$ZWIFT_OVERRIDE_RESOLUTION" '{
             gsub(/<USER_RESOLUTION_PREF>.*<\/USER_RESOLUTION_PREF>/,
@@ -53,7 +53,7 @@ pkill ZwiftLauncher || true
 pkill ZwiftWindowsCra
 pkill -f MicrosoftEdgeUpdate
 
-if [ -z "$ZWIFT_NO_GAMEMODE" ]; then
+if [[ -z $ZWIFT_NO_GAMEMODE ]]; then
     /usr/games/gamemoderun wineserver -w
 else
     wineserver -w
