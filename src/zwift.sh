@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [[ -n ${DEBUG} ]]; then set -x; fi
+if [[ ${DEBUG} -eq "1" ]]; then set -x; fi
 
 if [[ -t 1 ]]; then
     WHITE="\033[0;37m"
@@ -254,10 +254,10 @@ esac
 # Verify which system we are using for wayland and some checks.
 if [[ ${WINDOW_MANAGER} == "Wayland" ]]; then
     # System is using wayland or xwayland.
-    if [[ -z ${WINE_EXPERIMENTAL_WAYLAND} ]]; then
-        WINDOW_MANAGER="XWayland"
-    else
+    if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq "1" ]]; then
         WINDOW_MANAGER="Wayland"
+    else
+        WINDOW_MANAGER="XWayland"
     fi
 
     # ZWIFT_UID does not work on XWayland, show warning
@@ -479,7 +479,7 @@ printf '%s\n' "${ENVIRONMENT_VARIABLES[@]}" > "${ENV_FILE}"
 if [[ " ${ZWIFT_FG_FLAG[*]} " == *" -it "* ]]; then
     # In interactive mode we don't have a container ID to run xhost against later.
     # If using X11/XWayland, show instructions so users can enable X access manually.
-    if [[ -x "$(command -v xhost)" ]] && [[ -z ${WINE_EXPERIMENTAL_WAYLAND} ]]; then
+    if [[ -x "$(command -v xhost)" ]] && [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne "1" ]]; then
         msgbox info "INTERACTIVE mode: xhost is not automatically enabled for this container."
         msgbox info "  If you need X11 apps inside the container to display, run this in another terminal:"
         msgbox info "    xhost +local:${HOSTNAME}"
@@ -499,7 +499,7 @@ if [[ ${RC} -ne "0" ]]; then
 fi
 
 # Allow container to connect to X, has to be set for different UID
-if [[ -n ${CONTAINER} ]] && [[ -x "$(command -v xhost)" ]] && [[ -z ${WINE_EXPERIMENTAL_WAYLAND} ]]; then
+if [[ -n ${CONTAINER} ]] && [[ -x "$(command -v xhost)" ]] && [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne "1" ]]; then
     msgbox info "Allowing container to connect to X"
     xhost +local:"$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${CONTAINER}")" > /dev/null
 fi

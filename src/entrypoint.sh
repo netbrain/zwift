@@ -17,9 +17,9 @@ if [[ ${CONTAINER} != "docker" ]] && [[ ${CONTAINER} != "podman" ]]; then
 fi
 
 # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
-# NOTE: DISPLAY must be unset here before run_swift to work
+# NOTE: DISPLAY must be unset here before run_zwift to work
 #       Registry entries are set in the container install or won't work.
-if [[ -n ${WINE_EXPERIMENTAL_WAYLAND} ]]; then
+if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq "1" ]]; then
     unset DISPLAY
 fi
 
