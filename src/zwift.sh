@@ -184,8 +184,6 @@ fi
 ##### Basic configuration #####
 
 # Create temporary file for container environment variables, automatically removed upon exit
-declare -a container_env_vars
-container_env_vars=()
 if container_env_file="$(mktemp -q /tmp/zwift-container.env.XXXXXXXXXX)"; then
     trap 'rm -f -- "${container_env_file}" && msgbox info "Removed temporary file ${container_env_file}"' EXIT
     msgbox info "Created temporary file for environment variables:"
@@ -195,6 +193,10 @@ else
     msgbox error "Failed to create temporary file for environment variables"
     exit 1
 fi
+
+# Create array for container environment variables
+declare -a container_env_vars
+container_env_vars=()
 
 # Create array for container arguments
 declare -a container_args
@@ -357,44 +359,58 @@ else
     msgbox warning "No Zwift credentials found..."
 fi
 
-######################################
-##### OS and WM Manager Settings #####
+###################################
+##### Window manager settings #####
 
-window_manager="Other"
-
-case "${XDG_SESSION_TYPE}" in
-    "wayland")
-        window_manager="Wayland"
-        ;;
-    "x11")
-        window_manager="XOrg"
-        ;;
-    *)
-        if [[ -n ${WAYLAND_DISPLAY} ]]; then
-            window_manager="Wayland"
-        elif [[ -n ${DISPLAY} ]]; then
-            window_manager="XOrg"
-        fi
-        ;;
-esac
-
-# Verify which system we are using for wayland and some checks.
-if [[ ${window_manager} == "Wayland" ]]; then
-    # System is using wayland or xwayland.
+if [[ ${XDG_SESSION_TYPE} == "wayland" ]] || [[ -n ${WAYLAND_DISPLAY} ]]; then
     if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
         window_manager="Wayland"
     else
         window_manager="XWayland"
     fi
+elif [[ ${XDG_SESSION_TYPE} == "x11" ]] || [[ -n ${DISPLAY} ]]; then
+    window_manager="XOrg"
+else
+    window_manager="Other"
+fi
 
-    # ZWIFT_UID does not work on XWayland, show warning
+# Setup Flags for Window Managers
+if [[ ${window_manager} == "Wayland" ]]; then
     if [[ ${ZWIFT_UID} -ne "$(id -u)" ]]; then
         msgbox warning "Wayland does not support ZWIFT_UID different to your id of $(id -u), may not start." 5
     fi
+
+    container_env_vars+=(
+        WINE_EXPERIMENTAL_WAYLAND=1
+        XDG_RUNTIME_DIR="/run/user/${container_uid}"
+        WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
+    )
+
+    if [[ -n ${XDG_RUNTIME_DIR} ]]; then
+        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
+    else
+        msgbox error "XDG_RUNTIME_DIR not set, Zwift will likely launch with a black screen!"
+    fi
+elif [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
+    container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
+    if [[ -n ${XAUTHORITY} ]]; then
+        # If not XAuthority set then don't pass, hyprland is one that does not use it
+        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${local_uid}/${container_uid}}")
+        container_args+=(-v "${XAUTHORITY}":"${XAUTHORITY//${local_uid}/${container_uid}}")
+    fi
 fi
 
-###################################
-##### SPECIFIC CONFIGURATIONS #####
+####################################
+##### Hardware driver settings #####
+
+if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
+    [[ ${DBUS_SESSION_BUS_ADDRESS} =~ ^unix:path=([^,]+) ]]
+    dbus_unix_socket=${BASH_REMATCH[1]}
+    if [[ -n ${dbus_unix_socket} ]]; then
+        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${local_uid}/${container_uid}}")
+        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${local_uid}/${container_uid}}")
+    fi
+fi
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
 vga_device_flag="${VGA_DEVICE_FLAG}"
@@ -409,49 +425,13 @@ if [[ -z ${vga_device_flag} ]]; then
         vga_device_flag="--device=/dev/dri:/dev/dri"
     fi
 fi
-container_args+=("${VGA_DEVICE_FLAG}")
-
-if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
-    [[ ${DBUS_SESSION_BUS_ADDRESS} =~ ^unix:path=([^,]+) ]]
-    dbus_unix_socket=${BASH_REMATCH[1]}
-    if [[ -n ${dbus_unix_socket} ]]; then
-        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${local_uid}/${container_uid}}")
-        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${local_uid}/${container_uid}}")
-    fi
-fi
-
-# Setup Flags for Window Managers
-if [[ ${window_manager} == "Wayland" ]]; then
-    container_env_vars+=(
-        WINE_EXPERIMENTAL_WAYLAND=1
-        XDG_RUNTIME_DIR="/run/user/${container_uid}"
-        WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
-    )
-    if [[ -n ${XDG_RUNTIME_DIR} ]]; then
-        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
-    else
-        msgbox error "XDG_RUNTIME_DIR not set, Zwift will likely launch with a black screen!"
-    fi
-fi
-
-if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
-    # If not XAuthority set then don't pass, hyprland is one that does not use it.
-    if [[ -z ${XAUTHORITY} ]]; then
-        container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
-    else
-        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${local_uid}/${container_uid}}")
-        container_args+=(
-            -v /tmp/.X11-unix:/tmp/.X11-unix
-            -v "${XAUTHORITY}":"${XAUTHORITY//${local_uid}/${container_uid}}"
-        )
-    fi
-fi
+container_args+=("${vga_device_flag}")
 
 ###########################
 ##### Start container #####
 
 declare -a container_command
-container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "$@" "${IMAGE}:${VERSION}")
+container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${@}" "${IMAGE}:${VERSION}")
 
 # DRYRUN: print the exact command that would be executed, then exit
 if [[ ${DRYRUN} -eq 1 ]]; then
@@ -469,13 +449,15 @@ fi
 
 # Create a volume if not already exists, this is done now as
 # if left to the run command the directory can get the wrong permissions
-if [[ ${CONTAINER_TOOL} == "podman" ]] && ! podman volume ls | grep "zwift-${USER}" > /dev/null; then
-    podman volume create "zwift-${USER}"
+if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep "zwift-${USER}" > /dev/null; then
+    ${CONTAINER_TOOL} volume create "zwift-${USER}"
 fi
 
+# Only write environment variables to file when needed
 msgbox info "Writing environment variables to temporary file"
 printf '%s\n' "${container_env_vars[@]}" > "${container_env_file}"
 
+# Determine whether xhost access should be provided
 if { [[ ${window_manager} == "XOrg" ]] || [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne 1 ]]; } && [[ -x "$(command -v xhost)" ]]; then
     require_xhost_access=1
 else
@@ -493,19 +475,16 @@ if [[ ${INTERACTIVE} -eq 1 ]]; then
         msgbox info "  After you're done, you can revoke access with:"
         msgbox info "    xhost -local:${HOSTNAME}"
     fi
-
     if ! "${container_command[@]}"; then
         msgbox error "Failed to start Zwift, check variables!" 10
         exit 1
     fi
 elif container_id=$("${container_command[@]}"); then
-    # Allow container to connect to X, has to be set for different UID
+    msgbox ok "Launched Zwift! 🚀"
     if [[ -n ${container_id} ]] && [[ ${require_xhost_access} -eq 1 ]]; then
         msgbox info "Allowing container to connect to X"
         xhost +local:"$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")" > /dev/null
     fi
-
-    msgbox ok "Launched Zwift! 🚀"
 else
     msgbox error "Failed to start Zwift, check variables!" 10
     exit 1
