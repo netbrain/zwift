@@ -11,23 +11,23 @@ get_current_version() {
     if [[ -f Zwift_ver_cur_filename.txt ]]; then
         # If Zwift_ver_cur_filename.txt exists, use it
         # Remove Null to remove warning.
-        CUR_FILENAME="$(tr '\0' '\n' < Zwift_ver_cur_filename.txt)"
+        version_filename="$(tr '\0' '\n' < Zwift_ver_cur_filename.txt)"
     else
         # Default to Zwift_ver_cur.xml if Zwift_ver_cur_filename.txt doesn't exist
-        CUR_FILENAME="Zwift_ver_cur.xml"
+        version_filename="Zwift_ver_cur.xml"
     fi
 
-    if grep -q sversion "${CUR_FILENAME}"; then
-        ZWIFT_VERSION_CURRENT="$(grep -oP 'sversion="\K.*?(?=\s)' "${CUR_FILENAME}" | cut -f 1 -d ' ')"
+    if grep -q sversion "${version_filename}"; then
+        zwift_current_version="$(grep -oP 'sversion="\K.*?(?=\s)' "${version_filename}" | cut -f 1 -d ' ')"
     else
         # Basic install only, needs initial update
-        ZWIFT_VERSION_CURRENT="0.0.0"
+        zwift_current_version="0.0.0"
     fi
 }
 
 get_latest_version() {
     # Don't cache so we don't pick old versions.
-    ZWIFT_VERSION_LATEST="$(wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')"
+    zwift_latest_version="$(wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')"
 }
 
 wait_for_zwift_game_update() {
@@ -67,23 +67,23 @@ wait_for_zwift_game_update() {
 
     # Disable ERR Trap so return works.
     set +e
-    vercomp "${ZWIFT_VERSION_CURRENT}" "${ZWIFT_VERSION_LATEST}"
-    RESULT=$?
+    vercomp "${zwift_current_version}" "${zwift_latest_version}"
+    result=$?
     set -e
-    if [[ ${RESULT} -ne 2 ]]; then
+    if [[ ${result} -ne 2 ]]; then
         echo "already at latest version..."
         exit 0
     fi
 
     wine ZwiftLauncher.exe SilentLaunch &
-    until [[ ${RESULT} -ne 2 ]]; do
+    until [[ ${result} -ne 2 ]]; do
         echo "updating in progress..."
         sleep 5
         get_current_version
 
         set +e
-        vercomp "${ZWIFT_VERSION_CURRENT}" "${ZWIFT_VERSION_LATEST}"
-        RESULT=$?
+        vercomp "${zwift_current_version}" "${zwift_latest_version}"
+        result=$?
         set -e
     done
 

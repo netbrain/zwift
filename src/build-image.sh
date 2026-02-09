@@ -14,6 +14,7 @@ if [[ -z ${CONTAINER_TOOL} ]]; then
         CONTAINER_TOOL="docker"
     fi
 fi
+readonly CONTAINER_TOOL
 
 # Update information based on Container Tool
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
@@ -24,7 +25,8 @@ else
     readonly IMAGE="netbrain/zwift"
 fi
 
-GENERAL_FLAGS=(
+declare -a container_args
+container_args=(
     -it
     --network bridge
     --name zwift
@@ -42,33 +44,30 @@ GENERAL_FLAGS=(
 
 # Check for proprietary nvidia driver and set correct device to use
 if [[ -f "/proc/driver/nvidia/version" ]]; then
-    VGA_DEVICE_FLAG=(--gpus all)
+    container_args+=(--gpus all)
 else
-    VGA_DEVICE_FLAG=(--device /dev/dri:/dev/dri)
+    container_args+=(--device /dev/dri:/dev/dri)
 fi
 
-# Initiate podman Volume with correct permissions
+# Initiate podman volume with correct permissions
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     # Add ipc host to deal with an SHM issue on some machines.
-    PODMAN_FLAGS=(--userns "keep-id:uid=${ZWIFT_UID},gid=${ZWIFT_GID}")
+    container_args+=(--userns "keep-id:uid=${ZWIFT_UID},gid=${ZWIFT_GID}")
 fi
 
 # Cleanup on error
 trap cleanup ERR
 cleanup() {
     ${CONTAINER_TOOL} container rm zwift
-    exit
+    exit 1
 }
 
 ${CONTAINER_TOOL} build --force-rm -t "${BUILD_NAME}" "${SCRIPT_DIR}"
-${CONTAINER_TOOL} run "${GENERAL_FLAGS[@]}" \
-    "${VGA_DEVICE_FLAG[@]}" \
-    "${PODMAN_FLAGS[@]}" \
-    "${IMAGE}:latest" \
-    "$@"
+${CONTAINER_TOOL} run "${container_args[@]}" "${IMAGE}:latest" "$@"
 ${CONTAINER_TOOL} commit zwift "${BUILD_NAME}:latest"
 ${CONTAINER_TOOL} container rm zwift
 
-export IMAGE="${IMAGE}"
-export DONT_PULL="1"
+export IMAGE
+export DONT_CHECK=1
+export DONT_PULL=1
 "${SCRIPT_DIR}/zwift.sh"

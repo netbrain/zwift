@@ -55,17 +55,17 @@ exit_failure() {
 
 determine_install_location() {
     if [[ ${EUID} -eq 0 ]]; then
-        ROOT_BIN="/usr/local/bin"
-        ROOT_SHARE="/usr/local/share"
+        root_bin="/usr/local/bin"
+        root_share="/usr/local/share"
     else
         # user install
-        ROOT_BIN="${XDG_BIN_HOME:-${HOME}/.local/bin}"
-        ROOT_SHARE="${XDG_DATA_HOME:-${HOME}/.local/share}"
+        root_bin="${XDG_BIN_HOME:-${HOME}/.local/bin}"
+        root_share="${XDG_DATA_HOME:-${HOME}/.local/share}"
     fi
 
     msgbox info "Installing Zwift to:"
-    msgbox info "  binaries → ${ROOT_BIN}"
-    msgbox info "  data     → ${ROOT_SHARE}"
+    msgbox info "  binaries → ${root_bin}"
+    msgbox info "  data     → ${root_share}"
 }
 
 ask_user_confirmation() {
@@ -92,9 +92,9 @@ create_directories() {
 
     msgbox info "Creating directories"
 
-    create_directory "${ROOT_BIN}"
-    create_directory "${ROOT_SHARE}/icons/hicolor/scalable/apps"
-    create_directory "${ROOT_SHARE}/applications"
+    create_directory "${root_bin}"
+    create_directory "${root_share}/icons/hicolor/scalable/apps"
+    create_directory "${root_share}/applications"
 
     msgbox ok "Directories created"
 }
@@ -114,12 +114,12 @@ download_zwift() {
 
     msgbox info "Downloading Zwift"
 
-    download_asset "${ROOT_BIN}/zwift" "${ZWIFT_SCRIPT}"
-    download_asset "${ROOT_SHARE}/icons/hicolor/scalable/apps/zwift.svg" "${ZWIFT_LOGO}"
-    download_asset "${ROOT_SHARE}/applications/Zwift.desktop" "${ZWIFT_DESKTOP_ENTRY}"
+    download_asset "${root_bin}/zwift" "${ZWIFT_SCRIPT}"
+    download_asset "${root_share}/icons/hicolor/scalable/apps/zwift.svg" "${ZWIFT_LOGO}"
+    download_asset "${root_share}/applications/Zwift.desktop" "${ZWIFT_DESKTOP_ENTRY}"
 
-    if ! chmod 755 "${ROOT_BIN}/zwift"; then
-        msgbox error "Failed to set permissions for ${ROOT_BIN}/zwift, aborting"
+    if ! chmod 755 "${root_bin}/zwift"; then
+        msgbox error "Failed to set permissions for ${root_bin}/zwift, aborting"
         exit_failure
     fi
 
@@ -129,11 +129,11 @@ download_zwift() {
 check_in_path() {
     msgbox info "Checking if 'zwift' is in PATH"
 
-    if case ":${PATH}:" in *":${ROOT_BIN}:"*) true ;; *) false ;; esac then
-        msgbox info "  ${ROOT_BIN} is in your PATH"
+    if case ":${PATH}:" in *":${root_bin}:"*) true ;; *) false ;; esac then
+        msgbox info "  ${root_bin} is in your PATH"
         msgbox ok "Zwift can be launched using the 'zwift' command"
     else
-        msgbox warning "${ROOT_BIN} is not in your PATH"
+        msgbox warning "${root_bin} is not in your PATH"
         msgbox warning "You may need to add it to your PATH for the 'zwift' command to work"
     fi
 }
