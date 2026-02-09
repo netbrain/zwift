@@ -53,7 +53,7 @@ pkill ZwiftLauncher || true
 pkill ZwiftWindowsCra
 pkill -f MicrosoftEdgeUpdate
 
-if [[ -z ${ZWIFT_NO_GAMEMODE} ]]; then
+if [[ ${ZWIFT_NO_GAMEMODE} -ne "1" ]]; then
     /usr/games/gamemoderun wineserver -w
 else
     wineserver -w

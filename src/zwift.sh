@@ -375,7 +375,7 @@ else
 fi
 
 # INTERACTIVE mode: force foreground and provide a shell entrypoint for debugging
-if [[ -n ${INTERACTIVE} ]]; then
+if [[ ${INTERACTIVE} -eq "1" ]]; then
     ZWIFT_FG_FLAG=(-it)
     INTERACTIVE_FLAGS=(--entrypoint bash)
 fi
@@ -459,7 +459,7 @@ CMD=(
 )
 
 # DRYRUN: print the exact command that would be executed, then exit
-if [[ -n ${DRYRUN} ]]; then
+if [[ ${DRYRUN} -eq "1" ]]; then
     msgbox ok "DRYRUN:"
     msgbox ok "environment variables (${ENV_FILE}):"
     for env_var in "${ENVIRONMENT_VARIABLES[@]}"; do
