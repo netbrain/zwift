@@ -13,6 +13,7 @@
           tag,
           dontCheck,
           dontPull,
+          dontClean,
           dryRun,
           interactive,
           containerTool,
@@ -46,6 +47,7 @@
             ${pkgs.lib.optionalString (tag != "") "export VERSION=${tag}"}
             ${pkgs.lib.optionalString (dontCheck != "") "export DONT_CHECK=${dontCheck}"}
             ${pkgs.lib.optionalString (dontPull != "") "export DONT_PULL=${dontPull}"}
+            ${pkgs.lib.optionalString (dontClean != "") "export DONT_CLEAN=${dontClean}"}
             ${pkgs.lib.optionalString (dryRun != "") "export DRYRUN=${dryRun}"}
             ${pkgs.lib.optionalString (interactive != "") "export INTERACTIVE=${interactive}"}
             ${pkgs.lib.optionalString (containerTool != "") "export CONTAINER_TOOL=${containerTool}"}
@@ -121,6 +123,10 @@
                 default = false;
               };
               dontPull = mkOption {
+                type = bool;
+                default = false;
+              };
+              dontClean = mkOption {
                 type = bool;
                 default = false;
               };
@@ -238,6 +244,7 @@
                     tag = version;
                     dontCheck = if dontCheck then "1" else "";
                     dontPull = if dontPull then "1" else "";
+                    dontClean = if dontClean then "1" else "";
                     dryRun = if dryRun then "1" else "";
                     interactive = if interactive then "1" else "";
                     zwiftOverrideGraphics = if zwiftOverrideGraphics then "1" else "";
