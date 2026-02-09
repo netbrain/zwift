@@ -7,6 +7,7 @@ on: # yamllint disable-line rule:truthy
       - "master"
 jobs:
   validate-shell-scripts:
+    name: Lint with shellcheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
@@ -16,6 +17,7 @@ jobs:
       - name: Check bash scripts for errors and warnings
         run: find . -path ./.git -prune -o -name "*.sh" -exec shellcheck {} +
   check-shell-scripts-formatted:
+    name: Check formatting with shfmt
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
