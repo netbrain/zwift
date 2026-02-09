@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-LAUNCHER_CLIENT_ID="Game_Launcher"
-LAUNCHER_HOME="https://launcher.zwift.com/launcher"
-
-ZWIFT_REALM_URL=https://secure.zwift.com/auth/realms/zwift
-COOKIE="cookie.jar"
+readonly LAUNCHER_CLIENT_ID="Game_Launcher"
+readonly LAUNCHER_HOME="https://launcher.zwift.com/launcher"
+readonly ZWIFT_REALM_URL=https://secure.zwift.com/auth/realms/zwift
+readonly COOKIE="cookie.jar"
 
 curl -sS "${LAUNCHER_HOME}" --cookie-jar "${COOKIE}"
 REQUEST_STATE="$(grep -oP "OAuth_Token_Request_State\s+\K.*$" "${COOKIE}")"

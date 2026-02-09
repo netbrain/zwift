@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -x
 
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-ZWIFT_UID=$(id -u)
-ZWIFT_GID=$(id -g)
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+ZWIFT_UID="$(id -u)"
+ZWIFT_GID="$(id -g)"
+readonly SCRIPT_DIR ZWIFT_UID ZWIFT_GID
 
 # Use podman if available
 if [[ -z ${CONTAINER_TOOL} ]]; then
@@ -16,11 +17,11 @@ fi
 
 # Update information based on Container Tool
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
-    BUILD_NAME="zwift"
-    IMAGE="localhost/zwift"
+    readonly BUILD_NAME="zwift"
+    readonly IMAGE="localhost/zwift"
 else
-    BUILD_NAME="netbrain/zwift"
-    IMAGE="netbrain/zwift"
+    readonly BUILD_NAME="netbrain/zwift"
+    readonly IMAGE="netbrain/zwift"
 fi
 
 GENERAL_FLAGS=(

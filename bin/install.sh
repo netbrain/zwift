@@ -1,37 +1,42 @@
 #!/usr/bin/env bash
 
+readonly ZWIFT_SCRIPT="https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh"
+readonly ZWIFT_LOGO="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.svg"
+readonly ZWIFT_DESKTOP_ENTRY="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.desktop"
+
 if [[ -t 1 ]]; then
-    WHITE="\033[0;37m"
-    RED="\033[0;31m"
-    GREEN="\033[0;32m"
-    BLUE="\033[0;34m"
-    YELLOW="\033[0;33m"
-    BOLD="\033[1m"
-    UNDERLINE="\033[4m"
-    RESET_STYLE="\033[0m"
+    readonly COLOR_WHITE="\033[0;37m"
+    readonly COLOR_RED="\033[0;31m"
+    readonly COLOR_GREEN="\033[0;32m"
+    readonly COLOR_BLUE="\033[0;34m"
+    readonly COLOR_YELLOW="\033[0;33m"
+    readonly STYLE_BOLD="\033[1m"
+    readonly STYLE_UNDERLINE="\033[4m"
+    readonly RESET_STYLE="\033[0m"
 else
-    WHITE=""
-    RED=""
-    GREEN=""
-    BLUE=""
-    YELLOW=""
-    BOLD=""
-    UNDERLINE=""
-    RESET_STYLE=""
+    readonly COLOR_WHITE=""
+    readonly COLOR_RED=""
+    readonly COLOR_GREEN=""
+    readonly COLOR_BLUE=""
+    readonly COLOR_YELLOW=""
+    readonly STYLE_BOLD=""
+    readonly STYLE_UNDERLINE=""
+    readonly RESET_STYLE=""
 fi
 
 # Message Box to simplify errors and questions.
 msgbox() {
-    TYPE="$1" # Type: info, ok, warning, error, question
-    MSG="$2"  # Message: the message to display
+    local type="$1" # Type: info, ok, warning, error, question
+    local msg="$2"  # Message: the message to display
 
-    case ${TYPE} in
-        info) echo -e "${BLUE}[*] ${MSG}${RESET_STYLE}" ;;
-        ok) echo -e "${GREEN}[✓] ${MSG}${RESET_STYLE}" ;;
-        warning) echo -e "${YELLOW}[!] ${MSG}${RESET_STYLE}" ;;
-        error) echo -e "${RED}[✗] ${MSG}${RESET_STYLE}" >&2 ;;
+    case ${type} in
+        info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
+        ok) echo -e "${COLOR_GREEN}[✓] ${msg}${RESET_STYLE}" ;;
+        warning) echo -e "${COLOR_YELLOW}[!] ${msg}${RESET_STYLE}" ;;
+        error) echo -e "${COLOR_RED}[✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
-            echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}${MSG} [y/N]:${RESET_STYLE} "
+            echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
+            local ans
             read -rn 1 ans
             echo
             case "${ans}" in
@@ -39,7 +44,7 @@ msgbox() {
                 *) return 1 ;;
             esac
             ;;
-        *) echo -e "${WHITE}[*] ${MSG}${RESET_STYLE}" ;;
+        *) echo -e "${COLOR_WHITE}[*] ${msg}${RESET_STYLE}" ;;
     esac
 }
 
@@ -75,12 +80,12 @@ ask_user_confirmation() {
 
 create_directories() {
     create_directory() {
-        DIRECTORY="$1"
+        local directory="$1"
 
-        msgbox info "  Creating directory ${DIRECTORY}"
+        msgbox info "  Creating directory ${directory}"
 
-        if ! mkdir -p "${DIRECTORY}"; then
-            msgbox error "Could not create ${DIRECTORY}, aborting"
+        if ! mkdir -p "${directory}"; then
+            msgbox error "Could not create ${directory}, aborting"
             exit_failure
         fi
     }
@@ -96,22 +101,18 @@ create_directories() {
 
 download_zwift() {
     download_asset() {
-        DESTINATION="$1"
-        URL="$2"
+        local destination="$1"
+        local url="$2"
 
-        msgbox info "  Downloading ${URL}"
+        msgbox info "  Downloading ${url}"
 
-        if ! curl -fsSLo "${DESTINATION}" "${URL}"; then
-            msgbox error "Downloading ${URL} failed, aborting"
+        if ! curl -fsSLo "${destination}" "${url}"; then
+            msgbox error "Downloading ${url} failed, aborting"
             exit_failure
         fi
     }
 
     msgbox info "Downloading Zwift"
-
-    ZWIFT_SCRIPT="https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh"
-    ZWIFT_LOGO="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.svg"
-    ZWIFT_DESKTOP_ENTRY="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.desktop"
 
     download_asset "${ROOT_BIN}/zwift" "${ZWIFT_SCRIPT}"
     download_asset "${ROOT_SHARE}/icons/hicolor/scalable/apps/zwift.svg" "${ZWIFT_LOGO}"
@@ -137,8 +138,8 @@ check_in_path() {
     fi
 }
 
-echo -e "${YELLOW}[!] ${BOLD}Easily Zwift on linux!${RESET_STYLE}"
-echo -e "${YELLOW}[!] ${UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
+echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
+echo -e "${COLOR_YELLOW}[!] ${STYLE_UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
 
 msgbox info "Preparing to install Zwift"
 

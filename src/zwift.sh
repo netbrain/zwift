@@ -2,43 +2,44 @@
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 if [[ -t 1 ]]; then
-    WHITE="\033[0;37m"
-    RED="\033[0;31m"
-    GREEN="\033[0;32m"
-    BLUE="\033[0;34m"
-    YELLOW="\033[0;33m"
-    BOLD="\033[1m"
-    UNDERLINE="\033[4m"
-    RESET_STYLE="\033[0m"
+    readonly COLOR_WHITE="\033[0;37m"
+    readonly COLOR_RED="\033[0;31m"
+    readonly COLOR_GREEN="\033[0;32m"
+    readonly COLOR_BLUE="\033[0;34m"
+    readonly COLOR_YELLOW="\033[0;33m"
+    readonly STYLE_BOLD="\033[1m"
+    readonly STYLE_UNDERLINE="\033[4m"
+    readonly RESET_STYLE="\033[0m"
 else
-    WHITE=""
-    RED=""
-    GREEN=""
-    BLUE=""
-    YELLOW=""
-    BOLD=""
-    UNDERLINE=""
-    RESET_STYLE=""
+    readonly COLOR_WHITE=""
+    readonly COLOR_RED=""
+    readonly COLOR_GREEN=""
+    readonly COLOR_BLUE=""
+    readonly COLOR_YELLOW=""
+    readonly STYLE_BOLD=""
+    readonly STYLE_UNDERLINE=""
+    readonly RESET_STYLE=""
 fi
 
 # Message Box to simplify errors and questions.
 msgbox() {
-    TYPE="$1"    # Type: info, ok, warning, error, question
-    MSG="$2"     # Message: the message to display
-    TIMEOUT="$3" # Optional timeout: if explicitly set to 0, wait for user input to continue.
+    local type="$1"    # Type: info, ok, warning, error, question
+    local msg="$2"     # Message: the message to display
+    local timeout="$3" # Optional timeout: if explicitly set to 0, wait for user input to continue.
 
-    case ${TYPE} in
-        info) echo -e "${BLUE}[*] ${MSG}${RESET_STYLE}" ;;
-        ok) echo -e "${GREEN}[✓] ${MSG}${RESET_STYLE}" ;;
-        warning) echo -e "${YELLOW}[!] ${MSG}${RESET_STYLE}" ;;
-        error) echo -e "${RED}[✗] ${MSG}${RESET_STYLE}" >&2 ;;
+    case ${type} in
+        info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
+        ok) echo -e "${COLOR_GREEN}[✓] ${msg}${RESET_STYLE}" ;;
+        warning) echo -e "${COLOR_YELLOW}[!] ${msg}${RESET_STYLE}" ;;
+        error) echo -e "${COLOR_RED}[✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
-            if [[ -n ${TIMEOUT} ]] && [[ ${TIMEOUT} -gt "0" ]]; then
-                echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}${MSG} (Default no in ${TIMEOUT} seconds.) [y/N]:${RESET_STYLE} "
-                read -rt "${TIMEOUT}" -n 1 ans
+            local ans
+            if [[ -n ${timeout} ]] && [[ ${timeout} -gt "0" ]]; then
+                echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
+                read -rt "${timeout}" -n 1 ans
                 echo
             else
-                echo -ne "${YELLOW}[?] ${BOLD}${UNDERLINE}${MSG} [y/N]:${RESET_STYLE} "
+                echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
                 read -rn 1 ans
                 echo
             fi
@@ -47,22 +48,22 @@ msgbox() {
                 *) return 1 ;;
             esac
             ;;
-        *) echo -e "${WHITE}[*] ${MSG}${RESET_STYLE}" ;;
+        *) echo -e "${COLOR_WHITE}[*] ${msg}${RESET_STYLE}" ;;
     esac
 
-    if [[ -n ${TIMEOUT} ]]; then
-        if [[ ${TIMEOUT} -gt 0 ]]; then
-            sleep "${TIMEOUT}"
+    if [[ -n ${timeout} ]]; then
+        if [[ ${timeout} -gt 0 ]]; then
+            sleep "${timeout}"
         else
-            echo -ne "${YELLOW}[*] ${BOLD}${UNDERLINE}Press any key to continue...${RESET_STYLE}"
+            echo -ne "${COLOR_YELLOW}[*] ${STYLE_BOLD}${STYLE_UNDERLINE}Press any key to continue...${RESET_STYLE}"
             read -rsn1
             echo
         fi
     fi
 }
 
-echo -e "${YELLOW}[!] ${BOLD}Easily Zwift on linux!${RESET_STYLE}"
-echo -e "${YELLOW}[!] ${UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
+echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
+echo -e "${COLOR_YELLOW}[!] ${STYLE_UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
 
 msgbox info "Preparing to launch Zwift"
 
@@ -84,14 +85,14 @@ fi
 
 # Check for other zwift configuration, sourced here
 load_config_file() {
-    CONFIG_FILE="$1"
-    msgbox info "Looking for config file ${CONFIG_FILE}"
-    if [[ -f ${CONFIG_FILE} ]]; then
+    local config_file="$1"
+    msgbox info "Looking for config file ${config_file}"
+    if [[ -f ${config_file} ]]; then
         # shellcheck source=/dev/null
-        if source "${CONFIG_FILE}"; then
-            msgbox ok "Loaded ${CONFIG_FILE}"
+        if source "${config_file}"; then
+            msgbox ok "Loaded ${config_file}"
         else
-            msgbox error "Failed to load ${CONFIG_FILE}"
+            msgbox error "Failed to load ${config_file}"
         fi
     fi
 }
