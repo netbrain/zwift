@@ -298,11 +298,11 @@ if [[ ${DONT_PULL} -ne "1" ]]; then
 fi
 
 # Clean previous container images (if any)
-if [[ ! $DONT_CLEAN ]] && [[ ! $DONT_PULL ]]; then
-    readarray -t images < <($CONTAINER_TOOL images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:$VERSION" --format '{{.ID}}')
-    if [ "${#images[@]}" -gt 0 ] && [ -n "${images[0]}" ]; then
+if [[ ${DONT_CLEAN} -ne "1" ]] && [[ ${DONT_PULL} -ne "1" ]]; then
+    readarray -t images < <(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')
+    if [[ ${#images[@]} -gt "0" ]] && [[ -n ${images[0]} ]]; then
         msgbox info "Cleaning up previous container images"
-        if $CONTAINER_TOOL image rm "${images[@]}"; then
+        if ${CONTAINER_TOOL} image rm "${images[@]}"; then
             msgbox ok "Previous container images have been deleted"
         else
             msgbox warning "Failed to clean up previous container images"
