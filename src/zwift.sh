@@ -72,8 +72,10 @@ msgbox info "Preparing to launch Zwift"
 # More ease of use starting from desktop icon.
 
 # Create temporary file for environment variables, automatically removed upon exit
-ENVIRONMENT_VARIABLES=()
+declare -a container_env_vars
+container_env_vars=()
 if ENV_FILE="$(mktemp -q /tmp/zwift-container.env.XXXXXXXXXX)"; then
+    readonly ENV_FILE
     trap 'rm -f -- "${ENV_FILE}" && msgbox info "Removed temporary file ${ENV_FILE}"' EXIT
     msgbox info "Created temporary file for environment variables:"
     msgbox info "  ${ENV_FILE}"
@@ -203,11 +205,11 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     fi
 
     # prefer passing secret, otherwise pass ZWIFT_PASSWORD as plain text
-    ENVIRONMENT_VARIABLES+=(ZWIFT_USERNAME="${ZWIFT_USERNAME}")
+    container_env_vars+=(ZWIFT_USERNAME="${ZWIFT_USERNAME}")
     if [[ ${HAS_PASSWORD_SECRET} -eq 1 ]]; then
         ZWIFT_PASSWORD_SECRET="--secret ${PASSWORD_SECRET_NAME},type=env,target=ZWIFT_PASSWORD"
     elif [[ ${HAS_PLAINTEXT_PASSWORD} -eq 1 ]]; then
-        ENVIRONMENT_VARIABLES+=(ZWIFT_PASSWORD="${ZWIFT_PASSWORD}")
+        container_env_vars+=(ZWIFT_PASSWORD="${ZWIFT_PASSWORD}")
     else
         msgbox info "No password found for ${ZWIFT_USERNAME}"
         msgbox info "  To avoid manually entering your Zwift password each time, you can either:"
@@ -222,7 +224,7 @@ fi
 
 # Pass environment variable to container if gamemode should be disabled
 if [[ ${ZWIFT_NO_GAMEMODE} -eq 1 ]]; then
-    ENVIRONMENT_VARIABLES+=(ZWIFT_NO_GAMEMODE="1")
+    container_env_vars+=(ZWIFT_NO_GAMEMODE="1")
 fi
 
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
@@ -319,7 +321,7 @@ fi
 #############################
 ##### PREPARE ALL FLAGS #####
 
-ENVIRONMENT_VARIABLES+=(
+container_env_vars+=(
     DISPLAY="${DISPLAY}"
     ZWIFT_UID="${CONTAINER_UID}"
     ZWIFT_GID="${CONTAINER_GID}"
@@ -368,7 +370,7 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
 
     DBUS_UNIX_SOCKET=${BASH_REMATCH[1]}
     if [[ -n ${DBUS_UNIX_SOCKET} ]]; then
-        ENVIRONMENT_VARIABLES+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${LOCAL_UID}/${CONTAINER_UID}}")
+        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${LOCAL_UID}/${CONTAINER_UID}}")
         DBUS_CONFIG_FLAGS=(-v "${DBUS_UNIX_SOCKET}":"${DBUS_UNIX_SOCKET//${LOCAL_UID}/${CONTAINER_UID}}")
     fi
 fi
@@ -388,7 +390,7 @@ fi
 
 # Setup Flags for Window Managers
 if [[ ${WINDOW_MANAGER} == "Wayland" ]]; then
-    ENVIRONMENT_VARIABLES+=(
+    container_env_vars+=(
         WINE_EXPERIMENTAL_WAYLAND=1
         XDG_RUNTIME_DIR="/run/user/${CONTAINER_UID}"
         WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
@@ -401,7 +403,7 @@ if [[ ${WINDOW_MANAGER} == "XWayland" ]] || [[ ${WINDOW_MANAGER} == "XOrg" ]]; t
     if [[ -z ${XAUTHORITY} ]]; then
         WM_FLAGS=(-v /tmp/.X11-unix:/tmp/.X11-unix)
     else
-        ENVIRONMENT_VARIABLES+=(XAUTHORITY="${XAUTHORITY//${LOCAL_UID}/${CONTAINER_UID}}")
+        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${LOCAL_UID}/${CONTAINER_UID}}")
         WM_FLAGS=(
             -v /tmp/.X11-unix:/tmp/.X11-unix
             -v "${XAUTHORITY}":"${XAUTHORITY//${LOCAL_UID}/${CONTAINER_UID}}"
@@ -426,7 +428,7 @@ fi
 
 # If custom resolution is requested, pass environment variable to container
 if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
-    ENVIRONMENT_VARIABLES+=(ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION}")
+    container_env_vars+=(ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION}")
 fi
 
 # Read the user specified extra flags if any
@@ -468,7 +470,7 @@ CMD=(
 if [[ ${DRYRUN} -eq 1 ]]; then
     msgbox ok "DRYRUN:"
     msgbox ok "environment variables (${ENV_FILE}):"
-    for env_var in "${ENVIRONMENT_VARIABLES[@]}"; do
+    for env_var in "${container_env_vars[@]}"; do
         env_var="${env_var//\\/\\\\}"                                  # escape backslashes
         env_var="${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=REDACTED}" # redact password
         msgbox ok "  ${env_var}"
@@ -479,7 +481,7 @@ if [[ ${DRYRUN} -eq 1 ]]; then
 fi
 
 msgbox info "Writing environment variables to temporary file"
-printf '%s\n' "${ENVIRONMENT_VARIABLES[@]}" > "${ENV_FILE}"
+printf '%s\n' "${container_env_vars[@]}" > "${ENV_FILE}"
 
 # Execute: interactive (-it) should not be captured
 if [[ " ${ZWIFT_FG_FLAG[*]} " == *" -it "* ]]; then
