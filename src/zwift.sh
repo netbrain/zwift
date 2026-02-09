@@ -73,20 +73,6 @@ msgbox info "Preparing to launch Zwift"
 # Config early to allow setting of startup env files.
 # More ease of use starting from desktop icon.
 
-# Create temporary file for environment variables, automatically removed upon exit
-declare -a container_env_vars
-container_env_vars=()
-if ENV_FILE="$(mktemp -q /tmp/zwift-container.env.XXXXXXXXXX)"; then
-    readonly ENV_FILE
-    trap 'rm -f -- "${ENV_FILE}" && msgbox info "Removed temporary file ${ENV_FILE}"' EXIT
-    msgbox info "Created temporary file for environment variables:"
-    msgbox info "  ${ENV_FILE}"
-    msgbox info "  This file will be removed automatically when the script exits"
-else
-    msgbox error "Failed to create temporary file for environment variables"
-    exit 1
-fi
-
 # Check for other zwift configuration, sourced here
 load_config_file() {
     local config_file="$1"
@@ -102,6 +88,68 @@ load_config_file() {
 }
 load_config_file "${HOME}/.config/zwift/config"
 load_config_file "${HOME}/.config/zwift/${USER}-config"
+
+# Initialize environment variables
+readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
+readonly VERSION="${VERSION:-latest}"
+readonly DONT_CHECK="${DONT_CHECK:-0}"
+readonly DONT_PULL="${DONT_PULL:-0}"
+readonly DONT_CLEAN="${DONT_CLEAN:-0}"
+readonly DRYRUN="${DRYRUN:-0}"
+readonly INTERACTIVE="${INTERACTIVE:-0}"
+readonly CONTAINER_EXTRA_ARGS="${CONTAINER_EXTRA_ARGS:-}"
+readonly ZWIFT_USERNAME="${ZWIFT_USERNAME:-}"
+readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:-}"
+readonly ZWIFT_WORKOUT_DIR="${ZWIFT_WORKOUT_DIR:-}"
+readonly ZWIFT_ACTIVITY_DIR="${ZWIFT_ACTIVITY_DIR:-}"
+readonly ZWIFT_LOG_DIR="${ZWIFT_LOG_DIR:-}"
+readonly ZWIFT_SCREENSHOTS_DIR="${ZWIFT_SCREENSHOTS_DIR:-}"
+readonly ZWIFT_OVERRIDE_GRAPHICS="${ZWIFT_OVERRIDE_GRAPHICS:-0}"
+readonly ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION:-}"
+readonly ZWIFT_FG="${ZWIFT_FG:-0}"
+readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
+readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
+readonly NETWORKING="${NETWORKING:-bridge}"
+readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u)}"
+readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
+readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
+readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
+readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-}"
+readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
+
+# Initialize CONTAINER_TOOL: Use podman if available
+msgbox info "Looking for container tool"
+CONTAINER_TOOL="${CONTAINER_TOOL:-}"
+if [[ -z ${CONTAINER_TOOL} ]]; then
+    if [[ -x "$(command -v podman)" ]]; then
+        CONTAINER_TOOL="podman"
+    else
+        CONTAINER_TOOL="docker"
+    fi
+    readonly CONTAINER_TOOL
+fi
+if [[ -x "$(command -v "${CONTAINER_TOOL}")" ]]; then
+    msgbox ok "Found container tool: ${CONTAINER_TOOL}"
+else
+    msgbox error "Container tool ${CONTAINER_TOOL} not found"
+    msgbox error "  To install podman, see: https://podman.io/docs/installation"
+    msgbox error "  To install docker, see: https://docs.docker.com/get-started/get-docker/"
+    exit 1
+fi
+
+# Create temporary file for container environment variables, automatically removed upon exit
+declare -a container_env_vars
+container_env_vars=()
+if ENV_FILE="$(mktemp -q /tmp/zwift-container.env.XXXXXXXXXX)"; then
+    readonly ENV_FILE
+    trap 'rm -f -- "${ENV_FILE}" && msgbox info "Removed temporary file ${ENV_FILE}"' EXIT
+    msgbox info "Created temporary file for environment variables:"
+    msgbox info "  ${ENV_FILE}"
+    msgbox info "  This file will be removed automatically when the script exits"
+else
+    msgbox error "Failed to create temporary file for environment variables"
+    exit 1
+fi
 
 # If a workout directory is specified then map to that directory.
 if [[ -n ${ZWIFT_WORKOUT_DIR} ]]; then
@@ -152,30 +200,6 @@ fi
 ###### Default Setup and Settings ######
 
 WINDOW_MANAGER="Other"                     # XOrg, XWayland, Wayland, Other
-IMAGE="${IMAGE:-docker.io/netbrain/zwift}" # Set the container image to use
-VERSION="${VERSION:-latest}"               # The container version
-NETWORKING="${NETWORKING:-bridge}"         # Default Docker Network is Bridge
-
-ZWIFT_UID="${ZWIFT_UID:-$(id -u)}"
-ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
-
-# CONTAINER_TOOL, Use podman if available
-msgbox info "Looking for container tool"
-if [[ -z ${CONTAINER_TOOL} ]]; then
-    if [[ -x "$(command -v podman)" ]]; then
-        CONTAINER_TOOL="podman"
-    else
-        CONTAINER_TOOL="docker"
-    fi
-fi
-if [[ -x "$(command -v "${CONTAINER_TOOL}")" ]]; then
-    msgbox ok "Found container tool: ${CONTAINER_TOOL}"
-else
-    msgbox error "Container tool ${CONTAINER_TOOL} not found"
-    msgbox error "  To install podman, see: https://podman.io/docs/installation"
-    msgbox error "  To install docker, see: https://docs.docker.com/get-started/get-docker/"
-    exit 1
-fi
 
 # Lookup zwift password and create secret to pass to the container
 # Note: can't use the docker secret store since it requires swarm
@@ -397,7 +421,11 @@ if [[ ${WINDOW_MANAGER} == "Wayland" ]]; then
         XDG_RUNTIME_DIR="/run/user/${CONTAINER_UID}"
         WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
     )
-    WM_FLAGS=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}":"${XDG_RUNTIME_DIR//${LOCAL_UID}/${CONTAINER_UID}}/${WAYLAND_DISPLAY}")
+    if [[ -n ${XDG_RUNTIME_DIR} ]]; then
+        WM_FLAGS=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}":"${XDG_RUNTIME_DIR//${LOCAL_UID}/${CONTAINER_UID}}/${WAYLAND_DISPLAY}")
+    else
+        msgbox error "XDG_RUNTIME_DIR not set, Zwift will likely launch with a black screen!"
+    fi
 fi
 
 if [[ ${WINDOW_MANAGER} == "XWayland" ]] || [[ ${WINDOW_MANAGER} == "XOrg" ]]; then
