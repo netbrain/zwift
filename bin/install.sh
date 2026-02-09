@@ -49,9 +49,9 @@ exit_failure() {
 }
 
 determine_install_location() {
-    if [[ ${EUID} -eq "0" ]]; then
-        ROOT_BIN=/usr/local/bin
-        ROOT_SHARE=/usr/local/share
+    if [[ ${EUID} -eq 0 ]]; then
+        ROOT_BIN="/usr/local/bin"
+        ROOT_SHARE="/usr/local/share"
     else
         # user install
         ROOT_BIN="${XDG_BIN_HOME:-${HOME}/.local/bin}"

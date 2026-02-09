@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [[ ${DEBUG} -eq "1" ]]; then set -x; fi
+if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 if [[ -t 1 ]]; then
     WHITE="\033[0;37m"
@@ -51,7 +51,7 @@ msgbox() {
     esac
 
     if [[ -n ${TIMEOUT} ]]; then
-        if [[ ${TIMEOUT} -gt "0" ]]; then
+        if [[ ${TIMEOUT} -gt 0 ]]; then
             sleep "${TIMEOUT}"
         else
             echo -ne "${YELLOW}[*] ${BOLD}${UNDERLINE}Press any key to continue...${RESET_STYLE}"
@@ -72,7 +72,7 @@ msgbox info "Preparing to launch Zwift"
 
 # Create temporary file for environment variables, automatically removed upon exit
 ENVIRONMENT_VARIABLES=()
-if ENV_FILE=$(mktemp -q /tmp/zwift-container.env.XXXXXXXXXX); then
+if ENV_FILE="$(mktemp -q /tmp/zwift-container.env.XXXXXXXXXX)"; then
     trap 'rm -f -- "${ENV_FILE}" && msgbox info "Removed temporary file ${ENV_FILE}"' EXIT
     msgbox info "Created temporary file for environment variables:"
     msgbox info "  ${ENV_FILE}"
@@ -119,7 +119,7 @@ if [[ -n ${ZWIFT_SCREENSHOTS_DIR} ]]; then
 fi
 
 # If overriding zwift graphics then map custom config to the graphics profiles.
-if [[ ${ZWIFT_OVERRIDE_GRAPHICS} -eq "1" ]]; then
+if [[ ${ZWIFT_OVERRIDE_GRAPHICS} -eq 1 ]]; then
     ZWIFT_GRAPHICS_CONFIG="${HOME}/.config/zwift/graphics.txt"
 
     # Check for $USER specific graphics config file.
@@ -146,21 +146,21 @@ fi
 ########################################
 ###### Default Setup and Settings ######
 
-WINDOW_MANAGER="Other"                   # XOrg, XWayland, Wayland, Other
-IMAGE=${IMAGE:-docker.io/netbrain/zwift} # Set the container image to use
-VERSION=${VERSION:-latest}               # The container version
-NETWORKING=${NETWORKING:-bridge}         # Default Docker Network is Bridge
+WINDOW_MANAGER="Other"                     # XOrg, XWayland, Wayland, Other
+IMAGE="${IMAGE:-docker.io/netbrain/zwift}" # Set the container image to use
+VERSION="${VERSION:-latest}"               # The container version
+NETWORKING="${NETWORKING:-bridge}"         # Default Docker Network is Bridge
 
-ZWIFT_UID=${ZWIFT_UID:-$(id -u)}
-ZWIFT_GID=${ZWIFT_GID:-$(id -g)}
+ZWIFT_UID="${ZWIFT_UID:-$(id -u)}"
+ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 
 # CONTAINER_TOOL, Use podman if available
 msgbox info "Looking for container tool"
 if [[ -z ${CONTAINER_TOOL} ]]; then
     if [[ -x "$(command -v podman)" ]]; then
-        CONTAINER_TOOL=podman
+        CONTAINER_TOOL="podman"
     else
-        CONTAINER_TOOL=docker
+        CONTAINER_TOOL="docker"
     fi
 fi
 if [[ -x "$(command -v "${CONTAINER_TOOL}")" ]]; then
@@ -182,7 +182,7 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     if [[ -z ${ZWIFT_PASSWORD} ]]; then
         if [[ ${CONTAINER_TOOL} == "podman" ]] && ${CONTAINER_TOOL} secret exists "${PASSWORD_SECRET_NAME}"; then
             msgbox ok "Password for ${ZWIFT_USERNAME} found in ${CONTAINER_TOOL} secret store"
-            HAS_PASSWORD_SECRET="1"
+            HAS_PASSWORD_SECRET=1
         elif [[ -x "$(command -v secret-tool)" ]]; then
             msgbox info "Looking for password in secret-tool (application zwift username ${ZWIFT_USERNAME})"
             ZWIFT_PASSWORD=$(secret-tool lookup application zwift username "${ZWIFT_USERNAME}")
@@ -192,10 +192,10 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     # ZWIFT_PASSWORD set or found in secret-tool, create/update secret
     if [[ -n ${ZWIFT_PASSWORD} ]]; then
         msgbox ok "Password found for ${ZWIFT_USERNAME}"
-        HAS_PLAINTEXT_PASSWORD="1"
+        HAS_PLAINTEXT_PASSWORD=1
         if [[ ${CONTAINER_TOOL} == "podman" ]] && printf '%s' "${ZWIFT_PASSWORD}" | ${CONTAINER_TOOL} secret create --replace=true "${PASSWORD_SECRET_NAME}" - > /dev/null; then
             msgbox ok "Stored password in ${CONTAINER_TOOL} secret store"
-            HAS_PASSWORD_SECRET="1"
+            HAS_PASSWORD_SECRET=1
         else
             msgbox info "Could not create secret for password, using environment variable instead"
         fi
@@ -203,9 +203,9 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
 
     # prefer passing secret, otherwise pass ZWIFT_PASSWORD as plain text
     ENVIRONMENT_VARIABLES+=(ZWIFT_USERNAME="${ZWIFT_USERNAME}")
-    if [[ ${HAS_PASSWORD_SECRET} -eq "1" ]]; then
+    if [[ ${HAS_PASSWORD_SECRET} -eq 1 ]]; then
         ZWIFT_PASSWORD_SECRET="--secret ${PASSWORD_SECRET_NAME},type=env,target=ZWIFT_PASSWORD"
-    elif [[ ${HAS_PLAINTEXT_PASSWORD} -eq "1" ]]; then
+    elif [[ ${HAS_PLAINTEXT_PASSWORD} -eq 1 ]]; then
         ENVIRONMENT_VARIABLES+=(ZWIFT_PASSWORD="${ZWIFT_PASSWORD}")
     else
         msgbox info "No password found for ${ZWIFT_USERNAME}"
@@ -220,21 +220,21 @@ else
 fi
 
 # Pass environment variable to container if gamemode should be disabled
-if [[ ${ZWIFT_NO_GAMEMODE} -eq "1" ]]; then
+if [[ ${ZWIFT_NO_GAMEMODE} -eq 1 ]]; then
     ENVIRONMENT_VARIABLES+=(ZWIFT_NO_GAMEMODE="1")
 fi
 
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     # Podman has to use container id 1000
     # Local user is mapped to the container id
-    LOCAL_UID=${ZWIFT_UID}
+    LOCAL_UID="${ZWIFT_UID}"
     CONTAINER_UID=1000
     CONTAINER_GID=1000
 else
     # Docker will run as the id's provided.
-    LOCAL_UID=${UID}
-    CONTAINER_UID=${ZWIFT_UID}
-    CONTAINER_GID=${ZWIFT_GID}
+    LOCAL_UID="${UID}"
+    CONTAINER_UID="${ZWIFT_UID}"
+    CONTAINER_GID="${ZWIFT_GID}"
 fi
 
 ########################################
@@ -259,7 +259,7 @@ esac
 # Verify which system we are using for wayland and some checks.
 if [[ ${WINDOW_MANAGER} == "Wayland" ]]; then
     # System is using wayland or xwayland.
-    if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq "1" ]]; then
+    if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
         WINDOW_MANAGER="Wayland"
     else
         WINDOW_MANAGER="XWayland"
@@ -275,11 +275,11 @@ fi
 ###### UPD SCRIPTS and CONTAINER ######
 
 # Check for updated zwift.sh by comparing checksums
-if [[ ${DONT_CHECK} -ne "1" ]]; then
+if [[ ${DONT_CHECK} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
 
-    REMOTE_SUM=$(curl -s https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh | sha256sum | awk '{print $1}')
-    THIS_SUM=$(sha256sum "$0" | awk '{print $1}')
+    REMOTE_SUM="$(curl -s https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh | sha256sum | awk '{print $1}')"
+    THIS_SUM="$(sha256sum "$0" | awk '{print $1}')"
 
     if [[ ${REMOTE_SUM} == "${THIS_SUM}" ]]; then
         msgbox ok "You are running the latest zwift.sh 👏"
@@ -293,7 +293,7 @@ if [[ ${DONT_CHECK} -ne "1" ]]; then
 fi
 
 # Check for updated container image
-if [[ ${DONT_PULL} -ne "1" ]]; then
+if [[ ${DONT_PULL} -ne 1 ]]; then
     msgbox info "Checking for updated container image"
     if ${CONTAINER_TOOL} pull "${IMAGE}":"${VERSION}"; then
         msgbox ok "Container image is up to date"
@@ -303,9 +303,9 @@ if [[ ${DONT_PULL} -ne "1" ]]; then
 fi
 
 # Clean previous container images (if any)
-if [[ ${DONT_CLEAN} -ne "1" ]] && [[ ${DONT_PULL} -ne "1" ]]; then
+if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_PULL} -ne 1 ]]; then
     readarray -t images < <(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')
-    if [[ ${#images[@]} -gt "0" ]] && [[ -n ${images[0]} ]]; then
+    if [[ ${#images[@]} -gt 0 ]] && [[ -n ${images[0]} ]]; then
         msgbox info "Cleaning up previous container images"
         if ${CONTAINER_TOOL} image rm "${images[@]}"; then
             msgbox ok "Previous container images have been deleted"
@@ -343,7 +343,7 @@ GENERAL_FLAGS=(
 ##### SPECIFIC CONFIGURATIONS #####
 
 # Setup container security flags
-if [[ ${PRIVILEGED_CONTAINER} -eq "1" ]]; then
+if [[ ${PRIVILEGED_CONTAINER} -eq 1 ]]; then
     CONT_SEC_FLAG=(--privileged --security-opt label=disable) # privileged container, less secure
 else
     CONT_SEC_FLAG=(--security-opt label=type:container_runtime_t) # more secure
@@ -373,14 +373,14 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
 fi
 
 # Setup foreground/background flag
-if [[ ${ZWIFT_FG} -eq "1" ]]; then
+if [[ ${ZWIFT_FG} -eq 1 ]]; then
     ZWIFT_FG_FLAG=() # run in fg
 else
     ZWIFT_FG_FLAG=(-d) # run in bg
 fi
 
 # INTERACTIVE mode: force foreground and provide a shell entrypoint for debugging
-if [[ ${INTERACTIVE} -eq "1" ]]; then
+if [[ ${INTERACTIVE} -eq 1 ]]; then
     ZWIFT_FG_FLAG=(-it)
     INTERACTIVE_FLAGS=(--entrypoint bash)
 fi
@@ -388,7 +388,7 @@ fi
 # Setup Flags for Window Managers
 if [[ ${WINDOW_MANAGER} == "Wayland" ]]; then
     ENVIRONMENT_VARIABLES+=(
-        WINE_EXPERIMENTAL_WAYLAND="1"
+        WINE_EXPERIMENTAL_WAYLAND=1
         XDG_RUNTIME_DIR="/run/user/${CONTAINER_UID}"
         WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
     )
@@ -464,12 +464,12 @@ CMD=(
 )
 
 # DRYRUN: print the exact command that would be executed, then exit
-if [[ ${DRYRUN} -eq "1" ]]; then
+if [[ ${DRYRUN} -eq 1 ]]; then
     msgbox ok "DRYRUN:"
     msgbox ok "environment variables (${ENV_FILE}):"
     for env_var in "${ENVIRONMENT_VARIABLES[@]}"; do
-        env_var=${env_var//\\/\\\\}                                  # escape backslashes
-        env_var=${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=REDACTED} # redact password
+        env_var="${env_var//\\/\\\\}"                                  # escape backslashes
+        env_var="${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=REDACTED}" # redact password
         msgbox ok "  ${env_var}"
     done
     msgbox ok "${CONTAINER_TOOL} command:"
@@ -498,13 +498,13 @@ else
     RC=$?
 fi
 
-if [[ ${RC} -ne "0" ]]; then
+if [[ ${RC} -ne 0 ]]; then
     msgbox error "Failed to start Zwift, check variables!" 10
     exit 1
 fi
 
 # Allow container to connect to X, has to be set for different UID
-if [[ -n ${CONTAINER} ]] && [[ -x "$(command -v xhost)" ]] && [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne "1" ]]; then
+if [[ -n ${CONTAINER} ]] && [[ -x "$(command -v xhost)" ]] && [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne 1 ]]; then
     msgbox info "Allowing container to connect to X"
     xhost +local:"$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${CONTAINER}")" > /dev/null
 fi

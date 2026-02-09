@@ -13,10 +13,10 @@ fi
 if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
     if [[ -f ${ZWIFT_PREFS} ]]; then
         echo "Setting zwift resolution to ${ZWIFT_OVERRIDE_RESOLUTION}."
-        UPDATED_PREFS=$(awk -v resolution="${ZWIFT_OVERRIDE_RESOLUTION}" '{
+        UPDATED_PREFS="$(awk -v resolution="${ZWIFT_OVERRIDE_RESOLUTION}" '{
             gsub(/<USER_RESOLUTION_PREF>.*<\/USER_RESOLUTION_PREF>/,
                  "<USER_RESOLUTION_PREF>" resolution "</USER_RESOLUTION_PREF>")
-        } 1' "${ZWIFT_PREFS}")
+        } 1' "${ZWIFT_PREFS}")"
         echo "${UPDATED_PREFS}" > "${ZWIFT_PREFS}"
     else
         echo "Warning: Preferences file does not exist yet. Resolution ${ZWIFT_OVERRIDE_RESOLUTION} cannot be set."
@@ -28,8 +28,8 @@ cd "${ZWIFT_HOME}"
 echo "starting zwift..."
 wine start ZwiftLauncher.exe SilentLaunch
 
-LAUNCHER_PID_HEX=$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")
-LAUNCHER_PID=$((16#${LAUNCHER_PID_HEX}))
+LAUNCHER_PID_HEX="$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")"
+LAUNCHER_PID="$((16#${LAUNCHER_PID_HEX}))"
 
 if [[ -n ${ZWIFT_USERNAME} ]] && [[ -n ${ZWIFT_PASSWORD} ]]; then
     echo "authenticating with zwift..."
@@ -53,7 +53,7 @@ pkill ZwiftLauncher || true
 pkill ZwiftWindowsCra
 pkill -f MicrosoftEdgeUpdate
 
-if [[ ${ZWIFT_NO_GAMEMODE} -ne "1" ]]; then
+if [[ ${ZWIFT_NO_GAMEMODE} -ne 1 ]]; then
     /usr/games/gamemoderun wineserver -w
 else
     wineserver -w

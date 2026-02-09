@@ -69,5 +69,5 @@ ${CONTAINER_TOOL} commit zwift "${BUILD_NAME}:latest"
 ${CONTAINER_TOOL} container rm zwift
 
 export IMAGE="${IMAGE}"
-export DONT_PULL=1
+export DONT_PULL="1"
 "${SCRIPT_DIR}/zwift.sh"

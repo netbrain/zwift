@@ -19,7 +19,7 @@ fi
 # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
 # NOTE: DISPLAY must be unset here before run_zwift to work
 #       Registry entries are set in the container install or won't work.
-if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq "1" ]]; then
+if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
     unset DISPLAY
 fi
 
@@ -27,30 +27,30 @@ fi
 if [[ ${CONTAINER} == "docker" ]]; then
     # This script runs as the root user in Docker so need to do this to find the
     # home directory of the "user" user.
-    ZWIFT_USER_HOME=$(getent passwd "user" | cut -d: -f6)
+    ZWIFT_USER_HOME="$(getent passwd "user" | cut -d: -f6)"
     ZWIFT_HOME="${ZWIFT_USER_HOME}/.wine/drive_c/Program Files (x86)/Zwift"
     mkdir -p "${ZWIFT_HOME}"
     cd "${ZWIFT_HOME}"
 
-    USER_UID=$(id -u user)
-    USER_GID=$(id -g user)
+    USER_UID="$(id -u user)"
+    USER_GID="$(id -g user)"
 
     # Test that it exists and is a number, and only if different to existing.
     if [[ -n ${ZWIFT_UID} ]] && [[ ${ZWIFT_UID} -eq ${ZWIFT_UID} ]] && [[ ${USER_UID} -ne ${ZWIFT_UID} ]]; then
-        USER_UID=${ZWIFT_UID}
+        USER_UID="${ZWIFT_UID}"
         SWITCH_IDS=1
     else
         echo "ZWIFT_UID is not set or not a number: '${ZWIFT_UID}'"
     fi
     if [[ -n ${ZWIFT_GID} ]] && [[ ${ZWIFT_GID} -eq ${ZWIFT_GID} ]] && [[ ${USER_GID} -ne ${ZWIFT_GID} ]]; then
-        USER_GID=${ZWIFT_GID}
+        USER_GID="${ZWIFT_GID}"
         SWITCH_IDS=1
     else
         echo "ZWIFT_GID is not set or not a number: '${ZWIFT_GID}'"
     fi
 
     # This section is only run if we are switching either UID or GID.
-    if [[ -n ${SWITCH_IDS} ]]; then
+    if [[ ${SWITCH_IDS} -eq 1 ]]; then
         usermod -o -u "${USER_UID}" user
         groupmod -o -g "${USER_GID}" user
         chown -R "${USER_UID}":"${USER_GID}" /home/user
