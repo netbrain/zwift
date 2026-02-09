@@ -219,6 +219,11 @@ else
     msgbox warning "No Zwift credentials found..."
 fi
 
+# Pass environment variable to container if gamemode should be disabled
+if [[ ${ZWIFT_NO_GAMEMODE} -eq "1" ]]; then
+    ENVIRONMENT_VARIABLES+=(ZWIFT_NO_GAMEMODE="1")
+fi
+
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     # Podman has to use container id 1000
     # Local user is mapped to the container id
