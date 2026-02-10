@@ -36,7 +36,7 @@ container_args=(
 
     -e DISPLAY="${DISPLAY}"
     -e XAUTHORITY="${XAUTHORITY}"
-    -e CONTAINER="${CONTAINER_TOOL}"
+    -e CONTAINER_TOOL="${CONTAINER_TOOL}"
 
     -v /tmp/.X11-unix:/tmp/.X11-unix
     -v /run/user/${UID}:"/run/user/${ZWIFT_UID}"

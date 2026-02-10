@@ -222,7 +222,7 @@ container_env_vars+=(
     ZWIFT_UID="${container_uid}"
     ZWIFT_GID="${container_gid}"
     PULSE_SERVER="/run/user/${container_uid}/pulse/native"
-    CONTAINER="${CONTAINER_TOOL}"
+    CONTAINER_TOOL="${CONTAINER_TOOL}"
 )
 
 # Define base container parameters

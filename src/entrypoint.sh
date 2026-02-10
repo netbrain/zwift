@@ -9,7 +9,7 @@ readonly WINE_EXPERIMENTAL_WAYLAND=${WINE_EXPERIMENTAL_WAYLAND:-0}
 # Check whether we are running in Docker/ Podman
 # Docker has the file /.dockerenv
 # Podman exposes itself in /run/.containerenv
-CONTAINER_TOOL=${CONTAINER:-}
+CONTAINER_TOOL=${CONTAINER_TOOL:-}
 if [[ ${CONTAINER_TOOL} != "docker" ]] && [[ ${CONTAINER_TOOL} != "podman" ]]; then
     if [[ -f "/.dockerenv" ]]; then
         CONTAINER_TOOL="docker"
