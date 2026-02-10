@@ -1,9 +1,9 @@
 ---
 name: Docker Hub prune
-on: # yamllint disable-line rule:truthy
+'on':
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * 0" # weekly on Sundays
+  - cron: 0 0 * * 0 # weekly on Sundays
 jobs:
   prune:
     if: github.repository == 'netbrain/zwift'
@@ -12,70 +12,70 @@ jobs:
       REPO: netbrain/zwift
       MAX_AGE_DAYS: 365
     steps:
-      - name: Prune old Docker Hub tags
-        run: |
-          set -euo pipefail
+    - name: Prune old Docker Hub tags
+      run: |
+        set -euo pipefail
 
-          # Authenticate and get JWT token
-          TOKEN=$(curl -sf -X POST "https://hub.docker.com/v2/users/login" \
-            -H "Content-Type: application/json" \
-            -d "{\"username\":\"${{ secrets.DOCKERHUB_USERNAME }}\",\"password\":\"${{ secrets.DOCKERHUB_TOKEN }}\"}" \
-            | jq -r '.token')
+        # Authenticate and get JWT token
+        TOKEN=$(curl -sf -X POST "https://hub.docker.com/v2/users/login" \
+          -H "Content-Type: application/json" \
+          -d "{\"username\":\"${{ secrets.DOCKERHUB_USERNAME }}\",\"password\":\"${{ secrets.DOCKERHUB_TOKEN }}\"}" \
+          | jq -r '.token')
 
-          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-            echo "::error::Failed to authenticate with Docker Hub"
-            exit 1
+        if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+          echo "::error::Failed to authenticate with Docker Hub"
+          exit 1
+        fi
+
+        CUTOFF=$(date -u -d "-${MAX_AGE_DAYS} days" +%s)
+        DELETED=0
+        PAGE_SIZE=100
+        PAGE=1
+
+        echo "Pruning tags older than ${MAX_AGE_DAYS} days (before $(date -u -d "-${MAX_AGE_DAYS} days" +%Y-%m-%d))"
+
+        while true; do
+          RESPONSE=$(curl -sf "https://hub.docker.com/v2/repositories/${REPO}/tags/?page_size=${PAGE_SIZE}&page=${PAGE}")
+          TAGS=$(echo "$RESPONSE" | jq -r '.results // []')
+          COUNT=$(echo "$TAGS" | jq 'length')
+
+          if [ "$COUNT" -eq 0 ]; then
+            break
           fi
 
-          CUTOFF=$(date -u -d "-${MAX_AGE_DAYS} days" +%s)
-          DELETED=0
-          PAGE_SIZE=100
-          PAGE=1
+          for i in $(seq 0 $((COUNT - 1))); do
+            TAG=$(echo "$TAGS" | jq -r ".[$i].name")
+            LAST_UPDATED=$(echo "$TAGS" | jq -r ".[$i].last_updated")
+            TAG_TS=$(date -u -d "$LAST_UPDATED" +%s)
 
-          echo "Pruning tags older than ${MAX_AGE_DAYS} days (before $(date -u -d "-${MAX_AGE_DAYS} days" +%Y-%m-%d))"
-
-          while true; do
-            RESPONSE=$(curl -sf "https://hub.docker.com/v2/repositories/${REPO}/tags/?page_size=${PAGE_SIZE}&page=${PAGE}")
-            TAGS=$(echo "$RESPONSE" | jq -r '.results // []')
-            COUNT=$(echo "$TAGS" | jq 'length')
-
-            if [ "$COUNT" -eq 0 ]; then
-              break
+            # Never delete the latest tag
+            if [ "$TAG" = "latest" ]; then
+              echo "Skipping: $TAG (protected)"
+              continue
             fi
 
-            for i in $(seq 0 $((COUNT - 1))); do
-              TAG=$(echo "$TAGS" | jq -r ".[$i].name")
-              LAST_UPDATED=$(echo "$TAGS" | jq -r ".[$i].last_updated")
-              TAG_TS=$(date -u -d "$LAST_UPDATED" +%s)
+            if [ "$TAG_TS" -lt "$CUTOFF" ]; then
+              echo "Deleting: $TAG (last updated: $LAST_UPDATED)"
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+                "https://hub.docker.com/v2/repositories/${REPO}/tags/${TAG}/" \
+                -H "Authorization: Bearer ${TOKEN}")
 
-              # Never delete the latest tag
-              if [ "$TAG" = "latest" ]; then
-                echo "Skipping: $TAG (protected)"
-                continue
-              fi
-
-              if [ "$TAG_TS" -lt "$CUTOFF" ]; then
-                echo "Deleting: $TAG (last updated: $LAST_UPDATED)"
-                HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
-                  "https://hub.docker.com/v2/repositories/${REPO}/tags/${TAG}/" \
-                  -H "Authorization: Bearer ${TOKEN}")
-
-                if [ "$HTTP_CODE" -eq 204 ]; then
-                  echo "  Deleted successfully"
-                  DELETED=$((DELETED + 1))
-                else
-                  echo "::warning::Failed to delete tag $TAG (HTTP $HTTP_CODE)"
-                fi
+              if [ "$HTTP_CODE" -eq 204 ]; then
+                echo "  Deleted successfully"
+                DELETED=$((DELETED + 1))
               else
-                echo "Keeping: $TAG (last updated: $LAST_UPDATED)"
+                echo "::warning::Failed to delete tag $TAG (HTTP $HTTP_CODE)"
               fi
-            done
-
-            NEXT=$(echo "$RESPONSE" | jq -r '.next // empty')
-            if [ -z "$NEXT" ]; then
-              break
+            else
+              echo "Keeping: $TAG (last updated: $LAST_UPDATED)"
             fi
-            PAGE=$((PAGE + 1))
           done
 
-          echo "Pruned $DELETED tag(s)"
+          NEXT=$(echo "$RESPONSE" | jq -r '.next // empty')
+          if [ -z "$NEXT" ]; then
+            break
+          fi
+          PAGE=$((PAGE + 1))
+        done
+
+        echo "Pruned $DELETED tag(s)"

@@ -38,23 +38,22 @@
         "exiasr.hadolint",
         "foxundermoon.shell-format",
         "jnoortheen.nix-ide",
+        "kennylong.kubernetes-yaml-formatter",
         "ms-azuretools.vscode-containers",
         "redhat.vscode-yaml",
         "streetsidesoftware.code-spell-checker",
         "timonwong.shellcheck"
       ],
       "settings": {
-        "nix": {
-          "enableLanguageServer": true,
-          "serverPath": "nil",
-          "serverSettings": {
-            "formatting": {
-              "command": [
-                "nixfmt"
-              ]
-            }
-          }
-        }
+        "nix.enableLanguageServer": true,
+        "nix.serverPath": "nil",
+        "nix.serverSettings.formatting.command": [
+          "nixfmt"
+        ],
+        "yaml.format.enable": false,
+        "better-yaml.directives": true,
+        "better-yaml.indentSeq": false,
+        "better-yaml.lineWidth": 128
       }
     }
   },

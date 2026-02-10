@@ -1,21 +1,21 @@
 ---
-version: "0.2"
+version: '0.2'
 language: en
 words:
-  - devcontainer
-  - direnv
-  - hadolint
-  - kickr
-  - netbrain
-  - radeon
-  - shellcheck
-  - wqhd
-  - zwift
-  - zwifters
+- devcontainer
+- direnv
+- hadolint
+- kickr
+- netbrain
+- radeon
+- shellcheck
+- wqhd
+- zwift
+- zwifters
 files:
-  - "**/*.md"
-  - ".github/**/*.md"
+- '**/*.md'
+- .github/**/*.md
 languageSettings:
-  - languageId: markdown
-    ignoreRegExpList:
-      - '/(?:```[\s\S]*?```|`[^`]+`)/g'
+- languageId: markdown
+  ignoreRegExpList:
+  - /(?:```[\s\S]*?```|`[^`]+`)/g

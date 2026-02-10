@@ -1,18 +1,18 @@
 ---
 name: Validate yaml
-on: # yamllint disable-line rule:truthy
+'on':
   pull_request:
   push:
     branches:
-      - "master"
+    - master
 jobs:
   validate-yaml:
     name: Lint with yamllint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v6
-      - name: Install yamllint
-        run: sudo apt-get install -y yamllint
-      - name: Check yaml files for errors
-        run: yamllint .
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install yamllint
+      run: sudo apt-get install -y yamllint
+    - name: Check yaml files for errors
+      run: yamllint .

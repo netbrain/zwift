@@ -1,44 +1,44 @@
 ---
 name: Validate nix flake
-on: # yamllint disable-line rule:truthy
+'on':
   pull_request:
   push:
     branches:
-      - "master"
+    - master
 jobs:
   validate-nix-flake:
     name: Lint with nil
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v6
-      - name: Install nix
-        uses: cachix/install-nix-action@v31
-      - name: Install nix language tools
-        run: nix profile add github:oxalica/nil
-      - name: Check nix flake for errors
-        run: nil diagnostics -- *.nix
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install nix
+      uses: cachix/install-nix-action@v31
+    - name: Install nix language tools
+      run: nix profile add github:oxalica/nil
+    - name: Check nix flake for errors
+      run: nil diagnostics -- *.nix
   check-nix-flake-formatted:
     name: Check formatting with nixfmt
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v6
-      - name: Install nix
-        uses: cachix/install-nix-action@v31
-      - name: Install nix language tools
-        run: nix profile add github:nixos/nixfmt
-      - name: Check if nix flake is formatted
-        run: nixfmt --check -- *.nix
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install nix
+      uses: cachix/install-nix-action@v31
+    - name: Install nix language tools
+      run: nix profile add github:nixos/nixfmt
+    - name: Check if nix flake is formatted
+      run: nixfmt --check -- *.nix
   build-nix-flake:
     name: Build flake
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v6
-      - name: Install nix
-        uses: cachix/install-nix-action@v31
-      - name: Build nix flake
-        run: |
-          cd tests/nix-flake
-          nix build --no-write-lock-file --dry-run
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install nix
+      uses: cachix/install-nix-action@v31
+    - name: Build nix flake
+      run: |
+        cd tests/nix-flake
+        nix build --no-write-lock-file --dry-run

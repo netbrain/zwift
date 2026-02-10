@@ -1,9 +1,9 @@
 ---
 name: Generate Sponsors README
-on: # yamllint disable-line rule:truthy
+'on':
   workflow_dispatch:
   schedule:
-    - cron: 30 15 * * 0-6
+  - cron: 30 15 * * 0-6
 permissions:
   contents: write
 jobs:
@@ -11,16 +11,16 @@ jobs:
     if: github.repository == 'netbrain/zwift'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v6
-      - name: Generate Sponsors 💖
-        uses: JamesIves/github-sponsors-readme-action@v1
-        with:
-          token: ${{ secrets.SPONSORS_PAT }}
-          file: "README.md"
-          active-only: false
-      - name: Deploy to GitHub Pages 🚀
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: master
-          folder: "."
+    - name: Checkout 🛎️
+      uses: actions/checkout@v6
+    - name: Generate Sponsors 💖
+      uses: JamesIves/github-sponsors-readme-action@v1
+      with:
+        token: ${{ secrets.SPONSORS_PAT }}
+        file: README.md
+        active-only: false
+    - name: Deploy to GitHub Pages 🚀
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: master
+        folder: .

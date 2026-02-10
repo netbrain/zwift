@@ -1,16 +1,16 @@
 ---
 name: Validate github actions
-on: # yamllint disable-line rule:truthy
+'on':
   pull_request:
   push:
     branches:
-      - "master"
+    - master
 jobs:
   validate-github-actions:
     name: Lint with actionlint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v6
-      - name: Check github actions for errors
-        uses: devops-actions/actionlint@467e2ce19b2310e93c9ffa0b50fe31f86b5a7f23
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Check github actions for errors
+      uses: devops-actions/actionlint@467e2ce19b2310e93c9ffa0b50fe31f86b5a7f23

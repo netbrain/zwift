@@ -1,9 +1,9 @@
 ---
 name: Zwift script files updater
-on: # yamllint disable-line rule:truthy
+'on':
   push:
     branches:
-      - master
+    - master
 jobs:
   zwift_push:
     if: github.repository == 'netbrain/zwift'
@@ -11,45 +11,45 @@ jobs:
     timeout-minutes: 60
     concurrency: zwift
     steps:
-      - uses: netbrain/free-disk-space-action@v0.0.1
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Checkout
-        uses: actions/checkout@v6
-      - name: Get latest zwift container and diff script files
-        run: |
-          set -x
-          docker pull netbrain/zwift:latest
-          docker create --name zwift netbrain/zwift:latest
+    - uses: netbrain/free-disk-space-action@v0.0.1
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Get latest zwift container and diff script files
+      run: |
+        set -x
+        docker pull netbrain/zwift:latest
+        docker create --name zwift netbrain/zwift:latest
 
-          declare -A files_map
-          files_map["/bin/entrypoint"]="src/entrypoint.sh"
-          files_map["/bin/zwift-auth"]="src/zwift-auth.sh"
-          files_map["/bin/update_zwift.sh"]="src/update_zwift.sh"
-          files_map["/bin/run_zwift.sh"]="src/run_zwift.sh"
+        declare -A files_map
+        files_map["/bin/entrypoint"]="src/entrypoint.sh"
+        files_map["/bin/zwift-auth"]="src/zwift-auth.sh"
+        files_map["/bin/update_zwift.sh"]="src/update_zwift.sh"
+        files_map["/bin/run_zwift.sh"]="src/run_zwift.sh"
 
-          has_changes=false
-          for container_path in "${!files_map[@]}"; do
-              local_file="${files_map[${container_path}]}"
-              mkdir -p "$(dirname "/tmp/${local_file}")"
-              docker cp "zwift:${container_path}" "/tmp/${local_file}"
-              diff_exit_code=$(diff "${local_file}" "/tmp/${local_file}" > /dev/null; echo $?)
-              if [[ $diff_exit_code -eq 1 ]]; then
-                  has_changes=true
-                  docker cp "${local_file}" "zwift:${container_path}"
-              fi
-          done
+        has_changes=false
+        for container_path in "${!files_map[@]}"; do
+            local_file="${files_map[${container_path}]}"
+            mkdir -p "$(dirname "/tmp/${local_file}")"
+            docker cp "zwift:${container_path}" "/tmp/${local_file}"
+            diff_exit_code=$(diff "${local_file}" "/tmp/${local_file}" > /dev/null; echo $?)
+            if [[ $diff_exit_code -eq 1 ]]; then
+                has_changes=true
+                docker cp "${local_file}" "zwift:${container_path}"
+            fi
+        done
 
-          if [ "$has_changes" = true ]; then
-            BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-            export BUILD_DATE
-            docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
-              -m "Updated script files from git ($GITHUB_SHA)" \
-              zwift \
-              netbrain/zwift:latest
-            docker push "netbrain/zwift:latest"
-          fi
-          docker rm zwift
+        if [ "$has_changes" = true ]; then
+          BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          export BUILD_DATE
+          docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
+            -m "Updated script files from git ($GITHUB_SHA)" \
+            zwift \
+            netbrain/zwift:latest
+          docker push "netbrain/zwift:latest"
+        fi
+        docker rm zwift

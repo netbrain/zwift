@@ -1,8 +1,22 @@
 ---
+# https://yamlscript.org/blog/2025-07-20/yaml-best-practices/
 ignore-from-file: .gitignore
 extends: default
 rules:
+  braces:
+    forbid: non-empty
+  brackets:
+    forbid: non-empty
   comments:
     min-spaces-from-content: 1
+  indentation:
+    spaces: 2
+    indent-sequences: false
+    check-multi-line-strings: false
   line-length:
     max: 128
+  quoted-strings:
+    quote-type: single
+    required: only-when-needed
+    allow-quoted-quotes: true
+    check-keys: true

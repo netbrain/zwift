@@ -6,14 +6,14 @@ repository: netbrain/zwift
 color_scheme: dark
 permalink: pretty
 back_to_top: true
-back_to_top_text: "Back to top"
+back_to_top_text: Back to top
 aux_links:
-  "netbrain/zwift on GitHub":
-    - https://github.com/netbrain/zwift
+  netbrain/zwift on GitHub:
+  - https://github.com/netbrain/zwift
 nav_enabled: true
 nav_external_links:
-  - title: netbrain/zwift on GitHub
-    url: https://github.com/netbrain/zwift
+- title: netbrain/zwift on GitHub
+  url: https://github.com/netbrain/zwift
 callouts:
   important:
     title: Important
@@ -25,16 +25,17 @@ callouts:
     title: Warning
     color: red
 plugins:
-  - jekyll-coffeescript
-  - jekyll-default-layout
-  - jekyll-gist
-  - jekyll-github-metadata
-  - jekyll-optional-front-matter
-  - jekyll-paginate
-  - jekyll-readme-index
-  - jekyll-titles-from-headings
-  - jekyll-relative-links
-  - jemoji
+- jekyll-coffeescript
+- jekyll-default-layout
+- jekyll-gist
+- jekyll-github-metadata
+- jekyll-optional-front-matter
+- jekyll-paginate
+- jekyll-readme-index
+- jekyll-titles-from-headings
+- jekyll-relative-links
+- jemoji
 sass:
   quiet_deps: true # https://github.com/just-the-docs/just-the-docs/issues/1541
-  silence_deprecations: ["import"] # https://github.com/just-the-docs/just-the-docs/issues/1607
+  silence_deprecations:
+  - import # https://github.com/just-the-docs/just-the-docs/issues/1607
