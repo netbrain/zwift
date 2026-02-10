@@ -2,13 +2,13 @@
 set -e
 set -x
 
-ZWIFT_HOME="$HOME/.wine/drive_c/Program Files (x86)/Zwift"
+ZWIFT_HOME="${HOME}/.wine/drive_c/Program Files (x86)/Zwift"
 
-mkdir -p "$ZWIFT_HOME"
-cd "$ZWIFT_HOME"
+mkdir -p "${ZWIFT_HOME}"
+cd "${ZWIFT_HOME}"
 
 get_current_version() {
-    if [ -f Zwift_ver_cur_filename.txt ]; then
+    if [[ -f Zwift_ver_cur_filename.txt ]]; then
         # If Zwift_ver_cur_filename.txt exists, use it
         # Remove Null to remove warning.
         CUR_FILENAME=$(tr '\0' '\n' < Zwift_ver_cur_filename.txt)
@@ -17,8 +17,8 @@ get_current_version() {
         CUR_FILENAME="Zwift_ver_cur.xml"
     fi
 
-    if grep -q sversion "$CUR_FILENAME"; then
-        ZWIFT_VERSION_CURRENT=$(grep -oP 'sversion="\K.*?(?=\s)' "$CUR_FILENAME" | cut -f 1 -d ' ')
+    if grep -q sversion "${CUR_FILENAME}"; then
+        ZWIFT_VERSION_CURRENT=$(grep -oP 'sversion="\K.*?(?=\s)' "${CUR_FILENAME}" | cut -f 1 -d ' ')
     else
         # Basic install only, needs initial update
         ZWIFT_VERSION_CURRENT="0.0.0"
@@ -67,22 +67,22 @@ wait_for_zwift_game_update() {
 
     # Disable ERR Trap so return works.
     set +e
-    vercomp "$ZWIFT_VERSION_CURRENT" "$ZWIFT_VERSION_LATEST"
+    vercomp "${ZWIFT_VERSION_CURRENT}" "${ZWIFT_VERSION_LATEST}"
     RESULT=$?
     set -e
-    if [ $RESULT -ne 2 ]; then
+    if [[ ${RESULT} -ne "2" ]]; then
         echo "already at latest version..."
         exit 0
     fi
 
     wine ZwiftLauncher.exe SilentLaunch &
-    until [ $RESULT -ne 2 ]; do
+    until [[ ${RESULT} -ne "2" ]]; do
         echo "updating in progress..."
         sleep 5
         get_current_version
 
         set +e
-        vercomp "$ZWIFT_VERSION_CURRENT" "$ZWIFT_VERSION_LATEST"
+        vercomp "${ZWIFT_VERSION_CURRENT}" "${ZWIFT_VERSION_LATEST}"
         RESULT=$?
         set -e
     done
@@ -91,10 +91,10 @@ wait_for_zwift_game_update() {
     sleep 5
 
     # Remove as causes PODMAN Save Permisison issues.
-    rm -rf "$HOME/.wine/drive_c/users/user/Documents/Zwift"
+    rm -rf "${HOME}/.wine/drive_c/users/user/Documents/Zwift"
 }
 
-if [ ! "$(ls -A .)" ]; then # is directory empty?
+if [[ -z "$(ls -A .)" ]]; then # is directory empty?
     # Prevent Wine from trying to install a different mono version
     WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u
 
@@ -128,14 +128,14 @@ if [ ! "$(ls -A .)" ]; then # is directory empty?
     wineserver -k
 
     # cleanup
-    rm "$ZWIFT_HOME/ZwiftSetup.exe"
-    rm "$ZWIFT_HOME/webview2-setup.exe"
-    rm -rf "$HOME/.wine/drive_c/users/user/Downloads/Zwift"
-    rm -rf "$HOME/.cache/wine*"
+    rm "${ZWIFT_HOME}/ZwiftSetup.exe"
+    rm "${ZWIFT_HOME}/webview2-setup.exe"
+    rm -rf "${HOME}/.wine/drive_c/users/user/Downloads/Zwift"
+    rm -rf "${HOME}/.cache/wine*"
     exit 0
 fi
 
-if [ "$1" = "update" ]; then
+if [[ $1 == "update" ]]; then
     wait_for_zwift_game_update
 
     wineserver -k

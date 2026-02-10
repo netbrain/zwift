@@ -1,0 +1,4 @@
+enable=all
+
+disable=SC2312 # check-extra-masked-returns
+disable=SC2154 # check-unassigned-uppercase
