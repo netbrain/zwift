@@ -6,6 +6,9 @@ readonly ZWIFT_UID=${ZWIFT_UID:-}
 readonly ZWIFT_GID=${ZWIFT_GID:-}
 readonly WINE_EXPERIMENTAL_WAYLAND=${WINE_EXPERIMENTAL_WAYLAND:-0}
 
+readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
+readonly ZWIFT_DOCS="/home/user/.wine/drive_c/users/user/Documents/Zwift"
+
 # Check whether we are running in Docker/ Podman
 # Docker has the file /.dockerenv
 # Podman exposes itself in /run/.containerenv
@@ -29,14 +32,11 @@ if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
     unset DISPLAY
 fi
 
+mkdir -p "${ZWIFT_HOME}"
+cd "${ZWIFT_HOME}"
+
 # Check what container we are in:
 if [[ ${CONTAINER_TOOL} == "docker" ]]; then
-    # This script runs as the root user in Docker so need to do this to find the
-    # home directory of the "user" user.
-    zwift_home="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
-    mkdir -p "${zwift_home}"
-    cd "${zwift_home}"
-
     user_uid="$(id -u user)"
     user_gid="$(id -g user)"
 
@@ -77,15 +77,11 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         gosu user:user /bin/update_zwift.sh "${@}"
     else
         # Volume is mounted as root so always re-own.
-        chown -R "${user_uid}:${user_gid}" /home/user/.wine/drive_c/users/user/Documents/Zwift
+        chown -R "${user_uid}:${user_gid}" "${ZWIFT_DOCS}"
         gosu user:user /bin/run_zwift.sh "${@}"
     fi
 else
     # We are running in podman.
-    zwift_home="${HOME}/.wine/drive_c/Program Files (x86)/Zwift"
-    mkdir -p "${zwift_home}"
-    cd "${zwift_home}"
-
     if [[ $1 == "update" ]] || [[ -z "$(ls -A .)" ]]; then
         /bin/update_zwift.sh "${@}"
     else

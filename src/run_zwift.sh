@@ -7,8 +7,8 @@ readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:-}"
 readonly ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION:-}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 
-readonly ZWIFT_HOME="${HOME}/.wine/drive_c/Program Files (x86)/Zwift"
-readonly ZWIFT_PREFS="${HOME}/.wine/drive_c/users/user/Documents/Zwift/prefs.xml"
+readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
+readonly ZWIFT_PREFS="/home/user/.wine/drive_c/users/user/Documents/Zwift/prefs.xml"
 
 if [[ ! -d ${ZWIFT_HOME} ]]; then
     echo "Directory ${ZWIFT_HOME} does not exist.  Has Zwift been installed?" >&2

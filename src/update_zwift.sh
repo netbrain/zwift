@@ -2,7 +2,7 @@
 set -e
 set -x
 
-readonly ZWIFT_HOME="${HOME}/.wine/drive_c/Program Files (x86)/Zwift"
+readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 
 mkdir -p "${ZWIFT_HOME}"
 cd "${ZWIFT_HOME}"
@@ -91,7 +91,7 @@ wait_for_zwift_game_update() {
     sleep 5
 
     # Remove as causes PODMAN Save Permisison issues.
-    rm -rf "${HOME}/.wine/drive_c/users/user/Documents/Zwift"
+    rm -rf "/home/user/.wine/drive_c/users/user/Documents/Zwift"
 }
 
 if [[ -z "$(ls -A .)" ]]; then # is directory empty?
@@ -130,8 +130,8 @@ if [[ -z "$(ls -A .)" ]]; then # is directory empty?
     # cleanup
     rm "${ZWIFT_HOME}/ZwiftSetup.exe"
     rm "${ZWIFT_HOME}/webview2-setup.exe"
-    rm -rf "${HOME}/.wine/drive_c/users/user/Downloads/Zwift"
-    rm -rf "${HOME}/.cache/wine*"
+    rm -rf "/home/user/.wine/drive_c/users/user/Downloads/Zwift"
+    rm -rf "/home/user/.cache/wine*"
     exit 0
 fi
 
