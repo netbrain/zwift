@@ -466,28 +466,32 @@ else
     require_xhost_access=0
 fi
 
-# Execute: interactive (-it) should not be captured
-if [[ ${INTERACTIVE} -eq 1 ]]; then
+if [[ ${INTERACTIVE} -eq 1 ]] || [[ ${ZWIFT_FG} -eq 1 ]]; then
     # In interactive mode we don't have a container ID to run xhost against later.
     # If using X11/XWayland, show instructions so users can enable X access manually.
     if [[ ${require_xhost_access} -eq 1 ]]; then
-        msgbox info "INTERACTIVE mode: xhost is not automatically enabled for this container."
+        msgbox info "Starting Zwift in foreground: xhost is not automatically enabled for this container."
         msgbox info "  If you need X11 apps inside the container to display, run this in another terminal:"
         msgbox info "    xhost +local:${HOSTNAME}"
         msgbox info "  After you're done, you can revoke access with:"
         msgbox info "    xhost -local:${HOSTNAME}"
     fi
-    if ! "${container_command[@]}"; then
-        msgbox error "Failed to start Zwift, check variables!" 10
+    msgbox ok "Launching Zwift! 🚀"
+    if "${container_command[@]}"; then
+        msgbox ok "Zwift container closed, exiting 🫡"
+    else
+        msgbox error "Failed to start Zwift, check variables! 😢" 10
         exit 1
     fi
-elif container_id=$("${container_command[@]}"); then
-    msgbox ok "Launched Zwift! 🚀"
-    if [[ -n ${container_id} ]] && [[ ${require_xhost_access} -eq 1 ]]; then
-        msgbox info "Allowing container to connect to X"
-        xhost +local:"$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")" > /dev/null
-    fi
 else
-    msgbox error "Failed to start Zwift, check variables!" 10
-    exit 1
+    if container_id=$("${container_command[@]}"); then
+        msgbox ok "Launched Zwift! 🚀"
+        if [[ -n ${container_id} ]] && [[ ${require_xhost_access} -eq 1 ]]; then
+            msgbox info "Allowing container to connect to X server"
+            xhost +local:"$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")" > /dev/null
+        fi
+    else
+        msgbox error "Failed to start Zwift, check variables! 😢" 10
+        exit 1
+    fi
 fi
