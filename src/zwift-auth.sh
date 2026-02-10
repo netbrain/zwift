@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+readonly DEBUG="${DEBUG:-0}"
+if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
+
 readonly ZWIFT_USERNAME="${ZWIFT_USERNAME:?}"
 readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:?}"
 

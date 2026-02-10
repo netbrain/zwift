@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
-set -x
+
+readonly DEBUG="${DEBUG:-0}"
+if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 readonly ZWIFT_UID=${ZWIFT_UID:-}
 readonly ZWIFT_GID=${ZWIFT_GID:-}

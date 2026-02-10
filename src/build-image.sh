@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-set -x
+
+readonly DEBUG="${DEBUG:-0}"
+if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 ZWIFT_UID="$(id -u)"

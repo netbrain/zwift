@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
-set -x
+
+readonly DEBUG="${DEBUG:-0}"
+if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 

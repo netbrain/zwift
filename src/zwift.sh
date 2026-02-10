@@ -218,6 +218,7 @@ fi
 
 # Define base container environment variables
 container_env_vars+=(
+    DEBUG="${DEBUG}"
     DISPLAY="${DISPLAY}"
     ZWIFT_UID="${container_uid}"
     ZWIFT_GID="${container_gid}"

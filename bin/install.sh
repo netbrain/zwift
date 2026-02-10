@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+readonly DEBUG="${DEBUG:-0}"
+if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
+
 readonly ZWIFT_SCRIPT="https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh"
 readonly ZWIFT_LOGO="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.svg"
 readonly ZWIFT_DESKTOP_ENTRY="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.desktop"
