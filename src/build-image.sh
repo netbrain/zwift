@@ -44,9 +44,13 @@ container_args=(
 
 # Check for proprietary nvidia driver and set correct device to use
 if [[ -f "/proc/driver/nvidia/version" ]]; then
-    container_args+=(--gpus all)
+    if [[ ${CONTAINER_TOOL} == "podman" ]]; then
+        container_args+=(--device="nvidia.com/gpu=all")
+    else
+        container_args+=(--gpus="all")
+    fi
 else
-    container_args+=(--device /dev/dri:/dev/dri)
+    container_args+=(--device="/dev/dri:/dev/dri")
 fi
 
 # Initiate podman volume with correct permissions
