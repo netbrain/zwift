@@ -74,11 +74,11 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     if [[ $1 == "update" ]] || [[ -z "$(ls -A .)" ]]; then
         # Have to change owner for build as everything is root.
         chown -R user:user /home/user
-        gosu user:user /bin/update_zwift.sh "$@"
+        gosu user:user /bin/update_zwift.sh "${@}"
     else
         # Volume is mounted as root so always re-own.
         chown -R "${user_uid}:${user_gid}" /home/user/.wine/drive_c/users/user/Documents/Zwift
-        gosu user:user /bin/run_zwift.sh "$@"
+        gosu user:user /bin/run_zwift.sh "${@}"
     fi
 else
     # We are running in podman.
@@ -87,8 +87,8 @@ else
     cd "${zwift_home}"
 
     if [[ $1 == "update" ]] || [[ -z "$(ls -A .)" ]]; then
-        /bin/update_zwift.sh "$@"
+        /bin/update_zwift.sh "${@}"
     else
-        /bin/run_zwift.sh "$@"
+        /bin/run_zwift.sh "${@}"
     fi
 fi

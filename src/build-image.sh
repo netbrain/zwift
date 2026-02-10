@@ -63,7 +63,7 @@ cleanup() {
 }
 
 ${CONTAINER_TOOL} build --force-rm -t "${BUILD_NAME}" "${SCRIPT_DIR}"
-${CONTAINER_TOOL} run "${container_args[@]}" "${IMAGE}:latest" "$@"
+${CONTAINER_TOOL} run "${container_args[@]}" "${IMAGE}:latest" "${@}"
 ${CONTAINER_TOOL} commit zwift "${BUILD_NAME}:latest"
 ${CONTAINER_TOOL} container rm zwift
 
