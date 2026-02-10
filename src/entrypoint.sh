@@ -63,7 +63,7 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
 
         # Only make the directory if not there.
         if [[ ! -d "/run/user/${user_uid}" ]]; then
-            mkdir -p "/run/user/${user_gid}"
+            mkdir -p "/run/user/${user_uid}"
         fi
 
         chown -R user:user "/run/user/${user_uid}"
