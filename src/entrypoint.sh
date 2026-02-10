@@ -35,7 +35,13 @@ fi
 mkdir -p "${ZWIFT_HOME}"
 cd "${ZWIFT_HOME}"
 
-# Check what container we are in:
+# Run update if that's the first argument or if zwift directory is empty
+if [[ $1 == "update" ]] || [[ -z "$(ls -A .)" ]]; then
+    readonly UPDATE_REQUIRED=1
+else
+    readonly UPDATE_REQUIRED=0
+fi
+
 if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     user_uid="$(id -u user)"
     user_gid="$(id -g user)"
@@ -71,7 +77,7 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     fi
 
     # Run update if that's the first argument or if zwift directory is empty
-    if [[ $1 == "update" ]] || [[ -z "$(ls -A .)" ]]; then
+    if [[ ${UPDATE_REQUIRED} -eq 1 ]]; then
         # Have to change owner for build as everything is root.
         chown -R user:user /home/user
         gosu user:user /bin/update_zwift.sh "${@}"
@@ -82,7 +88,7 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     fi
 else
     # We are running in podman.
-    if [[ $1 == "update" ]] || [[ -z "$(ls -A .)" ]]; then
+    if [[ ${UPDATE_REQUIRED} -eq 1 ]]; then
         /bin/update_zwift.sh "${@}"
     else
         /bin/run_zwift.sh "${@}"
