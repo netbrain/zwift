@@ -4,8 +4,8 @@ set -e
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
-readonly ZWIFT_UID=${ZWIFT_UID:-}
-readonly ZWIFT_GID=${ZWIFT_GID:-}
+readonly ZWIFT_UID=${ZWIFT_UID:-$(id -u user)}
+readonly ZWIFT_GID=${ZWIFT_GID:-$(id -g user)}
 readonly WINE_EXPERIMENTAL_WAYLAND=${WINE_EXPERIMENTAL_WAYLAND:-0}
 
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
@@ -50,17 +50,17 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
 
     # Test that it exists and is a number, and only if different to existing.
     switch_user_id=0
-    if [[ -n ${ZWIFT_UID} ]] && [[ ${ZWIFT_UID} -eq ${ZWIFT_UID} ]] && [[ ${user_uid} -ne ${ZWIFT_UID} ]]; then
+    if [[ ! ${ZWIFT_UID} =~ ^[0-9]+$ ]]; then
+        echo "ZWIFT_UID is not a number: '${ZWIFT_UID}'" >&2
+    elif [[ ${user_uid} -ne ${ZWIFT_UID} ]]; then
         user_uid="${ZWIFT_UID}"
         switch_user_id=1
-    else
-        echo "ZWIFT_UID is not set or not a number: '${ZWIFT_UID}'"
     fi
-    if [[ -n ${ZWIFT_GID} ]] && [[ ${ZWIFT_GID} -eq ${ZWIFT_GID} ]] && [[ ${user_gid} -ne ${ZWIFT_GID} ]]; then
+    if [[ ! ${ZWIFT_GID} =~ ^[0-9]+$ ]]; then
+        echo "ZWIFT_GID is not a number: '${ZWIFT_GID}'" >&2
+    elif [[ ${user_gid} -ne ${ZWIFT_GID} ]]; then
         user_gid="${ZWIFT_GID}"
         switch_user_id=1
-    else
-        echo "ZWIFT_GID is not set or not a number: '${ZWIFT_GID}'"
     fi
 
     # This section is only run if we are switching either UID or GID.
