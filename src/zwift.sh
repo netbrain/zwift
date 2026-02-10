@@ -276,11 +276,12 @@ if [[ ${ZWIFT_OVERRIDE_GRAPHICS} -eq 1 ]]; then
 
     # Override all zwift graphics profiles with the custom config file.
     msgbox ok "Overriding zwift graphics profiles with ${zwift_graphics_config}"
+    zwift_graphics_target_dir="/home/user/.wine/drive_c/Program Files (x86)/Zwift/data/configs"
     container_args+=(
-        -v "${zwift_graphics_config}":/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/basic.txt:ro
-        -v "${zwift_graphics_config}":/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/medium.txt:ro
-        -v "${zwift_graphics_config}":/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/high.txt:ro
-        -v "${zwift_graphics_config}":/home/user/.wine/drive_c/Program\ Files\ \(x86\)/Zwift/data/configs/ultra.txt:ro
+        -v "${zwift_graphics_config}:${zwift_graphics_target_dir}/basic.txt:ro"
+        -v "${zwift_graphics_config}:${zwift_graphics_target_dir}/medium.txt:ro"
+        -v "${zwift_graphics_config}:${zwift_graphics_target_dir}/high.txt:ro"
+        -v "${zwift_graphics_config}:${zwift_graphics_target_dir}/ultra.txt:ro"
     )
 fi
 
