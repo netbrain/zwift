@@ -421,19 +421,18 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
 fi
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
-vga_device_flag="${VGA_DEVICE_FLAG}"
-if [[ -z ${vga_device_flag} ]]; then
-    if [[ -f "/proc/driver/nvidia/version" ]]; then
-        if [[ ${CONTAINER_TOOL} == "podman" ]]; then
-            vga_device_flag="--device=nvidia.com/gpu=all"
-        else
-            vga_device_flag="--gpus=all"
-        fi
+if [[ -n ${VGA_DEVICE_FLAG} ]]; then
+    read -ra vga_device_flags <<< "${VGA_DEVICE_FLAG}"
+    container_args+=("${vga_device_flags[@]}")
+elif [[ -f "/proc/driver/nvidia/version" ]]; then
+    if [[ ${CONTAINER_TOOL} == "podman" ]]; then
+        container_args+=(--device="nvidia.com/gpu=all")
     else
-        vga_device_flag="--device=/dev/dri:/dev/dri"
+        container_args+=(--gpus="all")
     fi
+else
+    container_args+=(--device="/dev/dri:/dev/dri")
 fi
-container_args+=("${vga_device_flag}")
 
 ###########################
 ##### Start container #####
