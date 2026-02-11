@@ -160,7 +160,7 @@ fi
 # Check for updated container image
 if [[ ${DONT_PULL} -ne 1 ]]; then
     msgbox info "Checking for updated container image"
-    if ${CONTAINER_TOOL} pull "${IMAGE}":"${VERSION}"; then
+    if ${CONTAINER_TOOL} pull "${IMAGE}:${VERSION}"; then
         msgbox ok "Container image is up to date"
     else
         msgbox error "Failed to update container image"
@@ -233,8 +233,8 @@ container_args+=(
     --name "zwift-${USER}"
     --hostname "${HOSTNAME}"
     --env-file "${container_env_file}"
-    -v "zwift-${USER}":/home/user/.wine/drive_c/users/user/Documents/Zwift
-    -v "/run/user/${local_uid}/pulse":"/run/user/${container_uid}/pulse"
+    -v "zwift-${USER}:/home/user/.wine/drive_c/users/user/Documents/Zwift"
+    -v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse"
 )
 
 ##############################################
@@ -404,7 +404,7 @@ elif [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]];
     if [[ -n ${XAUTHORITY} ]]; then
         # If not XAuthority set then don't pass, hyprland is one that does not use it
         container_env_vars+=(XAUTHORITY="${XAUTHORITY//${local_uid}/${container_uid}}")
-        container_args+=(-v "${XAUTHORITY}":"${XAUTHORITY//${local_uid}/${container_uid}}")
+        container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${local_uid}/${container_uid}}")
     fi
 fi
 

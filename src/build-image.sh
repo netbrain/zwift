@@ -41,7 +41,7 @@ container_args=(
     -e CONTAINER_TOOL="${CONTAINER_TOOL}"
 
     -v /tmp/.X11-unix:/tmp/.X11-unix
-    -v /run/user/${UID}:"/run/user/${ZWIFT_UID}"
+    -v "/run/user/${UID}:/run/user/${ZWIFT_UID}"
 )
 
 # Check for proprietary nvidia driver and set correct device to use
