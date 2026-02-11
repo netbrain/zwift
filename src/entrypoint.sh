@@ -38,7 +38,7 @@ mkdir -p "${ZWIFT_HOME}"
 cd "${ZWIFT_HOME}"
 
 # Run update if that's the first argument or if zwift directory is empty
-if [[ $1 == "update" ]] || [[ -z "$(ls -A .)" ]]; then
+if [[ ${1} == "update" ]] || [[ -z "$(ls -A .)" ]]; then
     readonly UPDATE_REQUIRED=1
 else
     readonly UPDATE_REQUIRED=0

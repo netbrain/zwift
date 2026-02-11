@@ -25,9 +25,9 @@ fi
 
 # Message Box to simplify errors and questions.
 msgbox() {
-    local type="$1"    # Type: info, ok, warning, error, question
-    local msg="$2"     # Message: the message to display
-    local timeout="$3" # Optional timeout: if explicitly set to 0, wait for user input to continue.
+    local type="${1}"    # Type: info, ok, warning, error, question
+    local msg="${2}"     # Message: the message to display
+    local timeout="${3}" # Optional timeout: if explicitly set to 0, wait for user input to continue.
 
     case ${type} in
         info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
@@ -74,7 +74,7 @@ msgbox info "Preparing to launch Zwift"
 
 # Check for zwift configuration, sourced here
 load_config_file() {
-    local config_file="$1"
+    local config_file="${1}"
     msgbox info "Looking for config file ${config_file}"
     if [[ -f ${config_file} ]]; then
         # shellcheck source=/dev/null
@@ -144,14 +144,14 @@ if [[ ${DONT_CHECK} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
 
     remote_sum="$(curl -s https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh | sha256sum | awk '{print $1}')"
-    this_sum="$(sha256sum "$0" | awk '{print $1}')"
+    this_sum="$(sha256sum "${0}" | awk '{print $1}')"
 
     if [[ ${remote_sum} == "${this_sum}" ]]; then
         msgbox ok "You are running the latest zwift.sh 👏"
     elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
         msgbox info "Downloading latest zwift.sh"
         pkexec env PATH="${PATH}" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
-        exec "$0" "${@}"
+        exec "${0}" "${@}"
     else
         msgbox warning "Continuing with old zwift.sh"
     fi

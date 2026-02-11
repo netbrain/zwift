@@ -35,14 +35,14 @@ get_latest_version() {
 wait_for_zwift_game_update() {
     vercomp() {
         # Return 0 if =, 1 if > and 2 if <
-        if [[ $1 == "$2" ]]; then
+        if [[ ${1} == "${2}" ]]; then
             return 0
         fi
 
         local IFS=.
         local i ver1 ver2
-        read -ra ver1 <<< "$1"
-        read -ra ver2 <<< "$2"
+        read -ra ver1 <<< "${1}"
+        read -ra ver2 <<< "${2}"
         # fill empty fields in ver1 with zeros
         for ((i = ${#ver1[@]}; i < ${#ver2[@]}; i++)); do
             ver1[i]=0
@@ -137,7 +137,7 @@ if [[ -z "$(ls -A .)" ]]; then # is directory empty?
     exit 0
 fi
 
-if [[ $1 == "update" ]]; then
+if [[ ${1} == "update" ]]; then
     wait_for_zwift_game_update
 
     wineserver -k
