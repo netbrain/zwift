@@ -35,7 +35,7 @@ ARG WINETRICKS_VERSION=20240105
 # - curl used in zwift authentication script
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
-# - libgl1 for GL library
+# - libegl1 and libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
 # - sudo for normal user installation
@@ -49,6 +49,7 @@ RUN dpkg --add-architecture i386 \
         curl \
         gamemode \
         gosu \
+        libegl1 \
         libgl1 \
         libvulkan1 \
         procps \
