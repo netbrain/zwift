@@ -310,6 +310,12 @@ else
     container_args+=(--security-opt label=type:container_runtime_t) # more secure
 fi
 
+# Append extra arguments provided by user
+if [[ -n ${CONTAINER_EXTRA_ARGS} ]]; then
+    read -ra extra_args <<< "${CONTAINER_EXTRA_ARGS}"
+    container_args+=("${extra_args[@]}")
+fi
+
 #####################################
 ##### Authentication parameters #####
 
