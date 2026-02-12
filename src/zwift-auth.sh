@@ -1,41 +1,46 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-LAUNCHER_CLIENT_ID="Game_Launcher"
-LAUNCHER_HOME="https://launcher.zwift.com/launcher"
+readonly DEBUG="${DEBUG:-0}"
+if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
-ZWIFT_REALM_URL=https://secure.zwift.com/auth/realms/zwift
-COOKIE="cookie.jar"
+readonly ZWIFT_USERNAME="${ZWIFT_USERNAME:?}"
+readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:?}"
+
+readonly LAUNCHER_CLIENT_ID="Game_Launcher"
+readonly LAUNCHER_HOME="https://launcher.zwift.com/launcher"
+readonly ZWIFT_REALM_URL="https://secure.zwift.com/auth/realms/zwift"
+readonly COOKIE="cookie.jar"
 
 curl -sS "${LAUNCHER_HOME}" --cookie-jar "${COOKIE}"
-REQUEST_STATE=$(grep -oP "OAuth_Token_Request_State\s+\K.*$" "${COOKIE}")
+request_state="$(grep -oP "OAuth_Token_Request_State\s+\K.*$" "${COOKIE}")"
 
-AUTHENTICATE_URL=$(curl -sSL --get --cookie "${COOKIE}" --cookie-jar "${COOKIE}" \
+authenticate_url="$(curl -sSL --get --cookie "${COOKIE}" --cookie-jar "${COOKIE}" \
     --data-urlencode "response_type=code" \
     --data-urlencode "client_id=${LAUNCHER_CLIENT_ID}" \
     --data-urlencode "redirect_uri=${LAUNCHER_HOME}" \
     --data-urlencode "login=true" \
     --data-urlencode "scope=openid" \
-    --data-urlencode "state=${REQUEST_STATE}" \
+    --data-urlencode "state=${request_state}" \
     "${ZWIFT_REALM_URL}/protocol/openid-connect/auth" \
     | grep -oP '<form id="form" class="zwift-form" action="\K(.+?)(?=" method="post">)' \
-    | sed -e 's/\&amp;/\&/g')
+    | sed -e 's/\&amp;/\&/g')"
 
-ACCESS_CODE=$(curl -sS --cookie "${COOKIE}" --cookie-jar "${COOKIE}" \
+access_code="$(curl -sS --cookie "${COOKIE}" --cookie-jar "${COOKIE}" \
     --data-urlencode "username=${ZWIFT_USERNAME}" \
     --data-urlencode "password=${ZWIFT_PASSWORD}" \
     --write-out "%{redirect_url}" \
-    "${AUTHENTICATE_URL}" \
-    | grep -oP "code=\K.+$")
+    "${authenticate_url}" \
+    | grep -oP "code=\K.+$")"
 
-AUTH_TOKEN_JSON=$(curl -sS --cookie "${COOKIE}" --cookie-jar "${COOKIE}" \
+auth_token_json="$(curl -sS --cookie "${COOKIE}" --cookie-jar "${COOKIE}" \
     --data-urlencode "client_id=${LAUNCHER_CLIENT_ID}" \
     --data-urlencode "redirect_uri=${LAUNCHER_HOME}" \
-    --data-urlencode "code=${ACCESS_CODE}" \
+    --data-urlencode "code=${access_code}" \
     --data-urlencode "grant_type=authorization_code" \
     --data-urlencode "scope=openid" \
-    "${ZWIFT_REALM_URL}/protocol/openid-connect/token")
+    "${ZWIFT_REALM_URL}/protocol/openid-connect/token")"
 
 rm "${COOKIE}"
 
-echo "${AUTH_TOKEN_JSON}"
+echo "${auth_token_json}"

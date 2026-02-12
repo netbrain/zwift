@@ -1,23 +1,30 @@
 #!/usr/bin/env bash
 set -e
-set -x
 
-ZWIFT_HOME="${HOME}/.wine/drive_c/Program Files (x86)/Zwift"
-ZWIFT_PREFS="${HOME}/.wine/drive_c/users/user/Documents/Zwift/prefs.xml"
+readonly DEBUG="${DEBUG:-0}"
+if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
+
+readonly ZWIFT_USERNAME="${ZWIFT_USERNAME:-}"
+readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:-}"
+readonly ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION:-}"
+readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
+
+readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
+readonly ZWIFT_PREFS="/home/user/.wine/drive_c/users/user/Documents/Zwift/prefs.xml"
 
 if [[ ! -d ${ZWIFT_HOME} ]]; then
-    echo "Directory ${ZWIFT_HOME} does not exist.  Has Zwift been installed?"
+    echo "Directory ${ZWIFT_HOME} does not exist.  Has Zwift been installed?" >&2
     exit 1
 fi
 
 if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
     if [[ -f ${ZWIFT_PREFS} ]]; then
         echo "Setting zwift resolution to ${ZWIFT_OVERRIDE_RESOLUTION}."
-        UPDATED_PREFS=$(awk -v resolution="${ZWIFT_OVERRIDE_RESOLUTION}" '{
+        updates_prefs="$(awk -v resolution="${ZWIFT_OVERRIDE_RESOLUTION}" '{
             gsub(/<USER_RESOLUTION_PREF>.*<\/USER_RESOLUTION_PREF>/,
                  "<USER_RESOLUTION_PREF>" resolution "</USER_RESOLUTION_PREF>")
-        } 1' "${ZWIFT_PREFS}")
-        echo "${UPDATED_PREFS}" > "${ZWIFT_PREFS}"
+        } 1' "${ZWIFT_PREFS}")"
+        echo "${updates_prefs}" > "${ZWIFT_PREFS}"
     else
         echo "Warning: Preferences file does not exist yet. Resolution ${ZWIFT_OVERRIDE_RESOLUTION} cannot be set."
     fi
@@ -28,14 +35,14 @@ cd "${ZWIFT_HOME}"
 echo "starting zwift..."
 wine start ZwiftLauncher.exe SilentLaunch
 
-LAUNCHER_PID_HEX=$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")
-LAUNCHER_PID=$((16#${LAUNCHER_PID_HEX}))
+launcher_pid_hex="$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")"
+launcher_pid="$((16#${launcher_pid_hex}))"
 
 if [[ -n ${ZWIFT_USERNAME} ]] && [[ -n ${ZWIFT_PASSWORD} ]]; then
     echo "authenticating with zwift..."
-    wine start /exec /bin/runfromprocess-rs.exe "${LAUNCHER_PID}" ZwiftApp.exe --token="$(zwift-auth)"
+    wine start /exec /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe --token="$(zwift-auth)"
 else
-    wine start /exec /bin/runfromprocess-rs.exe "${LAUNCHER_PID}" ZwiftApp.exe
+    wine start /exec /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe
 fi
 
 sleep 3
@@ -53,7 +60,7 @@ pkill ZwiftLauncher || true
 pkill ZwiftWindowsCra
 pkill -f MicrosoftEdgeUpdate
 
-if [[ ${ZWIFT_NO_GAMEMODE} -ne "1" ]]; then
+if [[ ${ZWIFT_NO_GAMEMODE} -ne 1 ]]; then
     /usr/games/gamemoderun wineserver -w
 else
     wineserver -w
