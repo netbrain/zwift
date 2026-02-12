@@ -53,11 +53,11 @@ jobs:
         Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &
         sleep 3
         export DISPLAY=:99
-        docker build \
+        docker build -f src/Dockerfile \
           --build-arg="WINE_VERSION=${{ matrix.wine-version }}" \
           --build-arg="WINETRICKS_VERSION=${{ matrix.winetricks-version }}" \
           --build-arg="WINE_MONO_VERSION=${{ matrix.wine-mono-version }}" \
-          -t netbrain/zwift:build .
+          -t netbrain/zwift:build src/
         xhost +
         docker run --name zwift \
                 -e DISPLAY=$DISPLAY \

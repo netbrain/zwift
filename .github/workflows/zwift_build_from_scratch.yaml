@@ -34,7 +34,7 @@ jobs:
         Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &
         sleep 3
         export DISPLAY=:99
-        docker build -t netbrain/zwift:build .
+        docker build -f src/Dockerfile -t netbrain/zwift:build src/
         xhost +
         docker run --name zwift \
                 -e DISPLAY="$DISPLAY" \
