@@ -4,9 +4,9 @@ set -e
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
-readonly ZWIFT_UID=${ZWIFT_UID:-$(id -u user)}
-readonly ZWIFT_GID=${ZWIFT_GID:-$(id -g user)}
-readonly WINE_EXPERIMENTAL_WAYLAND=${WINE_EXPERIMENTAL_WAYLAND:-0}
+readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
+readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
+readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="/home/user/.wine/drive_c/users/user/Documents/Zwift"
