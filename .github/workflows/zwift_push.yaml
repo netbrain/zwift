@@ -44,6 +44,7 @@ jobs:
                     docker cp "${local_file}" "zwift:${container_path}"
                 else
                     echo "::error::Failed to diff '${local_file}'"
+                    exit 1
                 fi
             }
         done
