@@ -42,26 +42,27 @@ jobs:
       uses: actions/checkout@v6
     - name: Build zwift
       run: |
-        set -x
-        VERSION=$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
-                | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')
-        BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-        export VERSION
-        export BUILD_DATE
+        set -euo pipefail
+
+        readonly DISPLAY=":99"
 
         echo "Starting build..."
-        Xvfb :99 -ac -screen 0 "800x600x24" -nolisten tcp &
+
+        Xvfb "${DISPLAY}" -ac -screen 0 "800x600x24" -nolisten tcp &
         sleep 3
-        export DISPLAY=:99
-        docker build -f src/Dockerfile \
-          --build-arg="WINE_VERSION=${{ matrix.wine-version }}" \
-          --build-arg="WINETRICKS_VERSION=${{ matrix.winetricks-version }}" \
-          --build-arg="WINE_MONO_VERSION=${{ matrix.wine-mono-version }}" \
-          -t netbrain/zwift:build src/
+
+        docker build \
+            --build-arg="WINE_VERSION=${{ matrix.wine-version }}" \
+            --build-arg="WINETRICKS_VERSION=${{ matrix.winetricks-version }}" \
+            --build-arg="WINE_MONO_VERSION=${{ matrix.wine-mono-version }}" \
+            -t netbrain/zwift:build \
+            src/
+
         xhost +
-        docker run --name zwift \
-                -e DISPLAY=$DISPLAY \
-                -e CONTAINER_TOOL=docker \
-                --device /dev/dri \
-                -v /tmp:/tmp \
-                netbrain/zwift:build
+        docker run \
+            --name zwift \
+            -e DISPLAY="${DISPLAY}" \
+            -e CONTAINER_TOOL="docker" \
+            --device="/dev/dri:/dev/dri" \
+            -v "/tmp:/tmp" \
+            netbrain/zwift:build
