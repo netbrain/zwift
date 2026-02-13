@@ -22,7 +22,8 @@ jobs:
       uses: actions/checkout@v6
     - name: Get latest zwift container and diff script files
       run: |
-        set -x
+        set -euo pipefail
+
         docker pull netbrain/zwift:latest
         docker create --name zwift netbrain/zwift:latest
 
@@ -32,25 +33,28 @@ jobs:
         files_map["/bin/update_zwift.sh"]="src/update_zwift.sh"
         files_map["/bin/run_zwift.sh"]="src/run_zwift.sh"
 
-        has_changes=false
+        has_changes=0
         for container_path in "${!files_map[@]}"; do
             local_file="${files_map[${container_path}]}"
             mkdir -p "$(dirname "/tmp/${local_file}")"
             docker cp "zwift:${container_path}" "/tmp/${local_file}"
-            diff_exit_code=$(diff "${local_file}" "/tmp/${local_file}" > /dev/null; echo $?)
-            if [[ $diff_exit_code -eq 1 ]]; then
-                has_changes=true
-                docker cp "${local_file}" "zwift:${container_path}"
-            fi
+            diff "${local_file}" "/tmp/${local_file}" > /dev/null || {
+                if [[ ${?} -eq 1 ]]; then
+                    has_changes=1
+                    docker cp "${local_file}" "zwift:${container_path}"
+                else
+                    echo "::error::Failed to diff '${local_file}'"
+                fi
+            }
         done
 
-        if [ "$has_changes" = true ]; then
-          BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          export BUILD_DATE
-          docker commit --change="LABEL org.opencontainers.image.created=$BUILD_DATE" \
-            -m "Updated script files from git ($GITHUB_SHA)" \
-            zwift \
-            netbrain/zwift:latest
-          docker push "netbrain/zwift:latest"
+        if [[ ${has_changes} -eq 1 ]]; then
+            build_date="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            docker commit \
+                --change="LABEL org.opencontainers.image.created=${build_date}" \
+                -m "Updated script files from git (${GITHUB_SHA})" \
+                zwift \
+                netbrain/zwift:latest
+            docker push "netbrain/zwift:latest"
         fi
         docker rm zwift
