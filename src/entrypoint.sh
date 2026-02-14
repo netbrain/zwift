@@ -4,28 +4,13 @@ set -e
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
-readonly ZWIFT_UID=${ZWIFT_UID:-$(id -u user)}
-readonly ZWIFT_GID=${ZWIFT_GID:-$(id -g user)}
-readonly WINE_EXPERIMENTAL_WAYLAND=${WINE_EXPERIMENTAL_WAYLAND:-0}
+readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
+readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
+readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
+readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="/home/user/.wine/drive_c/users/user/Documents/Zwift"
-
-# Check whether we are running in Docker/ Podman
-# Docker has the file /.dockerenv
-# Podman exposes itself in /run/.containerenv
-CONTAINER_TOOL=${CONTAINER_TOOL:-}
-if [[ ${CONTAINER_TOOL} != "docker" ]] && [[ ${CONTAINER_TOOL} != "podman" ]]; then
-    if [[ -f "/.dockerenv" ]]; then
-        CONTAINER_TOOL="docker"
-    elif grep -q "podman" /run/.containerenv; then
-        CONTAINER_TOOL="podman"
-    else
-        echo "Unknown Container."
-        exit 1
-    fi
-fi
-readonly CONTAINER_TOOL
 
 # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
 # NOTE: DISPLAY must be unset here before run_zwift to work

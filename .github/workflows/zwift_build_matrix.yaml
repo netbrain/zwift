@@ -61,7 +61,7 @@ jobs:
         xhost +
         docker run --name zwift \
                 -e DISPLAY=$DISPLAY \
-                -e CONTAINER=docker \
+                -e CONTAINER_TOOL=docker \
                 --device /dev/dri \
                 -v /tmp:/tmp \
                 netbrain/zwift:build
