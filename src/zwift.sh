@@ -105,6 +105,7 @@ load_config_file "${USER_CONFIG_DIR}/${USER}-config"
 # Initialize environment variables
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
 readonly VERSION="${VERSION:-latest}"
+readonly SCRIPT_VERSION="${SCRIPT_VERSION:-master}"
 readonly DONT_CHECK="${DONT_CHECK:-0}"
 readonly DONT_PULL="${DONT_PULL:-0}"
 readonly DONT_CLEAN="${DONT_CLEAN:-0}"
@@ -157,14 +158,14 @@ fi
 if [[ ${DONT_CHECK} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
 
-    remote_sum="$(curl -s https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh | sha256sum | awk '{print $1}')"
+    remote_sum="$(curl -s "https://raw.githubusercontent.com/netbrain/zwift/${SCRIPT_VERSION}/src/zwift.sh" | sha256sum | awk '{print $1}')"
     this_sum="$(sha256sum "${0}" | awk '{print $1}')"
 
     if [[ ${remote_sum} == "${this_sum}" ]]; then
         msgbox ok "You are running the latest zwift.sh 👏"
     elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
         msgbox info "Downloading latest zwift.sh"
-        pkexec env PATH="${PATH}" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+        pkexec env PATH="${PATH}" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)" -- --script-version="${SCRIPT_VERSION}"
         exec "${0}" "${@}"
     else
         msgbox warning "Continuing with old zwift.sh"

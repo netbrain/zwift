@@ -3,7 +3,36 @@
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
-readonly ZWIFT_SCRIPT="https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh"
+print_usage() {
+    echo "Usage: ${0} [ -v | --script-version COMMIT_HASH ]"
+    exit 2
+}
+
+script_version="master"
+if ! options="$(getopt -o "v:h" -l "script-version:,help" -- "${@}")"; then
+    print_usage
+fi
+eval set -- "${options}"
+while :; do
+    case "${1}" in
+        -v | --script-version)
+            script_version="${2}"
+            shift 2
+            ;;
+        -h | --help)
+            print_usage
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            exit 1
+            ;;
+    esac
+done
+
+readonly ZWIFT_SCRIPT="https://raw.githubusercontent.com/netbrain/zwift/${script_version}/src/zwift.sh"
 readonly ZWIFT_LOGO="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.svg"
 readonly ZWIFT_DESKTOP_ENTRY="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.desktop"
 
