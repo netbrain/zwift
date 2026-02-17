@@ -209,6 +209,10 @@ container_env_vars=()
 declare -a container_args
 container_args=()
 
+# Create array for entrypoint arguments
+declare -a entrypoint_args
+entrypoint_args=()
+
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     # Podman has to use container id 1000
     # Local user is mapped to the container id
@@ -243,6 +247,23 @@ container_args+=(
     -v "zwift-${USER}:/home/user/.wine/drive_c/users/user/Documents/Zwift"
     -v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse"
 )
+
+###################################################
+##### Forward arguments passed to this script #####
+
+# Arguments before -- are forwarded to the container tool
+# Arguments after -- are forwarded to the container entrypoint
+
+dashes_found=0
+for arg; do
+    if [[ ${dashes_found} -eq 1 ]]; then
+        entrypoint_args+=("${arg}")
+    elif [[ ${arg} == "--" ]]; then
+        dashes_found=1
+    else
+        container_args+=("${arg}")
+    fi
+done
 
 ##############################################
 ##### User defined environment variables #####
@@ -451,7 +472,7 @@ fi
 ##### Start container #####
 
 declare -a container_command
-container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${@}" "${IMAGE}:${VERSION}")
+container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${IMAGE}:${VERSION}" "${entrypoint_args[@]}")
 
 # DRYRUN: print the exact command that would be executed, then exit
 if [[ ${DRYRUN} -eq 1 ]]; then
