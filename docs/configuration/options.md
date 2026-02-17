@@ -21,7 +21,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | `DRYRUN`                    | `0`                        | If set to `1`, print the full container run command and exit                                                                           |
 | `INTERACTIVE`               | `0`                        | If set to `1`, force `-it` and use `--entrypoint bash` for debugging                                                                   |
 | `CONTAINER_TOOL`            |                            | Defaults to podman if installed, else docker                                                                                           |
-| `CONTAINER_EXTRA_ARGS`      |                            | Extra args passed to docker/podman (`--cups=1.5`)                                                                                      |
+| `CONTAINER_EXTRA_ARGS`      |                            | Extra args passed to docker/podman (`--cpus=1.5`)                                                                                      |
 | `ZWIFT_USERNAME`            |                            | If set, try to login to zwift automatically                                                                                            |
 | `ZWIFT_PASSWORD`            |                            | If set, try to login to zwift automatically                                                                                            |
 | `ZWIFT_WORKOUT_DIR`         |                            | Set the workouts directory location                                                                                                    |
@@ -74,7 +74,7 @@ of the single value `my password`.
 {: .important }
 > Use an array for `CONTAINER_EXTRA_ARGS` and `VGA_DEVICE_FLAG`!
 >
-> - `CONTAINER_EXTRA_ARGS=(--cups="1.5")`
+> - `CONTAINER_EXTRA_ARGS=(--cpus="1.5")`
 > - `VGA_DEVICE_FLAG=(--gpus="all")`
 
 {: .important }
