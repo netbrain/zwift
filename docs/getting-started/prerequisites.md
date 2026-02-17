@@ -43,7 +43,7 @@ Ubuntu 22.04 and related builds such as PopOS! 22.04.
 NVIDIA driver is updated using the following command: `sudo nvidia-ctk cdi generate --output=/var/run/cdi/nvidia.yaml`
 
 {: .note }
-> If you're running Docker with cdi and Zwift fails to launch, try the long form `VGA_DEVICE_FLAG="--device=nvidia.com/gpu=all"`
-> (instead of `"--gpus=all"`).
+> If you're running Docker with cdi and Zwift fails to launch, try the long form
+> `VGA_DEVICE_FLAG=(--device="nvidia.com/gpu=all")` (instead of `--gpus=all`).
 >
 > See <https://github.com/netbrain/zwift/issues/208> for context.
