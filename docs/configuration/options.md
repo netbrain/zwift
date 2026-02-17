@@ -50,8 +50,8 @@ These environment variables can be used to alter the execution of the zwift bash
 - `INTERACTIVE="1" zwift` will force foreground `-it` and set `--entrypoint bash` for step-by-step debugging inside the
    container
 - `CONTAINER_TOOL="docker" zwift` will launch zwift with docker even if podman is installed
-- `CONTAINER_EXTRA_ARGS="--cpus=1.5" zwift` will pass `--cpus=1.5` as extra argument to docker/podman (will use at most 1.5 CPU cores,
-   this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
+- `CONTAINER_EXTRA_ARGS="--cpus=1.5" zwift` will pass `--cpus=1.5` as extra argument to docker/podman (will use at most 1.5 CPU
+   cores, this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
 - `USER="fred" zwift` perfect if your neighbor Fred want's to try zwift, and you don't want to mess up your zwift config.
 - `NETWORKING="host" zwift` will use host networking which may be needed to have zwift talk to wifi enabled trainers.
 - `ZWIFT_UID="123" ZWIFT_GID="123" zwift` will run zwift as the given uid and gid. By default zwift runs with the uid and gid of
