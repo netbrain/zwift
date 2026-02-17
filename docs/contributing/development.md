@@ -4,6 +4,8 @@ parent: Contributing
 nav_order: 1
 ---
 
+# Development Environment
+
 This project provides two options for setting up a development environment with
 all the linting and development tools used in CI.
 
