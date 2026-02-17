@@ -4,12 +4,13 @@ name: Zwift script files updater
   push:
     branches:
     - master
+concurrency:
+  group: zwift-container-image
 jobs:
   zwift_push:
     if: github.repository == 'netbrain/zwift'
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    concurrency: zwift
     steps:
     - uses: netbrain/free-disk-space-action@v0.0.1
     - name: Login to Docker Hub
