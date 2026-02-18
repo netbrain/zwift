@@ -105,7 +105,8 @@ load_config_file "${USER_CONFIG_DIR}/${USER}-config"
 # Initialize environment variables
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
 readonly VERSION="${VERSION:-latest}"
-readonly SCRIPT_VERSION="${SCRIPT_VERSION:-master}"
+readonly LATEST_SCRIPT_VERSION="master"
+readonly SCRIPT_VERSION="${SCRIPT_VERSION:-${LATEST_SCRIPT_VERSION}}"
 readonly DONT_CHECK="${DONT_CHECK:-0}"
 readonly DONT_PULL="${DONT_PULL:-0}"
 readonly DONT_CLEAN="${DONT_CLEAN:-0}"
@@ -155,6 +156,9 @@ fi
 ##### Update zwift.sh script and pull latest container image #####
 
 # Check for updated zwift.sh by comparing checksums
+if [[ ${SCRIPT_VERSION} != "${LATEST_SCRIPT_VERSION}" ]]; then
+    msgbox warning "Using zwift.sh version ${SCRIPT_VERSION} instead of latest!"
+fi
 if [[ ${DONT_CHECK} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
 
