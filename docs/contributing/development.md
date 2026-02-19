@@ -91,7 +91,7 @@ nil diagnostics -- *.nix
 nixfmt --check -- *.nix
 
 # Dockerfile
-hadolint src/Dockerfile src/squash.Dockerfile
+hadolint src/Dockerfile
 
 # Markdown
 markdownlint-cli2

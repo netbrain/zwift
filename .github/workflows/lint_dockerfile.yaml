@@ -31,28 +31,3 @@ jobs:
       with:
         config: .hadolint.yaml
         dockerfile: src/Dockerfile
-  validate-squash-dockerfile:
-    name: Check squash.Dockerfile with docker buildx
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository code
-      uses: actions/checkout@v6
-    - name: Install docker buildx
-      uses: docker/setup-buildx-action@v3
-    - name: Check squash.Dockerfile for errors
-      uses: docker/build-push-action@v6
-      with:
-        call: check
-        file: src/squash.Dockerfile
-  lint-squash-dockerfile:
-    name: Lint squash.Dockerfile with hadolint
-    runs-on: ubuntu-latest
-    needs: validate-squash-dockerfile
-    steps:
-    - name: Checkout repository code
-      uses: actions/checkout@v6
-    - name: Check Dockerfile for errors
-      uses: hadolint/hadolint-action@master
-      with:
-        config: .hadolint.yaml
-        dockerfile: src/squash.Dockerfile
