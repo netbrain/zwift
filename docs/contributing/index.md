@@ -5,6 +5,8 @@ has_children: true
 description: "How to contribute to the project"
 ---
 
+# Contributing
+
 Thanks for your interest in contributing! This project welcomes all
 contributions, whether it's bug fixes, new features, documentation
 improvements, or issue reports.

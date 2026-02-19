@@ -64,6 +64,13 @@ msgbox() {
     fi
 }
 
+# Check if a variable is an array or not
+is_array() {
+    local variable_name="${1}"
+    local array_regex="^declare -a"
+    [[ "$(declare -p "${variable_name}")" =~ ${array_regex} ]]
+}
+
 echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
 echo -e "${COLOR_YELLOW}[!] ${STYLE_UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
 
@@ -202,6 +209,10 @@ container_env_vars=()
 declare -a container_args
 container_args=()
 
+# Create array for entrypoint arguments
+declare -a entrypoint_args
+entrypoint_args=()
+
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     # Podman has to use container id 1000
     # Local user is mapped to the container id
@@ -236,6 +247,23 @@ container_args+=(
     -v "zwift-${USER}:/home/user/.wine/drive_c/users/user/Documents/Zwift"
     -v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse"
 )
+
+###################################################
+##### Forward arguments passed to this script #####
+
+# Arguments before -- are forwarded to the container tool
+# Arguments after -- are forwarded to the container entrypoint
+
+dashes_found=0
+for arg; do
+    if [[ ${dashes_found} -eq 1 ]]; then
+        entrypoint_args+=("${arg}")
+    elif [[ ${arg} == "--" ]]; then
+        dashes_found=1
+    else
+        container_args+=("${arg}")
+    fi
+done
 
 ##############################################
 ##### User defined environment variables #####
@@ -311,7 +339,10 @@ else
 fi
 
 # Append extra arguments provided by user
-if [[ -n ${CONTAINER_EXTRA_ARGS} ]]; then
+if is_array "CONTAINER_EXTRA_ARGS"; then
+    container_args+=("${CONTAINER_EXTRA_ARGS[@]}")
+elif [[ -n ${CONTAINER_EXTRA_ARGS} ]]; then
+    msgbox warning "CONTAINER_EXTRA_ARGS is defined as a string, it is recommended to use an array"
     read -ra extra_args <<< "${CONTAINER_EXTRA_ARGS}"
     container_args+=("${extra_args[@]}")
 fi
@@ -421,7 +452,10 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
 fi
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
-if [[ -n ${VGA_DEVICE_FLAG} ]]; then
+if is_array "VGA_DEVICE_FLAG"; then
+    container_args+=("${VGA_DEVICE_FLAG[@]}")
+elif [[ -n ${VGA_DEVICE_FLAG} ]]; then
+    msgbox warning "VGA_DEVICE_FLAG is defined as a string, it is recommended to use an array"
     read -ra vga_device_flags <<< "${VGA_DEVICE_FLAG}"
     container_args+=("${vga_device_flags[@]}")
 elif [[ -f "/proc/driver/nvidia/version" ]]; then
@@ -438,7 +472,7 @@ fi
 ##### Start container #####
 
 declare -a container_command
-container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${@}" "${IMAGE}:${VERSION}")
+container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${IMAGE}:${VERSION}" "${entrypoint_args[@]}")
 
 # DRYRUN: print the exact command that would be executed, then exit
 if [[ ${DRYRUN} -eq 1 ]]; then

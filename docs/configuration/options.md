@@ -21,7 +21,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | `DRYRUN`                    | `0`                        | If set to `1`, print the full container run command and exit                                                                           |
 | `INTERACTIVE`               | `0`                        | If set to `1`, force `-it` and use `--entrypoint bash` for debugging                                                                   |
 | `CONTAINER_TOOL`            |                            | Defaults to podman if installed, else docker                                                                                           |
-| `CONTAINER_EXTRA_ARGS`      |                            | Extra args passed to docker/podman (`--cups=1.5`)                                                                                      |
+| `CONTAINER_EXTRA_ARGS`      |                            | Extra args passed to docker/podman (`--cpus=1.5`)                                                                                      |
 | `ZWIFT_USERNAME`            |                            | If set, try to login to zwift automatically                                                                                            |
 | `ZWIFT_PASSWORD`            |                            | If set, try to login to zwift automatically                                                                                            |
 | `ZWIFT_WORKOUT_DIR`         |                            | Set the workouts directory location                                                                                                    |
@@ -41,7 +41,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | `PRIVILEGED_CONTAINER`      | `0`                        | If set, container will run in privileged mode, SELinux label separation will be disabled (`--privileged --security-opt label=disable`) |
 
 {: .important }
-`ZWIFT_UID` and `ZWIFT_GID` can only used in X11. They do not work in wayland!
+`ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
 
 ### Examples
 
@@ -50,8 +50,8 @@ These environment variables can be used to alter the execution of the zwift bash
 - `INTERACTIVE="1" zwift` will force foreground `-it` and set `--entrypoint bash` for step-by-step debugging inside the
    container
 - `CONTAINER_TOOL="docker" zwift` will launch zwift with docker even if podman is installed
-- `CONTAINER_EXTRA_ARGS="--cpus=1.5"` will pass `--cpus=1.5` as extra argument to docker/podman (will use at most 1.5 CPU cores,
-   this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
+- `CONTAINER_EXTRA_ARGS="--cpus=1.5" zwift` will pass `--cpus=1.5` as extra argument to docker/podman (will use at most 1.5 CPU
+   cores, this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
 - `USER="fred" zwift` perfect if your neighbor Fred want's to try zwift, and you don't want to mess up your zwift config.
 - `NETWORKING="host" zwift` will use host networking which may be needed to have zwift talk to wifi enabled trainers.
 - `ZWIFT_UID="123" ZWIFT_GID="123" zwift` will run zwift as the given uid and gid. By default zwift runs with the uid and gid of
@@ -68,18 +68,20 @@ of the single value `my password`.
 {: .important }
 > Use single quotes to escape the value of the username and password!
 >
-> `ZWIFT_USERNAME='user@mail.com'`
->
-> `ZWIFT_PASSWORD='my password'`
+> - `ZWIFT_USERNAME='user@mail.com'`
+> - `ZWIFT_PASSWORD='my password'`
 
 {: .important }
-> Use double quotes to escape the value of all environment variables except for username and password!
+> Use an array for `CONTAINER_EXTRA_ARGS` and `VGA_DEVICE_FLAG`!
 >
-> `ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift"`
+> - `CONTAINER_EXTRA_ARGS=(--cpus="1.5")`
+> - `VGA_DEVICE_FLAG=(--gpus="all")`
+
+{: .important }
+> Use double quotes to escape the value of all other environment variables!
 >
-> `DONT_PULL="1"`
->
-> `CONTAINER_EXTRA_ARGS="--cups=1.5"`
+> - `ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift"`
+> - `DONT_PULL="1"`
 
 Most environment variables don't have special characters aside from spaces. For those variables is it enough to wrap them in
 double quotes.
@@ -101,11 +103,9 @@ happening. Using `ZWIFT_PASSWORD='Pa$word\n123'` would treat all characters lite
 > The sequence is a bit different depending on whether the `'` appears at the start, somewhere in the middle or at the end of
 > the password.
 >
-> For a password with value `p'as`, set `ZWIFT_PASSWORD='p'"'"'as'` (replace `'` with `'"'"'`)
->
-> For a password with value `'pas`, set `ZWIFT_PASSWORD="'"'pas'` (prepend `'pas'` with `"'"`)
->
-> For a password with value `pas'`, set `ZWIFT_PASSWORD='pas'"'"` (append `'"'` to `'pas'`)
+> - For a password with value `p'as`, set `ZWIFT_PASSWORD='p'"'"'as'` (replace `'` with `'"'"'`)
+> - For a password with value `'pas`, set `ZWIFT_PASSWORD="'"'pas'` (prepend `'pas'` with `"'"`)
+> - For a password with value `pas'`, set `ZWIFT_PASSWORD='pas'"'"` (append `'"'` to `'pas'`)
 
 ## Configuration files
 
