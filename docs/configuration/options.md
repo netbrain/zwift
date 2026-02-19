@@ -22,6 +22,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | `INTERACTIVE`               | `0`                        | If set to `1`, force `-it` and use `--entrypoint bash` for debugging                                                                   |
 | `CONTAINER_TOOL`            |                            | Defaults to podman if installed, else docker                                                                                           |
 | `CONTAINER_EXTRA_ARGS`      |                            | Extra args passed to docker/podman (`--cpus=1.5`)                                                                                      |
+| `CONTAINER_EXTRA_ENVVARS`   |                            | Extra environment variables passed to the container (`KEY="value"`)                                                                    |
 | `ZWIFT_USERNAME`            |                            | If set, try to login to zwift automatically                                                                                            |
 | `ZWIFT_PASSWORD`            |                            | If set, try to login to zwift automatically                                                                                            |
 | `ZWIFT_WORKOUT_DIR`         |                            | Set the workouts directory location                                                                                                    |
@@ -30,10 +31,10 @@ These environment variables can be used to alter the execution of the zwift bash
 | `ZWIFT_SCREENSHOTS_DIR`     |                            | Set the screenshots directory location, recommended to set `ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift"`                    |
 | `ZWIFT_OVERRIDE_GRAPHICS`   | `0`                        | If set to `1`, override the default zwift graphics profiles                                                                            |
 | `ZWIFT_OVERRIDE_RESOLUTION` |                            | If set, change game resolution (2560x1440, 3840x2160, ...)                                                                             |
-| `ZWIFT_FG`                  | `0`                        | If set to `1`, run the process in fg instead of bg (`-d`)                                                                              |
+| `ZWIFT_FG`                  | `0`                        | If set to `1`, run the process in the foreground instead of background (`-d`)                                                          |
 | `ZWIFT_NO_GAMEMODE`         | `0`                        | If set to `1`, don't run game mode                                                                                                     |
 | `WINE_EXPERIMENTAL_WAYLAND` | `0`                        | If set to `1`, try to use experimental wayland support in wine 9                                                                       |
-| `NETWORKING`                | `bridge`                   | Sets the type of container networking to use.                                                                                          |
+| `NETWORKING`                | `bridge`                   | Sets the type of container networking to use                                                                                           |
 | `ZWIFT_UID`                 | current users id           | Sets the UID that Zwift will run as (docker only)                                                                                      |
 | `ZWIFT_GID`                 | current users group id     | Sets the GID that Zwift will run as (docker only)                                                                                      |
 | `DEBUG`                     | `0`                        | If set to `1`, enable debug of zwift script `set -x`                                                                                   |
@@ -72,9 +73,10 @@ of the single value `my password`.
 > - `ZWIFT_PASSWORD='my password'`
 
 {: .important }
-> Use an array for `CONTAINER_EXTRA_ARGS` and `VGA_DEVICE_FLAG`!
+> Use an array for `CONTAINER_EXTRA_ARGS`, `CONTAINER_EXTRA_ENVVARS` and `VGA_DEVICE_FLAG`!
 >
 > - `CONTAINER_EXTRA_ARGS=(--cpus="1.5")`
+> - `CONTAINER_EXTRA_ENVVARS=(VAR1="value1" VAR2="value2")`
 > - `VGA_DEVICE_FLAG=(--gpus="all")`
 
 {: .important }

@@ -111,6 +111,7 @@ readonly DONT_CLEAN="${DONT_CLEAN:-0}"
 readonly DRYRUN="${DRYRUN:-0}"
 readonly INTERACTIVE="${INTERACTIVE:-0}"
 readonly CONTAINER_EXTRA_ARGS="${CONTAINER_EXTRA_ARGS:-}"
+readonly CONTAINER_EXTRA_ENVVARS="${CONTAINER_EXTRA_ENVVARS:-}"
 readonly ZWIFT_USERNAME="${ZWIFT_USERNAME:-}"
 readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:-}"
 readonly ZWIFT_WORKOUT_DIR="${ZWIFT_WORKOUT_DIR:-}"
@@ -362,6 +363,15 @@ elif [[ -n ${CONTAINER_EXTRA_ARGS} ]]; then
     msgbox warning "CONTAINER_EXTRA_ARGS is defined as a string, it is recommended to use an array"
     read -ra extra_args <<< "${CONTAINER_EXTRA_ARGS}"
     container_args+=("${extra_args[@]}")
+fi
+
+# Append extra environment variables provided by user
+if is_array "CONTAINER_EXTRA_ENVVARS"; then
+    container_env_vars+=("${CONTAINER_EXTRA_ENVVARS[@]}")
+elif [[ -n ${CONTAINER_EXTRA_ENVVARS} ]]; then
+    msgbox warning "CONTAINER_EXTRA_ENVVARS is defined as a string, it is recommended to use an array"
+    read -ra extra_envvars <<< "${CONTAINER_EXTRA_ENVVARS}"
+    container_env_vars+=("${extra_envvars[@]}")
 fi
 
 #####################################
