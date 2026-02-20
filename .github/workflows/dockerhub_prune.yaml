@@ -14,8 +14,6 @@ jobs:
     steps:
     - name: Prune old Docker Hub tags
       run: |
-        set -euo pipefail
-
         # Authenticate and get JWT token
         token="$(curl -sf -X POST "https://hub.docker.com/v2/users/login" \
             -H "Content-Type: application/json" \

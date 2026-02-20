@@ -22,8 +22,6 @@ jobs:
     - uses: netbrain/free-disk-space-action@v0.0.1
     - name: Check for zwift update
       run: |
-        set -euo pipefail
-
         readonly DISPLAY=":99"
 
         version="$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \

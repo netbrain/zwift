@@ -22,8 +22,6 @@ jobs:
       uses: actions/checkout@v6
     - name: Get latest zwift container and diff script files
       run: |
-        set -euo pipefail
-
         docker pull netbrain/zwift:latest
         docker create --name zwift netbrain/zwift:latest
 
