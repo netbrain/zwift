@@ -1,0 +1,133 @@
+---
+name: Lint everything
+'on':
+  pull_request:
+  push:
+    branches:
+    - master
+jobs:
+  bash-lint:
+    name: Bash - Lint with shellcheck
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install bash language tools
+      run: sudo apt-get install -y shellcheck
+    - name: Check bash scripts for errors and warnings
+      run: find . -path ./.git -prune -o -name "*.sh" -exec shellcheck {} +
+  bash-check-formatted:
+    name: Bash - Check formatting with shfmt
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: '>=1.23'
+        cache: false
+    - name: Install bash language tools
+      run: go install mvdan.cc/sh/v3/cmd/shfmt@latest
+    - name: Check if bash scripts are formatted
+      run: shfmt -d .
+  dockerfile-check-build:
+    name: Dockerfile - Check with docker buildx
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install docker buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Check Dockerfile for errors
+      uses: docker/build-push-action@v6
+      with:
+        call: check
+        file: src/Dockerfile
+  dockerfile-lint:
+    name: Dockerfile - Lint with hadolint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Check Dockerfile for errors
+      uses: hadolint/hadolint-action@master
+      with:
+        config: .hadolint.yaml
+        dockerfile: src/Dockerfile
+  github-actions-lint:
+    name: Github Actions - Lint with actionlint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Check github actions for errors
+      uses: devops-actions/actionlint@467e2ce19b2310e93c9ffa0b50fe31f86b5a7f23
+  markdown-lint:
+    name: Markdown - Lint with markdownlint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Check markdown files for errors
+      uses: DavidAnson/markdownlint-cli2-action@v20
+      with:
+        config: .markdownlint-cli2.yaml
+        globs: ''
+  markdown-spellcheck:
+    name: Markdown - Spellcheck with cspell
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Spellcheck markdown files
+      uses: streetsidesoftware/cspell-action@v7
+      with:
+        config: .cspell.yaml
+        suggestions: true
+  nix-flake-lint:
+    name: Nix Flake - Lint with nil
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install nix
+      uses: cachix/install-nix-action@v31
+    - name: Install nix language tools
+      run: nix profile add github:oxalica/nil
+    - name: Check nix flake for errors
+      run: nil diagnostics -- *.nix
+  nix-flake-check-formatted:
+    name: Nix Flake - Check formatting with nixfmt
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install nix
+      uses: cachix/install-nix-action@v31
+    - name: Install nix language tools
+      run: nix profile add github:nixos/nixfmt
+    - name: Check if nix flake is formatted
+      run: nixfmt --check -- *.nix
+  nix-flake-check-build:
+    name: Nix Flake - Try to build flake
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install nix
+      uses: cachix/install-nix-action@v31
+    - name: Build nix flake
+      run: |
+        cd tests/nix-flake
+        nix build --no-write-lock-file --dry-run
+  yaml-lint:
+    name: Yaml - Lint with yamllint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v6
+    - name: Install yamllint
+      run: sudo apt-get install -y yamllint
+    - name: Check yaml files for errors
+      run: yamllint .

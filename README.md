@@ -1,5 +1,6 @@
 # Zwift
 
+[![Lint everything][lint-everything-src]][lint-everything-href]
 [![Zwift updater][zwift-updater-src]][zwift-updater-href]
 [![image-href][image-pulls-src]][image-href]
 [![image-href][image-version-src]][image-href]
@@ -103,6 +104,18 @@ and tricks :smiley:
     cake, and have it too by creating `vgpus` for vms that leverage the host
     gpu, no dedicated gpu required
 
+## ⭐ Star History (for fun and giggles)
+
+[![Star History Chart](https://api.star-history.com/svg?repos=netbrain/zwift&type=Date)](https://star-history.com/#netbrain/zwift&Date)
+
+[lint-everything-src]: https://github.com/netbrain/zwift/actions/workflows/lint_everything.yaml/badge.svg
+[lint-everything-href]: https://github.com/netbrain/zwift/actions/workflows/lint_everything.yaml
+[zwift-updater-src]: https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg
+[zwift-updater-href]: https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml
+[image-version-src]: https://img.shields.io/docker/v/netbrain/zwift/latest?logo=docker&logoColor=white
+[image-pulls-src]: https://badgen.net/docker/pulls/netbrain/zwift?icon=docker&label=pulls
+[image-size-src]: https://badgen.net/docker/size/netbrain/zwift?icon=docker&label=size
+[image-href]: https://hub.docker.com/r/netbrain/zwift/tags
 [zwift-me]: https://www.zwift.com/eu/athlete/4e3c5880-1edd-4c5d-a1b8-0974ce3874f0
 [nvidia-toolkit]: https://github.com/NVIDIA/nvidia-container-toolkit
 [show-and-tell]: https://github.com/netbrain/zwift/discussions/categories/show-and-tell
@@ -112,14 +125,3 @@ and tricks :smiley:
 [sndcpy]: https://github.com/rom1v/sndcpy
 [redroid]: https://hub.docker.com/r/redroid/redroid
 [vgpu]: https://github.com/VGPU-Community-Drivers/vGPU-Unlock-patcher
-
-## ⭐ Star History (for fun and giggles)
-
-[![Star History Chart](https://api.star-history.com/svg?repos=netbrain/zwift&type=Date)](https://star-history.com/#netbrain/zwift&Date)
-
-[zwift-updater-src]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg
-[zwift-updater-href]:https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml
-[image-version-src]:https://img.shields.io/docker/v/netbrain/zwift/latest?logo=docker&logoColor=white
-[image-pulls-src]:https://badgen.net/docker/pulls/netbrain/zwift?icon=docker&label=pulls
-[image-size-src]:https://badgen.net/docker/size/netbrain/zwift?icon=docker&label=size
-[image-href]:https://hub.docker.com/r/netbrain/zwift/tags
