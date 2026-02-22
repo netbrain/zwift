@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
@@ -80,11 +80,8 @@ wait_for_zwift_game_update() {
     get_current_version
     get_latest_version
 
-    # Disable ERR Trap so return works.
-    set +e
     vercomp "${zwift_current_version}" "${zwift_latest_version}"
     result=$?
-    set -e
     if [[ ${result} -ne 2 ]]; then
         echo "already at latest version..."
         exit 0
@@ -96,10 +93,8 @@ wait_for_zwift_game_update() {
         sleep 5
         get_current_version
 
-        set +e
         vercomp "${zwift_current_version}" "${zwift_latest_version}"
         result=$?
-        set -e
     done
 
     echo "updating done, waiting 5 seconds..."
