@@ -174,7 +174,8 @@ if [[ ${DONT_CHECK} -ne 1 ]]; then
         msgbox ok "You are running the latest zwift.sh 👏"
     elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
         msgbox info "Downloading latest zwift.sh"
-        pkexec env PATH="${PATH}" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)" -- --script-version="${SCRIPT_VERSION}"
+        install_script="$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+        pkexec env PATH="${PATH}" bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}"
         exec "${0}" "${@}"
     else
         msgbox warning "Continuing with old zwift.sh"
@@ -207,7 +208,8 @@ fi
 
 # Clean previous container images (if any)
 if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_PULL} -ne 1 ]]; then
-    readarray -t images < <(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')
+    images_output="$(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')"
+    readarray -t images <<< "${images_output}"
     if [[ ${#images[@]} -gt 0 ]] && [[ -n ${images[0]} ]]; then
         msgbox info "Cleaning up previous container images"
         if ${CONTAINER_TOOL} image rm "${images[@]}"; then
@@ -556,9 +558,9 @@ if [[ ${INTERACTIVE} -eq 1 ]] || [[ ${ZWIFT_FG} -eq 1 ]]; then
 else
     if container_id=$("${container_command[@]}"); then
         msgbox ok "Launched Zwift! 🚀"
-        if [[ -n ${container_id} ]] && [[ ${require_xhost_access} -eq 1 ]]; then
+        if [[ -n ${container_id} ]] && [[ ${require_xhost_access} -eq 1 ]] && hostname="$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")"; then
             msgbox info "Allowing container to connect to X server"
-            xhost +local:"$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")" > /dev/null
+            xhost "+local:${hostname}" > /dev/null
         fi
     else
         msgbox error "Failed to start Zwift, check variables! 😢" 10
