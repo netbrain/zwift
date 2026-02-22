@@ -14,6 +14,16 @@ readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed (301)
 
+is_empty_directory() {
+    local directory="${1}"
+    if [[ ! -d ${directory} ]]; then
+        echo "error: ${directory} is not a directory" >&2
+        exit 1
+    fi
+    local contents
+    ! contents="$(ls -A "${directory}" 2> /dev/null)" || [[ -z ${contents} ]]
+}
+
 # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
 # NOTE: DISPLAY must be unset here before run_zwift to work
 #       Registry entries are set in the container install or won't work.
@@ -25,7 +35,7 @@ mkdir -p "${ZWIFT_HOME}"
 cd "${ZWIFT_HOME}"
 
 # Run update if that's the first argument or if zwift directory is empty
-if [[ ${1} == "update" ]] || [[ -z "$(ls -A .)" ]]; then
+if [[ ${1} == "update" ]] || is_empty_directory .; then
     readonly UPDATE_REQUIRED=1
 else
     readonly UPDATE_REQUIRED=0
