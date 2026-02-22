@@ -34,18 +34,24 @@ fi
 
 cd "${ZWIFT_HOME}"
 
-echo "starting zwift..."
+echo "Starting zwift..."
 wine start ZwiftLauncher.exe SilentLaunch
 
 launcher_pid_hex="$(winedbg --command "info proc" | grep -P "ZwiftLauncher.exe" | grep -oP "^\s\K.+?(?=\s)")"
 launcher_pid="$((16#${launcher_pid_hex}))"
 
+wine_cmd=(wine start /exec /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe)
+
 if [[ -n ${ZWIFT_USERNAME} ]] && [[ -n ${ZWIFT_PASSWORD} ]]; then
-    echo "authenticating with zwift..."
-    wine start /exec /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe --token="$(zwift-auth)"
-else
-    wine start /exec /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe
+    echo "Authenticating with zwift"
+    if token="$(zwift-auth)"; then
+        wine_cmd+=(--token="${token}")
+    else
+        echo "Authentication failed, manual login will be required"
+    fi
 fi
+
+"${wine_cmd[@]}"
 
 sleep 3
 
