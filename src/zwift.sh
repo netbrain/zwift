@@ -30,7 +30,6 @@ else
     readonly RESET_STYLE=""
 fi
 
-# Message Box to simplify errors and questions.
 msgbox() {
     local type="${1}"    # Type: info, ok, warning, error, question
     local msg="${2}"     # Message: the message to display
@@ -71,7 +70,6 @@ msgbox() {
     fi
 }
 
-# Check if a variable is an array or not
 is_array() {
     local variable_name="${1}"
     local array_regex="^declare -a"

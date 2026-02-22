@@ -65,7 +65,6 @@ else
     readonly RESET_STYLE=""
 fi
 
-# Message Box to simplify errors and questions.
 msgbox() {
     local type="${1}" # Type: info, ok, warning, error, question
     local msg="${2}"  # Message: the message to display
