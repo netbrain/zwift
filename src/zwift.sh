@@ -31,9 +31,9 @@ else
 fi
 
 msgbox() {
-    local type="${1}"    # Type: info, ok, warning, error, question
-    local msg="${2}"     # Message: the message to display
-    local timeout="${3}" # Optional timeout: if explicitly set to 0, wait for user input to continue.
+    local type="${1}"      # Type: info, ok, warning, error, question
+    local msg="${2}"       # Message: the message to display
+    local timeout="${3:-}" # Optional timeout: if explicitly set to 0, wait for user input to continue
 
     case ${type} in
         info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
