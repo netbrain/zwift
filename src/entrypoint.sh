@@ -17,7 +17,7 @@ readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when n
 is_empty_directory() {
     local directory="${1}"
     if [[ ! -d ${directory} ]]; then
-        echo "error: ${directory} is not a directory" >&2
+        echo "Error: ${directory} is not a directory" >&2
         exit 1
     fi
     local contents
@@ -31,8 +31,10 @@ if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
     unset DISPLAY
 fi
 
-mkdir -p "${ZWIFT_HOME}"
-cd "${ZWIFT_HOME}"
+if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
+    echo "Error: Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!" >&2
+    exit 1
+fi
 
 # Run update if that's the first argument or if zwift directory is empty
 if [[ ${1} == "update" ]] || is_empty_directory .; then

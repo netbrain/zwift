@@ -14,25 +14,23 @@ readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 readonly ZWIFT_PREFS="${ZWIFT_DOCS}/prefs.xml"
 
-if [[ ! -d ${ZWIFT_HOME} ]]; then
-    echo "Directory ${ZWIFT_HOME} does not exist.  Has Zwift been installed?" >&2
+if [[ ! -d ${ZWIFT_HOME} ]] || ! cd "${ZWIFT_HOME}"; then
+    echo "Directory ${ZWIFT_HOME} does not exist. Has Zwift been installed?" >&2
     exit 1
 fi
 
 if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
     if [[ -f ${ZWIFT_PREFS} ]]; then
         echo "Setting zwift resolution to ${ZWIFT_OVERRIDE_RESOLUTION}."
-        updates_prefs="$(awk -v resolution="${ZWIFT_OVERRIDE_RESOLUTION}" '{
+        updated_prefs="$(awk -v resolution="${ZWIFT_OVERRIDE_RESOLUTION}" '{
             gsub(/<USER_RESOLUTION_PREF>.*<\/USER_RESOLUTION_PREF>/,
                  "<USER_RESOLUTION_PREF>" resolution "</USER_RESOLUTION_PREF>")
         } 1' "${ZWIFT_PREFS}")"
-        echo "${updates_prefs}" > "${ZWIFT_PREFS}"
+        echo "${updated_prefs}" > "${ZWIFT_PREFS}"
     else
         echo "Warning: Preferences file does not exist yet. Resolution ${ZWIFT_OVERRIDE_RESOLUTION} cannot be set."
     fi
 fi
-
-cd "${ZWIFT_HOME}"
 
 echo "Starting zwift..."
 wine start ZwiftLauncher.exe SilentLaunch

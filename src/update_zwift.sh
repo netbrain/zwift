@@ -12,15 +12,12 @@ readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when n
 is_empty_directory() {
     local directory="${1}"
     if [[ ! -d ${directory} ]]; then
-        echo "error: ${directory} is not a directory" >&2
+        echo "Error: ${directory} is not a directory" >&2
         exit 1
     fi
     local contents
     ! contents="$(ls -A "${directory}" 2> /dev/null)" || [[ -z ${contents} ]]
 }
-
-mkdir -p "${ZWIFT_HOME}"
-cd "${ZWIFT_HOME}"
 
 get_current_version() {
     if [[ -f Zwift_ver_cur_filename.txt ]]; then
@@ -76,7 +73,6 @@ wait_for_zwift_game_update() {
     }
 
     echo "updating zwift..."
-    cd "${ZWIFT_HOME}"
     get_current_version
     get_latest_version
 
@@ -104,6 +100,11 @@ wait_for_zwift_game_update() {
     rm -rf "${ZWIFT_DOCS_OLD}" # TODO is this needed? remove when no longer needed  (301)
     rm -rf "${ZWIFT_DOCS}"     # TODO is this needed?
 }
+
+if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
+    echo "Error: Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!" >&2
+    exit 1
+fi
 
 if is_empty_directory .; then
     # Prevent Wine from trying to install a different mono version
