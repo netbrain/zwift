@@ -445,8 +445,9 @@ fi
 
 # Setup Flags for Window Managers
 if [[ ${window_manager} == "Wayland" ]]; then
-    if [[ ${ZWIFT_UID} -ne "$(id -u)" ]]; then
-        msgbox warning "Wayland does not support ZWIFT_UID different to your id of $(id -u), may not start." 5
+    current_user_id="$(id -u)"
+    if [[ ${ZWIFT_UID} -ne ${current_user_id} ]]; then
+        msgbox warning "Wayland does not support ZWIFT_UID different to your id of ${current_user_id}, may not start." 5
     fi
 
     container_env_vars+=(
