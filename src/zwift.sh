@@ -76,6 +76,12 @@ is_array() {
     [[ "$(declare -p "${variable_name}")" =~ ${array_regex} ]]
 }
 
+command_exists() {
+    local cmd="${1}"
+    local cmd_path
+    cmd_path="$(command -v "${cmd}" 2> /dev/null)" && [[ -x ${cmd_path} ]]
+}
+
 echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
 echo -e "${COLOR_YELLOW}[!] ${STYLE_UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
 
@@ -135,14 +141,14 @@ readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
 msgbox info "Looking for container tool"
 CONTAINER_TOOL="${CONTAINER_TOOL:-}"
 if [[ -z ${CONTAINER_TOOL} ]]; then
-    if [[ -x "$(command -v podman)" ]]; then
+    if command_exists podman; then
         CONTAINER_TOOL="podman"
     else
         CONTAINER_TOOL="docker"
     fi
 fi
 readonly CONTAINER_TOOL
-if [[ -x "$(command -v "${CONTAINER_TOOL}")" ]]; then
+if command_exists "${CONTAINER_TOOL}"; then
     msgbox ok "Found container tool: ${CONTAINER_TOOL}"
 else
     msgbox error "Container tool ${CONTAINER_TOOL} not found"
@@ -386,7 +392,7 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
         if [[ ${CONTAINER_TOOL} == "podman" ]] && ${CONTAINER_TOOL} secret exists "${password_secret_name}"; then
             msgbox ok "Password for ${ZWIFT_USERNAME} found in ${CONTAINER_TOOL} secret store"
             has_password_secret=1
-        elif [[ -x "$(command -v secret-tool)" ]]; then
+        elif command_exists secret-tool; then
             msgbox info "Looking for password in secret-tool (application zwift username ${ZWIFT_USERNAME})"
             plaintext_password=$(secret-tool lookup application zwift username "${ZWIFT_USERNAME}")
         fi
@@ -523,7 +529,7 @@ msgbox info "Writing environment variables to temporary file"
 printf '%s\n' "${container_env_vars[@]}" > "${container_env_file}"
 
 # Determine whether xhost access should be provided
-if { [[ ${window_manager} == "XOrg" ]] || [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne 1 ]]; } && [[ -x "$(command -v xhost)" ]]; then
+if { [[ ${window_manager} == "XOrg" ]] || [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne 1 ]]; } && command_exists xhost; then
     require_xhost_access=1
 else
     require_xhost_access=0

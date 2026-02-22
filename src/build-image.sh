@@ -9,9 +9,15 @@ ZWIFT_UID="$(id -u)"
 ZWIFT_GID="$(id -g)"
 readonly SCRIPT_DIR ZWIFT_UID ZWIFT_GID
 
+command_exists() {
+    local cmd="${1}"
+    local cmd_path
+    cmd_path="$(command -v "${cmd}" 2> /dev/null)" && [[ -x ${cmd_path} ]]
+}
+
 # Use podman if available
 if [[ -z ${CONTAINER_TOOL} ]]; then
-    if [[ -x "$(command -v podman)" ]]; then
+    if command_exists podman; then
         CONTAINER_TOOL="podman"
     else
         CONTAINER_TOOL="docker"
