@@ -147,7 +147,7 @@ if is_empty_directory .; then
     exit 0
 fi
 
-if [[ ${1} == "update" ]]; then
+if [[ ${1:-} == "update" ]]; then
     wait_for_zwift_game_update
 
     wineserver -k
