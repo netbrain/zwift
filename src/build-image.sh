@@ -25,8 +25,8 @@ else
 fi
 
 msgbox() {
-    local type="${1}" # Type: info, ok, warning, error
-    local msg="${2}"  # Message: the message to display
+    local type="${1:?}" # Type: info, ok, warning, error
+    local msg="${2:?}"  # Message: the message to display
 
     case ${type} in
         info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
@@ -38,7 +38,7 @@ msgbox() {
 }
 
 command_exists() {
-    local cmd="${1}"
+    local cmd="${1:?}"
     local cmd_path
     cmd_path="$(command -v "${cmd}" 2> /dev/null)" && [[ -x ${cmd_path} ]]
 }

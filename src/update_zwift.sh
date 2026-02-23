@@ -10,7 +10,7 @@ readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed (301)
 
 is_empty_directory() {
-    local directory="${1}"
+    local directory="${1:?}"
     if [[ ! -d ${directory} ]]; then
         echo "Error: ${directory} is not a directory" >&2
         exit 1

@@ -31,9 +31,9 @@ else
 fi
 
 msgbox() {
-    local type="${1}"      # Type: info, ok, warning, error, question
-    local msg="${2}"       # Message: the message to display
-    local timeout="${3:-}" # Optional timeout: if explicitly set to 0, wait for user input to continue
+    local type="${1:?}"      # Type: info, ok, warning, error, question
+    local msg="${2:?}"       # Message: the message to display
+    local timeout="${3:-}"   # Optional timeout: if explicitly set to 0, wait for user input to continue
 
     case ${type} in
         info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
@@ -71,13 +71,13 @@ msgbox() {
 }
 
 is_array() {
-    local variable_name="${1}"
+    local variable_name="${1:?}"
     local array_regex="^declare -a"
     [[ "$(declare -p "${variable_name}")" =~ ${array_regex} ]]
 }
 
 command_exists() {
-    local cmd="${1}"
+    local cmd="${1:?}"
     local cmd_path
     cmd_path="$(command -v "${cmd}" 2> /dev/null)" && [[ -x ${cmd_path} ]]
 }
@@ -92,7 +92,7 @@ msgbox info "Preparing to launch Zwift"
 
 # Check for zwift configuration, sourced here
 load_config_file() {
-    local config_file="${1}"
+    local config_file="${1:?}"
     msgbox info "Looking for config file ${config_file}"
     if [[ -f ${config_file} ]]; then
         # shellcheck source=/dev/null
