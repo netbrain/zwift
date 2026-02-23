@@ -62,6 +62,8 @@ ZWIFT_GID="$(id -g)"
 readonly SCRIPT_DIR ZWIFT_UID ZWIFT_GID
 
 # Initialize CONTAINER_TOOL: Use podman if available
+msgbox info "Looking for container tool"
+CONTAINER_TOOL="${CONTAINER_TOOL:-}"
 if [[ -z ${CONTAINER_TOOL} ]]; then
     if command_exists podman; then
         CONTAINER_TOOL="podman"
@@ -74,6 +76,8 @@ if command_exists "${CONTAINER_TOOL}"; then
     msgbox ok "Found container tool: ${CONTAINER_TOOL}"
 else
     msgbox error "Container tool ${CONTAINER_TOOL} not found"
+    msgbox error "  To install podman, see: https://podman.io/docs/installation"
+    msgbox error "  To install docker, see: https://docs.docker.com/get-started/get-docker/"
     exit 1
 fi
 
