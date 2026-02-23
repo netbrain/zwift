@@ -5,7 +5,7 @@ readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
-ZWIFT_UID="$(id -u)"
+ZWIFT_UID="${UID}"
 ZWIFT_GID="$(id -g)"
 readonly SCRIPT_DIR ZWIFT_UID ZWIFT_GID
 

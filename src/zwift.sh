@@ -130,7 +130,7 @@ readonly ZWIFT_FG="${ZWIFT_FG:-0}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly NETWORKING="${NETWORKING:-bridge}"
-readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u)}"
+readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
@@ -447,9 +447,8 @@ fi
 
 # Setup Flags for Window Managers
 if [[ ${window_manager} == "Wayland" ]]; then
-    current_user_id="$(id -u)"
-    if [[ ${ZWIFT_UID} -ne ${current_user_id} ]]; then
-        msgbox warning "Wayland does not support ZWIFT_UID different to your id of ${current_user_id}, may not start." 5
+    if [[ ${ZWIFT_UID} -ne ${UID} ]]; then
+        msgbox warning "Wayland does not support ZWIFT_UID different to your id of ${UID}, may not start." 5
     fi
 
     container_env_vars+=(
