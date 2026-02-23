@@ -107,7 +107,15 @@ mkdir -p "${USER_CONFIG_DIR}"
 load_config_file "${USER_CONFIG_DIR}/config"
 load_config_file "${USER_CONFIG_DIR}/${USER}-config"
 
-# Initialize environment variables
+# Initialize system environment variables
+readonly DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-}"
+readonly DISPLAY="${DISPLAY:-}"
+readonly WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}"
+readonly XAUTHORITY="${XAUTHORITY:-}"
+readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
+readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-}"
+
+# Initialize user configuration environment variables
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
 readonly VERSION="${VERSION:-latest}"
 readonly LATEST_SCRIPT_VERSION="master"
@@ -134,8 +142,6 @@ readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
-readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-}"
-readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
