@@ -56,7 +56,7 @@ readonly DISPLAY="${DISPLAY:-}"
 readonly XAUTHORITY="${XAUTHORITY:-}"
 
 # Initialize script constants
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd)"
 ZWIFT_UID="${UID}"
 ZWIFT_GID="$(id -g)"
 readonly SCRIPT_DIR ZWIFT_UID ZWIFT_GID
