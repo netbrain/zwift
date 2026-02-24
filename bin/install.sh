@@ -4,12 +4,15 @@ readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 print_usage() {
-    echo "Usage: ${0} [ -v | --script-version COMMIT_HASH ]"
+    echo "Usage: install [ -v | --script-version COMMIT_HASH ]"
+    echo "               [ -y | --auto-confirm ]"
+    echo "               [ -h | --help ]"
     exit 2
 }
 
 script_version="master"
-if ! options="$(getopt -o "v:h" -l "script-version:,help" -- "${@}")"; then
+auto_confirm=0
+if ! options="$(getopt -n install -o "v:yh" -l "script-version:,auto-confirm,help" -- "${@}")"; then
     print_usage
 fi
 eval set -- "${options}"
@@ -19,6 +22,10 @@ while :; do
             script_version="${2}"
             shift 2
             ;;
+        -y | --auto-confirm)
+            auto_confirm=1
+            shift
+            ;;
         -h | --help)
             print_usage
             ;;
@@ -27,7 +34,8 @@ while :; do
             break
             ;;
         *)
-            exit 1
+            echo "Unexpected option: ${1} - this should not happen." >&2
+            print_usage
             ;;
     esac
 done
@@ -67,6 +75,7 @@ msgbox() {
         warning) echo -e "${COLOR_YELLOW}[!] ${msg}${RESET_STYLE}" ;;
         error) echo -e "${COLOR_RED}[✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
+            [[ ${auto_confirm} -eq 1 ]] && return 0
             echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
             local ans
             read -rn 1 ans
