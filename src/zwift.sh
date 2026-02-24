@@ -157,7 +157,7 @@ fi
 
 # Check for updated zwift.sh by comparing checksums
 if [[ ${SCRIPT_VERSION} != "${LATEST_SCRIPT_VERSION}" ]]; then
-    msgbox warning "Using zwift.sh version ${SCRIPT_VERSION} instead of latest!"
+    msgbox warning "Using zwift.sh version ${SCRIPT_VERSION} instead of latest"
 fi
 if [[ ${DONT_CHECK} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
@@ -179,9 +179,13 @@ else
     msgbox warning "  Zwift may fail to launch if you are not using the latest zwift.sh script"
     # shellcheck disable=SC2016 # using a command as literal string on the next line
     msgbox warning '  To update manually, run: sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"'
+    msgbox warning "  To use a specific version of the script, it is recommended to set SCRIPT_VERSION=... instead"
 fi
 
 # Check for updated container image
+if [[ "${IMAGE}:${VERSION}" != "docker.io/netbrain/zwift:latest" ]]; then
+    msgbox warning "Using image ${IMAGE}:${VERSION} instead of docker.io/netbrain/zwift:latest"
+fi
 if [[ ${DONT_PULL} -ne 1 ]]; then
     msgbox info "Checking for updated container image"
     if ${CONTAINER_TOOL} pull "${IMAGE}:${VERSION}"; then
