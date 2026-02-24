@@ -48,7 +48,7 @@ jobs:
             -e DISPLAY="${DISPLAY}" \
             -e CONTAINER_TOOL="docker" \
             --device="/dev/dri:/dev/dri" \
-            -v "/tmp:/tmp" \
+            -v /tmp/.X11-unix:/tmp/.X11-unix \
             netbrain/zwift:build
 
         docker commit \
