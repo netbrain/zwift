@@ -163,7 +163,9 @@ if [[ ${DONT_CHECK} -ne 1 ]]; then
         msgbox warning "Continuing with old zwift.sh"
     fi
 else
-    msgbox warning "Not checking for new zwift.sh"
+    msgbox warning "DONT_CHECK: Not checking for new zwift.sh"
+    msgbox warning "  Zwift may fail to launch if you are not using the latest zwift.sh script"
+    msgbox warning "  To update manually, run: sudo bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)\""
 fi
 
 # Check for updated container image
@@ -175,7 +177,10 @@ if [[ ${DONT_PULL} -ne 1 ]]; then
         msgbox error "Failed to update container image"
     fi
 else
-    msgbox warning "Not checking for new container image"
+    msgbox warning "DONT_PULL: Not checking for new container image"
+    msgbox warning "  Zwift may fail to launch if you are not using the latest container image"
+    msgbox warning "  To update manually, run: ${CONTAINER_TOOL} pull ${IMAGE}:${VERSION}"
+    msgbox warning "  To use a specific version of the image, it is recommended to set VERSION=... instead"
 fi
 
 # Clean previous container images (if any)
