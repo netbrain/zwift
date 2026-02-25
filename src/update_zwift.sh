@@ -4,9 +4,10 @@ set -e
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
+readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
-readonly ZWIFT_DOCS="/home/user/.wine/drive_c/users/user/AppData/Local/Zwift"
-readonly ZWIFT_DOCS_OLD="/home/user/.wine/drive_c/users/user/Documents/Zwift" # TODO remove when no longer needed
+readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
+readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed
 
 mkdir -p "${ZWIFT_HOME}"
 cd "${ZWIFT_HOME}"
@@ -135,7 +136,7 @@ if [[ -z "$(ls -A .)" ]]; then # is directory empty?
     # cleanup
     rm "${ZWIFT_HOME}/ZwiftSetup.exe"
     rm "${ZWIFT_HOME}/webview2-setup.exe"
-    rm -rf "/home/user/.wine/drive_c/users/user/Downloads/Zwift"
+    rm -rf "${WINE_USER_HOME}/Downloads/Zwift"
     rm -rf "/home/user/.cache/wine*"
     exit 0
 fi

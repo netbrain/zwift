@@ -4,9 +4,10 @@ readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
+readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
-readonly ZWIFT_DOCS="/home/user/.wine/drive_c/users/user/AppData/Local/Zwift"
-readonly ZWIFT_DOCS_OLD="/home/user/.wine/drive_c/users/user/Documents/Zwift" # TODO remove when no longer needed
+readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
+readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed
 
 if [[ -t 1 ]]; then
     readonly COLOR_WHITE="\033[0;37m"
@@ -302,7 +303,7 @@ fi
 
 # If a screenshots directory is specified then map to that directory.
 if [[ -n ${ZWIFT_SCREENSHOTS_DIR} ]]; then
-    container_args+=(-v "${ZWIFT_SCREENSHOTS_DIR}:/home/user/.wine/drive_c/users/user/Pictures/Zwift")
+    container_args+=(-v "${ZWIFT_SCREENSHOTS_DIR}:${WINE_USER_HOME}/Pictures/Zwift")
 fi
 
 # If overriding zwift graphics then map custom config to the graphics profiles.
