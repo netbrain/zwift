@@ -3,6 +3,11 @@
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
+readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
+readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
+readonly ZWIFT_DOCS="/home/user/.wine/drive_c/users/user/AppData/Local/Zwift"
+readonly ZWIFT_DOCS_OLD="/home/user/.wine/drive_c/users/user/Documents/Zwift" # TODO remove when no longer needed
+
 if [[ -t 1 ]]; then
     readonly COLOR_WHITE="\033[0;37m"
     readonly COLOR_RED="\033[0;31m"
@@ -92,8 +97,9 @@ load_config_file() {
         fi
     fi
 }
-load_config_file "${HOME}/.config/zwift/config"
-load_config_file "${HOME}/.config/zwift/${USER}-config"
+mkdir -p "${USER_CONFIG_DIR}"
+load_config_file "${USER_CONFIG_DIR}/config"
+load_config_file "${USER_CONFIG_DIR}/${USER}-config"
 
 # Initialize environment variables
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
@@ -254,8 +260,8 @@ container_args+=(
     --name "zwift-${USER}"
     --hostname "${HOSTNAME}"
     --env-file "${container_env_file}"
-    -v "zwift-${USER}:/home/user/.wine/drive_c/users/user/AppData/Local/Zwift/"
-    -v "zwift-${USER}:/home/user/.wine/drive_c/users/user/Documents/Zwift"
+    -v "zwift-${USER}:${ZWIFT_DOCS}"
+    -v "zwift-${USER}:${ZWIFT_DOCS_OLD}" # TODO remove when no longer needed
     -v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse"
 )
 
@@ -281,17 +287,17 @@ done
 
 # If a workout directory is specified then map to that directory.
 if [[ -n ${ZWIFT_WORKOUT_DIR} ]]; then
-    container_args+=(-v "${ZWIFT_WORKOUT_DIR}:/home/user/.wine/drive_c/users/user/Documents/Zwift/Workouts")
+    container_args+=(-v "${ZWIFT_WORKOUT_DIR}:${ZWIFT_DOCS}/Workouts")
 fi
 
 # If an activity directory is specified then map to that directory.
 if [[ -n ${ZWIFT_ACTIVITY_DIR} ]]; then
-    container_args+=(-v "${ZWIFT_ACTIVITY_DIR}:/home/user/.wine/drive_c/users/user/Documents/Zwift/Activities")
+    container_args+=(-v "${ZWIFT_ACTIVITY_DIR}:${ZWIFT_DOCS}/Activities")
 fi
 
 # If a log directory is specified then map to that directory.
 if [[ -n ${ZWIFT_LOG_DIR} ]]; then
-    container_args+=(-v "${ZWIFT_LOG_DIR}:/home/user/.wine/drive_c/users/user/Documents/Zwift/Logs")
+    container_args+=(-v "${ZWIFT_LOG_DIR}:${ZWIFT_DOCS}/Logs")
 fi
 
 # If a screenshots directory is specified then map to that directory.
@@ -301,22 +307,21 @@ fi
 
 # If overriding zwift graphics then map custom config to the graphics profiles.
 if [[ ${ZWIFT_OVERRIDE_GRAPHICS} -eq 1 ]]; then
-    zwift_graphics_config="${HOME}/.config/zwift/graphics.txt"
+    zwift_graphics_config="${USER_CONFIG_DIR}/graphics.txt"
 
     # Check for $USER specific graphics config file.
-    zwift_user_graphics_config="${HOME}/.config/zwift/${USER}-graphics.txt"
+    zwift_user_graphics_config="${USER_CONFIG_DIR}/${USER}-graphics.txt"
     if [[ -f ${zwift_user_graphics_config} ]]; then
         zwift_graphics_config="${zwift_user_graphics_config}"
     # Create graphics.txt file if it does not exist.
     elif [[ ! -f ${zwift_graphics_config} ]]; then
-        mkdir -p "${HOME}/.config/zwift"
         echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "${zwift_graphics_config}"
         msgbox warning "Created ${zwift_graphics_config} with default values, edit this file to tweak the zwift graphics settings" 0
     fi
 
     # Override all zwift graphics profiles with the custom config file.
     msgbox ok "Overriding zwift graphics profiles with ${zwift_graphics_config}"
-    zwift_graphics_target_dir="/home/user/.wine/drive_c/Program Files (x86)/Zwift/data/configs"
+    zwift_graphics_target_dir="${ZWIFT_HOME}/data/configs"
     container_args+=(
         -v "${zwift_graphics_config}:${zwift_graphics_target_dir}/basic.txt:ro"
         -v "${zwift_graphics_config}:${zwift_graphics_target_dir}/medium.txt:ro"

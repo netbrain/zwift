@@ -5,6 +5,8 @@ readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
+readonly ZWIFT_DOCS="/home/user/.wine/drive_c/users/user/AppData/Local/Zwift"
+readonly ZWIFT_DOCS_OLD="/home/user/.wine/drive_c/users/user/Documents/Zwift" # TODO remove when no longer needed
 
 mkdir -p "${ZWIFT_HOME}"
 cd "${ZWIFT_HOME}"
@@ -93,7 +95,8 @@ wait_for_zwift_game_update() {
     sleep 5
 
     # Remove as causes PODMAN Save Permisison issues.
-    rm -rf "/home/user/.wine/drive_c/users/user/Documents/Zwift"
+    rm -rf "${ZWIFT_DOCS_OLD}" # TODO is this needed? remove when no longer needed
+    rm -rf "${ZWIFT_DOCS}"     # TODO is this needed?
 }
 
 if [[ -z "$(ls -A .)" ]]; then # is directory empty?
