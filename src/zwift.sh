@@ -254,6 +254,7 @@ container_args+=(
     --name "zwift-${USER}"
     --hostname "${HOSTNAME}"
     --env-file "${container_env_file}"
+    -v "zwift-${USER}:/home/user/.wine/drive_c/users/user/AppData/Local/Zwift/"
     -v "zwift-${USER}:/home/user/.wine/drive_c/users/user/Documents/Zwift"
     -v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse"
 )
