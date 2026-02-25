@@ -26,7 +26,6 @@ readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
-readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed (301)
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error
@@ -157,7 +156,6 @@ cleanup() {
     rm -rf -- "/home/user/.cache/wine*" || true
     # remove Zwift documents because it causes permission errors with podman
     rm -rf -- "${ZWIFT_DOCS}" || true
-    rm -rf -- "${ZWIFT_DOCS_OLD}" || true # TODO remove when no longer needed  (301)
 }
 
 trap cleanup EXIT

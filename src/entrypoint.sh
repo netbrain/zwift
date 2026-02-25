@@ -29,7 +29,6 @@ readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
-readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed (301)
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error
@@ -130,7 +129,6 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
             chown -R user:user /home/user || return 1
         else
             chown -R user:user "${ZWIFT_DOCS}" || return 1
-            chown -R user:user "${ZWIFT_DOCS_OLD}" || return 1 # TODO remove when no longer needed (301)
         fi
     }
 

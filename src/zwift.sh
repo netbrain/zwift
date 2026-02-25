@@ -8,7 +8,6 @@ readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
-readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed (301)
 
 if [[ -t 1 ]]; then
     readonly COLORED_OUTPUT_SUPPORTED="1"
@@ -319,7 +318,6 @@ container_args+=(
     --hostname "${HOSTNAME}"
     --env-file "${container_env_file}"
     -v "zwift-${USER}:${ZWIFT_DOCS}"
-    -v "zwift-${USER}:${ZWIFT_DOCS_OLD}" # TODO remove when no longer needed (301)
     -v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse"
 )
 
