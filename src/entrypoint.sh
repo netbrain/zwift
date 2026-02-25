@@ -12,7 +12,7 @@ readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
-readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed
+readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed (301)
 
 # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
 # NOTE: DISPLAY must be unset here before run_zwift to work
@@ -73,7 +73,7 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     else
         # Volume is mounted as root so always re-own.
         chown -R "${user_uid}:${user_gid}" "${ZWIFT_DOCS}"
-        chown -R "${user_uid}:${user_gid}" "${ZWIFT_DOCS_OLD}" # TODO is this needed? remove when no longer needed
+        chown -R "${user_uid}:${user_gid}" "${ZWIFT_DOCS_OLD}" # TODO is this needed? remove when no longer needed (301)
         gosu user:user /bin/run_zwift.sh "${@}"
     fi
 else
