@@ -105,6 +105,8 @@ load_config_file "${USER_CONFIG_DIR}/${USER}-config"
 # Initialize environment variables
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
 readonly VERSION="${VERSION:-latest}"
+readonly LATEST_SCRIPT_VERSION="master"
+readonly SCRIPT_VERSION="${SCRIPT_VERSION:-${LATEST_SCRIPT_VERSION}}"
 readonly DONT_CHECK="${DONT_CHECK:-0}"
 readonly DONT_PULL="${DONT_PULL:-0}"
 readonly DONT_CLEAN="${DONT_CLEAN:-0}"
@@ -154,17 +156,20 @@ fi
 ##### Update zwift.sh script and pull latest container image #####
 
 # Check for updated zwift.sh by comparing checksums
+if [[ ${SCRIPT_VERSION} != "${LATEST_SCRIPT_VERSION}" ]]; then
+    msgbox warning "Using zwift.sh version ${SCRIPT_VERSION} instead of latest"
+fi
 if [[ ${DONT_CHECK} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
 
-    remote_sum="$(curl -s https://raw.githubusercontent.com/netbrain/zwift/master/src/zwift.sh | sha256sum | awk '{print $1}')"
+    remote_sum="$(curl -s "https://raw.githubusercontent.com/netbrain/zwift/${SCRIPT_VERSION}/src/zwift.sh" | sha256sum | awk '{print $1}')"
     this_sum="$(sha256sum "${0}" | awk '{print $1}')"
 
     if [[ ${remote_sum} == "${this_sum}" ]]; then
         msgbox ok "You are running the latest zwift.sh 👏"
     elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
         msgbox info "Downloading latest zwift.sh"
-        pkexec env PATH="${PATH}" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+        pkexec env PATH="${PATH}" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)" -- --script-version="${SCRIPT_VERSION}"
         exec "${0}" "${@}"
     else
         msgbox warning "Continuing with old zwift.sh"
@@ -174,9 +179,13 @@ else
     msgbox warning "  Zwift may fail to launch if you are not using the latest zwift.sh script"
     # shellcheck disable=SC2016 # using a command as literal string on the next line
     msgbox warning '  To update manually, run: sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"'
+    msgbox warning "  To use a specific version of the script, it is recommended to set SCRIPT_VERSION=... instead"
 fi
 
 # Check for updated container image
+if [[ "${IMAGE}:${VERSION}" != "docker.io/netbrain/zwift:latest" ]]; then
+    msgbox warning "Using image ${IMAGE}:${VERSION} instead of docker.io/netbrain/zwift:latest"
+fi
 if [[ ${DONT_PULL} -ne 1 ]]; then
     msgbox info "Checking for updated container image"
     if ${CONTAINER_TOOL} pull "${IMAGE}:${VERSION}"; then

@@ -15,6 +15,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | `USER`                      | `$USER`                    | Used in creating the zwift volume `zwift-$USER`                                                                                        |
 | `IMAGE`                     | `docker.io/netbrain/zwift` | The image to use                                                                                                                       |
 | `VERSION`                   | `latest`                   | The image version/tag to use                                                                                                           |
+| `SCRIPT_VERSION`            | `master`                   | The `zwift.sh` script version to use (git commit hash)                                                                                 |
 | `DONT_CHECK`                | `0`                        | If set to `1`, don't check for updated `zwift.sh`                                                                                      |
 | `DONT_PULL`                 | `0`                        | If set to `1`, don't pull for new image version (implies `DONT_CLEAN`)                                                                 |
 | `DONT_CLEAN`                | `0`                        | If set to `1`, don't clean up previous image after pulling                                                                             |
