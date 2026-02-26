@@ -4,19 +4,24 @@ set -uo pipefail
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
+readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
+
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed (301)
 
-is_empty_directory() {
-    local directory="${1:?}"
-    if [[ ! -d ${directory} ]]; then
-        echo "Error: ${directory} is not a directory" >&2
-        exit 1
-    fi
-    local contents
-    ! contents="$(ls -A "${directory}" 2> /dev/null)" || [[ -z ${contents} ]]
+msgbox() {
+    local type="${1:?}" # Type: info, ok, warning, error
+    local msg="${2:?}"  # Message: the message to display
+
+    case ${type} in
+        info) echo -e "[${CONTAINER_TOOL}|*] ${msg}" ;;
+        ok) echo -e "[${CONTAINER_TOOL}|✓] ${msg}" ;;
+        warning) echo -e "[${CONTAINER_TOOL}|!] ${msg}" ;;
+        error) echo -e "[${CONTAINER_TOOL}|✗] ${msg}" >&2 ;;
+        *) echo -e "[${CONTAINER_TOOL}|*] ${msg}" ;;
+    esac
 }
 
 get_current_version() {
@@ -101,55 +106,55 @@ wait_for_zwift_game_update() {
     rm -rf "${ZWIFT_DOCS}"     # TODO is this needed?
 }
 
-if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
-    echo "Error: Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!" >&2
-    exit 1
-fi
+install_zwift() {
+    cleanup() {
+        msgbox info "Removing installation artifacts"
+        rm "${ZWIFT_HOME}/ZwiftSetup.exe" || true
+        rm "${ZWIFT_HOME}/webview2-setup.exe" || true
+        rm -rf "${WINE_USER_HOME}/Downloads/Zwift" || true
+        rm -rf "/home/user/.cache/wine*" || true
+    }
+    trap cleanup EXIT
 
-if is_empty_directory .; then
     # Prevent Wine from trying to install a different mono version
     WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u
 
-    # install dotnet 20 (to prevent error dialog with CloseLauncher.exe)
-    winetricks -q dotnet20
-
-    # install dotnet48 for zwift
-    winetricks -q dotnet48
-
-    # Install D3D Compiler to allow Vulkan Shaders.
-    winetricks d3dcompiler_47
+    winetricks -q dotnet20    # install dotnet 20 (to prevent error dialog with CloseLauncher.exe)
+    winetricks -q dotnet48    # install dotnet48 for zwift
+    winetricks d3dcompiler_47 # install D3D Compiler to allow Vulkan Shaders
 
     # install webview 2
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
     wine webview2-setup.exe /silent /install
 
-    # Enable Wayland Support, still requires DISPLAY to be blank to use Wayland.
+    # enable Wayland support, still requires DISPLAY to be blank to use Wayland
     wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
 
     # install zwift
     wget https://cdn.zwift.com/app/ZwiftSetup.exe
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
 
-    # Sleep 5 seconds fully start the update or just stops.
+    # wait until the updater starts
     sleep 5
 
-    wine ZwiftLauncher.exe SilentLaunch
+    wine ZwiftLauncher.exe SilentLaunch # TODO launcher started twice, remove this call?
 
-    # update game through zwift launcher
     wait_for_zwift_game_update
-    wineserver -k
+}
 
-    # cleanup
-    rm "${ZWIFT_HOME}/ZwiftSetup.exe"
-    rm "${ZWIFT_HOME}/webview2-setup.exe"
-    rm -rf "${WINE_USER_HOME}/Downloads/Zwift"
-    rm -rf "/home/user/.cache/wine*"
-    exit 0
+update_zwift() {
+    wait_for_zwift_game_update
+}
+
+if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
+    msgbox error "Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!"
+    exit 1
 fi
 
-if [[ ${1:-} == "update" ]]; then
-    wait_for_zwift_game_update
+case ${1:-} in
+    install) install_zwift ;;
+    update) update_zwift ;;
+    *) msgbox error "Invalid script argument '${1:-}', should be either 'install' or 'update'" ;;
+esac
 
-    wineserver -k
-    exit 0
-fi
+wineserver -k
