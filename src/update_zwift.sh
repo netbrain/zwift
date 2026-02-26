@@ -25,85 +25,86 @@ msgbox() {
 }
 
 get_current_version() {
+    # If Zwift_ver_cur_filename.txt exists, it holds the true current version filename
+    # If it does not exist, use Zwift_ver_cur.xml as fallback
+
+    local version_filename="Zwift_ver_cur.xml"
     if [[ -f Zwift_ver_cur_filename.txt ]]; then
-        # If Zwift_ver_cur_filename.txt exists, use it
-        # Remove Null to remove warning.
         version_filename="$(tr '\0' '\n' < Zwift_ver_cur_filename.txt)"
-    else
-        # Default to Zwift_ver_cur.xml if Zwift_ver_cur_filename.txt doesn't exist
-        version_filename="Zwift_ver_cur.xml"
     fi
 
-    if grep -q sversion "${version_filename}"; then
-        zwift_current_version="$(grep -oP 'sversion="\K.*?(?=\s)' "${version_filename}" | cut -f 1 -d ' ')"
-    else
-        # Basic install only, needs initial update
-        zwift_current_version="0.0.0"
+    local current_version
+    if ! current_version="$(grep -oP 'sversion="\K.*?(?=\s)' "${version_filename}" 2> /dev/null | cut -f 1 -d ' ')"; then
+        current_version="0.0.0"
     fi
+
+    echo "${current_version}"
 }
 
 get_latest_version() {
-    # Don't cache so we don't pick old versions.
-    zwift_latest_version="$(wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')"
+    local latest_version
+    latest_version="$(wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')" || return 1
+    echo "${latest_version}"
 }
 
 wait_for_zwift_game_update() {
     vercomp() {
-        # Return 0 if =, 1 if > and 2 if <
-        if [[ ${1} == "${2}" ]]; then
-            return 0
-        fi
+        # returns 0 if first == second, 1 if first > second, 2 if first < second
 
-        local IFS=.
-        local i ver1 ver2
-        read -ra ver1 <<< "${1}"
-        read -ra ver2 <<< "${2}"
-        # fill empty fields in ver1 with zeros
-        for ((i = ${#ver1[@]}; i < ${#ver2[@]}; i++)); do
+        local first="${1:?}"
+        local second="${2:?}"
+
+        [[ ${first} == "${second}" ]] && return 0
+
+        local IFS=. ver1 ver2 i
+        read -ra ver1 <<< "${first}"
+        read -ra ver2 <<< "${second}"
+
+        for i in $(seq "${#ver1[@]}" "${#ver2[@]}"); do
             ver1[i]=0
         done
-        for ((i = 0; i < ${#ver1[@]}; i++)); do
-            if [[ -z ${ver2[i]} ]]; then
-                # fill empty fields in ver2 with zeros
-                ver2[i]=0
-            fi
-            if ((10#${ver1[i]} > 10#${ver2[i]})); then
-                return 1
-            fi
-            if ((10#${ver1[i]} < 10#${ver2[i]})); then
-                return 2
-            fi
+
+        for i in $(seq 0 "${#ver1[@]}"); do
+            [[ -z ${ver2[i]} ]] && ver2[i]=0
+            [[ $((10#${ver1[i]})) -gt $((10#${ver2[i]})) ]] && return 1
+            [[ $((10#${ver1[i]})) -lt $((10#${ver2[i]})) ]] && return 2
         done
+
         return 0
     }
 
-    echo "updating zwift..."
-    get_current_version
-    get_latest_version
-
-    vercomp "${zwift_current_version}" "${zwift_latest_version}"
-    result=$?
-    if [[ ${result} -ne 2 ]]; then
-        echo "already at latest version..."
-        exit 0
+    local zwift_latest_version
+    if ! zwift_latest_version="$(get_latest_version)"; then
+        msgbox error "Unable to retrieve latest Zwift version number"
+        return 1
     fi
 
-    wine ZwiftLauncher.exe SilentLaunch &
-    until [[ ${result} -ne 2 ]]; do
-        echo "updating in progress..."
-        sleep 5
-        get_current_version
+    local zwift_current_version
+    zwift_current_version="$(get_current_version)"
+    if vercomp "${zwift_current_version}" "${zwift_latest_version}"; then
+        msgbox info "Nothing to do, already at latest version ${zwift_latest_version}"
+        return 0
+    else
+        msgbox info "Updating Zwift from version ${zwift_current_version} to ${zwift_latest_version}"
+    fi
 
-        vercomp "${zwift_current_version}" "${zwift_latest_version}"
-        result=$?
+    msgbox info "Starting Zwift launcher using wine"
+    wine ZwiftLauncher.exe SilentLaunch &
+
+    counter=1
+    until vercomp "${zwift_current_version}" "${zwift_latest_version}"; do
+        msgbox info "Updating Zwift... (${counter})"
+        sleep 5
+        zwift_current_version="$(get_current_version)"
+        ((counter++))
     done
 
-    echo "updating done, waiting 5 seconds..."
+    msgbox info "Updating done, waiting 5 seconds"
     sleep 5
 
-    # Remove as causes PODMAN Save Permisison issues.
-    rm -rf "${ZWIFT_DOCS_OLD}" # TODO is this needed? remove when no longer needed  (301)
-    rm -rf "${ZWIFT_DOCS}"     # TODO is this needed?
+    # remove as causes podman save permission issues
+    rm -rf "${ZWIFT_DOCS_OLD}" || true # TODO remove when no longer needed  (301)
+    rm -rf "${ZWIFT_DOCS}" || true
 }
 
 install_zwift() {
@@ -116,12 +117,14 @@ install_zwift() {
     }
     trap cleanup EXIT
 
-    # Prevent Wine from trying to install a different mono version
+    msgbox info "Installing Zwift..."
+
+    # prevent Wine from trying to install a different mono version
     WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u
 
-    winetricks -q dotnet20    # install dotnet 20 (to prevent error dialog with CloseLauncher.exe)
-    winetricks -q dotnet48    # install dotnet48 for zwift
-    winetricks d3dcompiler_47 # install D3D Compiler to allow Vulkan Shaders
+    winetricks -q dotnet20       # install dotnet 20 (to prevent error dialog with CloseLauncher.exe)
+    winetricks -q dotnet48       # install dotnet48 for zwift
+    winetricks -q d3dcompiler_47 # install D3D Compiler to allow Vulkan Shaders
 
     # install webview 2
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
@@ -133,17 +136,6 @@ install_zwift() {
     # install zwift
     wget https://cdn.zwift.com/app/ZwiftSetup.exe
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
-
-    # wait until the updater starts
-    sleep 5
-
-    wine ZwiftLauncher.exe SilentLaunch # TODO launcher started twice, remove this call?
-
-    wait_for_zwift_game_update
-}
-
-update_zwift() {
-    wait_for_zwift_game_update
 }
 
 if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
@@ -153,8 +145,18 @@ fi
 
 case ${1:-} in
     install) install_zwift ;;
-    update) update_zwift ;;
+    update) msgbox info "Updating Zwift..." ;;
     *) msgbox error "Invalid script argument '${1:-}', should be either 'install' or 'update'" ;;
 esac
 
-wineserver -k
+msgbox info "Waiting for Zwift to finish updating"
+if ! wait_for_zwift_game_update; then
+    msgbox error "Failed to update Zwift!"
+    exit 1
+fi
+
+msgbox info "Launching wine server"
+if ! wineserver -k; then
+    msgbox error "Failed to launch wine server!"
+    exit 1
+fi
