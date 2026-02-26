@@ -109,7 +109,7 @@ sleep 3
 
 counter=1
 until pgrep -f ZwiftApp.exe > /dev/null 2>&1; do
-    msgbox info "Waiting for zwift to start... (${counter})"
+    msgbox info "Waiting for Zwift to start... (${counter})"
     sleep 1
     ((counter++))
 done
