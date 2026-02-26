@@ -55,7 +55,7 @@ fi
 cleanup_invoked=0
 cleanup() {
     if [[ ${cleanup_invoked} -ne 1 ]]; then
-        msgbox info "Cleanup: Killing unnecessary applications"
+        msgbox info "Killing unnecessary applications"
         pkill ZwiftLauncher || true
         pkill ZwiftWindowsCra || true
         pkill -f MicrosoftEdgeUpdate || true
@@ -67,6 +67,8 @@ trap cleanup EXIT
 
 ###########################################
 ##### Start Zwift Launcher using wine #####
+
+msgbox info "Starting Zwift launcher using wine"
 
 if ! wine start ZwiftLauncher.exe SilentLaunch; then
     msgbox error "Failed to start Zwift launcher using wine!"
@@ -114,10 +116,10 @@ done
 
 msgbox ok "Zwift started using wine"
 
-cleanup # important, wine server will not stop if launcher etc keep running
-
 #############################
 ##### Start wine server #####
+
+cleanup # important, wine server will not stop if launcher etc keep running
 
 declare -a wineserver_cmd
 wineserver_cmd=(wineserver -w)
