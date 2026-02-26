@@ -396,6 +396,7 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     plaintext_password="${ZWIFT_PASSWORD}"
 
     # ZWIFT_PASSWORD not set, check if secret already exists or if password is stored in secret-tool
+    has_password_secret=0
     if [[ -z ${plaintext_password} ]]; then
         if [[ ${CONTAINER_TOOL} == "podman" ]] && ${CONTAINER_TOOL} secret exists "${password_secret_name}"; then
             msgbox ok "Password for ${ZWIFT_USERNAME} found in ${CONTAINER_TOOL} secret store"
@@ -407,6 +408,7 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     fi
 
     # ZWIFT_PASSWORD set or found in secret-tool, create/update secret
+    has_plaintext_password=0
     if [[ -n ${plaintext_password} ]]; then
         msgbox ok "Password found for ${ZWIFT_USERNAME}"
         has_plaintext_password=1
