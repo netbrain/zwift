@@ -29,7 +29,7 @@ jobs:
       uses: actions/checkout@v6
     - name: Build zwift
       run: |
-        readonly DISPLAY=":99"
+        export DISPLAY=":99"
 
         version="$(curl -s http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
             | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')"

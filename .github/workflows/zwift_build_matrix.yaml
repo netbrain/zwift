@@ -42,7 +42,7 @@ jobs:
       uses: actions/checkout@v6
     - name: Build zwift
       run: |
-        readonly DISPLAY=":99"
+        export DISPLAY=":99"
 
         echo "Starting build..."
 
