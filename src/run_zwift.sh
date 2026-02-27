@@ -10,6 +10,7 @@ readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:-}"
 readonly ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION:-}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 
+readonly ZWIFT_LAUNCH_TIMEOUT=300
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
@@ -106,11 +107,15 @@ if ! "${wine_cmd[@]}"; then
 fi
 
 counter=1
-until pgrep -f ZwiftApp.exe > /dev/null 2>&1; do
+until pgrep -f ZwiftApp.exe > /dev/null 2>&1 || [[ ${counter} -gt ${ZWIFT_LAUNCH_TIMEOUT} ]]; do
     msgbox info "Waiting for Zwift to start... (${counter})"
     sleep 1
     ((counter++))
 done
+if ! pgrep -f ZwiftApp.exe > /dev/null 2>&1; then
+    msgbox error "Zwift has not yet started after ${ZWIFT_LAUNCH_TIMEOUT} seconds, giving up!"
+    exit 1
+fi
 
 msgbox ok "Zwift started using wine"
 
