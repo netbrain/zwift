@@ -105,8 +105,6 @@ if ! "${wine_cmd[@]}"; then
     exit 1
 fi
 
-sleep 3
-
 counter=1
 until pgrep -f ZwiftApp.exe > /dev/null 2>&1; do
     msgbox info "Waiting for Zwift to start... (${counter})"
