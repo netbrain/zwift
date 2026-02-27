@@ -60,6 +60,12 @@ These environment variables can be used to alter the execution of the zwift bash
 - `WINE_EXPERIMENTAL_WAYLAND="1" zwift` This will start zwift using Wayland and not XWayland. It will start full screen
   windowed.
 
+{: .note }
+> To pass extra environment variables to the container, they can be added to `CONTAINER_EXTRA_ARGS` with the `-e` flag.
+>
+> For example, to increase the cursor size in Zwift to 48, set the `XCURSOR_SIZE` environment variable using:
+> `CONTAINER_EXTRA_ARGS=(-e XCURSOR_SIZE=48)`
+
 ## Syntax
 
 Special characters in the value of environment variables need to be escaped to make sure they are interpreted literally. For
@@ -75,8 +81,11 @@ of the single value `my password`.
 {: .important }
 > Use an array for `CONTAINER_EXTRA_ARGS` and `VGA_DEVICE_FLAG`!
 >
-> - `CONTAINER_EXTRA_ARGS=(--cpus="1.5")`
+> - `CONTAINER_EXTRA_ARGS=(--cpus="1.5" -e XCURSOR_SIZE=48)`
 > - `VGA_DEVICE_FLAG=(--gpus="all")`
+>
+> **Note**: When passing these arguments directly on the commandline, arrays cannot be used. Use `VARIABLE="value"` or
+> `VARIABLE='value'` instead.
 
 {: .important }
 > Use double quotes to escape the value of all other environment variables!
@@ -127,6 +136,7 @@ ZWIFT_LOG_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Logs"
 ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift"
 NETWORKING="host"
 ZWIFT_OVERRIDE_GRAPHICS="1"
+CONTAINER_EXTRA_ARGS=(-e XCURSOR_SIZE=48)
 ```
 
 ### Example: Two Zwift users sharing a single Linux user account
