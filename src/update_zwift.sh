@@ -48,31 +48,6 @@ get_latest_version() {
 }
 
 update_zwift_using_launcher() {
-    vercomp() {
-        # returns 0 if first == second, 1 if first > second, 2 if first < second
-
-        local first="${1:?}"
-        local second="${2:?}"
-
-        [[ ${first} == "${second}" ]] && return 0
-
-        local IFS=. ver1 ver2 i
-        read -ra ver1 <<< "${first}"
-        read -ra ver2 <<< "${second}"
-
-        for i in $(seq "${#ver1[@]}" "${#ver2[@]}"); do
-            ver1[i]=0
-        done
-
-        for i in $(seq 0 "${#ver1[@]}"); do
-            [[ -z ${ver2[i]} ]] && ver2[i]=0
-            [[ $((10#${ver1[i]})) -gt $((10#${ver2[i]})) ]] && return 1
-            [[ $((10#${ver1[i]})) -lt $((10#${ver2[i]})) ]] && return 2
-        done
-
-        return 0
-    }
-
     local zwift_latest_version
     if ! zwift_latest_version="$(get_latest_version)"; then
         msgbox error "Unable to retrieve latest Zwift version number"
@@ -81,7 +56,7 @@ update_zwift_using_launcher() {
 
     local zwift_current_version
     zwift_current_version="$(get_current_version)"
-    if vercomp "${zwift_current_version}" "${zwift_latest_version}"; then
+    if [[ "${zwift_current_version}" == "${zwift_latest_version}" ]]; then
         msgbox ok "Nothing to do, already at latest version ${zwift_latest_version}"
         return 0
     else
@@ -106,7 +81,7 @@ update_zwift_using_launcher() {
     sleep 5
 
     zwift_current_version="$(get_current_version)"
-    if ! vercomp "${zwift_current_version}" "${zwift_latest_version}"; then
+    if [[ "${zwift_current_version}" != "${zwift_latest_version}" ]]; then
         msgbox error "Zwift is still at version ${zwift_current_version}"
         return 1
     fi
