@@ -364,8 +364,12 @@ fi
 
 # Interactive mode and run in foreground/background
 if [[ ${INTERACTIVE} -eq 1 ]]; then
+    container_env_vars+=(COLORED_OUTPUT="1")
     container_args+=(-it --entrypoint bash)
-elif [[ ${ZWIFT_FG} -ne 1 ]]; then
+elif [[ ${ZWIFT_FG} -eq 1 ]]; then
+    container_env_vars+=(COLORED_OUTPUT="1")
+    container_args+=(-it)
+else
     container_args+=(-d)
 fi
 

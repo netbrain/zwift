@@ -104,6 +104,7 @@ container_args=(
     --hostname "${HOSTNAME}"
 
     -e DEBUG="${DEBUG}"
+    -e COLORED_OUTPUT="1"
     -e DISPLAY="${DISPLAY}"
     -e CONTAINER_TOOL="${CONTAINER_TOOL}"
     -e ZWIFT_UID="${ZWIFT_UID}"
