@@ -56,16 +56,15 @@ fi
 ##### Clean install, update or launch? #####
 
 declare -a startup_cmd
+startup_cmd=(/bin/run_zwift.sh)
 update_required=0
 
 if is_empty_directory "${ZWIFT_HOME}"; then
     startup_cmd=(/bin/update_zwift.sh install)
     update_required=1
 elif [[ ${1:-} == "update" ]]; then
-    startup_cmd=(/bin/update_zwift.sh update)
+    startup_cmd=(/bin/update_zwift.sh)
     update_required=1
-else
-    startup_cmd=(/bin/run_zwift.sh)
 fi
 
 ######################################

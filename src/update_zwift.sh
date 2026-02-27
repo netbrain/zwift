@@ -47,7 +47,7 @@ get_latest_version() {
     echo "${latest_version}"
 }
 
-wait_for_zwift_game_update() {
+update_zwift_using_launcher() {
     vercomp() {
         # returns 0 if first == second, 1 if first > second, 2 if first < second
 
@@ -82,60 +82,55 @@ wait_for_zwift_game_update() {
     local zwift_current_version
     zwift_current_version="$(get_current_version)"
     if vercomp "${zwift_current_version}" "${zwift_latest_version}"; then
-        msgbox info "Nothing to do, already at latest version ${zwift_latest_version}"
+        msgbox ok "Nothing to do, already at latest version ${zwift_latest_version}"
         return 0
     else
         msgbox info "Updating Zwift from version ${zwift_current_version} to ${zwift_latest_version}"
     fi
 
     msgbox info "Starting Zwift launcher using wine"
-    wine ZwiftLauncher.exe SilentLaunch &
+    if ! wine start ZwiftLauncher.exe SilentLaunch; then
+        msgbox error "Failed to start Zwift launcher using wine!"
+        return 1
+    fi
+    msgbox ok "Zwift launcher started using wine"
 
     counter=1
-    until vercomp "${zwift_current_version}" "${zwift_latest_version}"; do
+    while pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
         msgbox info "Updating Zwift... (${counter})"
         sleep 5
-        zwift_current_version="$(get_current_version)"
         ((counter++))
     done
 
-    msgbox info "Updating done, waiting 5 seconds"
+    msgbox info "Zwift launcher closed, waiting 5 seconds..."
     sleep 5
 
-    # remove as causes podman save permission issues
-    rm -rf "${ZWIFT_DOCS_OLD}" || true # TODO remove when no longer needed  (301)
-    rm -rf "${ZWIFT_DOCS}" || true
+    zwift_current_version="$(get_current_version)"
+    if ! vercomp "${zwift_current_version}" "${zwift_latest_version}"; then
+        msgbox error "Zwift is still at version ${zwift_current_version}"
+        return 1
+    fi
+
+    msgbox ok "Zwift updated to version ${zwift_latest_version}"
 }
 
 install_zwift() {
-    cleanup() {
-        msgbox info "Removing installation artifacts"
-        rm "${ZWIFT_HOME}/ZwiftSetup.exe" || true
-        rm "${ZWIFT_HOME}/webview2-setup.exe" || true
-        rm -rf "${WINE_USER_HOME}/Downloads/Zwift" || true
-        rm -rf "/home/user/.cache/wine*" || true
-    }
-    trap cleanup EXIT
+    # prevent wine from trying to install a different mono version
+    WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u || return 1
 
-    msgbox info "Installing Zwift..."
-
-    # prevent Wine from trying to install a different mono version
-    WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u
-
-    winetricks -q dotnet20       # install dotnet 20 (to prevent error dialog with CloseLauncher.exe)
-    winetricks -q dotnet48       # install dotnet48 for zwift
-    winetricks -q d3dcompiler_47 # install D3D Compiler to allow Vulkan Shaders
+    # install prerequisites using winetricks
+    winetricks -q dotnet20 dotnet48 d3dcompiler_47 || return 1
 
     # install webview 2
-    wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703
-    wine webview2-setup.exe /silent /install
+    wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
+    wine webview2-setup.exe /silent /install || return 1
 
     # enable Wayland support, still requires DISPLAY to be blank to use Wayland
-    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland
+    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland || return 1
 
     # install zwift
-    wget https://cdn.zwift.com/app/ZwiftSetup.exe
-    wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL
+    wget https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
+    wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
 }
 
 if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
@@ -143,20 +138,37 @@ if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
     exit 1
 fi
 
-case ${1:-} in
-    install) install_zwift ;;
-    update) msgbox info "Updating Zwift..." ;;
-    *) msgbox error "Invalid script argument '${1:-}', should be either 'install' or 'update'" ;;
-esac
+cleanup() {
+    msgbox info "Stopping wine server"
+    wineserver -k || true
 
-msgbox info "Waiting for Zwift to finish updating"
-if ! wait_for_zwift_game_update; then
-    msgbox error "Failed to update Zwift!"
-    exit 1
+    msgbox info "Removing installation artifacts"
+
+    # remove downloads and cache
+    rm "${ZWIFT_HOME}/ZwiftSetup.exe" || true
+    rm "${ZWIFT_HOME}/webview2-setup.exe" || true
+    rm -rf "${WINE_USER_HOME}/Downloads/Zwift" || true
+    rm -rf "/home/user/.cache/wine*" || true
+
+    # remove zwift documents because it causes permission errors with podman
+    rm -rf "${ZWIFT_DOCS}" || true
+    rm -rf "${ZWIFT_DOCS_OLD}" || true # TODO remove when no longer needed  (301)
+}
+
+trap cleanup EXIT
+
+if [[ ${1:-} == "install" ]]; then
+    msgbox info "Installing Zwift..."
+    if ! install_zwift; then
+        msgbox error "Failed to install Zwift!"
+        exit 1
+    fi
+else
+    msgbox info "Updating Zwift..."
 fi
 
-msgbox info "Launching wine server"
-if ! wineserver -k; then
-    msgbox error "Failed to launch wine server!"
+msgbox info "Waiting for Zwift to finish updating"
+if ! update_zwift_using_launcher; then
+    msgbox error "Failed to update Zwift!"
     exit 1
 fi
