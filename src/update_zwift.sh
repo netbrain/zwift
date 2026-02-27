@@ -25,8 +25,9 @@ msgbox() {
 }
 
 get_current_version() {
-    # If Zwift_ver_cur_filename.txt exists, it holds the true current version filename
-    # If it does not exist, use Zwift_ver_cur.xml as fallback
+    # if Zwift_ver_cur_filename.txt exists, it holds the true current version filename
+    # if it does not exist, use Zwift_ver_cur.xml as fallback
+    # if neither exist or contain a valid version, use 0.0.0 (Zwift not installed)
 
     local version_filename="Zwift_ver_cur.xml"
     if [[ -f Zwift_ver_cur_filename.txt ]]; then
@@ -37,7 +38,9 @@ get_current_version() {
 }
 
 get_latest_version() {
-    wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ' || return 1
+    wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
+        | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ' \
+        || return 1
 }
 
 update_zwift_using_launcher() {
@@ -49,7 +52,7 @@ update_zwift_using_launcher() {
 
     local zwift_current_version
     zwift_current_version="$(get_current_version)"
-    if [[ "${zwift_current_version}" == "${zwift_latest_version}" ]]; then
+    if [[ ${zwift_current_version} == "${zwift_latest_version}" ]]; then
         msgbox ok "Nothing to do, already at latest version ${zwift_latest_version}"
         return 0
     else
@@ -65,7 +68,7 @@ update_zwift_using_launcher() {
 
     counter=1
     # also stop if launcher exits before update finishes, so we don't hang forever
-    while [[ "${zwift_current_version}" != "${zwift_latest_version}" ]] && pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
+    while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
         msgbox info "Updating Zwift... (${counter})"
         sleep 5
         zwift_current_version="$(get_current_version)"
@@ -73,8 +76,8 @@ update_zwift_using_launcher() {
     done
 
     # if launcher exited unexpectedly, Zwift is still at the old version
-    if [[ "${zwift_current_version}" != "${zwift_latest_version}" ]]; then
-        msgbox error "Zwift is still at version ${zwift_current_version} instead of ${zwift_latest_version}"
+    if [[ ${zwift_current_version} != "${zwift_latest_version}" ]]; then
+        msgbox error "Launcher exited unexpectedly, update did not complete"
         return 1
     fi
 
@@ -83,19 +86,27 @@ update_zwift_using_launcher() {
 
 install_zwift() {
     # prevent wine from trying to install a different mono version
+    msgbox info "Starting wine with custom mono version"
     WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u || return 1
 
     # install prerequisites using winetricks
+    # dotnet20: to prevent error dialog with CloseLauncher.exe
+    # dotnet48: required by Zwift
+    # d3dcompiler_47: required for Vulkan shaders
+    msgbox info "Installing prerequisites using winetricks"
     winetricks -q dotnet20 dotnet48 d3dcompiler_47 || return 1
 
-    # install webview 2
+    # download and install webview 2
+    msgbox info "Downloading and installing webview2"
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
     wine webview2-setup.exe /silent /install || return 1
 
-    # enable Wayland support, still requires DISPLAY to be blank to use Wayland
+    # enable Wayland support, requires DISPLAY to be blank to use Wayland
+    msgbox info "Enabling Wayland support"
     wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland || return 1
 
-    # install zwift
+    # download and install zwift
+    msgbox info "Downloading and installing Zwift"
     wget https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
 }
@@ -107,8 +118,7 @@ fi
 
 cleanup() {
     msgbox info "Stopping wine server"
-    # zwift launcher won't stop until wine server is killed
-    wineserver -k || true
+    wineserver -k || true # important, zwift launcher won't stop until wine server is killed
 
     msgbox info "Removing installation artifacts"
     # remove downloads and cache
@@ -133,7 +143,6 @@ else
     msgbox info "Updating Zwift..."
 fi
 
-msgbox info "Waiting for Zwift to finish updating"
 if ! update_zwift_using_launcher; then
     msgbox error "Failed to update Zwift!"
     exit 1
