@@ -83,7 +83,7 @@ update_zwift_using_launcher() {
     fi
     msgbox ok "Zwift launcher started using wine"
 
-    counter=1
+    local counter=1
     # also stop if launcher exits before update finishes, so we don't hang forever
     while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
         msgbox info "Updating Zwift... (${counter})"
@@ -98,9 +98,11 @@ update_zwift_using_launcher() {
         return 1
     fi
 
-    # give launcher a bit of time to complete everything
-    msgbox info "Waiting 5 seconds to allow update to complete..."
-    sleep 5
+    local i
+    for i in $(seq 5 -1 1); do
+        msgbox info "Waiting for update to finish... (${i})"
+        sleep 1
+    done
 
     msgbox ok "Zwift updated to version ${zwift_latest_version}"
 }

@@ -27,7 +27,6 @@ readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:-}"
 readonly ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION:-}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 
-readonly ZWIFT_LAUNCH_TIMEOUT=300
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
@@ -109,7 +108,7 @@ declare -a wine_cmd
 wine_cmd=(wine start /exec /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe)
 
 if [[ -n ${ZWIFT_USERNAME} ]] && [[ -n ${ZWIFT_PASSWORD} ]]; then
-    msgbox info "Authenticating with zwift"
+    msgbox info "Authenticating with Zwift"
     if token="$(zwift-auth)"; then
         wine_cmd+=(--token="${token}")
     else
@@ -123,14 +122,13 @@ if ! "${wine_cmd[@]}"; then
     exit 1
 fi
 
-counter=1
-until pgrep -f ZwiftApp.exe > /dev/null 2>&1 || [[ ${counter} -gt ${ZWIFT_LAUNCH_TIMEOUT} ]]; do
-    msgbox info "Waiting for Zwift to start... (${counter})"
+# important, without this sleep Zwift gets stuck in the launcher!
+for i in $(seq 3 -1 1); do
+    msgbox info "Waiting for Zwift to start... (${i})"
     sleep 1
-    ((counter++))
 done
 if ! pgrep -f ZwiftApp.exe > /dev/null 2>&1; then
-    msgbox error "Zwift has not yet started after ${ZWIFT_LAUNCH_TIMEOUT} seconds, giving up!"
+    msgbox error "Zwift has not yet started, giving up!"
     exit 1
 fi
 
