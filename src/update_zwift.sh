@@ -33,18 +33,11 @@ get_current_version() {
         version_filename="$(tr '\0' '\n' < Zwift_ver_cur_filename.txt)"
     fi
 
-    local current_version
-    if ! current_version="$(grep -oP 'sversion="\K.*?(?=\s)' "${version_filename}" 2> /dev/null | cut -f 1 -d ' ')"; then
-        current_version="0.0.0"
-    fi
-
-    echo "${current_version}"
+    grep -oP 'sversion="\K.*?(?=\s)' "${version_filename}" 2> /dev/null | cut -f 1 -d ' ' || echo "0.0.0"
 }
 
 get_latest_version() {
-    local latest_version
-    latest_version="$(wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ')" || return 1
-    echo "${latest_version}"
+    wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ' || return 1
 }
 
 update_zwift_using_launcher() {
@@ -71,18 +64,17 @@ update_zwift_using_launcher() {
     msgbox ok "Zwift launcher started using wine"
 
     counter=1
-    while pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
+    # also stop if launcher exits before update finishes, so we don't hang forever
+    while [[ "${zwift_current_version}" != "${zwift_latest_version}" ]] && pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
         msgbox info "Updating Zwift... (${counter})"
         sleep 5
+        zwift_current_version="$(get_current_version)"
         ((counter++))
     done
 
-    msgbox info "Zwift launcher closed, waiting 5 seconds..."
-    sleep 5
-
-    zwift_current_version="$(get_current_version)"
+    # if launcher exited unexpectedly, Zwift is still at the old version
     if [[ "${zwift_current_version}" != "${zwift_latest_version}" ]]; then
-        msgbox error "Zwift is still at version ${zwift_current_version}"
+        msgbox error "Zwift is still at version ${zwift_current_version} instead of ${zwift_latest_version}"
         return 1
     fi
 
@@ -115,16 +107,15 @@ fi
 
 cleanup() {
     msgbox info "Stopping wine server"
+    # zwift launcher won't stop until wine server is killed
     wineserver -k || true
 
     msgbox info "Removing installation artifacts"
-
     # remove downloads and cache
     rm "${ZWIFT_HOME}/ZwiftSetup.exe" || true
     rm "${ZWIFT_HOME}/webview2-setup.exe" || true
     rm -rf "${WINE_USER_HOME}/Downloads/Zwift" || true
     rm -rf "/home/user/.cache/wine*" || true
-
     # remove zwift documents because it causes permission errors with podman
     rm -rf "${ZWIFT_DOCS}" || true
     rm -rf "${ZWIFT_DOCS_OLD}" || true # TODO remove when no longer needed  (301)
