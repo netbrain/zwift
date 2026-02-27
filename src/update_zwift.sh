@@ -81,6 +81,10 @@ update_zwift_using_launcher() {
         return 1
     fi
 
+    # give launcher a bit of time to complete everything
+    msgbox info "Waiting 5 seconds to allow update to complete..."
+    sleep 5
+
     msgbox ok "Zwift updated to version ${zwift_latest_version}"
 }
 
@@ -111,14 +115,20 @@ install_zwift() {
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
 }
 
+###########################
+##### Configure Zwift #####
+
 if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
     msgbox error "Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!"
     exit 1
 fi
 
+#########################################
+##### Automatically cleanup on exit #####
+
 cleanup() {
     msgbox info "Stopping wine server"
-    wineserver -k || true # important, zwift launcher won't stop until wine server is killed
+    wineserver -k || true # important, Zwift launcher won't stop until wine server is killed
 
     msgbox info "Removing installation artifacts"
     # remove downloads and cache
@@ -126,12 +136,15 @@ cleanup() {
     rm "${ZWIFT_HOME}/webview2-setup.exe" || true
     rm -rf "${WINE_USER_HOME}/Downloads/Zwift" || true
     rm -rf "/home/user/.cache/wine*" || true
-    # remove zwift documents because it causes permission errors with podman
+    # remove Zwift documents because it causes permission errors with podman
     rm -rf "${ZWIFT_DOCS}" || true
     rm -rf "${ZWIFT_DOCS_OLD}" || true # TODO remove when no longer needed  (301)
 }
 
 trap cleanup EXIT
+
+###################################
+##### Install or update Zwift #####
 
 if [[ ${1:-} == "--install" ]]; then
     msgbox info "Installing Zwift..."
