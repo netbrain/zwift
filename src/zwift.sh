@@ -214,11 +214,16 @@ fi
 
 # Clean previous container images (if any)
 if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_PULL} -ne 1 ]]; then
-    images_output="$(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')"
-    readarray -t images <<< "${images_output}"
-    if [[ ${#images[@]} -gt 0 ]] && [[ -n ${images[0]} ]]; then
+    declare -a old_images
+    old_images=()
+    if images_output="$(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')"; then
+        [[ -n ${images_output} ]] && readarray -t old_images <<< "${images_output}"
+    else
+        msgbox warning "Failed to retrieve list of container images"
+    fi
+    if [[ ${#old_images[@]} -gt 0 ]]; then
         msgbox info "Cleaning up previous container images"
-        if ${CONTAINER_TOOL} image rm "${images[@]}"; then
+        if ${CONTAINER_TOOL} image rm "${old_images[@]}"; then
             msgbox ok "Previous container images have been deleted"
         else
             msgbox warning "Failed to clean up previous container images"
@@ -385,8 +390,7 @@ if is_array "CONTAINER_EXTRA_ARGS"; then
     container_args+=("${CONTAINER_EXTRA_ARGS[@]}")
 elif [[ -n ${CONTAINER_EXTRA_ARGS} ]]; then
     msgbox warning "CONTAINER_EXTRA_ARGS is defined as a string, it is recommended to use an array"
-    read -ra extra_args <<< "${CONTAINER_EXTRA_ARGS}"
-    container_args+=("${extra_args[@]}")
+    read -ra extra_args <<< "${CONTAINER_EXTRA_ARGS}" && container_args+=("${extra_args[@]}")
 fi
 
 #####################################
@@ -460,7 +464,7 @@ fi
 # Setup Flags for Window Managers
 if [[ ${window_manager} == "Wayland" ]]; then
     if [[ ${ZWIFT_UID} -ne ${UID} ]]; then
-        msgbox warning "Wayland does not support ZWIFT_UID different to your id of ${UID}, may not start." 5
+        msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}, may not start"
     fi
 
     container_env_vars+=(
@@ -500,8 +504,7 @@ if is_array "VGA_DEVICE_FLAG"; then
     container_args+=("${VGA_DEVICE_FLAG[@]}")
 elif [[ -n ${VGA_DEVICE_FLAG} ]]; then
     msgbox warning "VGA_DEVICE_FLAG is defined as a string, it is recommended to use an array"
-    read -ra vga_device_flags <<< "${VGA_DEVICE_FLAG}"
-    container_args+=("${vga_device_flags[@]}")
+    read -ra vga_device_flags <<< "${VGA_DEVICE_FLAG}" && container_args+=("${vga_device_flags[@]}")
 elif [[ -f "/proc/driver/nvidia/version" ]]; then
     if [[ ${CONTAINER_TOOL} == "podman" ]]; then
         container_args+=(--device="nvidia.com/gpu=all")
@@ -535,7 +538,11 @@ fi
 # Create a volume if not already exists, this is done now as
 # if left to the run command the directory can get the wrong permissions
 if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep "zwift-${USER}" > /dev/null; then
-    ${CONTAINER_TOOL} volume create "zwift-${USER}"
+    if ${CONTAINER_TOOL} volume create "zwift-${USER}"; then
+        msgbox ok "Created volume zwift-${USER}"
+    else
+        msgbox error "Failed to create volume zwift-${USER}"
+    fi
 fi
 
 # Only write environment variables to file when needed
@@ -569,9 +576,12 @@ if [[ ${INTERACTIVE} -eq 1 ]] || [[ ${ZWIFT_FG} -eq 1 ]]; then
 else
     if container_id=$("${container_command[@]}"); then
         msgbox ok "Launched Zwift! 🚀"
-        if [[ -n ${container_id} ]] && [[ ${require_xhost_access} -eq 1 ]] && hostname="$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")"; then
-            msgbox info "Allowing container to connect to X server"
-            xhost "+local:${hostname}" > /dev/null
+        if [[ -n ${container_id} ]] && [[ ${require_xhost_access} -eq 1 ]]; then
+            if hostname="$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")" && xhost "+local:${hostname}" > /dev/null; then
+                msgbox ok "Allowed container access to X server"
+            else
+                msgbox error "Failed to allow container access to X server, may not start"
+            fi
         fi
     else
         msgbox error "Failed to start Zwift, check variables! 😢" 10
