@@ -167,22 +167,50 @@ fi
 ##### Update zwift.sh script and pull latest container image #####
 
 # Check for updated zwift.sh by comparing checksums
+
+check_script_up_to_date() {
+    local remote_sum this_sum
+
+    if ! remote_sum="$(curl -fsSL "https://raw.githubusercontent.com/netbrain/zwift/${SCRIPT_VERSION}/src/zwift.sh" | sha256sum | awk '{print $1}')"; then
+        msgbox warning "Failed to check latest script version, assuming update is required"
+        return 1
+    fi
+
+    this_sum="$(sha256sum "${0}" | awk '{print $1}')"
+
+    [[ ${remote_sum} == "${this_sum}" ]]
+}
+
+upgrade_script() {
+    local install_script
+
+    msgbox info "Downloading latest install script"
+    if ! install_script="$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"; then
+        msgbox error "Failed to download install script"
+        return 1
+    fi
+
+    msgbox info "Running install script"
+    if ! pkexec env PATH="${PATH}" bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}"; then
+        msgbox error "Install script failed"
+        return 1
+    fi
+}
+
 if [[ ${SCRIPT_VERSION} != "${LATEST_SCRIPT_VERSION}" ]]; then
     msgbox warning "Using zwift.sh version ${SCRIPT_VERSION} instead of latest"
 fi
 if [[ ${DONT_CHECK} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
-
-    remote_sum="$(curl -s "https://raw.githubusercontent.com/netbrain/zwift/${SCRIPT_VERSION}/src/zwift.sh" | sha256sum | awk '{print $1}')"
-    this_sum="$(sha256sum "${0}" | awk '{print $1}')"
-
-    if [[ ${remote_sum} == "${this_sum}" ]]; then
+    if check_script_up_to_date; then
         msgbox ok "You are running the latest zwift.sh 👏"
     elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
-        msgbox info "Downloading latest zwift.sh"
-        install_script="$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
-        pkexec env PATH="${PATH}" bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}"
-        exec "${0}" "${@}"
+        if upgrade_script; then
+            msgbox ok "Switching to new zwift.sh script"
+            exec "${0}" "${@}"
+        else
+            msgbox error "Failed to upgrade script, continuing with old zwift.sh! 😔"
+        fi
     else
         msgbox warning "Continuing with old zwift.sh"
     fi

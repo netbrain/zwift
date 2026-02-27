@@ -115,7 +115,7 @@ ask_user_confirmation() {
     else
         msgbox info "Aborted Zwift installation"
         msgbox warning "Zwift not installed! 😥"
-        exit 0
+        exit 2
     fi
 }
 
