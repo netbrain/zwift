@@ -60,9 +60,9 @@ startup_cmd=(/bin/run_zwift.sh)
 update_required=0
 
 if is_empty_directory "${ZWIFT_HOME}"; then
-    startup_cmd=(/bin/update_zwift.sh install)
+    startup_cmd=(/bin/update_zwift.sh --install)
     update_required=1
-elif [[ ${1:-} == "update" ]]; then
+elif [[ ${1:-} == "--update" ]]; then
     startup_cmd=(/bin/update_zwift.sh)
     update_required=1
 fi

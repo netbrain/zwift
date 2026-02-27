@@ -123,7 +123,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-if [[ ${1:-} == "install" ]]; then
+if [[ ${1:-} == "--install" ]]; then
     msgbox info "Installing Zwift..."
     if ! install_zwift; then
         msgbox error "Failed to install Zwift!"
