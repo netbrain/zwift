@@ -151,13 +151,13 @@ cleanup() {
 
     msgbox info "Removing installation artifacts"
     # remove downloads and cache
-    rm "${ZWIFT_HOME}/ZwiftSetup.exe" || true
-    rm "${ZWIFT_HOME}/webview2-setup.exe" || true
-    rm -rf "${WINE_USER_HOME}/Downloads/Zwift" || true
-    rm -rf "/home/user/.cache/wine*" || true
+    rm -- "${ZWIFT_HOME}/ZwiftSetup.exe" || true
+    rm -- "${ZWIFT_HOME}/webview2-setup.exe" || true
+    rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
+    rm -rf -- "/home/user/.cache/wine*" || true
     # remove Zwift documents because it causes permission errors with podman
-    rm -rf "${ZWIFT_DOCS}" || true
-    rm -rf "${ZWIFT_DOCS_OLD}" || true # TODO remove when no longer needed  (301)
+    rm -rf -- "${ZWIFT_DOCS}" || true
+    rm -rf -- "${ZWIFT_DOCS_OLD}" || true # TODO remove when no longer needed  (301)
 }
 
 trap cleanup EXIT
