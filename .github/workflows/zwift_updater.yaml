@@ -29,10 +29,11 @@ jobs:
         image_version="$(curl -s https://hub.docker.com/v2/repositories/netbrain/zwift/tags/ | jq -r '.results[1].name')"
         build_date="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
-        echo "Latest zwift version is ${version}"
-        echo "Latest zwift container image version is ${image_version}"
+        echo "Latest Zwift version is: ${version}"
+        echo "Latest image version is: ${image_version}"
 
         if [[ ${image_version} == "${version}" ]]; then
+            echo "Nothing to do, image already has latest Zwift version"
             exit 0
         fi
 
@@ -48,7 +49,8 @@ jobs:
             -e CONTAINER_TOOL="docker" \
             --device="/dev/dri:/dev/dri" \
             -v /tmp/.X11-unix:/tmp/.X11-unix \
-            netbrain/zwift:latest update
+            netbrain/zwift:latest \
+            --update
 
         docker commit \
             --change="LABEL org.opencontainers.image.created=${build_date}" \
