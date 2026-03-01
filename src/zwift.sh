@@ -11,6 +11,7 @@ readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed (301)
 
 if [[ -t 1 ]]; then
+    readonly COLORED_OUTPUT_SUPPORTED="1"
     readonly COLOR_WHITE="\033[0;37m"
     readonly COLOR_RED="\033[0;31m"
     readonly COLOR_GREEN="\033[0;32m"
@@ -20,6 +21,7 @@ if [[ -t 1 ]]; then
     readonly STYLE_UNDERLINE="\033[4m"
     readonly RESET_STYLE="\033[0m"
 else
+    readonly COLORED_OUTPUT_SUPPORTED="0"
     readonly COLOR_WHITE=""
     readonly COLOR_RED=""
     readonly COLOR_GREEN=""
@@ -397,12 +399,13 @@ fi
 
 # Interactive mode and run in foreground/background
 if [[ ${INTERACTIVE} -eq 1 ]]; then
-    container_env_vars+=(COLORED_OUTPUT="1")
+    container_env_vars+=(COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}")
     container_args+=(-it --entrypoint bash)
 elif [[ ${ZWIFT_FG} -eq 1 ]]; then
-    container_env_vars+=(COLORED_OUTPUT="1")
+    container_env_vars+=(COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}")
     container_args+=(-it)
 else
+    container_env_vars+=(COLORED_OUTPUT="0")
     container_args+=(-d)
 fi
 

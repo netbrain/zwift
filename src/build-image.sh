@@ -5,6 +5,7 @@ readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 if [[ -t 1 ]]; then
+    readonly COLORED_OUTPUT_SUPPORTED="1"
     readonly COLOR_WHITE="\033[0;37m"
     readonly COLOR_RED="\033[0;31m"
     readonly COLOR_GREEN="\033[0;32m"
@@ -14,6 +15,7 @@ if [[ -t 1 ]]; then
     readonly STYLE_UNDERLINE="\033[4m"
     readonly RESET_STYLE="\033[0m"
 else
+    readonly COLORED_OUTPUT_SUPPORTED="0"
     readonly COLOR_WHITE=""
     readonly COLOR_RED=""
     readonly COLOR_GREEN=""
@@ -104,7 +106,7 @@ container_args=(
     --hostname "${HOSTNAME}"
 
     -e DEBUG="${DEBUG}"
-    -e COLORED_OUTPUT="1"
+    -e COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}"
     -e DISPLAY="${DISPLAY}"
     -e CONTAINER_TOOL="${CONTAINER_TOOL}"
     -e ZWIFT_UID="${ZWIFT_UID}"
