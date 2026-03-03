@@ -489,6 +489,7 @@ elif [[ ${XDG_SESSION_TYPE} == "x11" ]]; then
     window_manager="XOrg"
 else # tty or not set
     msgbox error "Can't run Zwift without window manager (XDG_SESSION_TYPE='${XDG_SESSION_TYPE}')"
+    exit 1
 fi
 
 # Setup Flags for Window Managers
@@ -501,6 +502,7 @@ if [[ ${window_manager} == "Wayland" ]]; then
 
     if [[ ${ZWIFT_UID} -ne ${UID} ]]; then
         msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}"
+        exit 1
     fi
 
     if [[ -n ${XDG_RUNTIME_DIR} ]] && [[ -n ${WAYLAND_DISPLAY} ]]; then
@@ -524,6 +526,7 @@ if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; t
         container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
     else
         msgbox error "X11 socket does not exist at /tmp/.X11-unix"
+        exit 1
     fi
 
     if [[ -n ${XAUTHORITY} ]]; then
@@ -595,6 +598,7 @@ if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep -
         msgbox ok "Created volume zwift-${USER}"
     else
         msgbox error "Failed to create volume zwift-${USER}"
+        exit 1
     fi
 fi
 
@@ -608,6 +612,7 @@ if [[ ${xhost_access_required} -eq 1 ]]; then
         msgbox ok "Container X11 access provided through xhost"
     else
         msgbox error "Container requires X11 access, but invoking xhost failed"
+        exit 1
     fi
 fi
 

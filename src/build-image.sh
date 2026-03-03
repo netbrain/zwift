@@ -130,6 +130,7 @@ elif command_exists xhost && xhost +local: > /dev/null; then
     msgbox ok "Container X11 access provided through xhost"
 else
     msgbox error "Container requires X11 access, but invoking xhost failed"
+    exit 1
 fi
 
 # Check for proprietary nvidia driver and set correct device to use
