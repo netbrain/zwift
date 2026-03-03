@@ -304,10 +304,8 @@ fi
 # Define base container environment variables
 container_env_vars+=(
     DEBUG="${DEBUG}"
-    DISPLAY="${DISPLAY}"
     ZWIFT_UID="${container_uid}"
     ZWIFT_GID="${container_gid}"
-    PULSE_SERVER="/run/user/${container_uid}/pulse/native"
     CONTAINER_TOOL="${CONTAINER_TOOL}"
 )
 
@@ -320,7 +318,6 @@ container_args+=(
     --env-file "${container_env_file}"
     -v "zwift-${USER}:${ZWIFT_DOCS}"
     -v "zwift-${USER}:${ZWIFT_DOCS_OLD}" # TODO remove when no longer needed (301)
-    -v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse"
 )
 
 ###################################################
@@ -480,6 +477,8 @@ fi
 ###################################
 ##### Window manager settings #####
 
+# Determine Window Manager
+
 if [[ ${XDG_SESSION_TYPE} == "wayland" ]] || [[ -n ${WAYLAND_DISPLAY} ]]; then
     if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
         window_manager="Wayland"
@@ -493,6 +492,9 @@ else
 fi
 
 # Setup Flags for Window Managers
+
+container_env_vars+=(DISPLAY="${DISPLAY}")
+
 if [[ ${window_manager} == "Wayland" ]]; then
     if [[ ${ZWIFT_UID} -ne ${UID} ]]; then
         msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}, may not start"
@@ -521,6 +523,7 @@ fi
 ####################################
 ##### Hardware driver settings #####
 
+# Allow container access to d-bus
 if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
     [[ ${DBUS_SESSION_BUS_ADDRESS} =~ ^unix:path=([^,]+) ]]
     dbus_unix_socket=${BASH_REMATCH[1]}
@@ -529,6 +532,10 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
         container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${local_uid}/${container_uid}}")
     fi
 fi
+
+# Configure sound driver
+container_env_vars+=(PULSE_SERVER="/run/user/${container_uid}/pulse/native")
+container_args+=(-v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse")
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
 if is_array "VGA_DEVICE_FLAG"; then
