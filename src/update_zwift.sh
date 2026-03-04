@@ -22,6 +22,7 @@ else
 fi
 
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
+readonly WINE_DISABLE_EGL="${WINE_DISABLE_EGL:-0}"
 
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
@@ -126,6 +127,12 @@ install_zwift() {
     # enable Wayland support, requires DISPLAY to be blank to use Wayland
     msgbox info "Enabling Wayland support"
     wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland || return 1
+
+    # Use glx instead of egl
+    if [[ ${WINE_DISABLE_EGL} -eq 1 ]]; then
+        msgbox info "Disabling EGL (using GLX instead)"
+        wine reg.exe add 'HKCU\Software\Wine\X11 Driver' /v UseEGL /d N || return 1
+    fi
 
     # download and install zwift
     msgbox info "Downloading and installing Zwift"
