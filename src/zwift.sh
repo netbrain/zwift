@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -uo pipefail
 
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
@@ -10,6 +11,7 @@ readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 readonly ZWIFT_DOCS_OLD="${WINE_USER_HOME}/Documents/Zwift" # TODO remove when no longer needed (301)
 
 if [[ -t 1 ]]; then
+    readonly COLORED_OUTPUT_SUPPORTED="1"
     readonly COLOR_WHITE="\033[0;37m"
     readonly COLOR_RED="\033[0;31m"
     readonly COLOR_GREEN="\033[0;32m"
@@ -19,6 +21,7 @@ if [[ -t 1 ]]; then
     readonly STYLE_UNDERLINE="\033[4m"
     readonly RESET_STYLE="\033[0m"
 else
+    readonly COLORED_OUTPUT_SUPPORTED="0"
     readonly COLOR_WHITE=""
     readonly COLOR_RED=""
     readonly COLOR_GREEN=""
@@ -29,11 +32,10 @@ else
     readonly RESET_STYLE=""
 fi
 
-# Message Box to simplify errors and questions.
 msgbox() {
-    local type="${1}"    # Type: info, ok, warning, error, question
-    local msg="${2}"     # Message: the message to display
-    local timeout="${3}" # Optional timeout: if explicitly set to 0, wait for user input to continue.
+    local type="${1:?}"    # Type: info, ok, warning, error, question
+    local msg="${2:?}"     # Message: the message to display
+    local timeout="${3:-}" # Optional timeout: if explicitly set to 0, wait for user input to continue
 
     case ${type} in
         info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
@@ -70,11 +72,16 @@ msgbox() {
     fi
 }
 
-# Check if a variable is an array or not
 is_array() {
-    local variable_name="${1}"
+    local variable_name="${1:?}"
     local array_regex="^declare -a"
     [[ "$(declare -p "${variable_name}")" =~ ${array_regex} ]]
+}
+
+command_exists() {
+    local cmd="${1:?}"
+    local cmd_path
+    cmd_path="$(command -v "${cmd}" 2> /dev/null)" && [[ -x ${cmd_path} ]]
 }
 
 echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
@@ -87,7 +94,7 @@ msgbox info "Preparing to launch Zwift"
 
 # Check for zwift configuration, sourced here
 load_config_file() {
-    local config_file="${1}"
+    local config_file="${1:?}"
     msgbox info "Looking for config file ${config_file}"
     if [[ -f ${config_file} ]]; then
         # shellcheck source=/dev/null
@@ -102,7 +109,15 @@ mkdir -p "${USER_CONFIG_DIR}"
 load_config_file "${USER_CONFIG_DIR}/config"
 load_config_file "${USER_CONFIG_DIR}/${USER}-config"
 
-# Initialize environment variables
+# Initialize system environment variables
+readonly DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-}"
+readonly DISPLAY="${DISPLAY:-}"
+readonly WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}"
+readonly XAUTHORITY="${XAUTHORITY:-}"
+readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
+readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-}"
+
+# Initialize user configuration environment variables
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
 readonly VERSION="${VERSION:-latest}"
 readonly LATEST_SCRIPT_VERSION="master"
@@ -125,25 +140,23 @@ readonly ZWIFT_FG="${ZWIFT_FG:-0}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly NETWORKING="${NETWORKING:-bridge}"
-readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u)}"
+readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
-readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-}"
-readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
 CONTAINER_TOOL="${CONTAINER_TOOL:-}"
 if [[ -z ${CONTAINER_TOOL} ]]; then
-    if [[ -x "$(command -v podman)" ]]; then
+    if command_exists podman; then
         CONTAINER_TOOL="podman"
     else
         CONTAINER_TOOL="docker"
     fi
 fi
 readonly CONTAINER_TOOL
-if [[ -x "$(command -v "${CONTAINER_TOOL}")" ]]; then
+if command_exists "${CONTAINER_TOOL}"; then
     msgbox ok "Found container tool: ${CONTAINER_TOOL}"
 else
     msgbox error "Container tool ${CONTAINER_TOOL} not found"
@@ -156,21 +169,50 @@ fi
 ##### Update zwift.sh script and pull latest container image #####
 
 # Check for updated zwift.sh by comparing checksums
+
+check_script_up_to_date() {
+    local remote_sum this_sum
+
+    if ! remote_sum="$(curl -fsSL "https://raw.githubusercontent.com/netbrain/zwift/${SCRIPT_VERSION}/src/zwift.sh" | sha256sum | awk '{print $1}')"; then
+        msgbox warning "Failed to check latest script version, assuming update is required"
+        return 1
+    fi
+
+    this_sum="$(sha256sum "${0}" | awk '{print $1}')"
+
+    [[ ${remote_sum} == "${this_sum}" ]]
+}
+
+upgrade_script() {
+    local install_script
+
+    msgbox info "Downloading latest install script"
+    if ! install_script="$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"; then
+        msgbox error "Failed to download install script"
+        return 1
+    fi
+
+    msgbox info "Running install script"
+    if ! pkexec env PATH="${PATH}" bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}"; then
+        msgbox error "Install script failed"
+        return 1
+    fi
+}
+
 if [[ ${SCRIPT_VERSION} != "${LATEST_SCRIPT_VERSION}" ]]; then
     msgbox warning "Using zwift.sh version ${SCRIPT_VERSION} instead of latest"
 fi
 if [[ ${DONT_CHECK} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
-
-    remote_sum="$(curl -s "https://raw.githubusercontent.com/netbrain/zwift/${SCRIPT_VERSION}/src/zwift.sh" | sha256sum | awk '{print $1}')"
-    this_sum="$(sha256sum "${0}" | awk '{print $1}')"
-
-    if [[ ${remote_sum} == "${this_sum}" ]]; then
+    if check_script_up_to_date; then
         msgbox ok "You are running the latest zwift.sh 👏"
     elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
-        msgbox info "Downloading latest zwift.sh"
-        pkexec env PATH="${PATH}" bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)" -- --script-version="${SCRIPT_VERSION}"
-        exec "${0}" "${@}"
+        if upgrade_script; then
+            msgbox ok "Switching to new zwift.sh script"
+            exec "${0}" "${@}"
+        else
+            msgbox error "Failed to upgrade script, continuing with old zwift.sh! 😔"
+        fi
     else
         msgbox warning "Continuing with old zwift.sh"
     fi
@@ -202,10 +244,16 @@ fi
 
 # Clean previous container images (if any)
 if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_PULL} -ne 1 ]]; then
-    readarray -t images < <(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')
-    if [[ ${#images[@]} -gt 0 ]] && [[ -n ${images[0]} ]]; then
+    declare -a old_images
+    old_images=()
+    if images_output="$(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')"; then
+        [[ -n ${images_output} ]] && readarray -t old_images <<< "${images_output}"
+    else
+        msgbox warning "Failed to retrieve list of container images"
+    fi
+    if [[ ${#old_images[@]} -gt 0 ]]; then
         msgbox info "Cleaning up previous container images"
-        if ${CONTAINER_TOOL} image rm "${images[@]}"; then
+        if ${CONTAINER_TOOL} image rm "${old_images[@]}"; then
             msgbox ok "Previous container images have been deleted"
         else
             msgbox warning "Failed to clean up previous container images"
@@ -351,8 +399,13 @@ fi
 
 # Interactive mode and run in foreground/background
 if [[ ${INTERACTIVE} -eq 1 ]]; then
+    container_env_vars+=(COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}")
     container_args+=(-it --entrypoint bash)
-elif [[ ${ZWIFT_FG} -ne 1 ]]; then
+elif [[ ${ZWIFT_FG} -eq 1 ]]; then
+    container_env_vars+=(COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}")
+    container_args+=(-it)
+else
+    container_env_vars+=(COLORED_OUTPUT="0")
     container_args+=(-d)
 fi
 
@@ -368,8 +421,7 @@ if is_array "CONTAINER_EXTRA_ARGS"; then
     container_args+=("${CONTAINER_EXTRA_ARGS[@]}")
 elif [[ -n ${CONTAINER_EXTRA_ARGS} ]]; then
     msgbox warning "CONTAINER_EXTRA_ARGS is defined as a string, it is recommended to use an array"
-    read -ra extra_args <<< "${CONTAINER_EXTRA_ARGS}"
-    container_args+=("${extra_args[@]}")
+    read -ra extra_args <<< "${CONTAINER_EXTRA_ARGS}" && container_args+=("${extra_args[@]}")
 fi
 
 #####################################
@@ -383,17 +435,19 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     plaintext_password="${ZWIFT_PASSWORD}"
 
     # ZWIFT_PASSWORD not set, check if secret already exists or if password is stored in secret-tool
+    has_password_secret=0
     if [[ -z ${plaintext_password} ]]; then
         if [[ ${CONTAINER_TOOL} == "podman" ]] && ${CONTAINER_TOOL} secret exists "${password_secret_name}"; then
             msgbox ok "Password for ${ZWIFT_USERNAME} found in ${CONTAINER_TOOL} secret store"
             has_password_secret=1
-        elif [[ -x "$(command -v secret-tool)" ]]; then
+        elif command_exists secret-tool; then
             msgbox info "Looking for password in secret-tool (application zwift username ${ZWIFT_USERNAME})"
             plaintext_password=$(secret-tool lookup application zwift username "${ZWIFT_USERNAME}")
         fi
     fi
 
     # ZWIFT_PASSWORD set or found in secret-tool, create/update secret
+    has_plaintext_password=0
     if [[ -n ${plaintext_password} ]]; then
         msgbox ok "Password found for ${ZWIFT_USERNAME}"
         has_plaintext_password=1
@@ -440,8 +494,8 @@ fi
 
 # Setup Flags for Window Managers
 if [[ ${window_manager} == "Wayland" ]]; then
-    if [[ ${ZWIFT_UID} -ne "$(id -u)" ]]; then
-        msgbox warning "Wayland does not support ZWIFT_UID different to your id of $(id -u), may not start." 5
+    if [[ ${ZWIFT_UID} -ne ${UID} ]]; then
+        msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}, may not start"
     fi
 
     container_env_vars+=(
@@ -481,8 +535,7 @@ if is_array "VGA_DEVICE_FLAG"; then
     container_args+=("${VGA_DEVICE_FLAG[@]}")
 elif [[ -n ${VGA_DEVICE_FLAG} ]]; then
     msgbox warning "VGA_DEVICE_FLAG is defined as a string, it is recommended to use an array"
-    read -ra vga_device_flags <<< "${VGA_DEVICE_FLAG}"
-    container_args+=("${vga_device_flags[@]}")
+    read -ra vga_device_flags <<< "${VGA_DEVICE_FLAG}" && container_args+=("${vga_device_flags[@]}")
 elif [[ -f "/proc/driver/nvidia/version" ]]; then
     if [[ ${CONTAINER_TOOL} == "podman" ]]; then
         container_args+=(--device="nvidia.com/gpu=all")
@@ -516,7 +569,11 @@ fi
 # Create a volume if not already exists, this is done now as
 # if left to the run command the directory can get the wrong permissions
 if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep "zwift-${USER}" > /dev/null; then
-    ${CONTAINER_TOOL} volume create "zwift-${USER}"
+    if ${CONTAINER_TOOL} volume create "zwift-${USER}"; then
+        msgbox ok "Created volume zwift-${USER}"
+    else
+        msgbox error "Failed to create volume zwift-${USER}"
+    fi
 fi
 
 # Only write environment variables to file when needed
@@ -524,7 +581,7 @@ msgbox info "Writing environment variables to temporary file"
 printf '%s\n' "${container_env_vars[@]}" > "${container_env_file}"
 
 # Determine whether xhost access should be provided
-if { [[ ${window_manager} == "XOrg" ]] || [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne 1 ]]; } && [[ -x "$(command -v xhost)" ]]; then
+if { [[ ${window_manager} == "XOrg" ]] || [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne 1 ]]; } && command_exists xhost; then
     require_xhost_access=1
 else
     require_xhost_access=0
@@ -551,8 +608,11 @@ else
     if container_id=$("${container_command[@]}"); then
         msgbox ok "Launched Zwift! 🚀"
         if [[ -n ${container_id} ]] && [[ ${require_xhost_access} -eq 1 ]]; then
-            msgbox info "Allowing container to connect to X server"
-            xhost +local:"$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")" > /dev/null
+            if hostname="$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")" && xhost "+local:${hostname}" > /dev/null; then
+                msgbox ok "Allowed container access to X server"
+            else
+                msgbox error "Failed to allow container access to X server, may not start"
+            fi
         fi
     else
         msgbox error "Failed to start Zwift, check variables! 😢" 10

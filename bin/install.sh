@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -uo pipefail
 
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
@@ -64,10 +65,9 @@ else
     readonly RESET_STYLE=""
 fi
 
-# Message Box to simplify errors and questions.
 msgbox() {
-    local type="${1}" # Type: info, ok, warning, error, question
-    local msg="${2}"  # Message: the message to display
+    local type="${1:?}" # Type: info, ok, warning, error, question
+    local msg="${2:?}"  # Message: the message to display
 
     case ${type} in
         info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
@@ -115,13 +115,13 @@ ask_user_confirmation() {
     else
         msgbox info "Aborted Zwift installation"
         msgbox warning "Zwift not installed! 😥"
-        exit 0
+        exit 2
     fi
 }
 
 create_directories() {
     create_directory() {
-        local directory="${1}"
+        local directory="${1:?}"
 
         msgbox info "  Creating directory ${directory}"
 
@@ -142,8 +142,8 @@ create_directories() {
 
 download_zwift() {
     download_asset() {
-        local destination="${1}"
-        local url="${2}"
+        local destination="${1:?}"
+        local url="${2:?}"
 
         msgbox info "  Downloading ${url}"
 
