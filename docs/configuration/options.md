@@ -79,6 +79,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_FG`](#zwift_fg)                                   | `0`                        | If set to `1`, run the container in the foreground  |
 | [`ZWIFT_NO_GAMEMODE`](#zwift_no_gamemode)                 | `0`                        | If set to `1`, don't run game mode                  |
 | [`WINE_EXPERIMENTAL_WAYLAND`](#wine_experimental_wayland) | `0`                        | If set to `1`, use native Wayland                   |
+| [`WINE_DISABLE_EGL`](#wine_disable_egl)                   | `0`                        | If set to `1`, use GLX instead of EGL               |
 | [`NETWORKING`](#networking)                               | `bridge`                   | Sets the type of container networking to use        |
 | [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override container GPU/device flags                 |
 | [`PRIVILEGED_CONTAINER`](#privileged_container)           | `0`                        | If set to `1`, run the container in privileged mode |
@@ -663,6 +664,20 @@ Only used if the window manager is Wayland. Ignored if the window manager is X11
 
 {: .warning }
 This feature is experimental. Reduced performance and other sporadic issues are expected.
+
+---
+
+### `WINE_DISABLE_EGL`
+
+If set to `1`, use GLX instead of EGL. Wine uses EGL for OpenGL by default since version 10.17.
+
+| Item              | Description                  |
+|:------------------|:-----------------------------|
+| Allowed values    | `0` - Use EGL for OpenGL.    |
+|                   | `1` - Use GLX for OpenGL.    |
+| Default value     | `0`                          |
+| Commandline usage | `WINE_DISABLE_EGL="1" zwift` |
+| Config file usage | `WINE_DISABLE_EGL="1"`       |
 
 ---
 

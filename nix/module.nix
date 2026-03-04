@@ -169,6 +169,12 @@ in
       description = "Enable experimental Wayland support in Wine.";
     };
 
+    wineDisableEgl = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Use GLX instead of EGL in Wine.";
+    };
+
     debug = mkOption {
       type = types.bool;
       default = false;
@@ -216,6 +222,7 @@ in
         zwiftFg = if cfg.zwiftFg then "1" else "";
         zwiftNoGameMode = if cfg.zwiftNoGameMode then "1" else "";
         wineExperimentalWayland = if cfg.wineExperimentalWayland then "1" else "";
+        wineDisableEgl = if cfg.wineDisableEgl then "1" else "";
         debug = if cfg.debug then "1" else "";
         privilegedContainer = if cfg.privilegedContainer then "1" else "";
         disableBluetooth = if cfg.disableBluetooth then "1" else "";

@@ -23,6 +23,7 @@ fi
 
 readonly VERBOSITY="${VERBOSITY:-1}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
+readonly WINE_DISABLE_EGL="${WINE_DISABLE_EGL:-0}"
 readonly ZWIFT_USERNAME="${ZWIFT_USERNAME:-}"
 readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:-}"
 readonly ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION:-}"
@@ -126,6 +127,11 @@ fi
 # Create array for zwift arguments
 declare -a zwift_args
 zwift_args=()
+
+if [[ ${WINE_DISABLE_EGL} -eq 1 ]]; then
+    msgbox info "Disabling EGL (using GLX instead)"
+    wine reg.exe add 'HKCU\Software\Wine\X11 Driver' /f /v UseEGL /d N || return 1
+fi
 
 if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
     if [[ -f ${ZWIFT_PREFS_FILE} ]]; then

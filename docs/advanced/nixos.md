@@ -70,6 +70,8 @@ environment variables in camelCase:
     zwiftNoGameMode = false;
     # Enable Wine's experimental Wayland support if using Wayland
     wineExperimentalWayland = false;
+    # Use GLX instead of EGL for OpenGL in Wine
+    wineDisableEgl = true;
     # Networking mode for the container ("bridge" is default)
     networking = "bridge";
     # User ID for running the container (usually your own UID)
