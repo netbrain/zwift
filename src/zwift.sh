@@ -479,13 +479,15 @@ fi
 
 # Determine Window Manager
 
-if [[ ${XDG_SESSION_TYPE} == "wayland" ]] || [[ -n ${WAYLAND_DISPLAY} ]]; then
+window_manager=""
+
+if [[ ${XDG_SESSION_TYPE} == "wayland" ]]; then
     if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
         window_manager="Wayland"
     else
         window_manager="XWayland"
     fi
-elif [[ ${XDG_SESSION_TYPE} == "x11" ]] || [[ -n ${DISPLAY} ]]; then
+elif [[ ${XDG_SESSION_TYPE} == "x11" ]]; then
     window_manager="XOrg"
 else
     window_manager="Other"
