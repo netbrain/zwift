@@ -487,8 +487,8 @@ if [[ ${XDG_SESSION_TYPE} == "wayland" ]]; then
     fi
 elif [[ ${XDG_SESSION_TYPE} == "x11" ]]; then
     window_manager="XOrg"
-else
-    window_manager="Other"
+else # tty or not set
+    msgbox error "Can't run Zwift without window manager (XDG_SESSION_TYPE='${XDG_SESSION_TYPE}')"
 fi
 
 # Setup Flags for Window Managers
@@ -496,25 +496,36 @@ fi
 container_env_vars+=(DISPLAY="${DISPLAY}")
 
 if [[ ${window_manager} == "Wayland" ]]; then
+    msgbox info "Using Wayland window manager"
+
     if [[ ${ZWIFT_UID} -ne ${UID} ]]; then
-        msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}, may not start"
+        msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}"
     fi
 
-    container_env_vars+=(
-        WINE_EXPERIMENTAL_WAYLAND=1
-        XDG_RUNTIME_DIR="/run/user/${container_uid}"
-        WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
-    )
-
-    if [[ -n ${XDG_RUNTIME_DIR} ]]; then
+    if [[ -n ${XDG_RUNTIME_DIR} ]] && [[ -n ${WAYLAND_DISPLAY} ]]; then
+        container_env_vars+=(
+            XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}"
+            WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
+            WINE_EXPERIMENTAL_WAYLAND="1"
+        )
         container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
     else
-        msgbox error "XDG_RUNTIME_DIR not set, Zwift will likely launch with a black screen!"
+        msgbox error "Required environment variables XDG_RUNTIME_DIR and/or WAYLAND_DISPLAY are not set"
+        msgbox error "Falling back to XWayland"
+        window_manager="XWayland"
     fi
-elif [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
-    container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
+fi
+
+if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
+    msgbox info "Using X11 window manager (${window_manager})"
+
+    if [[ -d /tmp/.X11-unix ]]; then
+        container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
+    else
+        msgbox error "X11 socket does not exist at /tmp/.X11-unix"
+    fi
+
     if [[ -n ${XAUTHORITY} ]]; then
-        # If not XAuthority set then don't pass, hyprland is one that does not use it
         container_env_vars+=(XAUTHORITY="${XAUTHORITY//${local_uid}/${container_uid}}")
         container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${local_uid}/${container_uid}}")
     fi
