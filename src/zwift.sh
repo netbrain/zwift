@@ -376,7 +376,7 @@ if [[ ${ZWIFT_OVERRIDE_GRAPHICS} -eq 1 ]]; then
     fi
 
     # Override all zwift graphics profiles with the custom config file.
-    msgbox ok "Overriding zwift graphics profiles with ${zwift_graphics_config}"
+    msgbox info "Overriding zwift graphics profiles with ${zwift_graphics_config}"
     container_args+=(
         -v "${zwift_graphics_config}:${ZWIFT_HOME}/data/configs/basic.txt"
         -v "${zwift_graphics_config}:${ZWIFT_HOME}/data/configs/medium.txt"
@@ -436,7 +436,7 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     has_password_secret=0
     if [[ -z ${plaintext_password} ]]; then
         if [[ ${CONTAINER_TOOL} == "podman" ]] && ${CONTAINER_TOOL} secret exists "${password_secret_name}"; then
-            msgbox ok "Password for ${ZWIFT_USERNAME} found in ${CONTAINER_TOOL} secret store"
+            msgbox info "Password for ${ZWIFT_USERNAME} found in ${CONTAINER_TOOL} secret store"
             has_password_secret=1
         elif command_exists secret-tool; then
             msgbox info "Looking for password in secret-tool (application zwift username ${ZWIFT_USERNAME})"
@@ -447,10 +447,10 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     # ZWIFT_PASSWORD set or found in secret-tool, create/update secret
     has_plaintext_password=0
     if [[ -n ${plaintext_password} ]]; then
-        msgbox ok "Password found for ${ZWIFT_USERNAME}"
+        msgbox info "Password found for ${ZWIFT_USERNAME}"
         has_plaintext_password=1
         if [[ ${CONTAINER_TOOL} == "podman" ]] && printf '%s' "${plaintext_password}" | ${CONTAINER_TOOL} secret create --replace=true "${password_secret_name}" - > /dev/null; then
-            msgbox ok "Stored password in ${CONTAINER_TOOL} secret store"
+            msgbox info "Stored password in ${CONTAINER_TOOL} secret store"
             has_password_secret=1
         else
             msgbox info "Could not create secret for password, using environment variable instead"
