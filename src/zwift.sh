@@ -494,6 +494,7 @@ fi
 # Setup Flags for Window Managers
 
 container_env_vars+=(DISPLAY="${DISPLAY}")
+xhost_access_required=0
 
 if [[ ${window_manager} == "Wayland" ]]; then
     msgbox info "Using Wayland window manager"
@@ -528,6 +529,9 @@ if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; t
     if [[ -n ${XAUTHORITY} ]]; then
         container_env_vars+=(XAUTHORITY="${XAUTHORITY//${local_uid}/${container_uid}}")
         container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${local_uid}/${container_uid}}")
+    else
+        msgbox info "XAUTHORITY environment variable not set, container access to X11 needs to be granted with xhost"
+        xhost_access_required=1
     fi
 fi
 
@@ -598,17 +602,10 @@ fi
 msgbox info "Writing environment variables to temporary file"
 printf '%s\n' "${container_env_vars[@]}" > "${container_env_file}"
 
-# Determine whether xhost access should be provided
-if { [[ ${window_manager} == "XOrg" ]] || [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne 1 ]]; } && command_exists xhost; then
-    require_xhost_access=1
-else
-    require_xhost_access=0
-fi
-
 if [[ ${INTERACTIVE} -eq 1 ]] || [[ ${ZWIFT_FG} -eq 1 ]]; then
     # In interactive mode we don't have a container ID to run xhost against later.
     # If using X11/XWayland, show instructions so users can enable X access manually.
-    if [[ ${require_xhost_access} -eq 1 ]]; then
+    if command_exists xhost && [[ ${xhost_access_required} -eq 1 ]]; then
         msgbox info "Starting Zwift in foreground: xhost is not automatically enabled for this container."
         msgbox info "  If you need X11 apps inside the container to display, run this in another terminal:"
         msgbox info "    xhost +local:${HOSTNAME}"
@@ -625,7 +622,7 @@ if [[ ${INTERACTIVE} -eq 1 ]] || [[ ${ZWIFT_FG} -eq 1 ]]; then
 else
     if container_id=$("${container_command[@]}"); then
         msgbox ok "Launched Zwift! 🚀"
-        if [[ -n ${container_id} ]] && [[ ${require_xhost_access} -eq 1 ]]; then
+        if [[ -n ${container_id} ]] && command_exists xhost && [[ ${xhost_access_required} -eq 1 ]]; then
             if hostname="$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")" && xhost "+local:${hostname}" > /dev/null; then
                 msgbox ok "Allowed container access to X server"
             else
