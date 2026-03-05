@@ -604,35 +604,24 @@ fi
 msgbox info "Writing environment variables to temporary file"
 printf '%s\n' "${container_env_vars[@]}" > "${container_env_file}"
 
-if [[ ${INTERACTIVE} -eq 1 ]] || [[ ${ZWIFT_FG} -eq 1 ]]; then
-    # In interactive mode we don't have a container ID to run xhost against later.
-    # If using X11/XWayland, show instructions so users can enable X access manually.
-    if command_exists xhost && [[ ${xhost_access_required} -eq 1 ]]; then
-        msgbox info "Starting Zwift in foreground: xhost is not automatically enabled for this container."
-        msgbox info "  If you need X11 apps inside the container to display, run this in another terminal:"
-        msgbox info "    xhost +local:${HOSTNAME}"
-        msgbox info "  After you're done, you can revoke access with:"
-        msgbox info "    xhost -local:${HOSTNAME}"
+# Use xhost to allow container to access X11 if needed
+if [[ ${xhost_access_required} -eq 1 ]]; then
+    if command_exists xhost && xhost +local: > /dev/null; then
+        msgbox ok "Container X11 access provided through xhost"
+    else
+        msgbox error "Container requires X11 access, but invoking xhost failed"
     fi
-    msgbox ok "Launching Zwift! 🚀"
-    if "${container_command[@]}"; then
+fi
+
+# Launch Zwift!
+msgbox info "Launching Zwift"
+if "${container_command[@]}"; then
+    if [[ ${INTERACTIVE} -eq 1 ]] || [[ ${ZWIFT_FG} -eq 1 ]]; then
         msgbox ok "Zwift container closed, exiting 🫡"
     else
-        msgbox error "Failed to start Zwift, check variables! 😢" 10
-        exit 1
+        msgbox ok "Launched Zwift! 🚀"
     fi
 else
-    if container_id=$("${container_command[@]}"); then
-        msgbox ok "Launched Zwift! 🚀"
-        if [[ -n ${container_id} ]] && command_exists xhost && [[ ${xhost_access_required} -eq 1 ]]; then
-            if hostname="$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")" && xhost "+local:${hostname}" > /dev/null; then
-                msgbox ok "Allowed container access to X server"
-            else
-                msgbox error "Failed to allow container access to X server, may not start"
-            fi
-        fi
-    else
-        msgbox error "Failed to start Zwift, check variables! 😢" 10
-        exit 1
-    fi
+    msgbox error "Failed to start Zwift, check variables! 😢" 10
+    exit 1
 fi
