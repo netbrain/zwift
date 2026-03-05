@@ -496,9 +496,6 @@ fi
 
 # Setup Flags for Window Managers
 
-container_env_vars+=(DISPLAY="${DISPLAY}")
-xhost_access_required=0
-
 if [[ ${window_manager} == "Wayland" ]]; then
     msgbox info "Using Wayland window manager"
 
@@ -521,8 +518,16 @@ if [[ ${window_manager} == "Wayland" ]]; then
     fi
 fi
 
+xhost_access_required=0
 if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
     msgbox info "Using X11 window manager (${window_manager})"
+
+    if [[ -n ${DISPLAY} ]]; then
+        container_env_vars+=(DISPLAY="${DISPLAY}")
+    else
+        msgbox error "Required environment variable DISPLAY is not set"
+        exit 1
+    fi
 
     if [[ -d /tmp/.X11-unix ]]; then
         container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
