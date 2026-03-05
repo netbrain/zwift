@@ -113,15 +113,23 @@ container_args=(
     -e ZWIFT_GID="${ZWIFT_GID}"
 
     -v /tmp/.X11-unix:/tmp/.X11-unix
-    -v "/run/user/${UID}:/run/user/${ZWIFT_UID}"
 )
 
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     container_args+=(--userns "keep-id:uid=${ZWIFT_UID},gid=${ZWIFT_GID}")
 fi
 
+# Configure window manager
+msgbox info "Using X11 window manager"
 if [[ -n ${XAUTHORITY} ]]; then
-    container_args+=(-e XAUTHORITY="${XAUTHORITY}")
+    container_args+=(
+        -e XAUTHORITY="${XAUTHORITY}"
+        -v "${XAUTHORITY}:${XAUTHORITY}"
+    )
+elif command_exists xhost && xhost +local: > /dev/null; then
+    msgbox ok "Container X11 access provided through xhost"
+else
+    msgbox error "Container requires X11 access, but invoking xhost failed"
 fi
 
 # Check for proprietary nvidia driver and set correct device to use
