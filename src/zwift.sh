@@ -20,6 +20,8 @@ if [[ -t 1 ]]; then
     readonly STYLE_BOLD="\033[1m"
     readonly STYLE_UNDERLINE="\033[4m"
     readonly RESET_STYLE="\033[0m"
+    readonly OVERWRITE_PREV_LINE="\033[1A\033[K"
+    readonly OVERWRITE_CURRENT_LINE="\r\033[K"
 else
     readonly COLORED_OUTPUT_SUPPORTED="0"
     readonly COLOR_WHITE=""
@@ -30,6 +32,8 @@ else
     readonly STYLE_BOLD=""
     readonly STYLE_UNDERLINE=""
     readonly RESET_STYLE=""
+    readonly OVERWRITE_PREV_LINE=""
+    readonly OVERWRITE_CURRENT_LINE=""
 fi
 
 msgbox() {
@@ -43,28 +47,38 @@ msgbox() {
         warning) echo -e "${COLOR_YELLOW}[!] ${msg}${RESET_STYLE}" ;;
         error) echo -e "${COLOR_RED}[✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
-            local ans
-            if [[ -n ${timeout} ]] && [[ ${timeout} -gt "0" ]]; then
-                echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
-                read -rt "${timeout}" -n 1 ans
+            local ans=""
+            if [[ -n ${timeout} ]] && [[ ${timeout} -gt 0 ]]; then
+                while [[ ${timeout} -gt 0 ]]; do
+                    echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
+                    read -rt 1 -n 1 ans
+                    if [[ -n ${ans} ]]; then
+                        echo
+                        case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
+                    fi
+                    ((timeout--))
+                    [[ ${timeout} -gt 0 ]] && echo -ne "${OVERWRITE_CURRENT_LINE}"
+                done
                 echo
+                return 1
             else
                 echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
                 read -rn 1 ans
                 echo
+                case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
             fi
-            case "${ans}" in
-                [yY] | [yY][eE][sS]) return 0 ;;
-                *) return 1 ;;
-            esac
             ;;
         *) echo -e "${COLOR_WHITE}[*] ${msg}${RESET_STYLE}" ;;
     esac
 
     if [[ -n ${timeout} ]]; then
         if [[ ${timeout} -gt 0 ]]; then
-            echo -e "${COLOR_BLUE}[*] Continuing in ${timeout} seconds...${RESET_STYLE}"
-            sleep "${timeout}"
+            while [[ ${timeout} -gt 0 ]]; do
+                echo -e "${COLOR_BLUE}[*] Continuing in ${timeout} seconds...${RESET_STYLE}"
+                sleep 1
+                ((timeout--))
+                [[ ${timeout} -gt 0 ]] && echo -ne "${OVERWRITE_PREV_LINE}"
+            done
         else
             echo -ne "${COLOR_YELLOW}[*] ${STYLE_BOLD}${STYLE_UNDERLINE}Press any key to continue...${RESET_STYLE}"
             read -rsn1
