@@ -20,6 +20,8 @@ if [[ -t 1 ]]; then
     readonly STYLE_BOLD="\033[1m"
     readonly STYLE_UNDERLINE="\033[4m"
     readonly RESET_STYLE="\033[0m"
+    readonly OVERWRITE_PREV_LINE="\033[1A\033[K"
+    readonly OVERWRITE_CURRENT_LINE="\r\033[K"
 else
     readonly COLORED_OUTPUT_SUPPORTED="0"
     readonly COLOR_WHITE=""
@@ -30,6 +32,8 @@ else
     readonly STYLE_BOLD=""
     readonly STYLE_UNDERLINE=""
     readonly RESET_STYLE=""
+    readonly OVERWRITE_PREV_LINE=""
+    readonly OVERWRITE_CURRENT_LINE=""
 fi
 
 msgbox() {
@@ -43,27 +47,38 @@ msgbox() {
         warning) echo -e "${COLOR_YELLOW}[!] ${msg}${RESET_STYLE}" ;;
         error) echo -e "${COLOR_RED}[✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
-            local ans
-            if [[ -n ${timeout} ]] && [[ ${timeout} -gt "0" ]]; then
-                echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
-                read -rt "${timeout}" -n 1 ans
+            local ans=""
+            if [[ -n ${timeout} ]] && [[ ${timeout} -gt 0 ]]; then
+                while [[ ${timeout} -gt 0 ]]; do
+                    echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
+                    read -rt 1 -n 1 ans
+                    if [[ -n ${ans} ]]; then
+                        echo
+                        case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
+                    fi
+                    ((timeout--))
+                    [[ ${timeout} -gt 0 ]] && echo -ne "${OVERWRITE_CURRENT_LINE}"
+                done
                 echo
+                return 1
             else
                 echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
                 read -rn 1 ans
                 echo
+                case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
             fi
-            case "${ans}" in
-                [yY] | [yY][eE][sS]) return 0 ;;
-                *) return 1 ;;
-            esac
             ;;
         *) echo -e "${COLOR_WHITE}[*] ${msg}${RESET_STYLE}" ;;
     esac
 
     if [[ -n ${timeout} ]]; then
         if [[ ${timeout} -gt 0 ]]; then
-            sleep "${timeout}"
+            while [[ ${timeout} -gt 0 ]]; do
+                echo -e "${COLOR_BLUE}[*] Continuing in ${timeout} seconds...${RESET_STYLE}"
+                sleep 1
+                ((timeout--))
+                [[ ${timeout} -gt 0 ]] && echo -ne "${OVERWRITE_PREV_LINE}"
+            done
         else
             echo -ne "${COLOR_YELLOW}[*] ${STYLE_BOLD}${STYLE_UNDERLINE}Press any key to continue...${RESET_STYLE}"
             read -rsn1
@@ -115,7 +130,6 @@ readonly DISPLAY="${DISPLAY:-}"
 readonly WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}"
 readonly XAUTHORITY="${XAUTHORITY:-}"
 readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
-readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-}"
 
 # Initialize user configuration environment variables
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
@@ -304,10 +318,8 @@ fi
 # Define base container environment variables
 container_env_vars+=(
     DEBUG="${DEBUG}"
-    DISPLAY="${DISPLAY}"
     ZWIFT_UID="${container_uid}"
     ZWIFT_GID="${container_gid}"
-    PULSE_SERVER="/run/user/${container_uid}/pulse/native"
     CONTAINER_TOOL="${CONTAINER_TOOL}"
 )
 
@@ -320,7 +332,6 @@ container_args+=(
     --env-file "${container_env_file}"
     -v "zwift-${USER}:${ZWIFT_DOCS}"
     -v "zwift-${USER}:${ZWIFT_DOCS_OLD}" # TODO remove when no longer needed (301)
-    -v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse"
 )
 
 ###################################################
@@ -378,7 +389,7 @@ if [[ ${ZWIFT_OVERRIDE_GRAPHICS} -eq 1 ]]; then
     fi
 
     # Override all zwift graphics profiles with the custom config file.
-    msgbox ok "Overriding zwift graphics profiles with ${zwift_graphics_config}"
+    msgbox info "Overriding zwift graphics profiles with ${zwift_graphics_config}"
     container_args+=(
         -v "${zwift_graphics_config}:${ZWIFT_HOME}/data/configs/basic.txt"
         -v "${zwift_graphics_config}:${ZWIFT_HOME}/data/configs/medium.txt"
@@ -438,7 +449,7 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     has_password_secret=0
     if [[ -z ${plaintext_password} ]]; then
         if [[ ${CONTAINER_TOOL} == "podman" ]] && ${CONTAINER_TOOL} secret exists "${password_secret_name}"; then
-            msgbox ok "Password for ${ZWIFT_USERNAME} found in ${CONTAINER_TOOL} secret store"
+            msgbox info "Password for ${ZWIFT_USERNAME} found in ${CONTAINER_TOOL} secret store"
             has_password_secret=1
         elif command_exists secret-tool; then
             msgbox info "Looking for password in secret-tool (application zwift username ${ZWIFT_USERNAME})"
@@ -449,10 +460,10 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     # ZWIFT_PASSWORD set or found in secret-tool, create/update secret
     has_plaintext_password=0
     if [[ -n ${plaintext_password} ]]; then
-        msgbox ok "Password found for ${ZWIFT_USERNAME}"
+        msgbox info "Password found for ${ZWIFT_USERNAME}"
         has_plaintext_password=1
         if [[ ${CONTAINER_TOOL} == "podman" ]] && printf '%s' "${plaintext_password}" | ${CONTAINER_TOOL} secret create --replace=true "${password_secret_name}" - > /dev/null; then
-            msgbox ok "Stored password in ${CONTAINER_TOOL} secret store"
+            msgbox info "Stored password in ${CONTAINER_TOOL} secret store"
             has_password_secret=1
         else
             msgbox info "Could not create secret for password, using environment variable instead"
@@ -480,47 +491,89 @@ fi
 ###################################
 ##### Window manager settings #####
 
-if [[ ${XDG_SESSION_TYPE} == "wayland" ]] || [[ -n ${WAYLAND_DISPLAY} ]]; then
-    if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
+# Determine Window Manager
+
+# XDG_SESSION_TYPE is either wayland, x11 or tty
+# - On wayland, it is wayland
+# - On xorg, it is x11
+# - On tty, it is tty
+# - On tty, manually starting x11 with xstart, it remains tty
+# So we cannot rely on XDG_SESSION_TYPE to detect the window manager
+
+window_manager=""
+if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
+    if [[ -n ${WAYLAND_DISPLAY} ]]; then
         window_manager="Wayland"
     else
-        window_manager="XWayland"
+        msgbox warning "WINE_EXPERIMENTAL_WAYLAND: Window manager is not Wayland, ignoring"
     fi
-elif [[ ${XDG_SESSION_TYPE} == "x11" ]] || [[ -n ${DISPLAY} ]]; then
-    window_manager="XOrg"
-else
-    window_manager="Other"
+fi
+if [[ -z ${window_manager} ]]; then
+    if [[ -n ${WAYLAND_DISPLAY} ]]; then
+        window_manager="XWayland"
+    elif [[ -n ${DISPLAY} ]] && [[ -S /tmp/.X11-unix/X${DISPLAY#*:} ]]; then
+        window_manager="XOrg"
+    else # no window manager, tty?
+        msgbox error "Can't run Zwift without window manager"
+        exit 1
+    fi
 fi
 
 # Setup Flags for Window Managers
+
 if [[ ${window_manager} == "Wayland" ]]; then
+    msgbox info "Using Wayland window manager"
+
     if [[ ${ZWIFT_UID} -ne ${UID} ]]; then
-        msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}, may not start"
+        msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}"
+        exit 1
     fi
 
-    container_env_vars+=(
-        WINE_EXPERIMENTAL_WAYLAND=1
-        XDG_RUNTIME_DIR="/run/user/${container_uid}"
-        WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
-    )
-
-    if [[ -n ${XDG_RUNTIME_DIR} ]]; then
+    if [[ -n ${XDG_RUNTIME_DIR} ]] && [[ -n ${WAYLAND_DISPLAY} ]]; then
+        container_env_vars+=(
+            XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}"
+            WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
+            WINE_EXPERIMENTAL_WAYLAND="1"
+        )
         container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
     else
-        msgbox error "XDG_RUNTIME_DIR not set, Zwift will likely launch with a black screen!"
+        msgbox error "Required environment variables XDG_RUNTIME_DIR and/or WAYLAND_DISPLAY are not set"
+        msgbox error "Falling back to XWayland" 5
+        window_manager="XWayland"
     fi
-elif [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
-    container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
+fi
+
+xhost_access_required=0
+if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
+    msgbox info "Using X11 window manager (${window_manager})"
+
+    if [[ -n ${DISPLAY} ]]; then
+        container_env_vars+=(DISPLAY="${DISPLAY}")
+    else
+        msgbox error "Required environment variable DISPLAY is not set"
+        exit 1
+    fi
+
+    if [[ -d /tmp/.X11-unix ]]; then
+        container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
+    else
+        msgbox error "X11 socket does not exist at /tmp/.X11-unix"
+        exit 1
+    fi
+
     if [[ -n ${XAUTHORITY} ]]; then
-        # If not XAuthority set then don't pass, hyprland is one that does not use it
         container_env_vars+=(XAUTHORITY="${XAUTHORITY//${local_uid}/${container_uid}}")
         container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${local_uid}/${container_uid}}")
+    else
+        msgbox info "XAUTHORITY environment variable not set, container access to X11 needs to be granted with xhost"
+        xhost_access_required=1
     fi
 fi
 
 ####################################
 ##### Hardware driver settings #####
 
+# Allow container access to d-bus
 if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
     [[ ${DBUS_SESSION_BUS_ADDRESS} =~ ^unix:path=([^,]+) ]]
     dbus_unix_socket=${BASH_REMATCH[1]}
@@ -529,6 +582,10 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
         container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${local_uid}/${container_uid}}")
     fi
 fi
+
+# Configure sound driver
+container_env_vars+=(PULSE_SERVER="/run/user/${container_uid}/pulse/native")
+container_args+=(-v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse")
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
 if is_array "VGA_DEVICE_FLAG"; then
@@ -568,11 +625,12 @@ fi
 
 # Create a volume if not already exists, this is done now as
 # if left to the run command the directory can get the wrong permissions
-if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep "zwift-${USER}" > /dev/null; then
+if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep -q "zwift-${USER}"; then
     if ${CONTAINER_TOOL} volume create "zwift-${USER}"; then
         msgbox ok "Created volume zwift-${USER}"
     else
         msgbox error "Failed to create volume zwift-${USER}"
+        exit 1
     fi
 fi
 
@@ -580,42 +638,25 @@ fi
 msgbox info "Writing environment variables to temporary file"
 printf '%s\n' "${container_env_vars[@]}" > "${container_env_file}"
 
-# Determine whether xhost access should be provided
-if { [[ ${window_manager} == "XOrg" ]] || [[ ${WINE_EXPERIMENTAL_WAYLAND} -ne 1 ]]; } && command_exists xhost; then
-    require_xhost_access=1
-else
-    require_xhost_access=0
+# Use xhost to allow container to access X11 if needed
+if [[ ${xhost_access_required} -eq 1 ]]; then
+    if command_exists xhost && xhost +local: > /dev/null; then
+        msgbox ok "Container X11 access provided through xhost"
+    else
+        msgbox error "Container requires X11 access, but invoking xhost failed"
+        exit 1
+    fi
 fi
 
-if [[ ${INTERACTIVE} -eq 1 ]] || [[ ${ZWIFT_FG} -eq 1 ]]; then
-    # In interactive mode we don't have a container ID to run xhost against later.
-    # If using X11/XWayland, show instructions so users can enable X access manually.
-    if [[ ${require_xhost_access} -eq 1 ]]; then
-        msgbox info "Starting Zwift in foreground: xhost is not automatically enabled for this container."
-        msgbox info "  If you need X11 apps inside the container to display, run this in another terminal:"
-        msgbox info "    xhost +local:${HOSTNAME}"
-        msgbox info "  After you're done, you can revoke access with:"
-        msgbox info "    xhost -local:${HOSTNAME}"
-    fi
-    msgbox ok "Launching Zwift! 🚀"
-    if "${container_command[@]}"; then
+# Launch Zwift!
+msgbox info "Launching Zwift"
+if "${container_command[@]}"; then
+    if [[ ${INTERACTIVE} -eq 1 ]] || [[ ${ZWIFT_FG} -eq 1 ]]; then
         msgbox ok "Zwift container closed, exiting 🫡"
     else
-        msgbox error "Failed to start Zwift, check variables! 😢" 10
-        exit 1
+        msgbox ok "Launched Zwift! 🚀"
     fi
 else
-    if container_id=$("${container_command[@]}"); then
-        msgbox ok "Launched Zwift! 🚀"
-        if [[ -n ${container_id} ]] && [[ ${require_xhost_access} -eq 1 ]]; then
-            if hostname="$(${CONTAINER_TOOL} inspect --format='{{ .Config.Hostname }}' "${container_id}")" && xhost "+local:${hostname}" > /dev/null; then
-                msgbox ok "Allowed container access to X server"
-            else
-                msgbox error "Failed to allow container access to X server, may not start"
-            fi
-        fi
-    else
-        msgbox error "Failed to start Zwift, check variables! 😢" 10
-        exit 1
-    fi
+    msgbox error "Failed to start Zwift, check variables! 😢" 10
+    exit 1
 fi
