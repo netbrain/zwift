@@ -62,6 +62,7 @@ msgbox() {
 
     if [[ -n ${timeout} ]]; then
         if [[ ${timeout} -gt 0 ]]; then
+            echo -e "${COLOR_BLUE}[*] Continuing in ${timeout} seconds...${RESET_STYLE}"
             sleep "${timeout}"
         else
             echo -ne "${COLOR_YELLOW}[*] ${STYLE_BOLD}${STYLE_UNDERLINE}Press any key to continue...${RESET_STYLE}"
@@ -114,7 +115,6 @@ readonly DISPLAY="${DISPLAY:-}"
 readonly WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}"
 readonly XAUTHORITY="${XAUTHORITY:-}"
 readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
-readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-}"
 
 # Initialize user configuration environment variables
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
@@ -477,19 +477,30 @@ fi
 
 # Determine Window Manager
 
-window_manager=""
+# XDG_SESSION_TYPE is either wayland, x11 or tty
+# - On wayland, it is wayland
+# - On xorg, it is x11
+# - On tty, it is tty
+# - On tty, manually starting x11 with xstart, it remains tty
+# So we cannot rely on XDG_SESSION_TYPE to detect the window manager
 
-if [[ ${XDG_SESSION_TYPE} == "wayland" ]]; then
-    if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
+window_manager=""
+if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
+    if [[ -n ${WAYLAND_DISPLAY} ]]; then
         window_manager="Wayland"
     else
-        window_manager="XWayland"
+        msgbox warning "WINE_EXPERIMENTAL_WAYLAND: Window manager is not Wayland, ignoring"
     fi
-elif [[ ${XDG_SESSION_TYPE} == "x11" ]]; then
-    window_manager="XOrg"
-else # tty or not set
-    msgbox error "Can't run Zwift without window manager (XDG_SESSION_TYPE='${XDG_SESSION_TYPE}')"
-    exit 1
+fi
+if [[ -z ${window_manager} ]]; then
+    if [[ -n ${WAYLAND_DISPLAY} ]]; then
+        window_manager="XWayland"
+    elif [[ -n ${DISPLAY} ]] && [[ -S /tmp/.X11-unix/X${DISPLAY#*:} ]]; then
+        window_manager="XOrg"
+    else # no window manager, tty?
+        msgbox error "Can't run Zwift without window manager"
+        exit 1
+    fi
 fi
 
 # Setup Flags for Window Managers
@@ -511,7 +522,7 @@ if [[ ${window_manager} == "Wayland" ]]; then
         container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
     else
         msgbox error "Required environment variables XDG_RUNTIME_DIR and/or WAYLAND_DISPLAY are not set"
-        msgbox error "Falling back to XWayland"
+        msgbox error "Falling back to XWayland" 5
         window_manager="XWayland"
     fi
 fi
