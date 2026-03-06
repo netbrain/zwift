@@ -107,12 +107,9 @@ container_args=(
 
     -e DEBUG="${DEBUG}"
     -e COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}"
-    -e DISPLAY="${DISPLAY}"
     -e CONTAINER_TOOL="${CONTAINER_TOOL}"
     -e ZWIFT_UID="${ZWIFT_UID}"
     -e ZWIFT_GID="${ZWIFT_GID}"
-
-    -v /tmp/.X11-unix:/tmp/.X11-unix
 )
 
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
@@ -121,6 +118,14 @@ fi
 
 # Configure window manager
 msgbox info "Using X11 window manager"
+if [[ -z ${DISPLAY} ]] || [[ ! -S /tmp/.X11-unix/X${DISPLAY#*:} ]]; then
+    msgbox error "X11 is not running!"
+    exit 1
+fi
+container_args+=(
+    -e DISPLAY="${DISPLAY}"
+    -v /tmp/.X11-unix:/tmp/.X11-unix
+)
 if [[ -n ${XAUTHORITY} ]]; then
     container_args+=(
         -e XAUTHORITY="${XAUTHORITY}"
