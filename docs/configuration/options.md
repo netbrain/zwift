@@ -12,6 +12,7 @@ These environment variables can be used to alter the execution of the zwift bash
 
 | Key                         | Default                    | Description                                                                                                                            |
 |-----------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `MESSAGE_TIMESTAMP`         | `0`                        | Show a timestamp for all messages in the terminal                                                                                      |
 | `USER`                      | `$USER`                    | Used in creating the zwift volume `zwift-$USER`                                                                                        |
 | `IMAGE`                     | `docker.io/netbrain/zwift` | The image to use                                                                                                                       |
 | `VERSION`                   | `latest`                   | The image version/tag to use                                                                                                           |

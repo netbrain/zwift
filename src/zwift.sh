@@ -4,6 +4,8 @@ set -uo pipefail
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
+MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP:-0}" # updated after loading user config files
+
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
@@ -40,16 +42,28 @@ msgbox() {
     local msg="${2:?}"     # Message: the message to display
     local timeout="${3:-}" # Optional timeout: if explicitly set to 0, wait for user input to continue
 
+    make_timestamp() {
+        if [[ ${MESSAGE_TIMESTAMP} -eq 1 ]]; then
+            printf '%(%T)T|' -1
+        else
+            printf ''
+        fi
+    }
+
+    local timestamp
+    timestamp="$(make_timestamp)"
+
     case ${type} in
-        info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
-        ok) echo -e "${COLOR_GREEN}[✓] ${msg}${RESET_STYLE}" ;;
-        warning) echo -e "${COLOR_YELLOW}[!] ${msg}${RESET_STYLE}" ;;
-        error) echo -e "${COLOR_RED}[✗] ${msg}${RESET_STYLE}" >&2 ;;
+        info) echo -e "${COLOR_BLUE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        ok) echo -e "${COLOR_GREEN}[${timestamp}✓] ${msg}${RESET_STYLE}" ;;
+        warning) echo -e "${COLOR_YELLOW}[${timestamp}!] ${msg}${RESET_STYLE}" ;;
+        error) echo -e "${COLOR_RED}[${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
             local ans=""
             if [[ -n ${timeout} ]] && [[ ${timeout} -gt 0 ]]; then
                 while [[ ${timeout} -gt 0 ]]; do
-                    echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
+                    timestamp="$(make_timestamp)"
+                    echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
                     read -rt 1 -n 1 ans
                     if [[ -n ${ans} ]]; then
                         echo
@@ -61,25 +75,26 @@ msgbox() {
                 echo
                 return 1
             else
-                echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
+                echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
                 read -rn 1 ans
                 echo
                 case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
             fi
             ;;
-        *) echo -e "${COLOR_WHITE}[*] ${msg}${RESET_STYLE}" ;;
+        *) echo -e "${COLOR_WHITE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
     esac
 
     if [[ -n ${timeout} ]]; then
         if [[ ${timeout} -gt 0 ]]; then
             while [[ ${timeout} -gt 0 ]]; do
-                echo -e "${COLOR_BLUE}[*] Continuing in ${timeout} seconds...${RESET_STYLE}"
+                timestamp="$(make_timestamp)"
+                echo -e "${COLOR_BLUE}[${timestamp}*] Continuing in ${timeout} seconds...${RESET_STYLE}"
                 sleep 1
                 ((timeout--))
                 [[ ${timeout} -gt 0 ]] && echo -ne "${OVERWRITE_PREV_LINE}"
             done
         else
-            echo -ne "${COLOR_YELLOW}[*] ${STYLE_BOLD}${STYLE_UNDERLINE}Press any key to continue...${RESET_STYLE}"
+            echo -ne "${COLOR_YELLOW}[${timestamp}*] ${STYLE_BOLD}${STYLE_UNDERLINE}Press any key to continue...${RESET_STYLE}"
             read -rsn1
             echo
         fi
@@ -131,6 +146,7 @@ readonly XAUTHORITY="${XAUTHORITY:-}"
 readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
 
 # Initialize user configuration environment variables
+readonly MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP:-0}"
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
 readonly VERSION="${VERSION:-latest}"
 readonly LATEST_SCRIPT_VERSION="master"
