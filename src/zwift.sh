@@ -333,6 +333,7 @@ fi
 # Define base container environment variables
 container_env_vars+=(
     DEBUG="${DEBUG}"
+    MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP}"
     ZWIFT_UID="${container_uid}"
     ZWIFT_GID="${container_gid}"
     CONTAINER_TOOL="${CONTAINER_TOOL}"

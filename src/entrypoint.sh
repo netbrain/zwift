@@ -21,6 +21,7 @@ else
     readonly RESET_STYLE=""
 fi
 
+readonly MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP:-0}"
 readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
@@ -34,12 +35,23 @@ msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error
     local msg="${2:?}"  # Message: the message to display
 
+    make_timestamp() {
+        if [[ ${MESSAGE_TIMESTAMP} -eq 1 ]]; then
+            printf '%(%T)T|' -1
+        else
+            printf ''
+        fi
+    }
+
+    local timestamp
+    timestamp="$(make_timestamp)"
+
     case ${type} in
-        info) echo -e "${COLOR_BLUE}[${CONTAINER_TOOL}|*] ${msg}${RESET_STYLE}" ;;
-        ok) echo -e "${COLOR_GREEN}[${CONTAINER_TOOL}|✓] ${msg}${RESET_STYLE}" ;;
-        warning) echo -e "${COLOR_YELLOW}[${CONTAINER_TOOL}|!] ${msg}${RESET_STYLE}" ;;
-        error) echo -e "${COLOR_RED}[${CONTAINER_TOOL}|✗] ${msg}${RESET_STYLE}" >&2 ;;
-        *) echo -e "${COLOR_WHITE}[${CONTAINER_TOOL}|*] ${msg}${RESET_STYLE}" ;;
+        info) echo -e "${COLOR_BLUE}[${CONTAINER_TOOL}|${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        ok) echo -e "${COLOR_GREEN}[${CONTAINER_TOOL}|${timestamp}✓] ${msg}${RESET_STYLE}" ;;
+        warning) echo -e "${COLOR_YELLOW}[${CONTAINER_TOOL}|${timestamp}!] ${msg}${RESET_STYLE}" ;;
+        error) echo -e "${COLOR_RED}[${CONTAINER_TOOL}|${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
+        *) echo -e "${COLOR_WHITE}[${CONTAINER_TOOL}|${timestamp}*] ${msg}${RESET_STYLE}" ;;
     esac
 }
 
