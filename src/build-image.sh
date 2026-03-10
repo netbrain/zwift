@@ -26,16 +26,29 @@ else
     readonly RESET_STYLE=""
 fi
 
+readonly MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP:-0}"
+
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error
     local msg="${2:?}"  # Message: the message to display
 
+    make_timestamp() {
+        if [[ ${MESSAGE_TIMESTAMP} -eq 1 ]]; then
+            printf '%(%T)T|' -1
+        else
+            printf ''
+        fi
+    }
+
+    local timestamp
+    timestamp="$(make_timestamp)"
+
     case ${type} in
-        info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
-        ok) echo -e "${COLOR_GREEN}[✓] ${msg}${RESET_STYLE}" ;;
-        warning) echo -e "${COLOR_YELLOW}[!] ${msg}${RESET_STYLE}" ;;
-        error) echo -e "${COLOR_RED}[✗] ${msg}${RESET_STYLE}" >&2 ;;
-        *) echo -e "${COLOR_WHITE}[*] ${msg}${RESET_STYLE}" ;;
+        info) echo -e "${COLOR_BLUE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        ok) echo -e "${COLOR_GREEN}[${timestamp}✓] ${msg}${RESET_STYLE}" ;;
+        warning) echo -e "${COLOR_YELLOW}[${timestamp}!] ${msg}${RESET_STYLE}" ;;
+        error) echo -e "${COLOR_RED}[${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
+        *) echo -e "${COLOR_WHITE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
     esac
 }
 
@@ -106,6 +119,7 @@ container_args=(
     --hostname "${HOSTNAME}"
 
     -e DEBUG="${DEBUG}"
+    -e MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP}"
     -e COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}"
     -e CONTAINER_TOOL="${CONTAINER_TOOL}"
     -e ZWIFT_UID="${ZWIFT_UID}"
