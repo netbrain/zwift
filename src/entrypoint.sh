@@ -21,7 +21,7 @@ else
     readonly RESET_STYLE=""
 fi
 
-readonly MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP:-0}"
+readonly VERBOSITY="${VERBOSITY:-1}"
 readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
@@ -32,11 +32,11 @@ readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 
 msgbox() {
-    local type="${1:?}" # Type: info, ok, warning, error
+    local type="${1:?}" # Type: info, ok, warning, error, debug
     local msg="${2:?}"  # Message: the message to display
 
     make_timestamp() {
-        if [[ ${MESSAGE_TIMESTAMP} -eq 1 ]]; then
+        if [[ ${VERBOSITY} -ge 2 ]]; then
             printf '%(%T)T|' -1
         else
             printf ''
@@ -47,11 +47,12 @@ msgbox() {
     timestamp="$(make_timestamp)"
 
     case ${type} in
-        info) echo -e "${COLOR_BLUE}[${CONTAINER_TOOL}|${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        info) [[ ${VERBOSITY} -ge 1 ]] && echo -e "${COLOR_BLUE}[${CONTAINER_TOOL}|${timestamp}*] ${msg}${RESET_STYLE}" ;;
         ok) echo -e "${COLOR_GREEN}[${CONTAINER_TOOL}|${timestamp}✓] ${msg}${RESET_STYLE}" ;;
         warning) echo -e "${COLOR_YELLOW}[${CONTAINER_TOOL}|${timestamp}!] ${msg}${RESET_STYLE}" ;;
         error) echo -e "${COLOR_RED}[${CONTAINER_TOOL}|${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
-        *) echo -e "${COLOR_WHITE}[${CONTAINER_TOOL}|${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
 }
 

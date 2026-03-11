@@ -4,17 +4,12 @@ set -uo pipefail
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
-# TODO implement VERBOSITY or MESSAGE_VERBOSITY instead of MESSAGE_TIMESTAMP
-# Levels:
+# Verbosity levels:
 # - VERBOSITY=0 (ok, warning, error messages)
 # - VERBOSITY=1 (default, also info messages)
 # - VERBOSITY=2 (add timestamp to all messages)
 # - VERBOSITY=3 (also debug messages)
-# msgbox function:
-# - Add debug message type (replaces current catch-all case)
-# - Error in catch-all case (unknown message type)
-
-MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP:-0}" # updated after loading user config files
+VERBOSITY="${VERBOSITY:-1}" # updated after loading user config files
 
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
@@ -48,12 +43,12 @@ else
 fi
 
 msgbox() {
-    local type="${1:?}"    # Type: info, ok, warning, error, question
+    local type="${1:?}"    # Type: info, ok, warning, error, question, debug
     local msg="${2:?}"     # Message: the message to display
     local timeout="${3:-}" # Optional timeout: if explicitly set to 0, wait for user input to continue
 
     make_timestamp() {
-        if [[ ${MESSAGE_TIMESTAMP} -eq 1 ]]; then
+        if [[ ${VERBOSITY} -ge 2 ]]; then
             printf '%(%T)T|' -1
         else
             printf ''
@@ -64,7 +59,7 @@ msgbox() {
     timestamp="$(make_timestamp)"
 
     case ${type} in
-        info) echo -e "${COLOR_BLUE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        info) [[ ${VERBOSITY} -ge 1 ]] && echo -e "${COLOR_BLUE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
         ok) echo -e "${COLOR_GREEN}[${timestamp}✓] ${msg}${RESET_STYLE}" ;;
         warning) echo -e "${COLOR_YELLOW}[${timestamp}!] ${msg}${RESET_STYLE}" ;;
         error) echo -e "${COLOR_RED}[${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
@@ -91,7 +86,8 @@ msgbox() {
                 case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
             fi
             ;;
-        *) echo -e "${COLOR_WHITE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
 
     if [[ -n ${timeout} ]]; then
@@ -156,7 +152,7 @@ readonly XAUTHORITY="${XAUTHORITY:-}"
 readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
 
 # Initialize user configuration environment variables
-readonly MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP:-0}"
+readonly VERBOSITY="${VERBOSITY:-1}"
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
 readonly VERSION="${VERSION:-latest}"
 readonly LATEST_SCRIPT_VERSION="master"
@@ -343,7 +339,7 @@ fi
 # Define base container environment variables
 container_env_vars+=(
     DEBUG="${DEBUG}"
-    MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP}"
+    VERBOSITY="${VERBOSITY}"
     ZWIFT_UID="${container_uid}"
     ZWIFT_GID="${container_gid}"
     CONTAINER_TOOL="${CONTAINER_TOOL}"

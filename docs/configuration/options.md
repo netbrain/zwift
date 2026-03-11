@@ -12,7 +12,8 @@ These environment variables can be used to alter the execution of the zwift bash
 
 | Key                         | Default                    | Description                                                                                                                            |
 |-----------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `MESSAGE_TIMESTAMP`         | `0`                        | Show a timestamp for all messages in the terminal                                                                                      |
+| `DEBUG`                     | `0`                        | Enable `set -x` for all scripts, must be set on the commandline `DEBUG=1 zwift`                                                        |
+| `VERBOSITY`                 | `1`                        | Verbosity level: 0 = ok, warning, error; 1 = 0 + info; 2 = 1 + show timestamps; 3 = 2 + debug messages                                 |
 | `USER`                      | `$USER`                    | Used in creating the zwift volume `zwift-$USER`                                                                                        |
 | `IMAGE`                     | `docker.io/netbrain/zwift` | The image to use                                                                                                                       |
 | `VERSION`                   | `latest`                   | The image version/tag to use                                                                                                           |

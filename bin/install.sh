@@ -41,6 +41,7 @@ while :; do
     esac
 done
 
+readonly VERBOSITY="${VERBOSITY:-1}"
 readonly ZWIFT_SCRIPT="https://raw.githubusercontent.com/netbrain/zwift/${script_version}/src/zwift.sh"
 readonly ZWIFT_LOGO="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.svg"
 readonly ZWIFT_DESKTOP_ENTRY="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.desktop"
@@ -66,17 +67,28 @@ else
 fi
 
 msgbox() {
-    local type="${1:?}" # Type: info, ok, warning, error, question
+    local type="${1:?}" # Type: info, ok, warning, error, question, debug
     local msg="${2:?}"  # Message: the message to display
 
+    make_timestamp() {
+        if [[ ${VERBOSITY} -ge 2 ]]; then
+            printf '%(%T)T|' -1
+        else
+            printf ''
+        fi
+    }
+
+    local timestamp
+    timestamp="$(make_timestamp)"
+
     case ${type} in
-        info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
-        ok) echo -e "${COLOR_GREEN}[✓] ${msg}${RESET_STYLE}" ;;
-        warning) echo -e "${COLOR_YELLOW}[!] ${msg}${RESET_STYLE}" ;;
-        error) echo -e "${COLOR_RED}[✗] ${msg}${RESET_STYLE}" >&2 ;;
+        info) [[ ${VERBOSITY} -ge 1 ]] && echo -e "${COLOR_BLUE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        ok) echo -e "${COLOR_GREEN}[${timestamp}✓] ${msg}${RESET_STYLE}" ;;
+        warning) echo -e "${COLOR_YELLOW}[${timestamp}!] ${msg}${RESET_STYLE}" ;;
+        error) echo -e "${COLOR_RED}[${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
             [[ ${auto_confirm} -eq 1 ]] && return 0
-            echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
+            echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
             local ans
             read -rn 1 ans
             echo
@@ -85,7 +97,8 @@ msgbox() {
                 *) return 1 ;;
             esac
             ;;
-        *) echo -e "${COLOR_WHITE}[*] ${msg}${RESET_STYLE}" ;;
+        debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
 }
 
