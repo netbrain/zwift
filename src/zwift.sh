@@ -201,6 +201,7 @@ else
 fi
 
 # Print all parameters
+msgbox debug "Script was invoked with the following parameters:"
 declare -a parameters_to_print
 parameters_to_print=(
     DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_CHECK DONT_PULL DONT_CLEAN DRYRUN INTERACTIVE
@@ -216,7 +217,7 @@ for parameter_to_print in "${parameters_to_print[@]}"; do
     if [[ ${parameter_to_print} == "ZWIFT_PASSWORD" ]] && [[ -n ${ZWIFT_PASSWORD} ]]; then
         parameter_print_value="${parameter_print_value//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=\"💜💜💜💜💜💜\"}"
     fi
-    msgbox debug "${parameter_print_value}"
+    msgbox debug "  • ${parameter_print_value}"
 done
 
 ##################################################################
@@ -657,7 +658,7 @@ if [[ ${DRYRUN} -eq 1 ]]; then
         env_var="${env_var//\\/\\\\}"                                # escape backslashes
         env_var="${env_var//ZWIFT_USERNAME=*/ZWIFT_USERNAME=💜💜💜💜💜💜}" # redact username
         env_var="${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=💜💜💜💜💜💜}" # redact password
-        msgbox ok "  ${env_var}"
+        msgbox ok "  • ${env_var}"
     done
     msgbox ok "${CONTAINER_TOOL} command:"
     msgbox ok "  $(printf '%q ' "${container_command[@]}")"
