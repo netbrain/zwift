@@ -4,6 +4,16 @@ set -uo pipefail
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
+# TODO implement VERBOSITY or MESSAGE_VERBOSITY instead of MESSAGE_TIMESTAMP
+# Levels:
+# - VERBOSITY=0 (ok, warning, error messages)
+# - VERBOSITY=1 (default, also info messages)
+# - VERBOSITY=2 (add timestamp to all messages)
+# - VERBOSITY=3 (also debug messages)
+# msgbox function:
+# - Add debug message type (replaces current catch-all case)
+# - Error in catch-all case (unknown message type)
+
 MESSAGE_TIMESTAMP="${MESSAGE_TIMESTAMP:-0}" # updated after loading user config files
 
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
