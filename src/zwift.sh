@@ -210,8 +210,11 @@ parameters_to_print=(
 )
 for parameter_to_print in "${parameters_to_print[@]}"; do
     parameter_print_value="$(declare -p "${parameter_to_print}")"
+    if [[ ${parameter_to_print} == "ZWIFT_USERNAME" ]] && [[ -n ${ZWIFT_USERNAME} ]]; then
+        parameter_print_value="${parameter_print_value//ZWIFT_USERNAME=*/ZWIFT_USERNAME=\"💜💜💜💜💜💜\"}"
+    fi
     if [[ ${parameter_to_print} == "ZWIFT_PASSWORD" ]] && [[ -n ${ZWIFT_PASSWORD} ]]; then
-        parameter_print_value="${parameter_print_value//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=\"REDACTED\"}"
+        parameter_print_value="${parameter_print_value//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=\"💜💜💜💜💜💜\"}"
     fi
     msgbox debug "${parameter_print_value}"
 done
@@ -651,8 +654,9 @@ if [[ ${DRYRUN} -eq 1 ]]; then
     msgbox ok "DRYRUN:"
     msgbox ok "environment variables (${container_env_file}):"
     for env_var in "${container_env_vars[@]}"; do
-        env_var="${env_var//\\/\\\\}"                                  # escape backslashes
-        env_var="${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=REDACTED}" # redact password
+        env_var="${env_var//\\/\\\\}"                                # escape backslashes
+        env_var="${env_var//ZWIFT_USERNAME=*/ZWIFT_USERNAME=💜💜💜💜💜💜}" # redact username
+        env_var="${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=💜💜💜💜💜💜}" # redact password
         msgbox ok "  ${env_var}"
     done
     msgbox ok "${CONTAINER_TOOL} command:"
