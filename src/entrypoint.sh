@@ -125,12 +125,30 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         sed -i "s/1000/${user_uid}/g" /etc/pulse/client.conf || return 1
     }
 
+    ownership_needs_update() {
+        # Quick check: if the top-level directory is already owned by user:user, assume everything is fine
+        # This avoids a costly recursive find on every normal startup
+        local target="${1:?}"
+        local result
+        [[ -d ${target} ]] && result="$(find "${target}" -maxdepth 0 \( ! -user user -o ! -group user \) -print 2> /dev/null)" && [[ -n ${result} ]]
+    }
+
     update_ownership() {
+        local target
         if [[ ${update_required} -eq 1 ]]; then
-            chown -R user:user /home/user || return 1
+            target="/home/user"
         else
-            chown -R user:user "${ZWIFT_DOCS}" || return 1
+            target="${ZWIFT_DOCS}"
         fi
+
+        if ! ownership_needs_update "${target}"; then
+            msgbox ok "Ownership already correct, skipping"
+            return 0
+        fi
+
+        # Only chown files that actually need it, rather than blindly recursing everything
+        msgbox info "Updating ownership of files in ${target} (this may take a while on first run)..."
+        find "${target}" \( ! -user user -o ! -group user \) -exec chown user:user {} + || return 1
     }
 
     if should_change_user_ids; then
@@ -146,11 +164,11 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     if [[ ${ZWIFT_VOLUME} -eq 1 ]]; then
         msgbox ok "Volume variant: skipping ownership update (persisted in volume)"
     else
-        msgbox info "Changing ownership from root to user"
+        msgbox info "Checking file ownership"
         if update_ownership; then
-            msgbox ok "Changed ownership to user"
+            msgbox ok "File ownership is correct"
         else
-            msgbox error "Failed to change ownership from root to user"
+            msgbox error "Failed to update file ownership"
             exit 1
         fi
     fi
