@@ -53,6 +53,7 @@ RUN dpkg --add-architecture i386 \
         libgl1 \
         libvulkan1 \
         procps \
+        rsync \
         sudo \
         wget \
         winbind \

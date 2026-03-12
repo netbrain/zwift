@@ -645,6 +645,46 @@ if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep -
     fi
 fi
 
+# Volume variant: sync image contents into volume if image version changed
+if [[ ${ZWIFT_VARIANT} == "volume" ]]; then
+    image_version=""
+    if image_version="$(${CONTAINER_TOOL} inspect --format '{{index .Config.Labels "org.opencontainers.image.version"}}' "${IMAGE}:${VERSION}" 2> /dev/null)"; then
+        msgbox info "Image version: ${image_version}"
+    fi
+
+    if [[ -n ${image_version} ]]; then
+        volume_version="$(${CONTAINER_TOOL} run --rm -v "${volume_name}:/mnt/volume:ro" "${IMAGE}:${VERSION}" cat /mnt/volume/.zwift-image-version 2> /dev/null || true)"
+
+        if [[ ${image_version} != "${volume_version}" ]]; then
+            msgbox info "Volume outdated (${volume_version:-empty}), syncing from image (${image_version})..."
+            if ${CONTAINER_TOOL} run --rm \
+                -v "${volume_name}:/mnt/volume" \
+                "${IMAGE}:${VERSION}" \
+                rsync -a --delete \
+                --exclude "AppData/Local/Zwift/Activities/" \
+                --exclude "AppData/Local/Zwift/Workouts/" \
+                --exclude "AppData/Local/Zwift/Logs/" \
+                --exclude "AppData/Local/Zwift/prefs.xml" \
+                --exclude "Pictures/Zwift/" \
+                /home/user/ /mnt/volume/; then
+
+                ${CONTAINER_TOOL} run --rm \
+                    -v "${volume_name}:/mnt/volume" \
+                    "${IMAGE}:${VERSION}" \
+                    sh -c "echo '${image_version}' > /mnt/volume/.zwift-image-version"
+
+                msgbox ok "Volume synced to image version ${image_version}"
+            else
+                msgbox error "Failed to sync volume from image"
+            fi
+        else
+            msgbox ok "Volume is up to date (${image_version})"
+        fi
+    else
+        msgbox warning "Could not determine image version, skipping volume sync"
+    fi
+fi
+
 # Only write environment variables to file when needed
 msgbox info "Writing environment variables to temporary file"
 if printf '%s\n' "${container_env_vars[@]}" > "${container_env_file}"; then

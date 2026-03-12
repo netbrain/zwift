@@ -64,8 +64,11 @@ nix run github:netbrain/zwift#zwift-volume
 
 ## Updating Zwift
 
-Zwift updates itself through its built-in launcher. You can also force an update by passing `--update` as an entrypoint
-argument:
+When a new container image is pulled, the launch script automatically detects the version mismatch and syncs the updated
+files from the image into the volume. User data (activities, workouts, logs, preferences, screenshots) is preserved
+during the sync.
+
+You can also force an update manually by passing `--update` as an entrypoint argument:
 
 ```bash
 ZWIFT_VARIANT="volume" zwift -- --update
