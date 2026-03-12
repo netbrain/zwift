@@ -9,5 +9,9 @@ nav_order: 3
 If your `$(id -u)` or `$(id -g)` is not equal to 1000 then this would cause the zwift container to re-map all files (`chown`,
 `chgrp`) within the container so there is no uid/gid conflicts.
 
-So if speed is a concern of yours, consider changing your user to match the containers uid and gid using `usermod` or contribute
-a better solution for handling uid/gid remapping in containers. :smiley:
+If speed is a concern, you have two options:
+
+1. **Use the minimal variant** (`ZWIFT_VARIANT="minimal"`): This mounts the entire `/home/user` as a persistent volume,
+   so file ownership persists between runs and no `chown` is needed after the first launch. See
+   [Minimal Variant]({% link advanced/minimal-variant.md %}) for details.
+2. **Change your user IDs** to match the container's uid and gid (1000) using `usermod`.

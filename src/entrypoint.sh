@@ -25,6 +25,7 @@ readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
+readonly ZWIFT_MINIMAL="${ZWIFT_MINIMAL:-0}"
 
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
@@ -142,12 +143,16 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         fi
     fi
 
-    msgbox info "Changing ownership from root to user"
-    if update_ownership; then
-        msgbox ok "Changed ownership to user"
+    if [[ ${ZWIFT_MINIMAL} -eq 1 ]]; then
+        msgbox ok "Minimal variant: skipping ownership update (persisted in volume)"
     else
-        msgbox error "Failed to change owership from root to user"
-        exit 1
+        msgbox info "Changing ownership from root to user"
+        if update_ownership; then
+            msgbox ok "Changed ownership to user"
+        else
+            msgbox error "Failed to change ownership from root to user"
+            exit 1
+        fi
     fi
 
     startup_cmd=(gosu user:user "${startup_cmd[@]}")

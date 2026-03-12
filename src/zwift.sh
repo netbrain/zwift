@@ -157,6 +157,7 @@ readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
+readonly ZWIFT_VARIANT="${ZWIFT_VARIANT:-container}"
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -329,8 +330,14 @@ container_args+=(
     --name "zwift-${USER}"
     --hostname "${HOSTNAME}"
     --env-file "${container_env_file}"
-    -v "zwift-${USER}:${ZWIFT_DOCS}"
 )
+
+if [[ ${ZWIFT_VARIANT} == "minimal" ]]; then
+    container_args+=(-v "zwift-home-${USER}:/home/user")
+    container_env_vars+=(ZWIFT_MINIMAL="1")
+else
+    container_args+=(-v "zwift-${USER}:${ZWIFT_DOCS}")
+fi
 
 ###################################################
 ##### Forward arguments passed to this script #####
@@ -623,12 +630,17 @@ fi
 
 # Create a volume if not already exists, this is done now as
 # if left to the run command the directory can get the wrong permissions
-if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep -q "zwift-${USER}"; then
-    mshgbox info "Creating ${CONTAINER_TOOL} volume zwift-${USER}"
-    if ${CONTAINER_TOOL} volume create "zwift-${USER}"; then
-        msgbox ok "Created volume zwift-${USER}"
+if [[ ${ZWIFT_VARIANT} == "minimal" ]]; then
+    volume_name="zwift-home-${USER}"
+else
+    volume_name="zwift-${USER}"
+fi
+if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep -q "${volume_name}"; then
+    msgbox info "Creating ${CONTAINER_TOOL} volume ${volume_name}"
+    if ${CONTAINER_TOOL} volume create "${volume_name}"; then
+        msgbox ok "Created volume ${volume_name}"
     else
-        msgbox error "Failed to create volume zwift-${USER}"
+        msgbox error "Failed to create volume ${volume_name}"
         exit 1
     fi
 fi
