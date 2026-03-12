@@ -59,12 +59,11 @@ nvidia_proprietary_driver() {
 
 declare -a run_as=()
 
-######################################
-##### Change ownership if needed #####
+#############################################
+##### Remap container user to host user #####
 
 if [[ ${CONTAINER_TOOL} == "docker" ]]; then
-    # with docker the container is launched as root
-    # here we update ids and ownership so zwift can be launched as user instead
+    # docker does not support remapping container user to host user out of the box
 
     container_uid="$(id -u user)"
     container_gid="$(id -g user)"
@@ -78,14 +77,12 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         if [[ ! ${HOST_UID} =~ ^[0-9]+$ ]]; then
             msgbox warning "Ignoring HOST_UID '${HOST_UID}' because it is not a number"
         elif [[ ${container_uid} -ne ${HOST_UID} ]]; then
-            container_uid="${HOST_UID}"
             result=0
         fi
 
         if [[ ! ${HOST_GID} =~ ^[0-9]+$ ]]; then
             msgbox warning "Ignoring HOST_GID '${HOST_GID}' because it is not a number"
         elif [[ ${container_gid} -ne ${HOST_GID} ]]; then
-            container_gid="${HOST_GID}"
             result=0
         fi
 
@@ -93,33 +90,12 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     }
 
     change_user_ids() {
-        usermod -ou "${container_uid}" user || return 1
-        groupmod -og "${container_gid}" user || return 1
-    }
-
-    ownership_needs_update() {
-        # Quick check: if the top-level directory is already owned by user:user, assume everything is fine
-        # This avoids a costly recursive find on every normal startup
-        local target="${1:?}"
-        local result
-        [[ -d ${target} ]] && result="$(find "${target}" -maxdepth 1 \( ! -user user -o ! -group user \) -print 2> /dev/null)" && [[ -n ${result} ]]
-    }
-
-    update_ownership() {
-        local target="${ZWIFT_VOLUME}"
-
-        if [[ -z ${target} ]] || ! ownership_needs_update "${target}"; then
-            msgbox ok "Ownership already correct, skipping"
-            return 0
-        fi
-
-        # Only chown files that actually need it, rather than blindly recursing everything
-        msgbox info "Updating ownership of files in ${target} (this may take a while on first run)..."
-        find "${target}" \( ! -user user -o ! -group user \) -exec chown user:user {} + || return 1
+        sudo usermod -ou "${HOST_UID}" user || return 1
+        sudo groupmod -og "${HOST_GID}" user || return 1
     }
 
     if should_change_user_ids; then
-        msgbox info "Changing user ids to ${container_uid}:${container_gid}"
+        msgbox info "Changing user ids to ${HOST_UID}:${HOST_GID}"
         if change_user_ids; then
             msgbox ok "Changed user ids"
         else
@@ -159,6 +135,11 @@ fi
 ##### Launch update or start script #####
 
 msgbox debug "Entrypoint script invoked with arguments: ${*:-none}"
+
+actual_user="$(whoami)"
+actual_uid="$(id -u "${actual_user}")"
+actual_gid="$(id -g "${actual_user}")"
+msgbox debug "Running as ${actual_user} (uid=${actual_uid}, gid=${actual_gid})"
 
 declare -a startup_cmd=("${run_as[@]}")
 
