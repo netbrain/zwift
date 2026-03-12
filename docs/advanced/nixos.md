@@ -72,10 +72,6 @@ environment variables in camelCase:
     wineExperimentalWayland = false;
     # Networking mode for the container ("bridge" is default)
     networking = "bridge";
-    # User ID for running the container (usually your own UID)
-    zwiftUid = "1000";
-    # Group ID for running the container (usually your own GID)
-    zwiftGid = "1000";
     # GPU/device flags override (Docker: "--gpus=all", Podman/CDI: "--device=nvidia.com/gpu=all")
     vgaDeviceFlag = "--device=nvidia.com/gpu=all";
     # Enable debug output and verbose logging if true
