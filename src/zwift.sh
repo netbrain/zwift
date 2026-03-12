@@ -653,14 +653,14 @@ if [[ ${ZWIFT_VARIANT} == "volume" ]]; then
     fi
 
     if [[ -n ${image_version} ]]; then
-        volume_version="$(${CONTAINER_TOOL} run --rm -v "${volume_name}:/mnt/volume:ro" "${IMAGE}:${VERSION}" cat /mnt/volume/.zwift-image-version 2> /dev/null || true)"
+        volume_version="$(${CONTAINER_TOOL} run --rm --entrypoint cat -v "${volume_name}:/mnt/volume:ro" "${IMAGE}:${VERSION}" /mnt/volume/.zwift-image-version 2> /dev/null || true)"
 
         if [[ ${image_version} != "${volume_version}" ]]; then
             msgbox info "Volume outdated (${volume_version:-empty}), syncing from image (${image_version})..."
-            if ${CONTAINER_TOOL} run --rm \
+            if ${CONTAINER_TOOL} run --rm --entrypoint rsync \
                 -v "${volume_name}:/mnt/volume" \
                 "${IMAGE}:${VERSION}" \
-                rsync -a --delete \
+                -a --delete \
                 --exclude "AppData/Local/Zwift/Activities/" \
                 --exclude "AppData/Local/Zwift/Workouts/" \
                 --exclude "AppData/Local/Zwift/Logs/" \
@@ -668,10 +668,10 @@ if [[ ${ZWIFT_VARIANT} == "volume" ]]; then
                 --exclude "Pictures/Zwift/" \
                 /home/user/ /mnt/volume/; then
 
-                ${CONTAINER_TOOL} run --rm \
+                ${CONTAINER_TOOL} run --rm --entrypoint sh \
                     -v "${volume_name}:/mnt/volume" \
                     "${IMAGE}:${VERSION}" \
-                    sh -c "echo '${image_version}' > /mnt/volume/.zwift-image-version"
+                    -c "echo '${image_version}' > /mnt/volume/.zwift-image-version"
 
                 msgbox ok "Volume synced to image version ${image_version}"
             else
