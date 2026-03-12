@@ -39,7 +39,6 @@ ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731
 # - cabextract for winetricks
 # - curl used in zwift authentication script
 # - gamemode for freedesktop screensaver inhibit
-# - gosu for invoking scripts in entrypoint
 # - libglvnd0 for graphics libraries
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
@@ -55,7 +54,6 @@ RUN dpkg --add-architecture i386 \
         cabextract \
         curl \
         gamemode \
-        gosu \
         libgamemode0.i386 \
         libgamemodeauto0.i386 \
         libglvnd0 \
@@ -116,5 +114,7 @@ COPY --chmod=755 update_zwift.sh /bin/update_zwift.sh
 COPY --chmod=755 run_zwift.sh /bin/run_zwift.sh
 COPY --chmod=755 zwift-auth.sh /bin/zwift-auth
 COPY --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/runfromprocess-rs.exe /bin/runfromprocess-rs.exe
+
+USER user
 
 ENTRYPOINT ["entrypoint"]
