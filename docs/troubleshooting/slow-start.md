@@ -11,6 +11,11 @@ file ownership (`chown`) on every launch. Since the container is ephemeral, the 
 runs. Only files with incorrect ownership are updated, but the check itself still needs to scan the file tree which can be
 slow if you have a large Zwift installation.
 
-If speed is still a concern, consider changing your user to match the container's uid and gid (1000) using `usermod`.
+If speed is a concern, you have two options:
+
+1. **Use the volume variant** (`ZWIFT_VARIANT="volume"`): This mounts the entire `/home/user` as a persistent volume,
+   so file ownership persists between runs and no `chown` is needed after the first launch. See
+   [Volume Variant](../advanced/volume-variant.md) for details.
+2. **Change your user IDs** to match the container's uid and gid (1000) using `usermod`.
 
 **Podman** users are not affected by this since Podman handles uid/gid mapping via user namespaces (`--userns keep-id`).

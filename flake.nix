@@ -11,6 +11,7 @@
         {
           image,
           tag,
+          variant,
           dontCheck,
           dontPull,
           dontClean,
@@ -46,6 +47,7 @@
           nixosRun = pkgs.writeShellScript "zwift-nixos.sh" ''
             ${pkgs.lib.optionalString (image != "") "export IMAGE=${image}"}
             ${pkgs.lib.optionalString (tag != "") "export VERSION=${tag}"}
+            ${pkgs.lib.optionalString (variant != "") "export ZWIFT_VARIANT=${variant}"}
             ${pkgs.lib.optionalString (dontCheck != "") "export DONT_CHECK=${dontCheck}"}
             ${pkgs.lib.optionalString (dontPull != "") "export DONT_PULL=${dontPull}"}
             ${pkgs.lib.optionalString (dontClean != "") "export DONT_CLEAN=${dontClean}"}
@@ -112,6 +114,14 @@
             options.programs.zwift = {
               enable = mkEnableOption "zwift on linux";
 
+              variant = mkOption {
+                type = enum [
+                  "container"
+                  "volume"
+                ];
+                default = "container";
+                description = "Zwift variant: 'container' (default) or 'volume' (persistent /home/user volume, no per-launch chown)";
+              };
               image = lib.mkOption {
                 type = str;
                 default = "";
@@ -238,6 +248,7 @@
                   (wrapPackage {
                     inherit
                       image
+                      variant
                       containerTool
                       containerExtraArgs
                       zwiftUsername
@@ -327,6 +338,35 @@
           '';
 
           desktopItems = [ "bin/Zwift.desktop" ];
+        };
+        zwift-volume = wrapPackage {
+          image = "";
+          tag = "";
+          variant = "volume";
+          dontCheck = "";
+          dontPull = "";
+          dontClean = "";
+          dryRun = "";
+          interactive = "";
+          containerTool = "";
+          containerExtraArgs = "";
+          zwiftUsername = "";
+          zwiftPassword = "";
+          zwiftWorkoutDir = "";
+          zwiftActivityDir = "";
+          zwiftLogDir = "";
+          zwiftScreenshotsDir = "";
+          zwiftOverrideGraphics = "";
+          zwiftOverrideResolution = "";
+          zwiftFg = "";
+          zwiftNoGameMode = "";
+          wineExperimentalWayland = "";
+          networking = "";
+          zwiftUid = "";
+          zwiftGid = "";
+          vgaDeviceFlag = "";
+          debug = "";
+          privilegedContainer = "";
         };
         default = self.packages.x86_64-linux.zwift;
       };

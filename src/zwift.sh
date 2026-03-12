@@ -179,6 +179,7 @@ readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
+readonly ZWIFT_VARIANT="${ZWIFT_VARIANT:-container}"
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -372,8 +373,14 @@ container_args+=(
     --name "zwift-${USER}"
     --hostname "${HOSTNAME}"
     --env-file "${container_env_file}"
-    -v "zwift-${USER}:${ZWIFT_DOCS}"
 )
+
+if [[ ${ZWIFT_VARIANT} == "volume" ]]; then
+    container_args+=(-v "zwift-home-${USER}:/home/user")
+    container_env_vars+=(ZWIFT_VOLUME="1")
+else
+    container_args+=(-v "zwift-${USER}:${ZWIFT_DOCS}")
+fi
 
 ###################################################
 ##### Forward arguments passed to this script #####
@@ -667,13 +674,58 @@ fi
 
 # Create a volume if not already exists, this is done now as
 # if left to the run command the directory can get the wrong permissions
-if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep -q "zwift-${USER}"; then
-    mshgbox info "Creating ${CONTAINER_TOOL} volume zwift-${USER}"
-    if ${CONTAINER_TOOL} volume create "zwift-${USER}"; then
-        msgbox ok "Created volume zwift-${USER}"
+if [[ ${ZWIFT_VARIANT} == "volume" ]]; then
+    volume_name="zwift-home-${USER}"
+else
+    volume_name="zwift-${USER}"
+fi
+if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep -q "${volume_name}"; then
+    msgbox info "Creating ${CONTAINER_TOOL} volume ${volume_name}"
+    if ${CONTAINER_TOOL} volume create "${volume_name}"; then
+        msgbox ok "Created volume ${volume_name}"
     else
-        msgbox error "Failed to create volume zwift-${USER}"
+        msgbox error "Failed to create volume ${volume_name}"
         exit 1
+    fi
+fi
+
+# Volume variant: sync image contents into volume if image version changed
+if [[ ${ZWIFT_VARIANT} == "volume" ]]; then
+    image_version=""
+    if image_version="$(${CONTAINER_TOOL} inspect --format '{{index .Config.Labels "org.opencontainers.image.version"}}' "${IMAGE}:${VERSION}" 2> /dev/null)"; then
+        msgbox info "Image version: ${image_version}"
+    fi
+
+    if [[ -n ${image_version} ]]; then
+        volume_version="$(${CONTAINER_TOOL} run --rm --entrypoint cat -v "${volume_name}:/mnt/volume:ro" "${IMAGE}:${VERSION}" /mnt/volume/.zwift-image-version 2> /dev/null || true)"
+
+        if [[ ${image_version} != "${volume_version}" ]]; then
+            msgbox info "Volume outdated (${volume_version:-empty}), syncing from image (${image_version})..."
+            if ${CONTAINER_TOOL} run --rm --entrypoint rsync \
+                -v "${volume_name}:/mnt/volume" \
+                "${IMAGE}:${VERSION}" \
+                -a --delete \
+                --exclude "AppData/Local/Zwift/Activities/" \
+                --exclude "AppData/Local/Zwift/Workouts/" \
+                --exclude "AppData/Local/Zwift/Logs/" \
+                --exclude "AppData/Local/Zwift/prefs.xml" \
+                --exclude "Pictures/Zwift/" \
+                /home/user/ /mnt/volume/; then
+
+                ${CONTAINER_TOOL} run --rm --entrypoint sh \
+                    -v "${volume_name}:/mnt/volume" \
+                    "${IMAGE}:${VERSION}" \
+                    -c "echo '${image_version}' > /mnt/volume/.zwift-image-version"
+
+                msgbox ok "Volume synced to image version ${image_version}"
+            else
+                msgbox error "Failed to sync volume from image"
+            fi
+        else
+            msgbox ok "Volume is up to date (${image_version})"
+        fi
+    else
+        msgbox warning "Could not determine image version, skipping volume sync"
     fi
 fi
 

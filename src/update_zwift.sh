@@ -23,6 +23,7 @@ fi
 
 readonly VERBOSITY="${VERBOSITY:-1}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
+readonly ZWIFT_VOLUME="${ZWIFT_VOLUME:-0}"
 
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
@@ -169,7 +170,10 @@ cleanup() {
     rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
     rm -rf -- "/home/user/.cache/wine*" || true
     # remove Zwift documents because it causes permission errors with podman
-    rm -rf -- "${ZWIFT_DOCS}" || true
+    # skip in minimal variant — ZWIFT_DOCS lives in the persistent volume
+    if [[ ${ZWIFT_VOLUME} -ne 1 ]]; then
+        rm -rf -- "${ZWIFT_DOCS}" || true
+    fi
 }
 
 trap cleanup EXIT

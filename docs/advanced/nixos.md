@@ -36,6 +36,8 @@ environment variables in camelCase:
   programs.zwift = {
     # Enable the zwift module and install required dependencies
     enable = true;
+    # Variant: "container" (default) or "volume" (persistent /home/user volume)
+    variant = "container";
     # The Docker image to use for zwift
     image = "docker.io/netbrain/zwift";
     # The zwift game version to run

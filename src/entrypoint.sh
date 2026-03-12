@@ -26,6 +26,7 @@ readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
+readonly ZWIFT_VOLUME="${ZWIFT_VOLUME:-0}"
 
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
@@ -173,12 +174,16 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         fi
     fi
 
-    msgbox info "Checking file ownership"
-    if update_ownership; then
-        msgbox ok "File ownership is correct"
+    if [[ ${ZWIFT_VOLUME} -eq 1 ]]; then
+        msgbox ok "Volume variant: skipping ownership update (persisted in volume)"
     else
-        msgbox error "Failed to update file ownership"
-        exit 1
+        msgbox info "Checking file ownership"
+        if update_ownership; then
+            msgbox ok "File ownership is correct"
+        else
+            msgbox error "Failed to update file ownership"
+            exit 1
+        fi
     fi
 
     startup_cmd=(gosu user:user "${startup_cmd[@]}")

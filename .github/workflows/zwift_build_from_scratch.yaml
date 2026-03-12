@@ -54,6 +54,7 @@ jobs:
         docker commit \
             --change="LABEL org.opencontainers.image.created=${build_date}" \
             --change="LABEL org.opencontainers.image.version=${version}" \
+            --change="ENV ZWIFT_IMAGE_VERSION=${version}" \
             --change='CMD [""]' \
             -m "built from scratch from version ${version}" \
             zwift \
