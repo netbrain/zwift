@@ -128,7 +128,9 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         # Quick check: if the top-level directory is already owned by user:user, assume everything is fine
         # This avoids a costly recursive find on every normal startup
         local target="${1:?}"
-        [[ -d ${target} ]] && [[ -n "$(find "${target}" -maxdepth 0 \( ! -user user -o ! -group user \) -print 2>/dev/null)" ]]
+        local result
+        result="$(find "${target}" -maxdepth 0 \( ! -user user -o ! -group user \) -print 2> /dev/null)" || true
+        [[ -d ${target} ]] && [[ -n ${result} ]]
     }
 
     update_ownership() {
