@@ -19,13 +19,13 @@ volume from the image contents — no separate installation step needed.
 
 ## How it works
 
-| | Default (`container`) | Volume (`volume`) |
-| --- | --- | --- |
-| **Image** | `netbrain/zwift:latest` | `netbrain/zwift:latest` (same image) |
-| **Volume** | `zwift-$USER` mounted at Zwift docs directory | `zwift-home-$USER` mounted at `/home/user` |
-| **First run** | Seconds | Seconds (volume auto-populated from image) |
-| **Subsequent runs** | Seconds | Seconds |
-| **chown on launch** | Every launch if uid/gid != 1000 | Skipped (ownership persists in volume) |
+|                     | Default (`container`)                         | Volume (`volume`)                          |
+|---------------------|-----------------------------------------------|--------------------------------------------|
+| **Image**           | `netbrain/zwift:latest`                       | `netbrain/zwift:latest` (same image)       |
+| **Volume**          | `zwift-$USER` mounted at Zwift docs directory | `zwift-home-$USER` mounted at `/home/user` |
+| **First run**       | Seconds                                       | Seconds (volume auto-populated from image) |
+| **Subsequent runs** | Seconds                                       | Seconds                                    |
+| **chown on launch** | Every launch if uid/gid != 1000               | Skipped (ownership persists in volume)     |
 
 When a new named volume is mounted to a container path that already has data, Docker (and Podman) automatically copy
 the image contents into the volume. This means the first launch is just as fast as any other — no download or
