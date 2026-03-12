@@ -34,6 +34,7 @@
           zwiftGid,
           vgaDeviceFlag,
           debug,
+          verbosity,
           privilegedContainer,
         }:
         pkgs.stdenv.mkDerivation rec {
@@ -77,6 +78,7 @@
             ${pkgs.lib.optionalString (zwiftUid != "") "export ZWIFT_UID=${zwiftUid}"}
             ${pkgs.lib.optionalString (zwiftGid != "") "export ZWIFT_GID=${zwiftGid}"}
             ${pkgs.lib.optionalString (debug != "") "export DEBUG=${debug}"}
+            ${pkgs.lib.optionalString (verbosity != "") "export VERBOSITY=${verbosity}"}
             ${pkgs.lib.optionalString (vgaDeviceFlag != "") "export VGA_DEVICE_FLAG=${vgaDeviceFlag}"}
             ${pkgs.lib.optionalString (
               privilegedContainer != ""
@@ -213,6 +215,15 @@
                 type = bool;
                 default = false;
               };
+              verbosity = mkOption {
+                type = enum [
+                  "0"
+                  "1"
+                  "2"
+                  "3"
+                ];
+                default = "1";
+              };
               privilegedContainer = mkOption {
                 type = bool;
                 default = false;
@@ -240,6 +251,7 @@
                       zwiftUid
                       zwiftGid
                       vgaDeviceFlag
+                      verbosity
                       ;
                     tag = version;
                     dontCheck = if dontCheck then "1" else "";

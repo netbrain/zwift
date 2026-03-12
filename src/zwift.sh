@@ -4,6 +4,13 @@ set -uo pipefail
 readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
+# Verbosity levels:
+# - VERBOSITY=0 (ok, warning, error messages)
+# - VERBOSITY=1 (default, also info messages)
+# - VERBOSITY=2 (add timestamp to all messages)
+# - VERBOSITY=3 (also debug messages)
+VERBOSITY="${VERBOSITY:-1}" # updated after loading user config files
+
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
@@ -36,20 +43,32 @@ else
 fi
 
 msgbox() {
-    local type="${1:?}"    # Type: info, ok, warning, error, question
+    local type="${1:?}"    # Type: info, ok, warning, error, question, debug
     local msg="${2:?}"     # Message: the message to display
     local timeout="${3:-}" # Optional timeout: if explicitly set to 0, wait for user input to continue
 
+    make_timestamp() {
+        if [[ ${VERBOSITY} -ge 2 ]]; then
+            printf '%(%T)T|' -1
+        else
+            printf ''
+        fi
+    }
+
+    local timestamp
+    timestamp="$(make_timestamp)"
+
     case ${type} in
-        info) echo -e "${COLOR_BLUE}[*] ${msg}${RESET_STYLE}" ;;
-        ok) echo -e "${COLOR_GREEN}[✓] ${msg}${RESET_STYLE}" ;;
-        warning) echo -e "${COLOR_YELLOW}[!] ${msg}${RESET_STYLE}" ;;
-        error) echo -e "${COLOR_RED}[✗] ${msg}${RESET_STYLE}" >&2 ;;
+        info) [[ ${VERBOSITY} -ge 1 ]] && echo -e "${COLOR_BLUE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
+        ok) echo -e "${COLOR_GREEN}[${timestamp}✓] ${msg}${RESET_STYLE}" ;;
+        warning) echo -e "${COLOR_YELLOW}[${timestamp}!] ${msg}${RESET_STYLE}" ;;
+        error) echo -e "${COLOR_RED}[${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
             local ans=""
             if [[ -n ${timeout} ]] && [[ ${timeout} -gt 0 ]]; then
                 while [[ ${timeout} -gt 0 ]]; do
-                    echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
+                    timestamp="$(make_timestamp)"
+                    echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
                     read -rt 1 -n 1 ans
                     if [[ -n ${ans} ]]; then
                         echo
@@ -61,25 +80,27 @@ msgbox() {
                 echo
                 return 1
             else
-                echo -ne "${COLOR_YELLOW}[?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
+                echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
                 read -rn 1 ans
                 echo
                 case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
             fi
             ;;
-        *) echo -e "${COLOR_WHITE}[*] ${msg}${RESET_STYLE}" ;;
+        debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${timestamp}◉] ${msg}${RESET_STYLE}" ;;
+        *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
 
     if [[ -n ${timeout} ]]; then
         if [[ ${timeout} -gt 0 ]]; then
             while [[ ${timeout} -gt 0 ]]; do
-                echo -e "${COLOR_BLUE}[*] Continuing in ${timeout} seconds...${RESET_STYLE}"
+                timestamp="$(make_timestamp)"
+                echo -e "${COLOR_BLUE}[${timestamp}*] Continuing in ${timeout} seconds...${RESET_STYLE}"
                 sleep 1
                 ((timeout--))
                 [[ ${timeout} -gt 0 ]] && echo -ne "${OVERWRITE_PREV_LINE}"
             done
         else
-            echo -ne "${COLOR_YELLOW}[*] ${STYLE_BOLD}${STYLE_UNDERLINE}Press any key to continue...${RESET_STYLE}"
+            echo -ne "${COLOR_YELLOW}[${timestamp}*] ${STYLE_BOLD}${STYLE_UNDERLINE}Press any key to continue...${RESET_STYLE}"
             read -rsn1
             echo
         fi
@@ -131,6 +152,7 @@ readonly XAUTHORITY="${XAUTHORITY:-}"
 readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
 
 # Initialize user configuration environment variables
+readonly VERBOSITY="${VERBOSITY:-1}"
 readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
 readonly VERSION="${VERSION:-latest}"
 readonly LATEST_SCRIPT_VERSION="master"
@@ -177,6 +199,26 @@ else
     msgbox error "  To install docker, see: https://docs.docker.com/get-started/get-docker/"
     exit 1
 fi
+
+# Print all parameters
+msgbox debug "Script was invoked with the following parameters:"
+declare -a parameters_to_print
+parameters_to_print=(
+    DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_CHECK DONT_PULL DONT_CLEAN DRYRUN INTERACTIVE
+    CONTAINER_EXTRA_ARGS ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR ZWIFT_SCREENSHOTS_DIR
+    ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE WINE_EXPERIMENTAL_WAYLAND NETWORKING ZWIFT_UID
+    ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
+)
+for parameter_to_print in "${parameters_to_print[@]}"; do
+    parameter_print_value="$(declare -p "${parameter_to_print}")"
+    if [[ ${parameter_to_print} == "ZWIFT_USERNAME" ]] && [[ -n ${ZWIFT_USERNAME} ]]; then
+        parameter_print_value="${parameter_print_value//ZWIFT_USERNAME=*/ZWIFT_USERNAME=\"💜💜💜💜💜💜\"}"
+    fi
+    if [[ ${parameter_to_print} == "ZWIFT_PASSWORD" ]] && [[ -n ${ZWIFT_PASSWORD} ]]; then
+        parameter_print_value="${parameter_print_value//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=\"💜💜💜💜💜💜\"}"
+    fi
+    msgbox debug "  • ${parameter_print_value}"
+done
 
 ##################################################################
 ##### Update zwift.sh script and pull latest container image #####
@@ -317,6 +359,7 @@ fi
 # Define base container environment variables
 container_env_vars+=(
     DEBUG="${DEBUG}"
+    VERBOSITY="${VERBOSITY}"
     ZWIFT_UID="${container_uid}"
     ZWIFT_GID="${container_gid}"
     CONTAINER_TOOL="${CONTAINER_TOOL}"
@@ -612,9 +655,10 @@ if [[ ${DRYRUN} -eq 1 ]]; then
     msgbox ok "DRYRUN:"
     msgbox ok "environment variables (${container_env_file}):"
     for env_var in "${container_env_vars[@]}"; do
-        env_var="${env_var//\\/\\\\}"                                  # escape backslashes
-        env_var="${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=REDACTED}" # redact password
-        msgbox ok "  ${env_var}"
+        env_var="${env_var//\\/\\\\}"                                # escape backslashes
+        env_var="${env_var//ZWIFT_USERNAME=*/ZWIFT_USERNAME=💜💜💜💜💜💜}" # redact username
+        env_var="${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=💜💜💜💜💜💜}" # redact password
+        msgbox ok "  • ${env_var}"
     done
     msgbox ok "${CONTAINER_TOOL} command:"
     msgbox ok "  $(printf '%q ' "${container_command[@]}")"
