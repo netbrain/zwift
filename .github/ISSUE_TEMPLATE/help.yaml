@@ -13,7 +13,7 @@ body:
     options:
     - label: I have given details of my install including Distribution, Wayland/ XOrg, Parameters Used, echo $XAUTHORITY, etc.
       required: true
-    - label: I have provided logs showing any errors, if available (use `DEBUG=1 zwift`)
+    - label: I have provided logs showing any errors, if available (use `VERBOSITY=3 ZWIFT_FG=1 zwift`)
       required: true
     - label: I have filled out the issue template to the best of my ability.
       required: true
@@ -24,6 +24,16 @@ body:
   attributes:
     label: Describe the issue
     description: A clear and concise description of what the issue is.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Zwift Logs
+    description: The output of launching zwift using `VERBOSITY=3 ZWIFT_FG=1 zwift`.
+    value: |
+      ```text
+      Place output here
+      ```
   validations:
     required: true
 - type: textarea
