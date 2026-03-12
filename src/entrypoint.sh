@@ -22,14 +22,12 @@ else
 fi
 
 readonly VERBOSITY="${VERBOSITY:-1}"
-readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
-readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
+readonly HOST_UID="${HOST_UID:-$(id -u user)}"
+readonly HOST_GID="${HOST_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 
-readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
-readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
@@ -86,43 +84,37 @@ fi
 
 declare -a startup_cmd
 startup_cmd=(/bin/run_zwift.sh)
-update_required=0
 
 if is_empty_directory "${ZWIFT_HOME}"; then
     startup_cmd=(/bin/update_zwift.sh --install)
-    update_required=1
 elif [[ ${1:-} == "--update" ]]; then
     startup_cmd=(/bin/update_zwift.sh)
-    update_required=1
 fi
 
-######################################
-##### Change ownership if needed #####
+#################################################
+##### Add container user to host user group #####
 
 if [[ ${CONTAINER_TOOL} == "docker" ]]; then
-    # with docker the container is launched as root
-    # here we update ids and ownership so zwift can be launched as user instead
+    # docker does not support remapping container user to host user out of the box
 
-    user_uid="$(id -u user)"
-    user_gid="$(id -g user)"
+    container_uid="$(id -u user)"
+    container_gid="$(id -g user)"
 
     should_change_user_ids() {
-        # ids should be updated if ZWIFT_UID:ZWIFT_GID is different from from user uid:gid
+        # ids should be updated if HOST_UID:HOST_GID is different from from user uid:gid
         # returns 0 if ids should be changed, 1 if not, so it can be used in an if
 
         local result=1
 
-        if [[ ! ${ZWIFT_UID} =~ ^[0-9]+$ ]]; then
-            msgbox warning "Ignoring ZWIFT_UID '${ZWIFT_UID}' because it is not a number"
-        elif [[ ${user_uid} -ne ${ZWIFT_UID} ]]; then
-            user_uid="${ZWIFT_UID}"
+        if [[ ! ${HOST_UID} =~ ^[0-9]+$ ]]; then
+            msgbox warning "Ignoring HOST_UID '${HOST_UID}' because it is not a number"
+        elif [[ ${container_uid} -ne ${HOST_UID} ]]; then
             result=0
         fi
 
-        if [[ ! ${ZWIFT_GID} =~ ^[0-9]+$ ]]; then
-            msgbox warning "Ignoring ZWIFT_GID '${ZWIFT_GID}' because it is not a number"
-        elif [[ ${user_gid} -ne ${ZWIFT_GID} ]]; then
-            user_gid="${ZWIFT_GID}"
+        if [[ ! ${HOST_GID} =~ ^[0-9]+$ ]]; then
+            msgbox warning "Ignoring HOST_GID '${HOST_GID}' because it is not a number"
+        elif [[ ${container_gid} -ne ${HOST_GID} ]]; then
             result=0
         fi
 
@@ -130,41 +122,15 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     }
 
     change_user_ids() {
-        usermod -ou "${user_uid}" user || return 1
-        groupmod -og "${user_gid}" user || return 1
-        mkdir -p "/run/user/${user_uid}" || return 1
-        chown -R user:user "/run/user/${user_uid}" || return 1
-        sed -i "s|/run/user/1000|/run/user/${user_uid}|g" /etc/pulse/client.conf || return 1
-    }
-
-    ownership_needs_update() {
-        # Quick check: if the top-level directory is already owned by user:user, assume everything is fine
-        # This avoids a costly recursive find on every normal startup
-        local target="${1:?}"
-        local result
-        [[ -d ${target} ]] && result="$(find "${target}" -maxdepth 1 \( ! -user user -o ! -group user \) -print 2> /dev/null)" && [[ -n ${result} ]]
-    }
-
-    update_ownership() {
-        local target
-        if [[ ${update_required} -eq 1 ]]; then
-            target="/home/user"
-        else
-            target="${ZWIFT_DOCS}"
-        fi
-
-        if ! ownership_needs_update "${target}"; then
-            msgbox ok "Ownership already correct, skipping"
-            return 0
-        fi
-
-        # Only chown files that actually need it, rather than blindly recursing everything
-        msgbox info "Updating ownership of files in ${target} (this may take a while on first run)..."
-        find "${target}" \( ! -user user -o ! -group user \) -exec chown user:user {} + || return 1
+        sudo usermod -ou "${HOST_UID}" user || return 1
+        sudo groupmod -og "${HOST_GID}" user || return 1
+        sudo mkdir -p "/run/user/${HOST_UID}" || return 1
+        sudo chown -R user:user "/run/user/${HOST_UID}" || return 1
+        sudo sed -i "s|/run/user/1000|/run/user/${user_uid}|g" /etc/pulse/client.conf || return 1
     }
 
     if should_change_user_ids; then
-        msgbox info "Changing user ids to ${user_uid}:${user_gid}"
+        msgbox info "Changing user ids to ${HOST_UID}:${HOST_GID}"
         if change_user_ids; then
             msgbox ok "Changed user ids"
         else
@@ -172,19 +138,14 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
             exit 1
         fi
     fi
-
-    msgbox info "Checking file ownership"
-    if update_ownership; then
-        msgbox ok "File ownership is correct"
-    else
-        msgbox error "Failed to update file ownership"
-        exit 1
-    fi
-
-    startup_cmd=(gosu user:user "${startup_cmd[@]}")
 fi
 
 #########################################
 ##### Launch update or start script #####
+
+actual_user="$(whoami)"
+actual_uid="$(id -u "${actual_user}")"
+actual_gid="$(id -g "${actual_user}")"
+msgbox debug "Running as ${actual_user} (uid=${actual_uid}, gid=${actual_gid})"
 
 "${startup_cmd[@]}"

@@ -35,7 +35,6 @@ ARG WINETRICKS_VERSION=20240105
 # - ca-certificates for wget and curl
 # - curl used in zwift authentication script
 # - gamemode for freedesktop screensaver inhibit
-# - gosu for invoking scripts in entrypoint
 # - libegl1 and libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
@@ -49,7 +48,6 @@ RUN dpkg --add-architecture i386 \
         ca-certificates \
         curl \
         gamemode \
-        gosu \
         libegl1 \
         libgl1 \
         libvulkan1 \
@@ -74,10 +72,10 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
  && wget -qO /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
  && chmod +x /usr/local/bin/winetricks
 
-# Create passwordless user and make nvidia libraries discoverable
+# Add user with root privileges and make nvidia libraries discoverable
 RUN adduser --disabled-password --gecos '' user \
- && adduser user sudo \
- && echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
+ && usermod -aG sudo user \
+ && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
@@ -103,5 +101,7 @@ COPY --chmod=755 update_zwift.sh /bin/update_zwift.sh
 COPY --chmod=755 run_zwift.sh /bin/run_zwift.sh
 COPY --chmod=755 zwift-auth.sh /bin/zwift-auth
 COPY --chmod=755 --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/runfromprocess-rs.exe /bin/runfromprocess-rs.exe
+
+USER user
 
 ENTRYPOINT ["entrypoint"]

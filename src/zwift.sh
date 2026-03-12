@@ -175,10 +175,17 @@ readonly ZWIFT_FG="${ZWIFT_FG:-0}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly NETWORKING="${NETWORKING:-bridge}"
-readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
-readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
+
+# No longer supported configuration environment variables
+readonly ZWIFT_UID="${ZWIFT_UID:-}"
+readonly ZWIFT_GID="${ZWIFT_GID:-}"
+if [[ -n ${ZWIFT_UID} ]] || [[ -n ${ZWIFT_GID} ]]; then
+    msgbox error "ZWIFT_UID and ZWIFT_GID options are no longer supported"
+    msgbox error "  To start Zwift as a different user, use: sudo -i username zwift"
+    exit 1
+fi
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -206,8 +213,8 @@ declare -a parameters_to_print
 parameters_to_print=(
     DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_CHECK DONT_PULL DONT_CLEAN DRYRUN INTERACTIVE
     CONTAINER_EXTRA_ARGS ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR ZWIFT_SCREENSHOTS_DIR
-    ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE WINE_EXPERIMENTAL_WAYLAND NETWORKING ZWIFT_UID
-    ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
+    ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE WINE_EXPERIMENTAL_WAYLAND NETWORKING
+    VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
 )
 for parameter_to_print in "${parameters_to_print[@]}"; do
     parameter_print_value="$(declare -p "${parameter_to_print}")"
@@ -342,26 +349,24 @@ container_args=()
 declare -a entrypoint_args
 entrypoint_args=()
 
+# Initialize user ids
+host_uid="${UID}"
+host_gid="$(id -g)"
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
-    # Podman has to use container id 1000
-    # Local user is mapped to the container id
-    local_uid="${ZWIFT_UID}"
     container_uid=1000
-    container_gid=1000
-    container_args+=(--userns "keep-id:uid=${container_uid},gid=${container_gid}")
+    container_args+=(--userns="keep-id:uid=1000,gid=1000")
 else
-    # Docker will run as the id's provided.
-    local_uid="${UID}"
-    container_uid="${ZWIFT_UID}"
-    container_gid="${ZWIFT_GID}"
+    container_uid="${host_uid}"
+    container_env_vars+=(
+        HOST_UID="${host_uid}"
+        HOST_GID="${host_gid}"
+    )
 fi
 
 # Define base container environment variables
 container_env_vars+=(
     DEBUG="${DEBUG}"
     VERBOSITY="${VERBOSITY}"
-    ZWIFT_UID="${container_uid}"
-    ZWIFT_GID="${container_gid}"
     CONTAINER_TOOL="${CONTAINER_TOOL}"
 )
 
@@ -587,18 +592,13 @@ fi
 if [[ ${window_manager} == "Wayland" ]]; then
     msgbox info "Using Wayland window manager"
 
-    if [[ ${ZWIFT_UID} -ne ${UID} ]]; then
-        msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}"
-        exit 1
-    fi
-
     if [[ -n ${XDG_RUNTIME_DIR} ]] && [[ -n ${WAYLAND_DISPLAY} ]]; then
         container_env_vars+=(
-            XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}"
+            XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR//${host_uid}/${container_uid}}"
             WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
             WINE_EXPERIMENTAL_WAYLAND="1"
         )
-        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
+        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${host_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
     else
         msgbox error "Required environment variables XDG_RUNTIME_DIR and/or WAYLAND_DISPLAY are not set"
         msgbox error "Falling back to XWayland" 5
@@ -625,8 +625,8 @@ if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; t
     fi
 
     if [[ -n ${XAUTHORITY} ]]; then
-        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${local_uid}/${container_uid}}")
-        container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${local_uid}/${container_uid}}")
+        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${host_uid}/${container_uid}}")
+        container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${host_uid}/${container_uid}}")
     else
         msgbox info "XAUTHORITY environment variable not set, container access to X11 needs to be granted with xhost"
         xhost_access_required=1
@@ -641,17 +641,17 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
     [[ ${DBUS_SESSION_BUS_ADDRESS} =~ ^unix:path=([^,]+) ]]
     dbus_unix_socket=${BASH_REMATCH[1]}
     if [[ -n ${dbus_unix_socket} ]]; then
-        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${local_uid}/${container_uid}}")
-        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${local_uid}/${container_uid}}")
+        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${host_uid}/${container_uid}}")
+        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${host_uid}/${container_uid}}")
     fi
 fi
 
 # Configure sound driver
 container_env_vars+=(PULSE_SERVER="/run/user/${container_uid}/pulse/native")
-if [[ -d "/run/user/${local_uid}/pulse" ]]; then
-    container_args+=(-v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse")
+if [[ -d "/run/user/${host_uid}/pulse" ]]; then
+    container_args+=(-v "/run/user/${host_uid}/pulse:/run/user/${container_uid}/pulse")
 else
-    msgbox warning "PulseAudio socket /run/user/${local_uid}/pulse not found — audio may not work (PipeWire-only system?)"
+    msgbox warning "PulseAudio socket /run/user/${host_uid}/pulse not found — audio may not work (PipeWire-only system?)"
 fi
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
