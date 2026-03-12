@@ -38,9 +38,9 @@ jobs:
     - name: Checkout repository code
       uses: actions/checkout@v6
     - name: Install docker buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@v4
     - name: Check Dockerfile for errors
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         call: check
         file: src/Dockerfile
@@ -62,7 +62,7 @@ jobs:
     - name: Checkout repository code
       uses: actions/checkout@v6
     - name: Check github actions for errors
-      uses: devops-actions/actionlint@467e2ce19b2310e93c9ffa0b50fe31f86b5a7f23
+      uses: devops-actions/actionlint@e7ee33fbf5aa8c9f9ee1145137f3e52e25d6a35b
   markdown-lint:
     name: Markdown - Lint with markdownlint
     runs-on: ubuntu-latest
@@ -70,7 +70,7 @@ jobs:
     - name: Checkout repository code
       uses: actions/checkout@v6
     - name: Check markdown files for errors
-      uses: DavidAnson/markdownlint-cli2-action@v20
+      uses: DavidAnson/markdownlint-cli2-action@v22
       with:
         config: .markdownlint-cli2.yaml
         globs: ''
@@ -81,7 +81,7 @@ jobs:
     - name: Checkout repository code
       uses: actions/checkout@v6
     - name: Spellcheck markdown files
-      uses: streetsidesoftware/cspell-action@v7
+      uses: streetsidesoftware/cspell-action@v8
       with:
         config: .cspell.yaml
         suggestions: true
