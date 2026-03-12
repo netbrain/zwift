@@ -129,8 +129,7 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         # This avoids a costly recursive find on every normal startup
         local target="${1:?}"
         local result
-        result="$(find "${target}" -maxdepth 0 \( ! -user user -o ! -group user \) -print 2> /dev/null)" || true
-        [[ -d ${target} ]] && [[ -n ${result} ]]
+        [[ -d ${target} ]] && result="$(find "${target}" -maxdepth 0 \( ! -user user -o ! -group user \) -print 2> /dev/null)" && [[ -n ${result} ]]
     }
 
     update_ownership() {
