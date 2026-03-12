@@ -48,7 +48,7 @@ msgbox() {
         ok) echo -e "${COLOR_GREEN}[${CONTAINER_TOOL}|${timestamp}✓] ${msg}${RESET_STYLE}" ;;
         warning) echo -e "${COLOR_YELLOW}[${CONTAINER_TOOL}|${timestamp}!] ${msg}${RESET_STYLE}" ;;
         error) echo -e "${COLOR_RED}[${CONTAINER_TOOL}|${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
-        debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${timestamp}◉] ${msg}${RESET_STYLE}" ;;
+        debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${CONTAINER_TOOL}|${timestamp}◉] ${msg}${RESET_STYLE}" ;;
         *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
 }
@@ -99,6 +99,7 @@ update_zwift_using_launcher() {
     # also stop if launcher exits before update finishes, so we don't hang forever
     while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
         msgbox info "Updating Zwift... (${counter})"
+        msgbox debug "Current version: ${zwift_current_version}; Latest version: ${zwift_latest_version}"
         sleep 5
         zwift_current_version="$(get_current_version)"
         ((counter++))
