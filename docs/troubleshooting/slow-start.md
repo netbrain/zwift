@@ -13,5 +13,5 @@ If speed is a concern, you have two options:
 
 1. **Use the volume variant** (`ZWIFT_VARIANT="volume"`): This mounts the entire `/home/user` as a persistent volume,
    so file ownership persists between runs and no `chown` is needed after the first launch. See
-   [Volume Variant]({% link advanced/volume-variant.md %}) for details.
+   [Volume Variant](../advanced/volume-variant.md) for details.
 2. **Change your user IDs** to match the container's uid and gid (1000) using `usermod`.

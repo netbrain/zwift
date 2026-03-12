@@ -61,7 +61,7 @@ These environment variables can be used to alter the execution of the zwift bash
 - `WINE_EXPERIMENTAL_WAYLAND="1" zwift` This will start zwift using Wayland and not XWayland. It will start full screen
   windowed.
 - `ZWIFT_VARIANT="volume" zwift` will mount `/home/user` as a persistent volume, eliminating per-launch `chown` (see
-  [Volume Variant]({% link advanced/volume-variant.md %}) for details).
+  [Volume Variant](../advanced/volume-variant.md) for details).
 
 {: .note }
 > To pass extra environment variables to the container, they can be added to `CONTAINER_EXTRA_ARGS` with the `-e` flag.
