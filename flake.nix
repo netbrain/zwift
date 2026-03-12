@@ -115,10 +115,10 @@
               variant = mkOption {
                 type = enum [
                   "container"
-                  "minimal"
+                  "volume"
                 ];
                 default = "container";
-                description = "Zwift variant: 'container' (pre-installed) or 'minimal' (volume-based install on first run)";
+                description = "Zwift variant: 'container' (default) or 'volume' (persistent /home/user volume, no per-launch chown)";
               };
               image = lib.mkOption {
                 type = str;
@@ -327,10 +327,10 @@
 
           desktopItems = [ "bin/Zwift.desktop" ];
         };
-        zwift-minimal = wrapPackage {
+        zwift-volume = wrapPackage {
           image = "";
           tag = "";
-          variant = "minimal";
+          variant = "volume";
           dontCheck = "";
           dontPull = "";
           dontClean = "";

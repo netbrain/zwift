@@ -332,9 +332,9 @@ container_args+=(
     --env-file "${container_env_file}"
 )
 
-if [[ ${ZWIFT_VARIANT} == "minimal" ]]; then
+if [[ ${ZWIFT_VARIANT} == "volume" ]]; then
     container_args+=(-v "zwift-home-${USER}:/home/user")
-    container_env_vars+=(ZWIFT_MINIMAL="1")
+    container_env_vars+=(ZWIFT_VOLUME="1")
 else
     container_args+=(-v "zwift-${USER}:${ZWIFT_DOCS}")
 fi
@@ -630,7 +630,7 @@ fi
 
 # Create a volume if not already exists, this is done now as
 # if left to the run command the directory can get the wrong permissions
-if [[ ${ZWIFT_VARIANT} == "minimal" ]]; then
+if [[ ${ZWIFT_VARIANT} == "volume" ]]; then
     volume_name="zwift-home-${USER}"
 else
     volume_name="zwift-${USER}"

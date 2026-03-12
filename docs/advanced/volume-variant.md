@@ -1,12 +1,12 @@
 ---
-title: Minimal Variant
+title: Volume Variant
 parent: Advanced
 nav_order: 4
 ---
 
-# Minimal Variant (Volume-Based)
+# Volume Variant
 
-The default mode mounts only the Zwift documents directory as a volume. The **minimal variant** mounts the entire
+The default mode mounts only the Zwift documents directory as a volume. The **volume variant** mounts the entire
 `/home/user` directory as a persistent volume instead. On first run, the container runtime automatically populates the
 volume from the image contents — no separate installation step needed.
 
@@ -19,7 +19,7 @@ volume from the image contents — no separate installation step needed.
 
 ## How it works
 
-| | Default (`container`) | Minimal (`minimal`) |
+| | Default (`container`) | Volume (`volume`) |
 | --- | --- | --- |
 | **Image** | `netbrain/zwift:latest` | `netbrain/zwift:latest` (same image) |
 | **Volume** | `zwift-$USER` mounted at Zwift docs directory | `zwift-home-$USER` mounted at `/home/user` |
@@ -36,13 +36,13 @@ installation wait.
 ### Environment variable
 
 ```bash
-ZWIFT_VARIANT="minimal" zwift
+ZWIFT_VARIANT="volume" zwift
 ```
 
 Or add to your config file (`~/.config/zwift/config`):
 
 ```bash
-ZWIFT_VARIANT="minimal"
+ZWIFT_VARIANT="volume"
 ```
 
 ### NixOS module
@@ -51,7 +51,7 @@ ZWIFT_VARIANT="minimal"
 {
   programs.zwift = {
     enable = true;
-    variant = "minimal";
+    variant = "volume";
   };
 }
 ```
@@ -59,7 +59,7 @@ ZWIFT_VARIANT="minimal"
 ### Standalone Nix package
 
 ```bash
-nix run github:netbrain/zwift#zwift-minimal
+nix run github:netbrain/zwift#zwift-volume
 ```
 
 ## Updating Zwift
@@ -68,7 +68,7 @@ Zwift updates itself through its built-in launcher. You can also force an update
 argument:
 
 ```bash
-ZWIFT_VARIANT="minimal" zwift -- --update
+ZWIFT_VARIANT="volume" zwift -- --update
 ```
 
 ## Resetting the installation

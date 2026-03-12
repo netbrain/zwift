@@ -25,7 +25,7 @@ readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
-readonly ZWIFT_MINIMAL="${ZWIFT_MINIMAL:-0}"
+readonly ZWIFT_VOLUME="${ZWIFT_VOLUME:-0}"
 
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
@@ -143,8 +143,8 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         fi
     fi
 
-    if [[ ${ZWIFT_MINIMAL} -eq 1 ]]; then
-        msgbox ok "Minimal variant: skipping ownership update (persisted in volume)"
+    if [[ ${ZWIFT_VOLUME} -eq 1 ]]; then
+        msgbox ok "Volume variant: skipping ownership update (persisted in volume)"
     else
         msgbox info "Changing ownership from root to user"
         if update_ownership; then

@@ -40,7 +40,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | `DEBUG`                     | `0`                        | If set to `1`, enable debug of zwift script `set -x`                                                                                   |
 | `VGA_DEVICE_FLAG`           |                            | Override GPU/device flags for container (`--gpus=all`)                                                                                 |
 | `PRIVILEGED_CONTAINER`      | `0`                        | If set, container will run in privileged mode, SELinux label separation will be disabled (`--privileged --security-opt label=disable`) |
-| `ZWIFT_VARIANT`             | `container`                | Set to `minimal` to mount `/home/user` as a persistent volume (faster startup, no per-launch chown)                                    |
+| `ZWIFT_VARIANT`             | `container`                | Set to `volume` to mount `/home/user` as a persistent volume (faster startup, no per-launch chown)                                     |
 
 {: .important }
 `ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
@@ -60,8 +60,8 @@ These environment variables can be used to alter the execution of the zwift bash
   the user that started the container. You should not need to change this except in rare cases.
 - `WINE_EXPERIMENTAL_WAYLAND="1" zwift` This will start zwift using Wayland and not XWayland. It will start full screen
   windowed.
-- `ZWIFT_VARIANT="minimal" zwift` will mount `/home/user` as a persistent volume, eliminating per-launch `chown` (see
-  [Minimal Variant]({% link advanced/minimal-variant.md %}) for details).
+- `ZWIFT_VARIANT="volume" zwift` will mount `/home/user` as a persistent volume, eliminating per-launch `chown` (see
+  [Volume Variant]({% link advanced/volume-variant.md %}) for details).
 
 {: .note }
 > To pass extra environment variables to the container, they can be added to `CONTAINER_EXTRA_ARGS` with the `-e` flag.
