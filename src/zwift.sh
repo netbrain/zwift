@@ -323,6 +323,9 @@ if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_PULL} -ne 1 ]]; then
     fi
 fi
 
+container_image="${IMAGE}"
+container_image_version="${VERSION}"
+
 ###############################
 ##### Basic configuration #####
 
@@ -354,56 +357,59 @@ host_uid="${UID}"
 host_gid="$(id -g)"
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     container_uid=1000
-    container_args+=(--userns="keep-id:uid=1000,gid=1000")
+    container_gid=1000
+    container_args+=(--userns="keep-id:uid=${container_uid},gid=${container_gid}")
 else
-    container_uid="${host_uid}"
-    tmp_dockerfile=""
+    create_remap_dockerfile() {
+        local user_uid="${1:?}"
+        local user_gid="${2:?}"
+        local tmp_file=""
 
-    cleanup_remap_container() {
-        msgbox info "Removing temporary container zwift-remap-user"
-        ${CONTAINER_TOOL} rm zwift-remap-user || true
+        if ! tmp_file="$(mktemp -q /tmp/zwift-remap-user.dockerfile.XXXXXXXXXX)"; then
+            msgbox error "Failed to create dockerfile for remapping user"
+            return 1
+        fi
 
-        msgbox info "Removing temporary image zwift-remap-user-image"
-        ${CONTAINER_TOOL} image rm zwift-remap-user-image || true
+        {
+            echo "FROM ${IMAGE}:${VERSION}"
+            echo "USER root"
+            echo "RUN usermod -ou ${user_uid} user \\"
+            echo " && groupmod -og ${user_gid} user \\"
+            echo " && mkdir -p /run/user/${user_uid} \\"
+            echo " && chown -R user:user /run/user/${user_uid} \\"
+            echo " && sed -i \"s|/run/user/1000|/run/user/${user_uid}|g\" /etc/pulse/client.conf"
+            echo "USER user"
+            echo 'ENTRYPOINT ["entrypoint"]'
+        } > "${tmp_file}"
 
-        msgbox info "Removing temporary dockerfile"
-        [[ -n ${tmp_dockerfile} ]] && [[ -f ${tmp_dockerfile} ]] && rm -f -- "${tmp_dockerfile}" || true
+        echo "${tmp_file}"
     }
 
-    if ! tmp_dockerfile="$(mktemp -q /tmp/zwift-remap-user.dockerfile.XXXXXXXXXX)" || ! echo -e "FROM ${IMAGE}:${VERSION}\nUSER root\n ENTRYPOINT [\"entrypoint\"]" > "${tmp_dockerfile}"; then
-        msgbox error "Failed to create temporary dockerfile"
-        cleanup_remap_container
-        exit 1
-    fi
+    build_remap_dockerfile() {
+        local tag_name="${1:?}"
+        local dockerfile="${2:?}"
 
-    msgbox info "Creating image to remap user"
-    if ${CONTAINER_TOOL} build -t zwift-remap-user-image -f "${tmp_dockerfile}" .; then
-        msgbox ok "Created image to remap user"
-    else
-        msgbox error "Failed to create image to remap user"
-        cleanup_remap_container
-        exit 1
-    fi
+        if ${CONTAINER_TOOL} build -t "${tag_name}" -f "${dockerfile}" .; then
+            msgbox info "Created ${CONTAINER_TOOL} image ${tag_name}"
+        else
+            msgbox error "Failed to create ${CONTAINER_TOOL} image ${tag_name}"
+            return 1
+        fi
+    }
 
-    msgbox info "Remapping container user to host user"
-    if ${CONTAINER_TOOL} run --name zwift-remap-user -e CONTAINER_TOOL="${CONTAINER_TOOL}" -e DEBUG="${DEBUG}" -e VERBOSITY="${VERBOSITY}" -e HOST_UID="${host_uid}" -e HOST_GID="${host_gid}" zwift-remap-user-image --remap-user; then
-        msgbox ok "Remapped container user to host user"
-    else
-        msgbox error "Failed to remap container user to host user"
-        cleanup_remap_container
-        exit 1
+    container_uid="${host_uid}"
+    container_gid="${host_gid}"
+    if [[ ${host_uid} -ne 1000 ]] || [[ ${host_gid} -ne 1000 ]]; then
+        msgbox info "Remapping container user to host user"
+        container_image="netbrain/zwift"
+        container_image_version="remapped_user_${container_uid}_${container_gid}"
+        if remap_dockerfile="$(create_remap_dockerfile "${container_uid}" "${container_gid}")" && build_remap_dockerfile "${container_image}:${container_image_version}" "${remap_dockerfile}"; then
+            msgbox ok "Remapped container user to host user"
+        else
+            msgbox error "Failed to remap container user to host user"
+            exit 1
+        fi
     fi
-
-    msgbox info "Persisting container with remapped user"
-    if ${CONTAINER_TOOL} commit --change="USER user" --change='CMD [""]' -m "Remapped user to ${host_uid}:${host_gid}" zwift-remap-user "${IMAGE}:${VERSION}"; then
-        msgbox ok "Persisted container with remapped user"
-    else
-        msgbox error "Failed to persist container with remapped user"
-        cleanup_remap_container
-        exit 1
-    fi
-
-    cleanup_remap_container
 fi
 
 # Define base container environment variables
@@ -711,7 +717,7 @@ fi
 ##### Start container #####
 
 declare -a container_command
-container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${IMAGE}:${VERSION}" "${entrypoint_args[@]}")
+container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${container_image}:${container_image_version}" "${entrypoint_args[@]}")
 
 # DRYRUN: print the exact command that would be executed, then exit
 if [[ ${DRYRUN} -eq 1 ]]; then

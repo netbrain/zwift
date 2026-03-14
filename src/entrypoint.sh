@@ -22,8 +22,6 @@ else
 fi
 
 readonly VERBOSITY="${VERBOSITY:-1}"
-readonly HOST_UID="${HOST_UID:-$(id -u user)}"
-readonly HOST_GID="${HOST_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 
@@ -68,84 +66,15 @@ is_empty_directory() {
     ! contents="$(ls -A "${directory}" 2> /dev/null)" || [[ -z ${contents} ]]
 }
 
-remap_user() {
-    # docker does not support remapping container user to host user out of the box
-
-    if ! is_user_root; then
-        msgbox error "Must be root to remap user"
-        return 1
-    fi
-
-    if [[ ${CONTAINER_TOOL} != "docker" ]]; then
-        msgbox error "User should only be remapped when using docker"
-        return 1
-    fi
-
-    container_uid="$(id -u user)"
-    container_gid="$(id -g user)"
-
-    should_change_user_ids() {
-        # ids should be updated if HOST_UID:HOST_GID is different from from user uid:gid
-        # returns 0 if ids should be changed, 1 if not, so it can be used in an if
-
-        local result=1
-
-        if [[ ! ${HOST_UID} =~ ^[0-9]+$ ]]; then
-            msgbox warning "Ignoring HOST_UID '${HOST_UID}' because it is not a number"
-        elif [[ ${container_uid} -ne ${HOST_UID} ]]; then
-            result=0
-        fi
-
-        if [[ ! ${HOST_GID} =~ ^[0-9]+$ ]]; then
-            msgbox warning "Ignoring HOST_GID '${HOST_GID}' because it is not a number"
-        elif [[ ${container_gid} -ne ${HOST_GID} ]]; then
-            result=0
-        fi
-
-        return "${result}"
-    }
-
-    change_user_ids() {
-        usermod -ou "${HOST_UID}" user || return 1
-        groupmod -og "${HOST_GID}" user || return 1
-        mkdir -p "/run/user/${HOST_UID}" || return 1
-        chown -R user:user "/run/user/${HOST_UID}" || return 1
-        sed -i "s|/run/user/1000|/run/user/${HOST_UID}|g" /etc/pulse/client.conf || return 1
-    }
-
-    if should_change_user_ids; then
-        msgbox info "Changing user ids to ${HOST_UID}:${HOST_GID}"
-        if change_user_ids; then
-            msgbox ok "Changed user ids"
-        else
-            msgbox error "Failed to change user ids"
-            return 1
-        fi
-    else
-        msgbox info "Nothing to do, user ids are already ${HOST_UID}:${HOST_GID}"
-    fi
-}
-
 #########################################
 ##### Launch update or start script #####
+
+msgbox info "Starting or installing Zwift"
 
 actual_user="$(whoami)"
 actual_uid="$(id -u "${actual_user}")"
 actual_gid="$(id -g "${actual_user}")"
 msgbox debug "Running as ${actual_user} (uid=${actual_uid}, gid=${actual_gid})"
-
-if [[ ${1:-} == "--remap-user" ]]; then
-    msgbox info "Remapping container user to host user"
-    if remap_user; then
-        msgbox ok "Remapped container user to host user"
-        exit 0
-    else
-        msgbox error "Failed to remap container user to host user"
-        exit 1
-    fi
-fi
-
-msgbox info "Starting or installing Zwift"
 
 if is_user_root; then
     msgbox error "Cannot run or install Zwift as root!"
