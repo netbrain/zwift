@@ -1,4 +1,6 @@
 ARG DEBIAN_VERSION=trixie
+ARG USER_UID=1000
+ARG USER_GID=1000
 
 FROM rust:1.98.1-slim-trixie AS build-runfromprocess
 
@@ -28,6 +30,8 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 # - 20260125 : webview2 in zwift launcher works
 # - 20240105 : first version used in this Dockerfile
 ARG DEBIAN_VERSION
+ARG USER_UID
+ARG USER_GID
 ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=f3890f670867b5ffbc3938726db45c0f7d16c8ba
@@ -93,7 +97,8 @@ RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
 COPY pulse-client.conf /etc/pulse/client.conf
 
 # Create passwordless user
-RUN useradd --create-home --shell /bin/bash user
+RUN groupadd --gid ${USER_GID} user \
+ && useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --shell /bin/bash --no-log-init user
 USER user
 
 FROM wine-base
