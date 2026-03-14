@@ -77,9 +77,8 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
 # Download winetricks
 ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks /usr/local/bin/
 
-# Create passwordless user and make nvidia libraries discoverable
-RUN adduser --disabled-password --gecos '' user \
- && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
+# Make nvidia libraries discoverable
+RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
 # Required for non-glvnd setups
@@ -87,6 +86,10 @@ ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local
 
 # Configure audio driver
 COPY pulse-client.conf /etc/pulse/client.conf
+
+# Run as a regular user instead of root
+RUN adduser --disabled-password --gecos '' user
+USER user
 
 FROM wine-base
 
@@ -104,7 +107,5 @@ COPY --chmod=755 update_zwift.sh /bin/update_zwift.sh
 COPY --chmod=755 run_zwift.sh /bin/run_zwift.sh
 COPY --chmod=755 zwift-auth.sh /bin/zwift-auth
 COPY --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/runfromprocess-rs.exe /bin/runfromprocess-rs.exe
-
-USER user
 
 ENTRYPOINT ["entrypoint"]
