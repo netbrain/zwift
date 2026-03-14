@@ -363,10 +363,53 @@ if [[ ${CONTAINER_TOOL} == "podman" ]]; then
 else
     # Remap the container user to the host user
     container_uid="${host_uid}"
-    container_env_vars+=(
-        -e HOST_UID="${host_uid}"
-        -e HOST_GID="${host_gid}"
-    )
+    tmp_dockerfile=""
+
+    cleanup_remap_container() {
+        msgbox info "Removing temporary container zwift-remap-user"
+        ${CONTAINER_TOOL} rm zwift-remap-user || true
+
+        msgbox info "Removing temporary image zwift-remap-user-image"
+        ${CONTAINER_TOOL} image rm zwift-remap-user-image || true
+
+        msgbox info "Removing temporary dockerfile"
+        [[ -n ${tmp_dockerfile} ]] && [[ -f ${tmp_dockerfile} ]] && rm -f -- "${tmp_dockerfile}" || true
+    }
+
+    if ! tmp_dockerfile="$(mktemp -q /tmp/zwift-remap-user.dockerfile.XXXXXXXXXX)" || ! echo -e "FROM ${IMAGE}:${VERSION}\nUSER root\n ENTRYPOINT [\"entrypoint\"]" > "${tmp_dockerfile}"; then
+        msgbox error "Failed to create temporary dockerfile"
+        cleanup_remap_container
+        exit 1
+    fi
+
+    msgbox info "Creating image to remap user"
+    if ${CONTAINER_TOOL} build -t zwift-remap-user-image -f "${tmp_dockerfile}" .; then
+        msgbox ok "Created image to remap user"
+    else
+        msgbox error "Failed to create image to remap user"
+        cleanup_remap_container
+        exit 1
+    fi
+
+    msgbox info "Remapping container user to host user"
+    if ${CONTAINER_TOOL} run --name zwift-remap-user -e CONTAINER_TOOL="${CONTAINER_TOOL}" -e DEBUG="${DEBUG}" -e VERBOSITY="${VERBOSITY}" -e HOST_UID="${host_uid}" -e HOST_GID="${host_gid}" zwift-remap-user-image --remap-user; then
+        msgbox ok "Remapped container user to host user"
+    else
+        msgbox error "Failed to remap container user to host user"
+        cleanup_remap_container
+        exit 1
+    fi
+
+    msgbox info "Persisting container with remapped user"
+    if ${CONTAINER_TOOL} commit --change="USER user" --change='CMD [""]' -m "Remapped user to ${host_uid}:${host_gid}" zwift-remap-user "${IMAGE}:${VERSION}"; then
+        msgbox ok "Persisted container with remapped user"
+    else
+        msgbox error "Failed to persist container with remapped user"
+        cleanup_remap_container
+        exit 1
+    fi
+
+    cleanup_remap_container
 fi
 container_runtime_dir="${XDG_RUNTIME_DIR//${host_uid}/${container_uid}}"
 

@@ -124,11 +124,6 @@ container_args=(
 # Initialize user ids
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     container_args+=(--userns "keep-id:uid=1000,gid=1000")
-else
-    container_args+=(
-        -e HOST_UID="${UID}"
-        -e HOST_GID="$(id -g)"
-    )
 fi
 
 # Configure window manager
