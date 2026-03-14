@@ -57,13 +57,36 @@ nvidia_proprietary_driver() {
     command_exists nvidia-smi && nvidia_gpus="$(nvidia-smi -L)" && [[ -n ${nvidia_gpus} ]]
 }
 
-declare -a run_as=()
+is_user_root() {
+    [[ ${EUID} -eq 0 ]]
+}
+
+############################
+##### Print debug info #####
+
+msgbox debug "Entrypoint script invoked with arguments: ${*:-none}"
+
+actual_user="$(whoami)"
+actual_uid="$(id -u "${actual_user}")"
+actual_gid="$(id -g "${actual_user}")"
+
+msgbox debug "Running as ${actual_user} (uid=${actual_uid}, gid=${actual_gid})"
 
 #############################################
 ##### Remap container user to host user #####
 
-if [[ ${CONTAINER_TOOL} == "docker" ]]; then
+remap_user() {
     # docker does not support remapping container user to host user out of the box
+
+    if ! is_user_root; then
+        msgbox error "Must be root to remap user"
+        return 1
+    fi
+
+    if [[ ${CONTAINER_TOOL} != "docker" ]]; then
+        msgbox error "User should only be remapped when using docker"
+        return 1
+    fi
 
     container_uid="$(id -u user)"
     container_gid="$(id -g user)"
@@ -100,19 +123,25 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
             msgbox ok "Changed user ids"
         else
             msgbox error "Failed to change user ids"
-            exit 1
+            return 1
         fi
-    fi
-
-    msgbox info "Checking file ownership"
-    if update_ownership; then
-        msgbox ok "File ownership is correct"
     else
-        msgbox error "Failed to update file ownership"
+        msgbox info "Nothing to do, user ids are already ${HOST_UID}:${HOST_GID}"
+    fi
+}
+
+if [[ ${1:-} == "--remap-user" ]]; then
+    msgbox info "Remapping container user to host user"
+    if remap_user; then
+        msgbox ok "Remapped container user to host user"
+        exit 0
+    else
+        msgbox error "Failed to remap container user to host user"
         exit 1
     fi
-
-    run_as=(gosu user:user)
+elif is_user_root; then
+    msgbox error "Cannot run or install Zwift as root!"
+    exit 1
 fi
 
 #####################################
@@ -123,7 +152,7 @@ if [[ ${XDG_SESSION_TYPE} == "wayland" ]]; then
     unset DISPLAY # DISPLAY variable needs to be empty for wine to use native wayland
 elif [[ ${WINE_DISABLE_EGL} -eq 1 ]]; then
     msgbox info "Disabling EGL (using GLX instead)"
-    "${run_as[@]}" wine reg.exe add 'HKCU\Software\Wine\X11 Driver' /f /v UseEGL /d N > /dev/null 2>&1 || exit 1
+    wine reg.exe add 'HKCU\Software\Wine\X11 Driver' /f /v UseEGL /d N > /dev/null 2>&1 || exit 1
 elif nvidia_proprietary_driver; then
     msgbox info "Detected nvidia graphics, performing EGL vendor library workaround"
     export __EGL_VENDOR_LIBRARY_FILENAMES=""
@@ -134,19 +163,12 @@ fi
 #########################################
 ##### Launch update or start script #####
 
-msgbox debug "Entrypoint script invoked with arguments: ${*:-none}"
-
-actual_user="$(whoami)"
-actual_uid="$(id -u "${actual_user}")"
-actual_gid="$(id -g "${actual_user}")"
-msgbox debug "Running as ${actual_user} (uid=${actual_uid}, gid=${actual_gid})"
-
-declare -a startup_cmd=("${run_as[@]}")
+declare -a startup_cmd=()
 
 if [[ ${1:-} == "--install" ]] || [[ ${1:-} == "--update" ]]; then
-    startup_cmd+=(/bin/update_zwift.sh "${1:-}")
+    startup_cmd=(/bin/update_zwift.sh "${1:-}")
 else
-    startup_cmd+=(/bin/run_zwift.sh)
+    startup_cmd=(/bin/run_zwift.sh)
 fi
 
 "${startup_cmd[@]}"
