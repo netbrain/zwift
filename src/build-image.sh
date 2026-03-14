@@ -125,7 +125,6 @@ container_args=(
 
 # Initialize user ids
 host_uid="${UID}"
-host_gid="$(id -g)"
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     # Podman maps the local user into the container as uid/gid 1000 (the container's user),
     # consistent with zwift.sh. Using the host uid/gid here causes a uid mismatch at runtime.
@@ -133,10 +132,6 @@ if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     container_args+=(--userns="keep-id:uid=1000,gid=1000")
 else
     container_uid="${host_uid}"
-    container_args+=(
-        -e HOST_UID="${host_uid}"
-        -e HOST_GID="${host_gid}"
-    )
 fi
 
 # Configure window manager

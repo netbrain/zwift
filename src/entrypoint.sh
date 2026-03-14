@@ -54,6 +54,10 @@ msgbox() {
     esac
 }
 
+is_user_root() {
+    [[ ${EUID} -eq 0 ]]
+}
+
 is_empty_directory() {
     local directory="${1:?}"
     if [[ ! -d ${directory} ]]; then
@@ -64,38 +68,18 @@ is_empty_directory() {
     ! contents="$(ls -A "${directory}" 2> /dev/null)" || [[ -z ${contents} ]]
 }
 
-###########################
-##### Configure Zwift #####
-
-if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
-    msgbox error "Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!"
-    exit 1
-fi
-
-# If Wayland Experimental need to blank DISPLAY here to enable Wayland.
-# NOTE: DISPLAY must be unset here before run_zwift to work
-#       Registry entries are set in the container install or won't work.
-if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
-    unset DISPLAY
-fi
-
-############################################
-##### Clean install, update or launch? #####
-
-declare -a startup_cmd
-startup_cmd=(/bin/run_zwift.sh)
-
-if is_empty_directory "${ZWIFT_HOME}"; then
-    startup_cmd=(/bin/update_zwift.sh --install)
-elif [[ ${1:-} == "--update" ]]; then
-    startup_cmd=(/bin/update_zwift.sh)
-fi
-
-#################################################
-##### Add container user to host user group #####
-
-if [[ ${CONTAINER_TOOL} == "docker" ]]; then
+remap_user() {
     # docker does not support remapping container user to host user out of the box
+
+    if ! is_user_root; then
+        msgbox error "Must be root to remap user"
+        return 1
+    fi
+
+    if [[ ${CONTAINER_TOOL} != "docker" ]]; then
+        msgbox error "User should only be remapped when using docker"
+        return 1
+    fi
 
     container_uid="$(id -u user)"
     container_gid="$(id -g user)"
@@ -122,11 +106,11 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     }
 
     change_user_ids() {
-        sudo usermod -ou "${HOST_UID}" user || return 1
-        sudo groupmod -og "${HOST_GID}" user || return 1
-        sudo mkdir -p "/run/user/${HOST_UID}" || return 1
-        sudo chown -R user:user "/run/user/${HOST_UID}" || return 1
-        sudo sed -i "s|/run/user/1000|/run/user/${user_uid}|g" /etc/pulse/client.conf || return 1
+        usermod -ou "${HOST_UID}" user || return 1
+        groupmod -og "${HOST_GID}" user || return 1
+        mkdir -p "/run/user/${HOST_UID}" || return 1
+        chown -R user:user "/run/user/${HOST_UID}" || return 1
+        sed -i "s|/run/user/1000|/run/user/${HOST_UID}|g" /etc/pulse/client.conf || return 1
     }
 
     if should_change_user_ids; then
@@ -135,10 +119,12 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
             msgbox ok "Changed user ids"
         else
             msgbox error "Failed to change user ids"
-            exit 1
+            return 1
         fi
+    else
+        msgbox info "Nothing to do, user ids are already ${HOST_UID}:${HOST_GID}"
     fi
-fi
+}
 
 #########################################
 ##### Launch update or start script #####
@@ -147,5 +133,45 @@ actual_user="$(whoami)"
 actual_uid="$(id -u "${actual_user}")"
 actual_gid="$(id -g "${actual_user}")"
 msgbox debug "Running as ${actual_user} (uid=${actual_uid}, gid=${actual_gid})"
+
+if [[ ${1:-} == "--remap-user" ]]; then
+    msgbox info "Remapping container user to host user"
+    if remap_user; then
+        msgbox ok "Remapped container user to host user"
+        exit 0
+    else
+        msgbox error "Failed to remap container user to host user"
+        exit 1
+    fi
+fi
+
+msgbox info "Starting or installing Zwift"
+
+if is_user_root; then
+    msgbox error "Cannot run or install Zwift as root!"
+    exit 1
+fi
+
+if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
+    msgbox error "Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!"
+    exit 1
+fi
+
+# If Wayland Experimental need to blank DISPLAY here to enable Wayland.
+# NOTE: DISPLAY must be unset here before run_zwift to work
+#       Registry entries are set in the container install or won't work.
+if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
+    msgbox info "Using Wayland, unsetting DISPLAY environment variable"
+    unset DISPLAY
+fi
+
+declare -a startup_cmd
+startup_cmd=(/bin/run_zwift.sh)
+
+if is_empty_directory "${ZWIFT_HOME}"; then
+    startup_cmd=(/bin/update_zwift.sh --install)
+elif [[ ${1:-} == "--update" ]]; then
+    startup_cmd=(/bin/update_zwift.sh)
+fi
 
 "${startup_cmd[@]}"
