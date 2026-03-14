@@ -1,4 +1,6 @@
 ARG DEBIAN_VERSION=trixie
+ARG USER_UID=1000
+ARG USER_GID=1000
 
 FROM rust:1.90-slim AS build-runfromprocess
 
@@ -27,6 +29,8 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 # make sure to add "=" to the start, comment out for latest
 #    WINE_VERSION="=9.9~bookworm-1"
 ARG DEBIAN_VERSION
+ARG USER_UID
+ARG USER_GID
 ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=20240105
@@ -81,7 +85,8 @@ ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local
 COPY pulse-client.conf /etc/pulse/client.conf
 
 # Run as a regular user instead of root
-RUN adduser --disabled-password --gecos '' user
+RUN addgroup --gid ${USER_GID} user \
+ && adduser --uid ${USER_UID} --gid ${USER_GID} --disabled-password --comment '' user
 USER user
 
 FROM wine-base
