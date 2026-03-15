@@ -15,7 +15,8 @@ RUN apt-get update \
 
 # Build runfromprocess
 WORKDIR /usr/src
-RUN git clone --branch v0.1.0 --depth 1 https://github.com/quietvoid/runfromprocess-rs . \
+RUN git clone https://github.com/quietvoid/runfromprocess-rs . \
+ && git checkout d8754035b1b8a38f96ec6806a772a944ef5396c0 \
  && cargo build --target x86_64-pc-windows-gnu --release
 
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
