@@ -141,12 +141,14 @@ container_args+=(
     -e DISPLAY="${DISPLAY}"
     -v /tmp/.X11-unix:/tmp/.X11-unix
 )
+xhost_granted=0
 if [[ -n ${XAUTHORITY} ]]; then
     container_args+=(
         -e XAUTHORITY="${XAUTHORITY}"
         -v "${XAUTHORITY}:${XAUTHORITY}"
     )
 elif command_exists xhost && xhost +local: > /dev/null; then
+    xhost_granted=1
     msgbox ok "Container X11 access provided through xhost"
 else
     msgbox error "Container requires X11 access, but invoking xhost failed"
@@ -175,6 +177,10 @@ cleanup() {
             msgbox ok "Removed temporary container"
         else
             msgbox info "No temporary container to remove"
+        fi
+        if [[ ${xhost_granted:-0} -eq 1 ]]; then
+            xhost -local: > /dev/null 2>&1 || true
+            msgbox info "Revoked xhost local access"
         fi
         cleanup_invoked=1
     fi
