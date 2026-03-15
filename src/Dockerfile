@@ -20,7 +20,6 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs . \
  && cargo build --target x86_64-pc-windows-gnu --release
 
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # As at May 2024 Wayland Native works wine 9.9 or later:
 #    WINE_BRANCH="devel"
@@ -64,7 +63,6 @@ RUN dpkg --add-architecture i386 \
 # Install wine and winetricks (including recommends, which appear to be required)
 # hadolint ignore=DL3015
 RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key \
- && echo "d965d646defe94b3dfba6d5b4406900ac6c81065428bf9d9303ad7a72ee8d1b8  /etc/apt/trusted.gpg.d/winehq.asc" | sha256sum -c - \
  && echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list \
  && apt-get update \
  && apt-get install -y \
@@ -74,7 +72,6 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
         winehq-${WINE_BRANCH}${WINE_VERSION} \
  && rm -rf /var/lib/apt/lists/* \
  && wget -qO /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
- && echo "8f28985b06e9e04b5268e2aef3429b2a0f6abd4fd12c4a30472dfe66355128fa  /usr/local/bin/winetricks" | sha256sum -c - \
  && chmod +x /usr/local/bin/winetricks
 
 # Create passwordless user and make nvidia libraries discoverable

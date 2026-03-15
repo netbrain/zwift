@@ -321,14 +321,7 @@ fi
 
 # Create temporary file for container environment variables, automatically removed upon exit
 if container_env_file="$(mktemp -q /tmp/zwift-container.env.XXXXXXXXXX)"; then
-    cleanup() {
-        rm -f -- "${container_env_file}" && msgbox info "Removed temporary file ${container_env_file}"
-        if [[ ${xhost_access_required:-0} -eq 1 ]]; then
-            xhost -local: > /dev/null 2>&1 || true
-            msgbox info "Revoked xhost local access"
-        fi
-    }
-    trap cleanup EXIT
+    trap 'rm -f -- "${container_env_file}" && msgbox info "Removed temporary file ${container_env_file}"' EXIT
     msgbox info "Created temporary file for environment variables:"
     msgbox info "  ${container_env_file}"
     msgbox info "  This file will be removed automatically when the script exits"
