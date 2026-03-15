@@ -552,16 +552,8 @@ fi
 if [[ -z ${window_manager} ]]; then
     if [[ -n ${WAYLAND_DISPLAY} ]]; then
         window_manager="XWayland"
-    elif [[ -n ${DISPLAY} ]]; then
-        # Strip host prefix and screen suffix: "localhost:10.0" -> "10"
-        display_num="${DISPLAY#*:}"
-        display_num="${display_num%%.*}"
-        if [[ -S /tmp/.X11-unix/X${display_num} ]]; then
-            window_manager="XOrg"
-        else # no window manager, tty?
-            msgbox error "Can't run Zwift without window manager"
-            exit 1
-        fi
+    elif [[ -n ${DISPLAY} ]] && [[ -S /tmp/.X11-unix/X${DISPLAY#*:} ]]; then
+        window_manager="XOrg"
     else # no window manager, tty?
         msgbox error "Can't run Zwift without window manager"
         exit 1
