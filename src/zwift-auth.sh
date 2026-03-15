@@ -11,6 +11,7 @@ readonly LAUNCHER_CLIENT_ID="Game_Launcher"
 readonly LAUNCHER_HOME="https://launcher.zwift.com/launcher"
 readonly ZWIFT_REALM_URL="https://secure.zwift.com/auth/realms/zwift"
 readonly COOKIE="cookie.jar"
+trap 'rm -f "${COOKIE}"' EXIT
 
 curl -sS "${LAUNCHER_HOME}" --cookie-jar "${COOKIE}"
 request_state="$(grep -oP "OAuth_Token_Request_State\s+\K.*$" "${COOKIE}")"
@@ -40,7 +41,5 @@ auth_token_json="$(curl -sS --cookie "${COOKIE}" --cookie-jar "${COOKIE}" \
     --data-urlencode "grant_type=authorization_code" \
     --data-urlencode "scope=openid" \
     "${ZWIFT_REALM_URL}/protocol/openid-connect/token")"
-
-rm "${COOKIE}"
 
 echo "${auth_token_json}"

@@ -668,7 +668,7 @@ fi
 # Create a volume if not already exists, this is done now as
 # if left to the run command the directory can get the wrong permissions
 if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep -q "zwift-${USER}"; then
-    mshgbox info "Creating ${CONTAINER_TOOL} volume zwift-${USER}"
+    msgbox info "Creating ${CONTAINER_TOOL} volume zwift-${USER}"
     if ${CONTAINER_TOOL} volume create "zwift-${USER}"; then
         msgbox ok "Created volume zwift-${USER}"
     else
