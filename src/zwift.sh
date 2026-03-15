@@ -342,112 +342,15 @@ fi
 
 # Create array for container environment variables
 declare -a container_env_vars
-container_env_vars=()
-
-# Create array for container arguments
-declare -a container_args
-container_args=()
-
-# Create array for entrypoint arguments
-declare -a entrypoint_args
-entrypoint_args=()
-
-# Initialize user ids
-host_uid="${UID}"
-host_gid="$(id -g)"
-if [[ ${CONTAINER_TOOL} == "podman" ]]; then
-    container_uid=1000
-    container_gid=1000
-    container_args+=(--userns="keep-id:uid=${container_uid},gid=${container_gid}")
-else
-    remap_build_required() {
-        local tag_name="${1:?}"
-
-        local latest_image_digest=""
-        if ! latest_image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{index .RepoDigests 0}}' 2> /dev/null)"; then
-            msgbox warning "Failed to get ${IMAGE}:${VERSION} image digest"
-            return 0
-        fi
-
-        local current_image_digest=""
-        if ! current_image_digest="$(${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .Config.Labels "org.opencontainers.image.base.digest"}}' 2> /dev/null))"; then
-            msgbox info "Failed to get ${tag_name} base image digest, may not exist yet"
-            return 0
-        fi
-
-        [[ ${current_image_digest} != "${latest_image_digest}" ]]
-    }
-
-    create_remap_dockerfile() {
-        local user_uid="${1:?}"
-        local user_gid="${2:?}"
-
-        local tmp_file=""
-        if ! tmp_file="$(mktemp -q /tmp/zwift-remap-user.dockerfile.XXXXXXXXXX)"; then
-            msgbox error "Failed to create dockerfile for remapping user"
-            return 1
-        fi
-
-        local image_digest=""
-        if ! image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{index .RepoDigests 0}}' 2> /dev/null)"; then
-            msgbox warning "Failed to get ${IMAGE}:${VERSION} image digest"
-            image_digest="${IMAGE}:${VERSION}"
-        fi
-
-        {
-            echo "FROM ${IMAGE}:${VERSION}"
-            echo "USER root"
-            echo "RUN usermod -ou ${user_uid} user \\"
-            echo " && groupmod -og ${user_gid} user \\"
-            echo " && mkdir -p /run/user/${user_uid} \\"
-            echo " && chown -R user:user /run/user/${user_uid} \\"
-            echo " && sed -i \"s|/run/user/1000|/run/user/${user_uid}|g\" /etc/pulse/client.conf"
-            echo "USER user"
-            echo 'ENTRYPOINT ["entrypoint"]'
-            echo "LABEL org.opencontainers.image.base.digest=\"${image_digest}\""
-        } > "${tmp_file}"
-
-        echo "${tmp_file}"
-    }
-
-    build_remap_dockerfile() {
-        local tag_name="${1:?}"
-        local dockerfile="${2:?}"
-
-        if ${CONTAINER_TOOL} build -t "${tag_name}" -f "${dockerfile}" .; then
-            msgbox info "Created ${CONTAINER_TOOL} image ${tag_name}"
-        else
-            msgbox error "Failed to create ${CONTAINER_TOOL} image ${tag_name}"
-            return 1
-        fi
-    }
-
-    msgbox info "Remapping container user to host user"
-    container_uid="${host_uid}"
-    container_gid="${host_gid}"
-    container_image="netbrain/zwift"
-    container_image_version="remapped_user_${container_uid}_${container_gid}"
-    if remap_build_required "${container_image}:${container_image_version}"; then
-        if remap_dockerfile="$(create_remap_dockerfile "${container_uid}" "${container_gid}")" && build_remap_dockerfile "${container_image}:${container_image_version}" "${remap_dockerfile}"; then
-            msgbox ok "Remapped container user to host user"
-        else
-            msgbox error "Failed to remap container user to host user"
-            exit 1
-        fi
-    else
-        msgbox ok "${container_image}:${container_image_version} is up to date"
-    fi
-fi
-
-# Define base container environment variables
-container_env_vars+=(
+container_env_vars=(
     DEBUG="${DEBUG}"
     VERBOSITY="${VERBOSITY}"
     CONTAINER_TOOL="${CONTAINER_TOOL}"
 )
 
-# Define base container parameters
-container_args+=(
+# Create array for container arguments
+declare -a container_args
+container_args=(
     --rm
     --network "${NETWORKING}"
     --name "zwift-${USER}"
@@ -455,6 +358,10 @@ container_args+=(
     --env-file "${container_env_file}"
     -v "zwift-${USER}:${ZWIFT_DOCS}"
 )
+
+# Create array for entrypoint arguments
+declare -a entrypoint_args
+entrypoint_args=()
 
 ###################################################
 ##### Forward arguments passed to this script #####
@@ -472,6 +379,99 @@ for arg; do
         container_args+=("${arg}")
     fi
 done
+
+#############################################
+##### Remap container user to host user #####
+
+remap_build_required() {
+    local tag_name="${1:?}"
+
+    local latest_image_digest=""
+    if ! latest_image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{index .RepoDigests 0}}' 2> /dev/null)"; then
+        msgbox warning "Failed to get ${IMAGE}:${VERSION} image digest"
+        return 0
+    fi
+
+    local current_image_digest=""
+    if ! current_image_digest="$(${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .Config.Labels "org.opencontainers.image.base.digest"}}' 2> /dev/null))"; then
+        msgbox info "Failed to get ${tag_name} base image digest, may not exist yet"
+        return 0
+    fi
+
+    [[ ${current_image_digest} != "${latest_image_digest}" ]]
+}
+
+create_remap_dockerfile() {
+    local user_uid="${1:?}"
+    local user_gid="${2:?}"
+
+    local tmp_file=""
+    if ! tmp_file="$(mktemp -q /tmp/zwift-remap-user.dockerfile.XXXXXXXXXX)"; then
+        msgbox error "Failed to create dockerfile for remapping user"
+        return 1
+    fi
+
+    local image_digest=""
+    if ! image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{index .RepoDigests 0}}' 2> /dev/null)"; then
+        msgbox warning "Failed to get ${IMAGE}:${VERSION} image digest"
+        image_digest="${IMAGE}:${VERSION}"
+    fi
+
+    {
+        echo "FROM ${IMAGE}:${VERSION}"
+        echo "USER root"
+        echo "RUN usermod -ou ${user_uid} user \\"
+        echo " && groupmod -og ${user_gid} user \\"
+        echo " && mkdir -p /run/user/${user_uid} \\"
+        echo " && chown -R user:user /run/user/${user_uid} \\"
+        echo " && sed -i \"s|/run/user/1000|/run/user/${user_uid}|g\" /etc/pulse/client.conf"
+        echo "USER user"
+        echo 'ENTRYPOINT ["entrypoint"]'
+        echo "LABEL org.opencontainers.image.base.digest=\"${image_digest}\""
+    } > "${tmp_file}"
+
+    echo "${tmp_file}"
+}
+
+build_remap_dockerfile() {
+    local tag_name="${1:?}"
+    local dockerfile="${2:?}"
+
+    if ${CONTAINER_TOOL} build -t "${tag_name}" -f "${dockerfile}" .; then
+        msgbox info "Created ${CONTAINER_TOOL} image ${tag_name}"
+    else
+        msgbox error "Failed to create ${CONTAINER_TOOL} image ${tag_name}"
+        return 1
+    fi
+}
+
+host_uid="${UID}"
+host_gid="$(id -g)"
+
+if [[ ${CONTAINER_TOOL} == "podman" ]]; then
+    container_uid=1000
+    container_gid=1000
+
+    container_args+=(--userns="keep-id:uid=${container_uid},gid=${container_gid}")
+else
+    container_uid="${host_uid}"
+    container_gid="${host_gid}"
+
+    container_image="netbrain/zwift"
+    container_image_version="remapped_user_${container_uid}_${container_gid}"
+
+    msgbox info "Remapping container user to host user"
+    if remap_build_required "${container_image}:${container_image_version}"; then
+        if remap_dockerfile="$(create_remap_dockerfile "${container_uid}" "${container_gid}")" && build_remap_dockerfile "${container_image}:${container_image_version}" "${remap_dockerfile}"; then
+            msgbox ok "Remapped container user to host user"
+        else
+            msgbox error "Failed to remap container user to host user"
+            exit 1
+        fi
+    else
+        msgbox ok "${container_image}:${container_image_version} is up to date"
+    fi
+fi
 
 ##############################################
 ##### User defined environment variables #####
