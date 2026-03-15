@@ -134,7 +134,7 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         groupmod -og "${user_gid}" user || return 1
         mkdir -p "/run/user/${user_uid}" || return 1
         chown -R user:user "/run/user/${user_uid}" || return 1
-        sed -i "s/\b1000\b/${user_uid}/g" /etc/pulse/client.conf || return 1
+        sed -i "s|/run/user/1000|/run/user/${user_uid}|g" /etc/pulse/client.conf || return 1
     }
 
     ownership_needs_update() {
