@@ -44,42 +44,42 @@
           src = self.packages.x86_64-linux.zwift;
 
           nixosRun = pkgs.writeShellScript "zwift-nixos.sh" ''
-            ${pkgs.lib.optionalString (image != "") "export IMAGE=${image}"}
-            ${pkgs.lib.optionalString (tag != "") "export VERSION=${tag}"}
+            ${pkgs.lib.optionalString (image != "") "export IMAGE='${image}'"}
+            ${pkgs.lib.optionalString (tag != "") "export VERSION='${tag}'"}
             ${pkgs.lib.optionalString (dontCheck != "") "export DONT_CHECK=${dontCheck}"}
             ${pkgs.lib.optionalString (dontPull != "") "export DONT_PULL=${dontPull}"}
             ${pkgs.lib.optionalString (dontClean != "") "export DONT_CLEAN=${dontClean}"}
             ${pkgs.lib.optionalString (dryRun != "") "export DRYRUN=${dryRun}"}
             ${pkgs.lib.optionalString (interactive != "") "export INTERACTIVE=${interactive}"}
-            ${pkgs.lib.optionalString (containerTool != "") "export CONTAINER_TOOL=${containerTool}"}
+            ${pkgs.lib.optionalString (containerTool != "") "export CONTAINER_TOOL='${containerTool}'"}
             ${pkgs.lib.optionalString (
               containerExtraArgs != ""
-            ) "export CONTAINER_EXTRA_ARGS=${containerExtraArgs}"}
-            ${pkgs.lib.optionalString (zwiftUsername != "") "export ZWIFT_USERNAME=${zwiftUsername}"}
-            ${pkgs.lib.optionalString (zwiftPassword != "") "export ZWIFT_PASSWORD=${zwiftPassword}"}
-            ${pkgs.lib.optionalString (zwiftWorkoutDir != "") "export ZWIFT_WORKOUT_DIR=${zwiftWorkoutDir}"}
-            ${pkgs.lib.optionalString (zwiftActivityDir != "") "export ZWIFT_ACTIVITY_DIR=${zwiftActivityDir}"}
-            ${pkgs.lib.optionalString (zwiftLogDir != "") "export ZWIFT_LOG_DIR=${zwiftLogDir}"}
+            ) "export CONTAINER_EXTRA_ARGS='${containerExtraArgs}'"}
+            ${pkgs.lib.optionalString (zwiftUsername != "") "export ZWIFT_USERNAME='${zwiftUsername}'"}
+            ${pkgs.lib.optionalString (zwiftPassword != "") "export ZWIFT_PASSWORD='${zwiftPassword}'"}
+            ${pkgs.lib.optionalString (zwiftWorkoutDir != "") "export ZWIFT_WORKOUT_DIR='${zwiftWorkoutDir}'"}
+            ${pkgs.lib.optionalString (zwiftActivityDir != "") "export ZWIFT_ACTIVITY_DIR='${zwiftActivityDir}'"}
+            ${pkgs.lib.optionalString (zwiftLogDir != "") "export ZWIFT_LOG_DIR='${zwiftLogDir}'"}
             ${pkgs.lib.optionalString (
               zwiftScreenshotsDir != ""
-            ) "export ZWIFT_SCREENSHOTS_DIR=${zwiftScreenshotsDir}"}
+            ) "export ZWIFT_SCREENSHOTS_DIR='${zwiftScreenshotsDir}'"}
             ${pkgs.lib.optionalString (
               zwiftOverrideGraphics != ""
             ) "export ZWIFT_OVERRIDE_GRAPHICS=${zwiftOverrideGraphics}"}
             ${pkgs.lib.optionalString (
               zwiftOverrideResolution != ""
-            ) "export ZWIFT_OVERRIDE_RESOLUTION=${zwiftOverrideResolution}"}
+            ) "export ZWIFT_OVERRIDE_RESOLUTION='${zwiftOverrideResolution}'"}
             ${pkgs.lib.optionalString (zwiftFg != "") "export ZWIFT_FG=${zwiftFg}"}
             ${pkgs.lib.optionalString (zwiftNoGameMode != "") "export ZWIFT_NO_GAMEMODE=${zwiftNoGameMode}"}
             ${pkgs.lib.optionalString (
               wineExperimentalWayland != ""
             ) "export WINE_EXPERIMENTAL_WAYLAND=${wineExperimentalWayland}"}
-            ${pkgs.lib.optionalString (networking != "") "export NETWORKING=${networking}"}
-            ${pkgs.lib.optionalString (zwiftUid != "") "export ZWIFT_UID=${zwiftUid}"}
-            ${pkgs.lib.optionalString (zwiftGid != "") "export ZWIFT_GID=${zwiftGid}"}
+            ${pkgs.lib.optionalString (networking != "") "export NETWORKING='${networking}'"}
+            ${pkgs.lib.optionalString (zwiftUid != "") "export ZWIFT_UID='${zwiftUid}'"}
+            ${pkgs.lib.optionalString (zwiftGid != "") "export ZWIFT_GID='${zwiftGid}'"}
             ${pkgs.lib.optionalString (debug != "") "export DEBUG=${debug}"}
-            ${pkgs.lib.optionalString (verbosity != "") "export VERBOSITY=${verbosity}"}
-            ${pkgs.lib.optionalString (vgaDeviceFlag != "") "export VGA_DEVICE_FLAG=${vgaDeviceFlag}"}
+            ${pkgs.lib.optionalString (verbosity != "") "export VERBOSITY='${verbosity}'"}
+            ${pkgs.lib.optionalString (vgaDeviceFlag != "") "export VGA_DEVICE_FLAG='${vgaDeviceFlag}'"}
             ${pkgs.lib.optionalString (
               privilegedContainer != ""
             ) "export PRIVILEGED_CONTAINER=${privilegedContainer}"}
