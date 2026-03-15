@@ -360,13 +360,37 @@ if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     container_gid=1000
     container_args+=(--userns="keep-id:uid=${container_uid},gid=${container_gid}")
 else
+    remap_build_required() {
+        local tag_name="${1:?}"
+
+        local latest_image_digest=""
+        if ! latest_image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{.Digest}}')"; then
+            msgbox error "Failed to get ${IMAGE}:${VERSION} image digest"
+            exit 1
+        fi
+
+        local current_image_digest=""
+        if ! current_image_digest="$(${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .Config.Labels "org.opencontainers.image.base.digest"}}')"; then
+            msgbox info "Failed to get ${tag_name} base image digest, may not exist yet"
+            return 0
+        fi
+
+        [[ ${current_image_digest} != "${latest_image_digest}" ]]
+    }
+
     create_remap_dockerfile() {
         local user_uid="${1:?}"
         local user_gid="${2:?}"
-        local tmp_file=""
 
+        local tmp_file=""
         if ! tmp_file="$(mktemp -q /tmp/zwift-remap-user.dockerfile.XXXXXXXXXX)"; then
             msgbox error "Failed to create dockerfile for remapping user"
+            return 1
+        fi
+
+        local image_digest=""
+        if ! image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{.Digest}}')"; then
+            msgbox error "Failed to get ${IMAGE}:${VERSION} image digest"
             return 1
         fi
 
@@ -380,6 +404,7 @@ else
             echo " && sed -i \"s|/run/user/1000|/run/user/${user_uid}|g\" /etc/pulse/client.conf"
             echo "USER user"
             echo 'ENTRYPOINT ["entrypoint"]'
+            echo "LABEL org.opencontainers.image.base.digest=\"${image_digest}\""
         } > "${tmp_file}"
 
         echo "${tmp_file}"
@@ -403,11 +428,15 @@ else
         msgbox info "Remapping container user to host user"
         container_image="netbrain/zwift"
         container_image_version="remapped_user_${container_uid}_${container_gid}"
-        if remap_dockerfile="$(create_remap_dockerfile "${container_uid}" "${container_gid}")" && build_remap_dockerfile "${container_image}:${container_image_version}" "${remap_dockerfile}"; then
-            msgbox ok "Remapped container user to host user"
+        if remap_build_required "${container_image}:${container_image_version}"; then
+            if remap_dockerfile="$(create_remap_dockerfile "${container_uid}" "${container_gid}")" && build_remap_dockerfile "${container_image}:${container_image_version}" "${remap_dockerfile}"; then
+                msgbox ok "Remapped container user to host user"
+            else
+                msgbox error "Failed to remap container user to host user"
+                exit 1
+            fi
         else
-            msgbox error "Failed to remap container user to host user"
-            exit 1
+            msgbox ok "${container_image}:${container_image_version} is up to date"
         fi
     fi
 fi
