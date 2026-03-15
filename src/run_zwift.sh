@@ -89,6 +89,7 @@ cleanup() {
         pkill ZwiftLauncher || true
         pkill ZwiftWindowsCra || true
         pkill -f MicrosoftEdgeUpdate || true
+        wineserver -k || true
         cleanup_invoked=1
     fi
 }
