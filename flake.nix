@@ -58,7 +58,9 @@
             ${pkgs.lib.optionalString (zwiftUsername != "") "export ZWIFT_USERNAME='${zwiftUsername}'"}
             ${pkgs.lib.optionalString (zwiftPassword != "") "export ZWIFT_PASSWORD='${zwiftPassword}'"}
             ${pkgs.lib.optionalString (zwiftWorkoutDir != "") "export ZWIFT_WORKOUT_DIR='${zwiftWorkoutDir}'"}
-            ${pkgs.lib.optionalString (zwiftActivityDir != "") "export ZWIFT_ACTIVITY_DIR='${zwiftActivityDir}'"}
+            ${pkgs.lib.optionalString (
+              zwiftActivityDir != ""
+            ) "export ZWIFT_ACTIVITY_DIR='${zwiftActivityDir}'"}
             ${pkgs.lib.optionalString (zwiftLogDir != "") "export ZWIFT_LOG_DIR='${zwiftLogDir}'"}
             ${pkgs.lib.optionalString (
               zwiftScreenshotsDir != ""
