@@ -552,8 +552,16 @@ fi
 if [[ -z ${window_manager} ]]; then
     if [[ -n ${WAYLAND_DISPLAY} ]]; then
         window_manager="XWayland"
-    elif [[ -n ${DISPLAY} ]] && [[ -S /tmp/.X11-unix/X${DISPLAY#*:} ]]; then
-        window_manager="XOrg"
+    elif [[ -n ${DISPLAY} ]]; then
+        # Strip host prefix and screen suffix: "localhost:10.0" -> "10"
+        display_num="${DISPLAY#*:}"
+        display_num="${display_num%%.*}"
+        if [[ -S /tmp/.X11-unix/X${display_num} ]]; then
+            window_manager="XOrg"
+        else # no window manager, tty?
+            msgbox error "Can't run Zwift without window manager"
+            exit 1
+        fi
     else # no window manager, tty?
         msgbox error "Can't run Zwift without window manager"
         exit 1
@@ -626,7 +634,11 @@ fi
 
 # Configure sound driver
 container_env_vars+=(PULSE_SERVER="/run/user/${container_uid}/pulse/native")
-container_args+=(-v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse")
+if [[ -d "/run/user/${local_uid}/pulse" ]]; then
+    container_args+=(-v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse")
+else
+    msgbox warning "PulseAudio socket /run/user/${local_uid}/pulse not found — audio may not work (PipeWire-only system?)"
+fi
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
 if is_array "VGA_DEVICE_FLAG"; then
@@ -667,8 +679,8 @@ fi
 
 # Create a volume if not already exists, this is done now as
 # if left to the run command the directory can get the wrong permissions
-if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume ls | grep -q "zwift-${USER}"; then
-    mshgbox info "Creating ${CONTAINER_TOOL} volume zwift-${USER}"
+if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume inspect "zwift-${USER}" > /dev/null 2>&1; then
+    msgbox info "Creating ${CONTAINER_TOOL} volume zwift-${USER}"
     if ${CONTAINER_TOOL} volume create "zwift-${USER}"; then
         msgbox ok "Created volume zwift-${USER}"
     else
