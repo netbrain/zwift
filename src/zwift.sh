@@ -364,13 +364,13 @@ else
         local tag_name="${1:?}"
 
         local latest_image_digest=""
-        if ! latest_image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{.Digest}}')"; then
-            msgbox error "Failed to get ${IMAGE}:${VERSION} image digest"
-            exit 1
+        if ! latest_image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{index .RepoDigests 0}}' 2> /dev/null)"; then
+            msgbox warning "Failed to get ${IMAGE}:${VERSION} image digest"
+            return 0
         fi
 
         local current_image_digest=""
-        if ! current_image_digest="$(${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .Config.Labels "org.opencontainers.image.base.digest"}}')"; then
+        if ! current_image_digest="$(${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .Config.Labels "org.opencontainers.image.base.digest"}}' 2> /dev/null))"; then
             msgbox info "Failed to get ${tag_name} base image digest, may not exist yet"
             return 0
         fi
@@ -389,9 +389,9 @@ else
         fi
 
         local image_digest=""
-        if ! image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{.Digest}}')"; then
-            msgbox error "Failed to get ${IMAGE}:${VERSION} image digest"
-            return 1
+        if ! image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{index .RepoDigests 0}}' 2> /dev/null)"; then
+            msgbox warning "Failed to get ${IMAGE}:${VERSION} image digest"
+            image_digest="${IMAGE}:${VERSION}"
         fi
 
         {
