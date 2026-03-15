@@ -383,18 +383,36 @@ done
 #############################################
 ##### Remap container user to host user #####
 
+image_repo_digest() {
+    # Local images do not have a remote repository, will return 1
+
+    local tag_name="${1:?}"
+
+    local repo_digest
+    repo_digest="$(${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .RepoDigests 0}}' 2> /dev/null)" || return 1
+    echo "${repo_digest}"
+}
+
+image_digest_label() {
+    local tag_name="${1:?}"
+
+    local digest_label
+    digest_label="$(${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .Config.Labels "org.opencontainers.image.base.digest"}}' 2> /dev/null))" || return 1
+    echo "${digest_label}"
+}
+
 remap_build_required() {
     local tag_name="${1:?}"
 
-    local latest_image_digest=""
-    if ! latest_image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{index .RepoDigests 0}}' 2> /dev/null)"; then
-        msgbox warning "Failed to get ${IMAGE}:${VERSION} image digest"
+    local latest_image_digest
+    if ! latest_image_digest="$(image_repo_digest "${IMAGE}:${VERSION}")"; then
+        msgbox info "Failed to get ${IMAGE}:${VERSION} image repository digest, assuming rebuild is required"
         return 0
     fi
 
-    local current_image_digest=""
-    if ! current_image_digest="$(${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .Config.Labels "org.opencontainers.image.base.digest"}}' 2> /dev/null))"; then
-        msgbox info "Failed to get ${tag_name} base image digest, may not exist yet"
+    local current_image_digest
+    if ! current_image_digest="$(image_digest_label "${tag_name}")"; then
+        msgbox info "Failed to get ${tag_name} base image digest, may not exist yet, assuming rebuild is required"
         return 0
     fi
 
@@ -405,17 +423,14 @@ create_remap_dockerfile() {
     local user_uid="${1:?}"
     local user_gid="${2:?}"
 
-    local tmp_file=""
+    local tmp_file
     if ! tmp_file="$(mktemp -q /tmp/zwift-remap-user.dockerfile.XXXXXXXXXX)"; then
         msgbox error "Failed to create dockerfile for remapping user"
         return 1
     fi
 
-    local image_digest=""
-    if ! image_digest="$(${CONTAINER_TOOL} inspect "${IMAGE}:${VERSION}" --format '{{index .RepoDigests 0}}' 2> /dev/null)"; then
-        msgbox warning "Failed to get ${IMAGE}:${VERSION} image digest"
-        image_digest="${IMAGE}:${VERSION}"
-    fi
+    local image_digest
+    image_digest="$(image_repo_digest "${IMAGE}:${VERSION}" || echo "Unknown")"
 
     {
         echo "FROM ${IMAGE}:${VERSION}"
