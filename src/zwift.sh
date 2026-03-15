@@ -422,22 +422,20 @@ else
         fi
     }
 
+    msgbox info "Remapping container user to host user"
     container_uid="${host_uid}"
     container_gid="${host_gid}"
-    if [[ ${host_uid} -ne 1000 ]] || [[ ${host_gid} -ne 1000 ]]; then
-        msgbox info "Remapping container user to host user"
-        container_image="netbrain/zwift"
-        container_image_version="remapped_user_${container_uid}_${container_gid}"
-        if remap_build_required "${container_image}:${container_image_version}"; then
-            if remap_dockerfile="$(create_remap_dockerfile "${container_uid}" "${container_gid}")" && build_remap_dockerfile "${container_image}:${container_image_version}" "${remap_dockerfile}"; then
-                msgbox ok "Remapped container user to host user"
-            else
-                msgbox error "Failed to remap container user to host user"
-                exit 1
-            fi
+    container_image="netbrain/zwift"
+    container_image_version="remapped_user_${container_uid}_${container_gid}"
+    if remap_build_required "${container_image}:${container_image_version}"; then
+        if remap_dockerfile="$(create_remap_dockerfile "${container_uid}" "${container_gid}")" && build_remap_dockerfile "${container_image}:${container_image_version}" "${remap_dockerfile}"; then
+            msgbox ok "Remapped container user to host user"
         else
-            msgbox ok "${container_image}:${container_image_version} is up to date"
+            msgbox error "Failed to remap container user to host user"
+            exit 1
         fi
+    else
+        msgbox ok "${container_image}:${container_image_version} is up to date"
     fi
 fi
 
