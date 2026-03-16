@@ -39,7 +39,6 @@ These environment variables can be used to alter the execution of the zwift bash
 | `NETWORKING`                | `bridge`                   | Sets the type of container networking to use.                                                                                          |
 | `ZWIFT_UID`                 | current users id           | Sets the UID that Zwift will run as (docker only)                                                                                      |
 | `ZWIFT_GID`                 | current users group id     | Sets the GID that Zwift will run as (docker only)                                                                                      |
-| `DEBUG`                     | `0`                        | If set to `1`, enable debug of zwift script `set -x`                                                                                   |
 | `VGA_DEVICE_FLAG`           |                            | Override GPU/device flags for container (`--gpus=all`)                                                                                 |
 | `PRIVILEGED_CONTAINER`      | `0`                        | If set, container will run in privileged mode, SELinux label separation will be disabled (`--privileged --security-opt label=disable`) |
 

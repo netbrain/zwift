@@ -96,9 +96,14 @@ update_zwift_using_launcher() {
     msgbox ok "Zwift launcher started using wine"
 
     local counter=1
+    local max_iterations=60 # 60 * 5s = 5 minutes max
     # also stop if launcher exits before update finishes, so we don't hang forever
     while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
-        msgbox info "Updating Zwift... (${counter})"
+        if [[ ${counter} -gt ${max_iterations} ]]; then
+            msgbox error "Update timed out after $((max_iterations * 5)) seconds"
+            return 1
+        fi
+        msgbox info "Updating Zwift... (${counter}/${max_iterations})"
         msgbox debug "Current version: ${zwift_current_version}; Latest version: ${zwift_latest_version}"
         sleep 5
         zwift_current_version="$(get_current_version)"

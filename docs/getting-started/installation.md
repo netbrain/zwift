@@ -18,7 +18,7 @@ sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/mast
 
 This script will:
 
-- Download the Zwift Docker image
+- Download the Zwift container image
 - Create necessary configuration files
 - Add zwift command to your system path
 - Create desktop shortcut
