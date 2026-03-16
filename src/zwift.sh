@@ -521,7 +521,18 @@ if [[ ${ZWIFT_OVERRIDE_GRAPHICS} -eq 1 ]]; then
         zwift_graphics_config="${zwift_user_graphics_config}"
     # Create graphics.txt file if it does not exist.
     elif [[ ! -f ${zwift_graphics_config} ]]; then
-        echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "${zwift_graphics_config}"
+        {
+            echo "res 1920x1080(0x)"
+            echo "sres 2048x2048"
+            echo "set gSSAO=1"
+            echo "set gFXAA=1"
+            echo "set gSunRays=1"
+            echo "set gHeadlight=1"
+            echo "set gFoliagePercent=1.0"
+            echo "set gSimpleReflections=0"
+            echo "set gLODBias=0"
+            echo "set gShowFPS=0"
+        } > "${zwift_graphics_config}"
         msgbox warning "Created ${zwift_graphics_config} with default values, edit this file to tweak the zwift graphics settings" 0
     fi
 
