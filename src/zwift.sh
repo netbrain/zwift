@@ -516,6 +516,48 @@ else
     fi
 fi
 
+# Create the volume for the zwift documents directory if it does not already exist
+if ! ${CONTAINER_TOOL} volume inspect "zwift-${ZWIFT_RIDER}" > /dev/null 2>&1; then
+    msgbox info "Creating ${CONTAINER_TOOL} volume zwift-${ZWIFT_RIDER}"
+    if ${CONTAINER_TOOL} volume create "zwift-${ZWIFT_RIDER}" > /dev/null 2>&1; then
+        msgbox ok "Created volume zwift-${ZWIFT_RIDER}"
+    else
+        msgbox error "Failed to create volume zwift-${ZWIFT_RIDER}"
+        exit 1
+    fi
+fi
+
+volume_remap_required() {
+    ${CONTAINER_TOOL} run --rm \
+        -v "zwift-${ZWIFT_RIDER}:/tmp/zwift-data" \
+        -it --entrypoint bash \
+        "${container_image}:${container_image_version}" \
+        -c "[[ ! -O /tmp/zwift-data ]] || [[ ! -G /tmp/zwift-data ]]"
+}
+
+remap_volume() {
+    ${CONTAINER_TOOL} run --rm \
+        --user root \
+        -v "zwift-${ZWIFT_RIDER}:/tmp/zwift-data" \
+        -it --entrypoint bash \
+        "${container_image}:${container_image_version}" \
+        -c "chown -R \"${container_uid}:${container_gid}\" /tmp/zwift-data"
+}
+
+# Docker: Remap volume to container user
+# Necessary in two cases:
+# - Volume was just created, owner will be root, remap required
+# - End user changed user uid/gid, remap required
+if [[ ${CONTAINER_TOOL} != "podman" ]] && volume_remap_required; then
+    msgbox info "Updating owner of volume zwift-${ZWIFT_RIDER}"
+    if remap_volume; then
+        msgbox ok "Updated zwift-${ZWIFT_RIDER} volume owner to ${container_uid}:${container_gid}"
+    else
+        msgbox error "Failed to update zwift-${ZWIFT_RIDER} volume owner to ${container_uid}:${container_gid}"
+        exit 1
+    fi
+fi
+
 ##############################################
 ##### User defined environment variables #####
 
@@ -847,26 +889,6 @@ if [[ ${DRYRUN} -eq 1 ]]; then
 else
     msgbox debug "Starting ${CONTAINER_TOOL} container with the following arguments:"
     print_container_command debug
-fi
-
-# Create the volume for the zwift documents directory if it does not already exist
-if ! ${CONTAINER_TOOL} volume inspect "zwift-${ZWIFT_RIDER}" > /dev/null 2>&1; then
-    msgbox info "Creating ${CONTAINER_TOOL} volume zwift-${ZWIFT_RIDER}"
-    if ${CONTAINER_TOOL} volume create "zwift-${ZWIFT_RIDER}" > /dev/null 2>&1; then
-        msgbox ok "Created volume zwift-${ZWIFT_RIDER}"
-    else
-        msgbox error "Failed to create volume zwift-${ZWIFT_RIDER}"
-        exit 1
-    fi
-    if [[ ${CONTAINER_TOOL} != "podman" ]]; then
-        msgbox info "Updating owner of volume zwift-${ZWIFT_RIDER}"
-        if ${CONTAINER_TOOL} run --rm --user root -it -v "zwift-${ZWIFT_RIDER}:/tmp/zwift-data" --entrypoint bash "${container_image}:${container_image_version}" -c "chown -R \"${container_uid}:${container_gid}\" /tmp/zwift-data"; then
-            msgbox ok "Updated zwift-${ZWIFT_RIDER} volume owner to ${container_uid}:${container_gid}"
-        else
-            msgbox error "Failed to update zwift-${ZWIFT_RIDER} volume owner to ${container_uid}:${container_gid}"
-            exit 1
-        fi
-    fi
 fi
 
 # Only write environment variables to file when needed
