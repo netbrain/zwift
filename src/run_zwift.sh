@@ -66,6 +66,16 @@ if [[ ! -d ${ZWIFT_HOME} ]] || ! cd "${ZWIFT_HOME}"; then
     exit 1
 fi
 
+if [[ ! -d ${ZWIFT_DOCS} ]] || [[ ! -O ${ZWIFT_DOCS} ]] || [[ ! -G ${ZWIFT_DOCS} ]]; then
+    # shellcheck disable=SC2016 # using a command as literal string on the next line
+    expected_owner='$(id -u $USER):$(id -g $USER)'
+    [[ ${CONTAINER_TOOL} == "podman" ]] && expected_owner="1000:1000"
+    msgbox error "Directory ${ZWIFT_DOCS} does not exist or is not accessible."
+    msgbox error "You can try to fix its permissions by running:"
+    msgbox error "  ${CONTAINER_TOOL} run --rm --user root -it -v zwift-\$USER:/zwift-docs --entrypoint bash netbrain/zwift:latest -c \"chown -R ${expected_owner} /zwift-docs\""
+    exit 1
+fi
+
 if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
     if [[ -f ${ZWIFT_PREFS} ]]; then
         msgbox info "Setting zwift resolution to ${ZWIFT_OVERRIDE_RESOLUTION}."
