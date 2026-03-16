@@ -111,6 +111,16 @@ fi
 ##############################################
 ##### Sync Zwift volume to Zwift AppData #####
 
+if [[ -n ${ZWIFT_VOLUME} ]] && { [[ ! -d ${ZWIFT_VOLUME} ]] || [[ ! -O ${ZWIFT_VOLUME} ]] || [[ ! -G ${ZWIFT_VOLUME} ]]; }; then
+    # shellcheck disable=SC2016 # using a command as literal string on the next line
+    expected_owner='$(id -u $USER):$(id -g $USER)'
+    [[ ${CONTAINER_TOOL} == "podman" ]] && expected_owner="1000:1000"
+    msgbox error "Directory ${ZWIFT_VOLUME} does not exist or is not accessible."
+    msgbox error "You can try to fix its permissions by running:"
+    msgbox error "  ${CONTAINER_TOOL} run --rm --user root -it -v zwift-\$USER:/tmp/zwift-data --entrypoint bash netbrain/zwift:latest -c \"chown -R ${expected_owner} /tmp/zwift-data\""
+    exit 1
+fi
+
 if [[ -n ${ZWIFT_VOLUME} ]] && [[ ${ZWIFT_VOLUME} != "${ZWIFT_DATA_DIR}" ]]; then
     msgbox info "Synchronizing Zwift settings"
     if rsync -qa "${ZWIFT_VOLUME}/" "${ZWIFT_DATA_DIR}/"; then

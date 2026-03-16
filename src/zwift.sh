@@ -849,15 +849,23 @@ else
     print_container_command debug
 fi
 
-# Create a volume if not already exists, this is done now as
-# if left to the run command the directory can get the wrong permissions
+# Create the volume for the zwift documents directory if it does not already exist
 if ! ${CONTAINER_TOOL} volume inspect "zwift-${ZWIFT_RIDER}" > /dev/null 2>&1; then
     msgbox info "Creating ${CONTAINER_TOOL} volume zwift-${ZWIFT_RIDER}"
-    if ${CONTAINER_TOOL} volume create "zwift-${ZWIFT_RIDER}"; then
+    if ${CONTAINER_TOOL} volume create "zwift-${ZWIFT_RIDER}" > /dev/null 2>&1; then
         msgbox ok "Created volume zwift-${ZWIFT_RIDER}"
     else
         msgbox error "Failed to create volume zwift-${ZWIFT_RIDER}"
         exit 1
+    fi
+    if [[ ${CONTAINER_TOOL} != "podman" ]]; then
+        msgbox info "Updating owner of volume zwift-${ZWIFT_RIDER}"
+        if ${CONTAINER_TOOL} run --rm --user root -it -v "zwift-${ZWIFT_RIDER}:/tmp/zwift-data" --entrypoint bash "${container_image}:${container_image_version}" -c "chown -R \"${container_uid}:${container_gid}\" /tmp/zwift-data"; then
+            msgbox ok "Updated zwift-${ZWIFT_RIDER} volume owner to ${container_uid}:${container_gid}"
+        else
+            msgbox error "Failed to update zwift-${ZWIFT_RIDER} volume owner to ${container_uid}:${container_gid}"
+            exit 1
+        fi
     fi
 fi
 
