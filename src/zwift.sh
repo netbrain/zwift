@@ -761,19 +761,29 @@ fi
 declare -a container_command
 container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${container_image}:${container_image_version}" "${entrypoint_args[@]}")
 
-# DRYRUN: print the exact command that would be executed, then exit
-if [[ ${DRYRUN} -eq 1 ]]; then
-    msgbox ok "DRYRUN:"
-    msgbox ok "environment variables (${container_env_file}):"
+# Print the exact command that would be executed
+
+print_container_command() {
+    local msg_type="${1:?}"
+
+    msgbox "${msg_type}" "environment variables (${container_env_file}):"
     for env_var in "${container_env_vars[@]}"; do
         env_var="${env_var//\\/\\\\}"                                # escape backslashes
         env_var="${env_var//ZWIFT_USERNAME=*/ZWIFT_USERNAME=💜💜💜💜💜💜}" # redact username
         env_var="${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=💜💜💜💜💜💜}" # redact password
-        msgbox ok "  • ${env_var}"
+        msgbox "${msg_type}" "  • ${env_var}"
     done
-    msgbox ok "${CONTAINER_TOOL} command:"
-    msgbox ok "  $(printf '%q ' "${container_command[@]}")"
+    msgbox "${msg_type}" "${CONTAINER_TOOL} command:"
+    msgbox "${msg_type}" "  $(printf '%q ' "${container_command[@]}")"
+}
+
+if [[ ${DRYRUN} -eq 1 ]]; then
+    msgbox ok "DRYRUN:"
+    print_container_command ok
     exit 0
+else
+    msgbox debug "Starting ${CONTAINER_TOOL} container with the following arguments:"
+    print_container_command debug
 fi
 
 # Create a volume if not already exists, this is done now as
