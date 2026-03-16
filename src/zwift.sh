@@ -423,36 +423,35 @@ create_remap_dockerfile() {
     local user_uid="${1:?}"
     local user_gid="${2:?}"
 
-    local tmp_file
-    if ! tmp_file="$(mktemp -q /tmp/zwift-remap-user.dockerfile.XXXXXXXXXX)"; then
-        msgbox error "Failed to create dockerfile for remapping user"
-        return 1
-    fi
-
     local image_digest
     image_digest="$(image_repo_digest "${IMAGE}:${VERSION}" || echo "Unknown")"
 
-    {
-        echo "FROM ${IMAGE}:${VERSION}"
-        echo "USER root"
-        echo "RUN usermod -ou ${user_uid} user \\"
-        echo " && groupmod -og ${user_gid} user \\"
-        echo " && mkdir -p /run/user/${user_uid} \\"
-        echo " && chown -R user:user /run/user/${user_uid} \\"
-        echo " && sed -i \"s|/run/user/1000|/run/user/${user_uid}|g\" /etc/pulse/client.conf"
-        echo "USER user"
-        echo 'ENTRYPOINT ["entrypoint"]'
-        echo "LABEL org.opencontainers.image.base.digest=\"${image_digest}\""
-    } > "${tmp_file}"
-
-    echo "${tmp_file}"
+    echo "FROM ${IMAGE}:${VERSION}"
+    echo "USER root"
+    echo "RUN usermod -ou ${user_uid} user \\"
+    echo " && groupmod -og ${user_gid} user \\"
+    echo " && mkdir -p /run/user/${user_uid} \\"
+    echo " && chown -R user:user /run/user/${user_uid} \\"
+    echo " && sed -i \"s|/run/user/1000|/run/user/${user_uid}|g\" /etc/pulse/client.conf"
+    echo "USER user"
+    echo 'ENTRYPOINT ["entrypoint"]'
+    echo "LABEL org.opencontainers.image.base.digest=\"${image_digest}\""
 }
 
 build_remap_dockerfile() {
     local tag_name="${1:?}"
     local dockerfile="${2:?}"
 
-    if ${CONTAINER_TOOL} build -t "${tag_name}" -f "${dockerfile}" .; then
+    msgbox info "Building container image with remapped user"
+
+    msgbox debug "Using dockerfile:"
+    local dockerfile_lines line
+    readarray -t dockerfile_lines <<< "${dockerfile}"
+    for line in "${dockerfile_lines[@]}"; do
+        msgbox debug "  ${line/\\/\\\\}"
+    done
+
+    if ${CONTAINER_TOOL} build -t "${tag_name}" - <<< "${dockerfile}"; then
         msgbox info "Created ${CONTAINER_TOOL} image ${tag_name}"
     else
         msgbox error "Failed to create ${CONTAINER_TOOL} image ${tag_name}"
@@ -477,7 +476,8 @@ else
 
     msgbox info "Remapping container user to host user"
     if remap_build_required "${container_image}:${container_image_version}"; then
-        if remap_dockerfile="$(create_remap_dockerfile "${container_uid}" "${container_gid}")" && build_remap_dockerfile "${container_image}:${container_image_version}" "${remap_dockerfile}"; then
+        remap_dockerfile="$(create_remap_dockerfile "${container_uid}" "${container_gid}")"
+        if build_remap_dockerfile "${container_image}:${container_image_version}" "${remap_dockerfile}"; then
             msgbox ok "Remapped container user to host user"
         else
             msgbox error "Failed to remap container user to host user"
