@@ -384,34 +384,34 @@ done
 ##### Remap container user to host user #####
 
 image_repo_digest() {
-    # Local images do not have a remote repository, will return 1
+    # Local images do not have a remote repository, will return non-zero
 
     local tag_name="${1:?}"
 
-    local repo_digest
-    repo_digest="$(${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .RepoDigests 0}}' 2> /dev/null)" || return 1
-    echo "${repo_digest}"
+    ${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .RepoDigests 0}}' 2> /dev/null
 }
 
 image_digest_label() {
     local tag_name="${1:?}"
 
-    local digest_label
-    digest_label="$(${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .Config.Labels "org.opencontainers.image.base.digest"}}' 2> /dev/null))" || return 1
-    echo "${digest_label}"
+    ${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .Config.Labels "org.opencontainers.image.base.digest"}}' 2> /dev/null
 }
 
 remap_build_required() {
     local tag_name="${1:?}"
 
     local latest_image_digest
-    if ! latest_image_digest="$(image_repo_digest "${IMAGE}:${VERSION}")"; then
+    if latest_image_digest="$(image_repo_digest "${IMAGE}:${VERSION}")"; then
+        msgbox debug "Latest image digest is ${latest_image_digest}"
+    else
         msgbox info "Failed to get ${IMAGE}:${VERSION} image repository digest, assuming rebuild is required"
         return 0
     fi
 
     local current_image_digest
-    if ! current_image_digest="$(image_digest_label "${tag_name}")"; then
+    if current_image_digest="$(image_digest_label "${tag_name}")"; then
+        msgbox debug "Base image digest is ${current_image_digest}"
+    else
         msgbox info "Failed to get ${tag_name} base image digest, may not exist yet, assuming rebuild is required"
         return 0
     fi
@@ -424,7 +424,9 @@ create_remap_dockerfile() {
     local user_gid="${2:?}"
 
     local image_digest
-    image_digest="$(image_repo_digest "${IMAGE}:${VERSION}" || echo "Unknown")"
+    if ! image_digest="$(image_repo_digest "${IMAGE}:${VERSION}")"; then
+        image_digest="Unknown"
+    fi
 
     echo "FROM ${IMAGE}:${VERSION}"
     echo "USER root"
