@@ -430,11 +430,11 @@ create_remap_dockerfile() {
 
     echo "FROM ${IMAGE}:${VERSION}"
     echo "USER root"
-    echo "RUN usermod -ou ${user_uid} user \\"
+    echo "RUN sed -i \"s|/run/user/\$(id -u user)|/run/user/${user_uid}|g\" /etc/pulse/client.conf \\"
+    echo " && usermod -ou ${user_uid} user \\"
     echo " && groupmod -og ${user_gid} user \\"
     echo " && mkdir -p /run/user/${user_uid} \\"
-    echo " && chown -R user:user /run/user/${user_uid} \\"
-    echo " && sed -i \"s|/run/user/1000|/run/user/${user_uid}|g\" /etc/pulse/client.conf"
+    echo " && chown -R user:user /run/user/${user_uid}"
     echo "USER user"
     echo 'ENTRYPOINT ["entrypoint"]'
     echo "LABEL org.opencontainers.image.base.digest=\"${image_digest}\""

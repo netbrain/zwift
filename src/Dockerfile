@@ -74,19 +74,26 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
  && wget -qO /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
  && chmod +x /usr/local/bin/winetricks
 
-# Make nvidia libraries discoverable
-RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
- && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-
-# Required for non-glvnd setups
-ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
-
-# Configure audio driver
+# Add audio driver config file
 COPY pulse-client.conf /etc/pulse/client.conf
 
-# Run as a regular user instead of root
+# Various configuration
+# - Create user
+# - Create runtime directory
+# - Update audio driver config file
+# - Make nvidia libraries discoverable
 RUN addgroup --gid ${USER_GID} user \
- && adduser --uid ${USER_UID} --gid ${USER_GID} --disabled-password --comment '' user
+ && adduser --uid ${USER_UID} --gid ${USER_GID} --disabled-password --comment '' user \
+ && sed -i "s|/run/user/1000|/run/user/${USER_UID}|g" /etc/pulse/client.conf \
+ && mkdir -p /run/user/${USER_UID} \
+ && chown -R user:user /run/user/${USER_UID} \
+ && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
+ && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+
+# Make nvidia libraries discoverable (Required for non-glvnd setups)
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+
+# Run as a regular user instead of root
 USER user
 
 FROM wine-base
