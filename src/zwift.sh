@@ -532,7 +532,7 @@ fi
 volume_remap_required() {
     ${CONTAINER_TOOL} run --rm \
         -v "zwift-${ZWIFT_RIDER}:/tmp/zwift-data" \
-        -it --entrypoint bash \
+        --entrypoint bash \
         "${container_image}:${container_image_version}" \
         -c "[[ ! -O /tmp/zwift-data ]] || [[ ! -G /tmp/zwift-data ]]"
 }
@@ -541,7 +541,7 @@ remap_volume() {
     ${CONTAINER_TOOL} run --rm \
         --user root \
         -v "zwift-${ZWIFT_RIDER}:/tmp/zwift-data" \
-        -it --entrypoint bash \
+        --entrypoint bash \
         "${container_image}:${container_image_version}" \
         -c "chown -R \"${container_uid}:${container_gid}\" /tmp/zwift-data"
 }
