@@ -504,7 +504,7 @@ fi
 volume_remap_required() {
     ${CONTAINER_TOOL} run --rm \
         -v "zwift-${USER}:/zwift-docs" \
-        -it --entrypoint bash \
+        --entrypoint bash \
         "${container_image}:${container_image_version}" \
         -c "[[ ! -O /zwift-docs ]] || [[ ! -G /zwift-docs ]]"
 }
@@ -513,7 +513,7 @@ remap_volume() {
     ${CONTAINER_TOOL} run --rm \
         --user root \
         -v "zwift-${USER}:/zwift-docs" \
-        -it --entrypoint bash \
+        --entrypoint bash \
         "${container_image}:${container_image_version}" \
         -c "chown -R \"${container_uid}:${container_gid}\" /zwift-docs"
 }
