@@ -96,9 +96,12 @@ RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
 # Configure audio driver
 COPY pulse-client.conf /etc/pulse/client.conf
 
-# Create passwordless user
+# Create passwordless user and configure user id
 RUN groupadd --gid ${USER_GID} user \
- && useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --shell /bin/bash --no-log-init user
+ && useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --shell /bin/bash --no-log-init user \
+ && sed -i "s|/run/user/1000|/run/user/${USER_UID}|g" /etc/pulse/client.conf \
+ && mkdir -p /run/user/${USER_UID} \
+ && chown -R user:user /run/user/${USER_UID}
 USER user
 
 FROM wine-base
