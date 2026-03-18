@@ -473,8 +473,8 @@ else
     container_uid="${host_uid}"
     container_gid="${host_gid}"
 
-    container_image="netbrain/zwift"
-    container_image_version="remapped_user_${container_uid}_${container_gid}"
+    container_image="${IMAGE#docker.io/}"
+    container_image_version="uid_${container_uid}_gid_${container_gid}"
 
     msgbox info "Remapping container user to host user"
     if remap_build_required "${container_image}:${container_image_version}"; then
