@@ -535,8 +535,8 @@ if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     # otherwise fail with unmapped groups. Honored by crun, ignored by runc.
     container_args+=(--group-add keep-groups)
 else
-    container_image="netbrain/zwift"
-    container_image_version="remapped_user_${host_uid}_${host_gid}"
+    container_image="${IMAGE#docker.io/}"
+    container_image_version="uid_${host_uid}_gid_${host_gid}"
 
     msgbox info "Remapping container user to host user"
     if remap_build_required "${container_image}:${container_image_version}"; then
