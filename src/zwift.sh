@@ -591,64 +591,59 @@ fi
 # - On tty, manually starting x11 with xstart, it remains tty
 # So we cannot rely on XDG_SESSION_TYPE to detect the window manager
 
+is_wayland_supported() {
+    [[ -n ${WAYLAND_DISPLAY} ]] && [[ -S ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY} ]]
+}
+
+is_x11_supported() {
+    # DISPLAY is [host]:displaynumber[.screennumber] but the X11 socket is named
+    # by the display number alone, so strip the host prefix and screen suffix.
+    local x11_display="${DISPLAY#*:}"
+    x11_display="${x11_display%.*}"
+    [[ -n ${DISPLAY} ]] && [[ -d /tmp/.X11-unix ]] && [[ -S /tmp/.X11-unix/X${x11_display} ]]
+}
+
 window_manager=""
 if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
-    if [[ -n ${WAYLAND_DISPLAY} ]]; then
+    if is_wayland_supported; then
         window_manager="Wayland"
     else
         msgbox warning "WINE_EXPERIMENTAL_WAYLAND: Window manager is not Wayland, ignoring"
     fi
 fi
 if [[ -z ${window_manager} ]]; then
-    # DISPLAY is [host]:displaynumber[.screennumber] but the X11 socket is named
-    # by the display number alone, so strip the host prefix and screen suffix.
-    x11_display="${DISPLAY#*:}"
-    x11_display="${x11_display%.*}"
-    if [[ -n ${WAYLAND_DISPLAY} ]]; then
-        window_manager="XWayland"
-    elif [[ -n ${DISPLAY} ]] && [[ -S /tmp/.X11-unix/X${x11_display} ]]; then
-        window_manager="XOrg"
+    if is_x11_supported; then
+        if is_wayland_supported; then
+            window_manager="XWayland"
+        else
+            window_manager="XOrg"
+        fi
     else # no window manager, tty?
-        msgbox error "Can't run Zwift without window manager"
+        msgbox error "No window manager found, neither Wayland nor X11 are supported"
         exit 1
     fi
 fi
 
 # Setup Flags for Window Managers
 
+xhost_access_required=0
 if [[ ${window_manager} == "Wayland" ]]; then
     msgbox info "Using Wayland window manager"
+    msgbox warning "WINE_EXPERIMENTAL_WAYLAND: Using experimental native Wayland window manager!"
 
-    if [[ -n ${XDG_RUNTIME_DIR} ]] && [[ -n ${WAYLAND_DISPLAY} ]]; then
-        container_env_vars+=(
-            WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
-            WINE_EXPERIMENTAL_WAYLAND="1"
-        )
-        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/tmp/${WAYLAND_DISPLAY}")
-    else
-        msgbox error "Required environment variables XDG_RUNTIME_DIR and/or WAYLAND_DISPLAY are not set"
-        msgbox error "Falling back to XWayland" 5
-        window_manager="XWayland"
-    fi
-fi
-
-xhost_access_required=0
-if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
+    container_env_vars+=(
+        WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
+        XDG_SESSION_TYPE="wayland"
+    )
+    container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/tmp/${WAYLAND_DISPLAY}")
+elif [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
     msgbox info "Using X11 window manager (${window_manager})"
 
-    if [[ -n ${DISPLAY} ]]; then
-        container_env_vars+=(DISPLAY="${DISPLAY}")
-    else
-        msgbox error "Required environment variable DISPLAY is not set"
-        exit 1
-    fi
-
-    if [[ -d /tmp/.X11-unix ]]; then
-        container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
-    else
-        msgbox error "X11 socket does not exist at /tmp/.X11-unix"
-        exit 1
-    fi
+    container_env_vars+=(
+        DISPLAY="${DISPLAY}"
+        XDG_SESSION_TYPE="x11"
+    )
+    container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
 
     if [[ -n ${XAUTHORITY} ]]; then
         container_env_vars+=(XAUTHORITY="/tmp/.Xauthority")
