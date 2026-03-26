@@ -462,10 +462,21 @@ else
 fi
 
 # Setup container security flags
-if [[ ${PRIVILEGED_CONTAINER} -eq 1 ]]; then
+# Detect if SELinux is actively enforcing
+_selinux_enforcing() {
+    [[ -f /sys/fs/selinux/enforce ]] && [[ $(cat /sys/fs/selinux/enforce) == "1" ]]
+}
+
+# Setup container security flags
+if [[ ${PRIVILEGED_CONTAINER:-0} -eq 1 ]]; then
+    # Explicit opt-in to privileged mode
     container_args+=(--privileged --security-opt label=disable) # privileged container, less secure
-else
+elif _selinux_enforcing; then
+    # SELinux is active, use label-based security
     container_args+=(--security-opt label=type:container_runtime_t) # more secure
+else
+    # Not SELinux (e.g. AppArmor/none), default to privileged for GPU compatibility
+    container_args+=(--privileged --security-opt label=disable) # privileged container, less secure
 fi
 
 # Append extra arguments provided by user
