@@ -465,8 +465,8 @@ fi
 # Detect if SELinux is actively enforcing
 _selinux_enforcing() {
     local enforce_file=/sys/fs/selinux/enforce
-    if [[ -f $enforce_file ]]; then
-        [[ $(<"$enforce_file") == "1" ]]
+    if [[ -f ${enforce_file} ]]; then
+        [[ $(< "${enforce_file}") == "1" ]]
     else
         return 1
     fi
