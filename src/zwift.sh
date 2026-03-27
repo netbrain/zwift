@@ -464,7 +464,12 @@ fi
 # Setup container security flags
 # Detect if SELinux is actively enforcing
 _selinux_enforcing() {
-    [[ -f /sys/fs/selinux/enforce ]] && [[ $(cat /sys/fs/selinux/enforce) == "1" ]]
+    local enforce_file=/sys/fs/selinux/enforce
+    if [[ -f $enforce_file ]]; then
+        [[ $(<"$enforce_file") == "1" ]]
+    else
+        return 1
+    fi
 }
 
 # Setup container security flags
