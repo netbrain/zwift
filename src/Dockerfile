@@ -21,23 +21,22 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs . \
 
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 
-# As at May 2024 Wayland Native works wine 9.9 or later:
-#    WINE_BRANCH="devel"
-# For Specific version fix add WINE_VERSION,
-# make sure to add "=" to the start, comment out for latest
-#    WINE_VERSION="=9.9~bookworm-1"
+# Wine 11: EGL is the default OpenGL backend (replaced GLX since 10.17).
+# Wayland native support included since 9.9. Pinned to 11.5 devel.
+# To update, change WINE_VERSION (prefix with "=", omit for latest devel)
+#    WINE_VERSION="=11.5~${DEBIAN_VERSION}-1"
 ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
-ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
-ARG WINETRICKS_VERSION=20240105
+ARG WINE_VERSION="=11.5~${DEBIAN_VERSION}-1"
+ARG WINETRICKS_VERSION=20260125
 
 # Install prerequisites
 # - ca-certificates for wget and curl
 # - curl used in zwift authentication script
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
-# - libegl1 and libgl1 for GL library
-# - libvulkan1 for vulkan loader library
+# - libegl1/libgl1 and i386 variants for GL/EGL library
+# - libvulkan1 and i386 variant for vulkan loader library
 # - procps for pgrep
 # - sudo for normal user installation
 # - wget for downloading winehq key
@@ -51,8 +50,11 @@ RUN dpkg --add-architecture i386 \
         gamemode \
         gosu \
         libegl1 \
+        libegl1:i386 \
         libgl1 \
+        libgl1:i386 \
         libvulkan1 \
+        libvulkan1:i386 \
         procps \
         sudo \
         wget \
@@ -75,11 +77,17 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
  && chmod +x /usr/local/bin/winetricks
 
 # Create passwordless user and make nvidia libraries discoverable
+# Register NVIDIA as a GLVND EGL vendor so the dispatcher loads libEGL_nvidia.so.0
+# when injected by the NVIDIA container runtime. Harmless if NVIDIA is absent
+# (GLVND silently skips vendors whose library is not found).
 RUN adduser --disabled-password --gecos '' user \
  && adduser user sudo \
  && echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
- && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+ && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf \
+ && mkdir -p /usr/share/glvnd/egl_vendor.d \
+ && printf '{"file_format_version":"1.0.0","ICD":{"library_path":"libEGL_nvidia.so.0"}}\n' \
+        > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
 
 # Required for non-glvnd setups
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
