@@ -1,4 +1,6 @@
 ARG DEBIAN_VERSION=trixie
+ARG USER_UID=1000
+ARG USER_GID=1000
 
 FROM rust:1.90-slim AS build-runfromprocess
 
@@ -27,6 +29,8 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 # make sure to add "=" to the start, comment out for latest
 #    WINE_VERSION="=9.9~bookworm-1"
 ARG DEBIAN_VERSION
+ARG USER_UID
+ARG USER_GID
 ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=20240105
@@ -35,11 +39,9 @@ ARG WINETRICKS_VERSION=20240105
 # - ca-certificates for wget and curl
 # - curl used in zwift authentication script
 # - gamemode for freedesktop screensaver inhibit
-# - gosu for invoking scripts in entrypoint
 # - libegl1 and libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
-# - sudo for normal user installation
 # - wget for downloading winehq key
 # - winbind for ntml_auth required by zwift/wine
 # - xdg-utils seems to be a dependency of wayland
@@ -49,12 +51,10 @@ RUN dpkg --add-architecture i386 \
         ca-certificates \
         curl \
         gamemode \
-        gosu \
         libegl1 \
         libgl1 \
         libvulkan1 \
         procps \
-        sudo \
         wget \
         winbind \
         xdg-utils \
@@ -74,18 +74,27 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
  && wget -qO /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
  && chmod +x /usr/local/bin/winetricks
 
-# Create passwordless user and make nvidia libraries discoverable
-RUN adduser --disabled-password --gecos '' user \
- && adduser user sudo \
- && echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
+# Add audio driver config file
+COPY pulse-client.conf /etc/pulse/client.conf
+
+# Various configuration
+# - Create user
+# - Create runtime directory
+# - Update audio driver config file
+# - Make nvidia libraries discoverable
+RUN addgroup --gid ${USER_GID} user \
+ && adduser --uid ${USER_UID} --gid ${USER_GID} --disabled-password --comment '' user \
+ && sed -i "s|/run/user/1000|/run/user/${USER_UID}|g" /etc/pulse/client.conf \
+ && mkdir -p /run/user/${USER_UID} \
+ && chown -R user:user /run/user/${USER_UID} \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
-# Required for non-glvnd setups
+# Make nvidia libraries discoverable (Required for non-glvnd setups)
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
 
-# Configure audio driver
-COPY pulse-client.conf /etc/pulse/client.conf
+# Run as a regular user instead of root
+USER user
 
 FROM wine-base
 

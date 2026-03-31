@@ -37,13 +37,8 @@ These environment variables can be used to alter the execution of the zwift bash
 | `ZWIFT_NO_GAMEMODE`         | `0`                        | If set to `1`, don't run game mode                                                                                                     |
 | `WINE_EXPERIMENTAL_WAYLAND` | `0`                        | If set to `1`, try to use experimental wayland support in wine 9                                                                       |
 | `NETWORKING`                | `bridge`                   | Sets the type of container networking to use.                                                                                          |
-| `ZWIFT_UID`                 | current users id           | Sets the UID that Zwift will run as (docker only)                                                                                      |
-| `ZWIFT_GID`                 | current users group id     | Sets the GID that Zwift will run as (docker only)                                                                                      |
 | `VGA_DEVICE_FLAG`           |                            | Override GPU/device flags for container (`--gpus=all`)                                                                                 |
 | `PRIVILEGED_CONTAINER`      | `0`                        | If set, container will run in privileged mode, SELinux label separation will be disabled (`--privileged --security-opt label=disable`) |
-
-{: .important }
-`ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
 
 ### Examples
 
@@ -56,8 +51,6 @@ These environment variables can be used to alter the execution of the zwift bash
    cores, this is useful on laptops to avoid overheating and subsequent throttling of the CPU by the system).
 - `USER="fred" zwift` perfect if your neighbor Fred want's to try zwift, and you don't want to mess up your zwift config.
 - `NETWORKING="host" zwift` will use host networking which may be needed to have zwift talk to wifi enabled trainers.
-- `ZWIFT_UID="123" ZWIFT_GID="123" zwift` will run zwift as the given uid and gid. By default zwift runs with the uid and gid of
-  the user that started the container. You should not need to change this except in rare cases.
 - `WINE_EXPERIMENTAL_WAYLAND="1" zwift` This will start zwift using Wayland and not XWayland. It will start full screen
   windowed.
 

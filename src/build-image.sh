@@ -73,9 +73,7 @@ readonly XAUTHORITY="${XAUTHORITY:-}"
 
 # Initialize script constants
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd)"
-ZWIFT_UID="${UID}"
-ZWIFT_GID="$(id -g)"
-readonly SCRIPT_DIR ZWIFT_UID ZWIFT_GID
+readonly SCRIPT_DIR
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -110,6 +108,10 @@ msgbox info "Image will be called ${IMAGE}"
 ###############################
 ##### Basic configuration #####
 
+# Create array for build arguments
+declare -a build_args
+build_args=()
+
 # Create array for container arguments
 declare -a container_args
 container_args=(
@@ -123,14 +125,22 @@ container_args=(
     -e VERBOSITY="${VERBOSITY}"
     -e COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}"
     -e CONTAINER_TOOL="${CONTAINER_TOOL}"
-    -e ZWIFT_UID="${ZWIFT_UID}"
-    -e ZWIFT_GID="${ZWIFT_GID}"
 )
 
+# Initialize user ids
+host_uid="${UID}"
+host_gid="$(id -g)"
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     # Podman maps the local user into the container as uid/gid 1000 (the container's user),
     # consistent with zwift.sh. Using the host uid/gid here causes a uid mismatch at runtime.
-    container_args+=(--userns "keep-id:uid=1000,gid=1000")
+    container_uid=1000
+    container_args+=(--userns="keep-id:uid=1000,gid=1000")
+else
+    container_uid="${host_uid}"
+    build_args+=(
+        --build-arg USER_UID="${host_uid}"
+        --build-arg USER_GID="${host_gid}"
+    )
 fi
 
 # Configure window manager
@@ -145,8 +155,8 @@ container_args+=(
 )
 if [[ -n ${XAUTHORITY} ]]; then
     container_args+=(
-        -e XAUTHORITY="${XAUTHORITY}"
-        -v "${XAUTHORITY}:${XAUTHORITY}"
+        -e XAUTHORITY="${XAUTHORITY//${host_uid}/${container_uid}}"
+        -v "${XAUTHORITY}:${XAUTHORITY//${host_uid}/${container_uid}}"
     )
 elif command_exists xhost && xhost +local: > /dev/null; then
     msgbox ok "Container X11 access provided through xhost"
@@ -185,7 +195,7 @@ cleanup() {
 trap cleanup EXIT
 
 msgbox info "Building image ${IMAGE}"
-if ${CONTAINER_TOOL} build --force-rm -t "${BUILD_NAME}" "${SCRIPT_DIR}"; then
+if ${CONTAINER_TOOL} build --force-rm "${build_args[@]}" -t "${BUILD_NAME}" "${SCRIPT_DIR}"; then
     msgbox ok "Successfully built image ${IMAGE}"
 else
     msgbox error "Failed to build image"
