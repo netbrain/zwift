@@ -472,27 +472,22 @@ else
     container_args+=(-d)
 fi
 
-# Setup container security flags
 # Detect if SELinux is actively enforcing
-_selinux_enforcing() {
+is_selinux_active() {
     local enforce_file=/sys/fs/selinux/enforce
-    if [[ -f ${enforce_file} ]]; then
-        [[ $(< "${enforce_file}") == "1" ]]
-    else
-        return 1
-    fi
+    [[ -f ${enforce_file} ]] && [[ $(< "${enforce_file}") == "1" ]]
 }
 
 # Setup container security flags
-if [[ ${PRIVILEGED_CONTAINER:-0} -eq 1 ]]; then
-    # Explicit opt-in to privileged mode
-    container_args+=(--privileged --security-opt label=disable) # privileged container, less secure
-elif _selinux_enforcing; then
-    # SELinux is active, use label-based security
-    container_args+=(--security-opt label=type:container_runtime_t) # more secure
+if [[ ${PRIVILEGED_CONTAINER} -eq 1 ]]; then
+    msgbox warning "PRIVILEGED_CONTAINER is set, running container in privileged mode"
+    container_args+=(--privileged --security-opt label=disable)
+elif is_selinux_active; then
+    msgbox info "SELinux is active, using secure container flags"
+    container_args+=(--security-opt label=type:container_runtime_t)
 else
-    # Not SELinux (e.g. AppArmor/none), default to privileged for GPU compatibility
-    container_args+=(--privileged --security-opt label=disable) # privileged container, less secure
+    msgbox warning "Not using SELinux, running container in privileged mode to be able to access the GPU"
+    container_args+=(--privileged --security-opt label=disable)
 fi
 
 # Append extra arguments provided by user
