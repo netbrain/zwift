@@ -425,7 +425,18 @@ if [[ ${ZWIFT_OVERRIDE_GRAPHICS} -eq 1 ]]; then
         zwift_graphics_config="${zwift_user_graphics_config}"
     # Create graphics.txt file if it does not exist.
     elif [[ ! -f ${zwift_graphics_config} ]]; then
-        echo -e "res 1920x1080(0x)\nsres 2048x2048\nset gSSAO=1\nset gFXAA=1\nset gSunRays=1\nset gHeadlight=1\nset gFoliagePercent=1.0\nset gSimpleReflections=0\nset gLODBias=0\nset gShowFPS=0" > "${zwift_graphics_config}"
+        {
+            echo "res 1920x1080(0x)"
+            echo "sres 2048x2048"
+            echo "set gSSAO=1"
+            echo "set gFXAA=1"
+            echo "set gSunRays=1"
+            echo "set gHeadlight=1"
+            echo "set gFoliagePercent=1.0"
+            echo "set gSimpleReflections=0"
+            echo "set gLODBias=0"
+            echo "set gShowFPS=0"
+        } > "${zwift_graphics_config}"
         msgbox warning "Created ${zwift_graphics_config} with default values, edit this file to tweak the zwift graphics settings" 0
     fi
 
@@ -461,27 +472,22 @@ else
     container_args+=(-d)
 fi
 
-# Setup container security flags
 # Detect if SELinux is actively enforcing
-_selinux_enforcing() {
-    local enforce_file=/sys/fs/selinux/enforce
-    if [[ -f ${enforce_file} ]]; then
-        [[ $(< "${enforce_file}") == "1" ]]
-    else
-        return 1
-    fi
+is_selinux_active() {
+    local enforcing
+    command_exists getenforce && enforcing="$(getenforce)" && [[ ${enforcing} == "Enforcing" ]]
 }
 
 # Setup container security flags
-if [[ ${PRIVILEGED_CONTAINER:-0} -eq 1 ]]; then
-    # Explicit opt-in to privileged mode
-    container_args+=(--privileged --security-opt label=disable) # privileged container, less secure
-elif _selinux_enforcing; then
-    # SELinux is active, use label-based security
-    container_args+=(--security-opt label=type:container_runtime_t) # more secure
+if [[ ${PRIVILEGED_CONTAINER} -eq 1 ]]; then
+    msgbox warning "PRIVILEGED_CONTAINER is set, running container in privileged mode"
+    container_args+=(--privileged --security-opt label=disable)
+elif is_selinux_active; then
+    msgbox info "SELinux is active, using secure container flags"
+    container_args+=(--security-opt label=type:container_runtime_t)
 else
-    # Not SELinux (e.g. AppArmor/none), default to privileged for GPU compatibility
-    container_args+=(--privileged --security-opt label=disable) # privileged container, less secure
+    msgbox warning "Not using SELinux, running container in privileged mode to be able to access the GPU"
+    container_args+=(--privileged --security-opt label=disable)
 fi
 
 # Append extra arguments provided by user
@@ -670,19 +676,29 @@ fi
 declare -a container_command
 container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${IMAGE}:${VERSION}" "${entrypoint_args[@]}")
 
-# DRYRUN: print the exact command that would be executed, then exit
-if [[ ${DRYRUN} -eq 1 ]]; then
-    msgbox ok "DRYRUN:"
-    msgbox ok "environment variables (${container_env_file}):"
+# Print the exact command that would be executed
+
+print_container_command() {
+    local msg_type="${1:?}"
+
+    msgbox "${msg_type}" "environment variables (${container_env_file}):"
     for env_var in "${container_env_vars[@]}"; do
         env_var="${env_var//\\/\\\\}"                                # escape backslashes
         env_var="${env_var//ZWIFT_USERNAME=*/ZWIFT_USERNAME=💜💜💜💜💜💜}" # redact username
         env_var="${env_var//ZWIFT_PASSWORD=*/ZWIFT_PASSWORD=💜💜💜💜💜💜}" # redact password
-        msgbox ok "  • ${env_var}"
+        msgbox "${msg_type}" "  • ${env_var}"
     done
-    msgbox ok "${CONTAINER_TOOL} command:"
-    msgbox ok "  $(printf '%q ' "${container_command[@]}")"
+    msgbox "${msg_type}" "${CONTAINER_TOOL} command:"
+    msgbox "${msg_type}" "  $(printf '%q ' "${container_command[@]}")"
+}
+
+if [[ ${DRYRUN} -eq 1 ]]; then
+    msgbox ok "DRYRUN:"
+    print_container_command ok
     exit 0
+else
+    msgbox debug "Starting ${CONTAINER_TOOL} container with the following arguments:"
+    print_container_command debug
 fi
 
 # Create a volume if not already exists, this is done now as
