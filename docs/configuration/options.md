@@ -64,7 +64,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`DONT_PULL`](#dont_pull)                                 | `0`                        | If set to `1`, don't pull for new image version (implies `DONT_CLEAN`)                                                                 |
 | [`DONT_CLEAN`](#dont_clean)                               | `0`                        | If set to `1`, don't clean up previous image after pulling                                                                             |
 | [`DRYRUN`](#dryrun)                                       | `0`                        | If set to `1`, print the full container run command and exit                                                                           |
-| [`INTERACTIVE`](#interactive)                             | `0`                        | If set to `1`, force `-it` and use `--entrypoint bash` for debugging                                                                   |
+| [`INTERACTIVE`](#interactive)                             | `0`                        | If set to `1`, attach to the container terminal                                                                                        |
 | [`CONTAINER_TOOL`](#container_tool)                       |                            | Defaults to podman if installed, else docker                                                                                           |
 | [`CONTAINER_EXTRA_ARGS`](#container_extra_args)           |                            | Extra arguments to pass to podman/docker                                                                                               |
 | [`ZWIFT_USERNAME`](#zwift_username)                       |                            | Zwift username. If set, try to login to zwift automatically.                                                                           |
@@ -77,7 +77,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution) |                            | If set, change the game resolution                                                                                                     |
 | [`ZWIFT_FG`](#zwift_fg)                                   | `0`                        | If set to `1`, run the container in the foreground                                                                                     |
 | [`ZWIFT_NO_GAMEMODE`](#zwift_no_gamemode)                 | `0`                        | If set to `1`, don't run game mode                                                                                                     |
-| [`WINE_EXPERIMENTAL_WAYLAND`](#wine_experimental_wayland) | `0`                        | If set to `1`, try to use experimental wayland support in wine 9                                                                       |
+| [`WINE_EXPERIMENTAL_WAYLAND`](#wine_experimental_wayland) | `0`                        | If set to `1`, use native Wayland                                                                                                      |
 | [`NETWORKING`](#networking)                               | `bridge`                   | Sets the type of container networking to use.                                                                                          |
 | [`ZWIFT_UID`](#zwift_uid)                                 | `$(id -u)`                 | Sets the UID that Zwift will run as                                                                                                    |
 | [`ZWIFT_GID`](#zwift_gid)                                 | `$(id -g)`                 | Sets the GID that Zwift will run as                                                                                                    |
@@ -603,9 +603,35 @@ echo "The Zwift container has exited"
 
 ### `ZWIFT_NO_GAMEMODE`
 
+If set to `1`, don't use game mode.
+
+| Item              | Description                          |
+|:------------------|:-------------------------------------|
+| Allowed values    | `0` - Start Zwift using game mode.   |
+|                   | `1` - Start Zwift without game mode. |
+| Default value     | `0`                                  |
+| Commandline usage | `ZWIFT_NO_GAMEMODE="1" zwift`        |
+| Config file usage | `ZWIFT_NO_GAMEMODE="1"`              |
+
 ---
 
 ### `WINE_EXPERIMENTAL_WAYLAND`
+
+If set to `1`, use native Wayland instead of XWayland if the display manager is Wayland.
+
+| Item              | Description                              |
+|:------------------|:-----------------------------------------|
+| Allowed values    | `0` - Use XWayland window manager.       |
+|                   | `1` - Use native Wayland window manager. |
+| Default value     | `0`                                      |
+| Commandline usage | `WINE_EXPERIMENTAL_WAYLAND="1" zwift`    |
+| Config file usage | `WINE_EXPERIMENTAL_WAYLAND="1"`          |
+
+{: .note }
+Only used if the window manager is Wayland. Ignored if the window manager is X11/XOrg.
+
+{: .warning }
+This feature is experimental. Reduced performance and other sporadic issues are expected.
 
 ---
 
