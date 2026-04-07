@@ -139,19 +139,11 @@ on a single linux user account.
 - The `$HOME/.config/zwift/config` file could look like:
 
   ```bash
+  ZWIFT_USERNAME='bob@mail.com'
+  ZWIFT_PASSWORD='the password for bob'
   NETWORKING="host"
   ZWIFT_OVERRIDE_GRAPHICS="1"
   ```
-
-- The `$HOME/.config/zwift/bob-config` file could look like:
-
-  ```bash
-  ZWIFT_USERNAME='bob@mail.com'
-  ZWIFT_PASSWORD='the password for bob'
-  ```
-
-  Running `USER="bob" zwift` will first load the `config` file and then the `bob-config` file. The values in the `bob-config`
-  file will overwrite the values in the `config` file. So the zwift script will use Bob's username and password.
 
 - The `$HOME/.config/zwift/fred-config` file could look like:
 
@@ -167,6 +159,8 @@ on a single linux user account.
 
 See also [`VERSION`](#version), [`DONT_PULL`](#dont_pull).
 
+Specify which container image to use.
+
 | Item              | Description                     |
 |:------------------|:--------------------------------|
 | Allowed values    | string                          |
@@ -175,27 +169,99 @@ See also [`VERSION`](#version), [`DONT_PULL`](#dont_pull).
 | Config file usage | `IMAGE="localhost/zwift"`       |
 
 {: .important }
-When using a local image, you should also set `DONT_PULL="1"`.
+When using a local image, you should also set `DONT_PULL="1"` to prevent the zwift script from trying to pull the image.
 
 ### VERSION
 
 See also [`IMAGE`](#image), [`DONT_PULL`](#dont_pull).
 
+Specify which container image version/tag to use. This can be useful to pin the image to a specific Zwift version.
+
+| Item              | Description                |
+|:------------------|:---------------------------|
+| Allowed values    | string                     |
+| Default value     | `latest`                   |
+| Commandline usage | `VERSION="v1.110.2" zwift` |
+| Config file usage | `VERSION="v1.110.2"`       |
+
+{: .warning }
+Pinning to a specific image version may result in Zwift failing to launch. Only use this option if you have a good reason.
+
 ### SCRIPT_VERSION
 
 See also [`DONT_CHECK`](#dont_check).
+
+Pin the `zwift.sh` script to a specific version.
+
+| Item              | Description                              |
+|:------------------|:-----------------------------------------|
+| Allowed values    | master - Use the latest version.         |
+|                   | commit hash - Pin to a specific version. |
+| Default value     | `master`                                 |
+| Commandline usage | `SCRIPT_VERSION="cd50c7" zwift`          |
+| Config file usage | `SCRIPT_VERSION="cd50c7"`                |
+
+- To find the commit hashes, look at the zwift script git history on github at:
+  <https://github.com/netbrain/zwift/commits/master/src/zwift.sh>.
+- When using a commit hash, it is enough to specify the first 6 characters. For example to pin to commit
+  `cd50c7454268a9bfa5de0e6615eb43b9e080b9b2` it is enough to set `SCRIPT_VERSION="cd50c7"`.
+
+{: .warning }
+Pinning to a specific image version may result in Zwift failing to launch. Only use this option if you have a good reason.
 
 ### DONT_CHECK
 
 See also [`SCRIPT_VERSION`](#script_version).
 
+If set to `1`, don't check for updated `zwift.sh` script.
+
+| Item              | Description                                      |
+|:------------------|:-------------------------------------------------|
+| Allowed values    | `0` - Check for updated `zwift.sh` script.       |
+|                   | `1` - Don't check for updated `zwift.sh` script. |
+| Default value     | `0`                                              |
+| Commandline usage | `DONT_CHECK="1" zwift`                           |
+| Config file usage | `DONT_CHECK="1"`                                 |
+
+{: .important }
+Prefer pinning the zwift script to a specific version using `SCRIPT_VERSION="..."` instead of using `DONT_CHECK="1"`.
+
+{: .warning }
+Not updating the zwift script may result in Zwift failing to launch. Only use this option if you have a good reason.
+
 ### DONT_PULL
 
 See also [`IMAGE`](#image), [`VERSION`](#version).
 
+If set to `1`, don't pull for a new image version (implies `DONT_CLEAN=1`).
+
+| Item              | Description                                    |
+|:------------------|:-----------------------------------------------|
+| Allowed values    | `0` - Check for updated container image.       |
+|                   | `1` - Don't check for updated container image. |
+| Default value     | `0`                                            |
+| Commandline usage | `DONT_PULL="1" zwift`                          |
+| Config file usage | `DONT_PULL="1"`                                |
+
+{: .important }
+Prefer pinning the container image to a specific version using `VERSION="..."` instead of using `DONT_PULL="1"`.
+
+{: .warning }
+Not updating the container image may result in Zwift failing to launch. Only use this option if you have a good reason.
+
 ### DONT_CLEAN
 
 See also [`DONT_PULL`](#dont_pull).
+
+If set to `1`, don't clean up previous image versions after pulling.
+
+| Item              | Description                                                 |
+|:------------------|:------------------------------------------------------------|
+| Allowed values    | `0` - Clean up previous image versions after pulling.       |
+|                   | `1` - Don't clean up previous image versions after pulling. |
+| Default value     | `0`                                                         |
+| Commandline usage | `DONT_CLEAN="1" zwift`                                      |
+| Config file usage | `DONT_CLEAN="1"`                                            |
 
 ### DRYRUN
 
