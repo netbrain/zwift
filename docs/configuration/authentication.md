@@ -28,3 +28,22 @@ In this case the username should still be saved in the config file.
 
 {: .note }
 It is recommended to save your password securely in the secret store and add your username to the config file.
+
+## How can I update my persisted password?
+
+### Update your password
+
+- If you stored your password in the config file, simply update the `ZWIFT_PASSWORD` value there.
+- If you stored your password in the Linux secret store, overwrite it:
+
+  ```bash
+  secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwift username ${ZWIFT_USERNAME}
+  ```
+
+### Podman
+
+If you are using podman, you need to remove your password from the podman secret store.
+
+```bash
+podman secret rm zwift-password-$ZWIFT_USERNAME
+```

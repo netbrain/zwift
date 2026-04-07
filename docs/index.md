@@ -15,7 +15,7 @@ Easily Zwift on Linux! :100:
 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
 ```
 
-![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/example.gif)
+![example.gif](/assets/images/example.gif)
 
 ## Key Features
 
