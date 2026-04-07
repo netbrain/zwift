@@ -21,7 +21,7 @@ and give me a ride on from time to time.
 
 ## Getting started
 
-![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/example.gif)
+![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/docs/assets/images/example.gif)
 
 ### Prerequisites
 
