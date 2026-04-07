@@ -52,37 +52,37 @@ These environment variables can be used to alter the execution of the zwift bash
 
 ### Overview
 
-| Key                                                       | Default                    | Description                                                                                                                            |
-|:----------------------------------------------------------|:---------------------------|:---------------------------------------------------------------------------------------------------------------------------------------|
-| [`DEBUG`](#debug)                                         | `0`                        | Enable `set -x` for all scripts                                                                                                        |
-| [`VERBOSITY`](#verbosity)                                 | `1`                        | Configure how much output should be shown                                                                                              |
-| [`USER`](#user)                                           | `$USER`                    | Use a different user to avoid configuration conflicts                                                                                  |
-| [`IMAGE`](#image)                                         | `docker.io/netbrain/zwift` | The image to use                                                                                                                       |
-| [`VERSION`](#version)                                     | `latest`                   | The image version/tag to use                                                                                                           |
-| [`SCRIPT_VERSION`](#script_version)                       | `master`                   | The `zwift.sh` script version to use (git commit hash)                                                                                 |
-| [`DONT_CHECK`](#dont_check)                               | `0`                        | If set to `1`, don't check for updated `zwift.sh`                                                                                      |
-| [`DONT_PULL`](#dont_pull)                                 | `0`                        | If set to `1`, don't pull for new image version (implies `DONT_CLEAN`)                                                                 |
-| [`DONT_CLEAN`](#dont_clean)                               | `0`                        | If set to `1`, don't clean up previous image after pulling                                                                             |
-| [`DRYRUN`](#dryrun)                                       | `0`                        | If set to `1`, print the full container run command and exit                                                                           |
-| [`INTERACTIVE`](#interactive)                             | `0`                        | If set to `1`, attach to the container terminal                                                                                        |
-| [`CONTAINER_TOOL`](#container_tool)                       |                            | Defaults to podman if installed, else docker                                                                                           |
-| [`CONTAINER_EXTRA_ARGS`](#container_extra_args)           |                            | Extra arguments to pass to podman/docker                                                                                               |
-| [`ZWIFT_USERNAME`](#zwift_username)                       |                            | Zwift username. If set, try to login to zwift automatically                                                                            |
-| [`ZWIFT_PASSWORD`](#zwift_password)                       |                            | Zwift password.                                                                                                                        |
-| [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir)                 |                            | Set the workouts directory location                                                                                                    |
-| [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir)               |                            | Set the activities directory location                                                                                                  |
-| [`ZWIFT_LOG_DIR`](#zwift_log_dir)                         |                            | Set the logs directory location                                                                                                        |
-| [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir)         |                            | Set the screenshots directory location                                                                                                 |
-| [`ZWIFT_OVERRIDE_GRAPHICS`](#zwift_override_graphics)     | `0`                        | If set to `1`, override the default zwift graphics profiles                                                                            |
-| [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution) |                            | If set, change the game resolution                                                                                                     |
-| [`ZWIFT_FG`](#zwift_fg)                                   | `0`                        | If set to `1`, run the container in the foreground                                                                                     |
-| [`ZWIFT_NO_GAMEMODE`](#zwift_no_gamemode)                 | `0`                        | If set to `1`, don't run game mode                                                                                                     |
-| [`WINE_EXPERIMENTAL_WAYLAND`](#wine_experimental_wayland) | `0`                        | If set to `1`, use native Wayland                                                                                                      |
-| [`NETWORKING`](#networking)                               | `bridge`                   | Sets the type of container networking to use                                                                                           |
-| [`ZWIFT_UID`](#zwift_uid)                                 | `$(id -u)`                 | Sets the UID that Zwift will run as                                                                                                    |
-| [`ZWIFT_GID`](#zwift_gid)                                 | `$(id -g)`                 | Sets the GID that Zwift will run as                                                                                                    |
-| [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override container GPU/device flags                                                                                                    |
-| [`PRIVILEGED_CONTAINER`](#privileged_container)           | `0`                        | If set, container will run in privileged mode, SELinux label separation will be disabled (`--privileged --security-opt label=disable`) |
+| Key                                                       | Default value              | Description                                         |
+|:----------------------------------------------------------|:---------------------------|:----------------------------------------------------|
+| [`DEBUG`](#debug)                                         | `0`                        | Enable `set -x` for all scripts                     |
+| [`VERBOSITY`](#verbosity)                                 | `1`                        | Configure how much output should be shown           |
+| [`USER`](#user)                                           | `$USER`                    | Use a different user to avoid conflicts             |
+| [`IMAGE`](#image)                                         | `docker.io/netbrain/zwift` | The image to use                                    |
+| [`VERSION`](#version)                                     | `latest`                   | The image version/tag to use                        |
+| [`SCRIPT_VERSION`](#script_version)                       | `master`                   | The `zwift.sh` script version to use                |
+| [`DONT_CHECK`](#dont_check)                               | `0`                        | If set to `1`, don't check for updated `zwift.sh`   |
+| [`DONT_PULL`](#dont_pull)                                 | `0`                        | If set to `1`, don't pull for new image version     |
+| [`DONT_CLEAN`](#dont_clean)                               | `0`                        | If set to `1`, don't clean up previous images       |
+| [`DRYRUN`](#dryrun)                                       | `0`                        | If set to `1`, only print the container run command |
+| [`INTERACTIVE`](#interactive)                             | `0`                        | If set to `1`, attach to the container terminal     |
+| [`CONTAINER_TOOL`](#container_tool)                       |                            | Defaults to podman if installed, else docker        |
+| [`CONTAINER_EXTRA_ARGS`](#container_extra_args)           |                            | Extra arguments to pass to podman/docker            |
+| [`ZWIFT_USERNAME`](#zwift_username)                       |                            | Zwift username. If set, login automatically         |
+| [`ZWIFT_PASSWORD`](#zwift_password)                       |                            | Zwift password.                                     |
+| [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir)                 |                            | Set the workouts directory location                 |
+| [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir)               |                            | Set the activities directory location               |
+| [`ZWIFT_LOG_DIR`](#zwift_log_dir)                         |                            | Set the logs directory location                     |
+| [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir)         |                            | Set the screenshots directory location              |
+| [`ZWIFT_OVERRIDE_GRAPHICS`](#zwift_override_graphics)     | `0`                        | If set to `1`, override the zwift graphics profiles |
+| [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution) |                            | If set, change the game resolution                  |
+| [`ZWIFT_FG`](#zwift_fg)                                   | `0`                        | If set to `1`, run the container in the foreground  |
+| [`ZWIFT_NO_GAMEMODE`](#zwift_no_gamemode)                 | `0`                        | If set to `1`, don't run game mode                  |
+| [`WINE_EXPERIMENTAL_WAYLAND`](#wine_experimental_wayland) | `0`                        | If set to `1`, use native Wayland                   |
+| [`NETWORKING`](#networking)                               | `bridge`                   | Sets the type of container networking to use        |
+| [`ZWIFT_UID`](#zwift_uid)                                 | `$(id -u)`                 | Sets the UID that Zwift will run as                 |
+| [`ZWIFT_GID`](#zwift_gid)                                 | `$(id -g)`                 | Sets the GID that Zwift will run as                 |
+| [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override container GPU/device flags                 |
+| [`PRIVILEGED_CONTAINER`](#privileged_container)           | `0`                        | If set to `1`, run the container in privileged mode |
 
 ---
 
@@ -705,7 +705,7 @@ Use this option to launch Zwift from a different group id.
 
 ### `VGA_DEVICE_FLAG`
 
-See also [Prerequisites for NVIDIA graphics cards](../../getting-started/prerequisites/#additional-dependencies-for-nvidia-graphics-cards).
+See also [Prerequisites for NVIDIA graphics cards][nvidia-prerequisites-href].
 
 Override the container GPU/device flags.
 
@@ -726,6 +726,23 @@ Override the container GPU/device flags.
 > For this reason the zwift script will issue a warning if the `VGA_DEVICE_FLAG` option is defined as a string instead of as a
 > list.
 
+[nvidia-prerequisites-href]: ../../getting-started/prerequisites/#additional-dependencies-for-nvidia-graphics-cards
+
 ---
 
 ### `PRIVILEGED_CONTAINER`
+
+If set to `1`, the container will run in privileged mode (`--privileged --security-opt label=disable`). If set to `0`, SELinux
+label separation (`--security-opt label=type:container_runtime_t`) will be used if SELinux is available and active, otherwise it
+will fallback to privileged mode.
+
+| Item              | Description                             |
+|:------------------|:----------------------------------------|
+| Allowed values    | `0` - Use SELinux label separation.     |
+|                   | `1` - Run container in privileged mode. |
+| Default value     | `0`                                     |
+| Commandline usage | `PRIVILEGED_CONTAINER="1" zwift`        |
+| Config file usage | `PRIVILEGED_CONTAINER="1"`              |
+
+{: .note }
+Running the container in privileged mode is less secure. Only use this option if you have to.
