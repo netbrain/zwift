@@ -74,7 +74,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_LOG_DIR`](#zwift_log_dir)                         |                            | Set the logs directory location                                                                                                        |
 | [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir)         |                            | Set the screenshots directory location                                                                                                 |
 | [`ZWIFT_OVERRIDE_GRAPHICS`](#zwift_override_graphics)     | `0`                        | If set to `1`, override the default zwift graphics profiles                                                                            |
-| [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution) |                            | If set, change game resolution (2560x1440, 3840x2160, ...)                                                                             |
+| [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution) |                            | If set, change the game resolution                                                                                                     |
 | [`ZWIFT_FG`](#zwift_fg)                                   | `0`                        | If set to `1`, run the process in fg instead of bg (`-d`)                                                                              |
 | [`ZWIFT_NO_GAMEMODE`](#zwift_no_gamemode)                 | `0`                        | If set to `1`, don't run game mode                                                                                                     |
 | [`WINE_EXPERIMENTAL_WAYLAND`](#wine_experimental_wayland) | `0`                        | If set to `1`, try to use experimental wayland support in wine 9                                                                       |
@@ -430,7 +430,7 @@ when using single quotes `'` all characters are treated literally.
 
 {: .warning }
 It is not recommended to store your password as plain text in the config file. Read the
-[Authentication section](../authentication) to learn how to store your password using the Linux secret tool.
+[Authentication](../authentication) section to learn how to store your password using the Linux secret tool.
 
 ---
 
@@ -537,13 +537,34 @@ the screenshots directory to a Zwift subdirectory in your user pictures director
 
 ### `ZWIFT_OVERRIDE_GRAPHICS`
 
-See also [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution).
+See also [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution) and [Graphics Settings](../graphics).
+
+If set to `1`, override the default Zwift graphics profiles. For details on how to customize the Zwift graphics settings, read
+the [Graphics Settings](../graphics/#how-can-i-accessmodify-the-graphics-settings) section.
+
+| Item              | Description                              |
+|:------------------|:-----------------------------------------|
+| Allowed values    | `0` - Don't overwrite graphics profiles. |
+|                   | `1` - Overwrite graphics profiles.       |
+| Default value     | `0`                                      |
+| Commandline usage | `ZWIFT_OVERRIDE_GRAPHICS="1" zwift`      |
+| Config file usage | `ZWIFT_OVERRIDE_GRAPHICS="1"`            |
 
 ---
 
 ### `ZWIFT_OVERRIDE_RESOLUTION`
 
-See also [`ZWIFT_OVERRIDE_GRAPHICS`](#zwift_override_graphics).
+See also [`ZWIFT_OVERRIDE_GRAPHICS`](#zwift_override_graphics) and [Graphics Settings](../graphics).
+
+Set this option to a value to change the Zwift game resolution. For details on how to change the Zwift game resolution, read the
+[Graphics Settings](../graphics/#how-can-i-change-the-game-resolution) section.
+
+| Item              | Description                                   |
+|:------------------|:----------------------------------------------|
+| Allowed values    | string representing a display resolution      |
+| Default value     |                                               |
+| Commandline usage | `ZWIFT_OVERRIDE_RESOLUTION="3840x2160" zwift` |
+| Config file usage | `ZWIFT_OVERRIDE_RESOLUTION="3840x2160"`       |
 
 ---
 
