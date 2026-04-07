@@ -55,7 +55,7 @@ These environment variables can be used to alter the execution of the zwift bash
 |:----------------------------------------------------------|:---------------------------|:---------------------------------------------------------------------------------------------------------------------------------------|
 | [`DEBUG`](#debug)                                         | `0`                        | Enable `set -x` for all scripts                                                                                                        |
 | [`VERBOSITY`](#verbosity)                                 | `1`                        | Configure how much output should be shown by the scripts                                                                               |
-| [`USER`](#user)                                           | `$USER`                    | Used in creating the zwift volume `zwift-$USER`                                                                                        |
+| [`USER`](#user)                                           | `$USER`                    | Use a different user to avoid configuration conflicts                                                                                  |
 | [`IMAGE`](#image)                                         | `docker.io/netbrain/zwift` | The image to use                                                                                                                       |
 | [`VERSION`](#version)                                     | `latest`                   | The image version/tag to use                                                                                                           |
 | [`SCRIPT_VERSION`](#script_version)                       | `master`                   | The `zwift.sh` script version to use (git commit hash)                                                                                 |
@@ -87,13 +87,13 @@ These environment variables can be used to alter the execution of the zwift bash
 
 If enabled, echo all bash commands in the terminal (enables `set -x` for all scripts).
 
-| Item               | Description               |
-|:-------------------|:--------------------------|
-| Allowed values     | `0` - Disable debug mode. |
-|                    | `1` - Enable debug mode.  |
-| Default value      | `0`                       |
-| Commandline usage  | `DEBUG="1" zwift`         |
-| Config file usage  | :x:                       |
+| Item              | Description               |
+|:------------------|:--------------------------|
+| Allowed values    | `0` - Disable debug mode. |
+|                   | `1` - Enable debug mode.  |
+| Default value     | `0`                       |
+| Commandline usage | `DEBUG="1" zwift`         |
+| Config file usage | :x:                       |
 
 {: .warning }
 If DEBUG is enabled, your username and password will be printed in the console in plain text. Before copy-pasting the zwift
@@ -104,20 +104,64 @@ should also remove the contents of the authentication token before sharing the o
 
 Set the verbosity level. The output shown by the zwift scripts depends on this setting.
 
-| Item               | Description                                                                   |
-|:-------------------|:------------------------------------------------------------------------------|
-| Allowed values     | `0` - Show ok, warning and error messages.                                    |
-|                    | `1` - Show ok, warning, error and info messages.                              |
-|                    | `2` - Show ok, warning, error and info messages. Also show timestamps.        |
-|                    | `3` - Show ok, warning, error, info and debug messages. Also show timestamps. |
-| Default value      | `1`                                                                           |
-| Commandline usage  | `VERBOSITY="1" zwift`                                                         |
-| Config file usage  | `VERBOSITY="3"`                                                               |
+| Item              | Description                                                                   |
+|:------------------|:------------------------------------------------------------------------------|
+| Allowed values    | `0` - Show ok, warning and error messages.                                    |
+|                   | `1` - Show ok, warning, error and info messages.                              |
+|                   | `2` - Show ok, warning, error and info messages. Also show timestamps.        |
+|                   | `3` - Show ok, warning, error, info and debug messages. Also show timestamps. |
+| Default value     | `1`                                                                           |
+| Commandline usage | `VERBOSITY="3" zwift`                                                         |
+| Config file usage | `VERBOSITY="3"`                                                               |
 
 {: .note }
 Questions where user input is required are always shown, regardless of the verbosity level.
 
 ### USER
+
+Use a different user to avoid configuration conflicts. Especially useful if you want to be able to use multiple zwift accounts
+on a single linux user account.
+
+- Used in sourcing the configuration file `$HOME/.config/zwift/$USER-config`.
+- Used in creating the zwift volume `zwift-$USER`.
+
+| Item              | Description         |
+|:------------------|:--------------------|
+| Allowed values    | string              |
+| Default value     | `$USER`             |
+| Commandline usage | `USER="fred" zwift` |
+| Config file usage | :x:                 |
+
+#### Example: Two Zwift users sharing a single Linux user account
+
+- Fred and Bob both want to run Zwift on the same linux user account.
+
+- The `$HOME/.config/zwift/config` file could look like:
+
+  ```bash
+  NETWORKING="host"
+  ZWIFT_OVERRIDE_GRAPHICS="1"
+  ```
+
+- The `$HOME/.config/zwift/bob-config` file could look like:
+
+  ```bash
+  ZWIFT_USERNAME='bob@mail.com'
+  ZWIFT_PASSWORD='the password for bob'
+  ```
+
+  Running `USER="bob" zwift` will first load the `config` file and then the `bob-config` file. The values in the `bob-config`
+  file will overwrite the values in the `config` file. So the zwift script will use Bob's username and password.
+
+- The `$HOME/.config/zwift/fred-config` file could look like:
+
+  ```bash
+  ZWIFT_USERNAME='fred@mail.com'
+  ZWIFT_PASSWORD='the password for fred'
+  ```
+
+  Running `USER="fred" zwift` will first load the `config` file and then the `fred-config` file. The values in the `fred-config`
+  file will overwrite the values in the `config` file. So the zwift script will use Fred's username and password.
 
 ### IMAGE
 
@@ -237,24 +281,3 @@ happening. Using `ZWIFT_PASSWORD='Pa$word\n123'` would treat all characters lite
 > - For a password with value `p'as`, set `ZWIFT_PASSWORD='p'"'"'as'` (replace `'` with `'"'"'`)
 > - For a password with value `'pas`, set `ZWIFT_PASSWORD="'"'pas'` (prepend `'pas'` with `"'"`)
 > - For a password with value `pas'`, set `ZWIFT_PASSWORD='pas'"'"` (append `'"'` to `'pas'`)
-
-## Example: Two Zwift users sharing a single Linux user account
-
-- The `$HOME/.config/zwift/config` file could look like:
-
-  ```bash
-  ZWIFT_USERNAME='bob@mail.com'
-  ZWIFT_PASSWORD='the password for bob'
-  NETWORKING="host"
-  ZWIFT_OVERRIDE_GRAPHICS="1"
-  ```
-
-- The `$HOME/.config/zwift/fred-config` file could look like:
-
-  ```bash
-  ZWIFT_USERNAME='fred@mail.com'
-  ZWIFT_PASSWORD='the password for fred'
-  ```
-
-- Running `USER="fred" zwift` will first load the `config` file and then the `fred-config` file. The values in the `fred-config`
-  file will overwrite the values in the `config` file. So the zwift script will use Fred's username and password.
