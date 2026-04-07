@@ -67,7 +67,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`INTERACTIVE`](#interactive)                             | `0`                        | If set to `1`, attach to the container terminal                                                                                        |
 | [`CONTAINER_TOOL`](#container_tool)                       |                            | Defaults to podman if installed, else docker                                                                                           |
 | [`CONTAINER_EXTRA_ARGS`](#container_extra_args)           |                            | Extra arguments to pass to podman/docker                                                                                               |
-| [`ZWIFT_USERNAME`](#zwift_username)                       |                            | Zwift username. If set, try to login to zwift automatically.                                                                           |
+| [`ZWIFT_USERNAME`](#zwift_username)                       |                            | Zwift username. If set, try to login to zwift automatically                                                                            |
 | [`ZWIFT_PASSWORD`](#zwift_password)                       |                            | Zwift password.                                                                                                                        |
 | [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir)                 |                            | Set the workouts directory location                                                                                                    |
 | [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir)               |                            | Set the activities directory location                                                                                                  |
@@ -78,7 +78,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_FG`](#zwift_fg)                                   | `0`                        | If set to `1`, run the container in the foreground                                                                                     |
 | [`ZWIFT_NO_GAMEMODE`](#zwift_no_gamemode)                 | `0`                        | If set to `1`, don't run game mode                                                                                                     |
 | [`WINE_EXPERIMENTAL_WAYLAND`](#wine_experimental_wayland) | `0`                        | If set to `1`, use native Wayland                                                                                                      |
-| [`NETWORKING`](#networking)                               | `bridge`                   | Sets the type of container networking to use.                                                                                          |
+| [`NETWORKING`](#networking)                               | `bridge`                   | Sets the type of container networking to use                                                                                           |
 | [`ZWIFT_UID`](#zwift_uid)                                 | `$(id -u)`                 | Sets the UID that Zwift will run as                                                                                                    |
 | [`ZWIFT_GID`](#zwift_gid)                                 | `$(id -g)`                 | Sets the GID that Zwift will run as                                                                                                    |
 | [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override GPU/device flags for container (`--gpus=all`)                                                                                 |
@@ -661,8 +661,23 @@ Configure how the container connects to the Internet.
 
 See also [`ZWIFT_GID`](#zwift_gid).
 
-{: .important }
-`ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
+Use this option to launch Zwift from a different user id.
+
+| Item              | Description              |
+|:------------------|:-------------------------|
+| Allowed values    | number                   |
+| Default value     | `$(id -u)`               |
+| Commandline usage | `ZWIFT_UID="1001" zwift` |
+| Config file usage | `ZWIFT_UID="1001"`       |
+
+{: .warning }
+> It is strongly discouraged to use a `ZWIFT_UID` that is different from your user uid.
+>
+> If you decide to do so anyway, know that:
+>
+> - It does not work with podman
+> - It does not work with Wayland
+> - Cats and dogs may start living together
 
 ---
 
@@ -670,8 +685,23 @@ See also [`ZWIFT_GID`](#zwift_gid).
 
 See also [`ZWIFT_UID`](#zwift_uid).
 
-{: .important }
-`ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
+Use this option to launch Zwift from a different group id.
+
+| Item              | Description              |
+|:------------------|:-------------------------|
+| Allowed values    | number                   |
+| Default value     | `$(id -g)`               |
+| Commandline usage | `ZWIFT_GID="1001" zwift` |
+| Config file usage | `ZWIFT_GID="1001"`       |
+
+{: .warning }
+> It is strongly discouraged to use a `ZWIFT_GID` that is different from your user gid.
+>
+> If you decide to do so anyway, know that:
+>
+> - It does not work with podman
+> - It does not work with Wayland
+> - Cats and dogs may start living together
 
 ---
 
