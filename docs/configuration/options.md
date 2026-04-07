@@ -285,9 +285,35 @@ If set to `1`, don't clean up previous image versions after pulling.
 
 ### `DRYRUN`
 
+See also [`VERBOSITY`](#verbosity).
+
+If set to `1`, print the full container run command and exit without launching Zwift.
+
+| Item              | Description                                                    |
+|:------------------|:---------------------------------------------------------------|
+| Allowed values    | `0` - Launch Zwift.                                            |
+|                   | `1` - Instead of launching Zwift, print the container command. |
+| Default value     | `0`                                                            |
+| Commandline usage | `DRYRUN="1" zwift`                                             |
+| Config file usage | `DRYRUN="1"`                                                   |
+
+{: .note }
+The container command is also printed when the verbosity level is set to at least 3.
+
 ---
 
 ### `INTERACTIVE`
+
+If set to `1`, launch the Zwift container in interactive mode. Instead of starting Zwift, the terminal will attach to the
+container bash. This option will launch the container interactively with `-it` and use `--entrypoint bash` for debugging.
+
+| Item              | Description                                                          |
+|:------------------|:---------------------------------------------------------------------|
+| Allowed values    | `0` - Launch Zwift.                                                  |
+|                   | `1` - Instead of launching Zwift, connect to the container terminal. |
+| Default value     | `0`                                                                  |
+| Commandline usage | `INTERACTIVE="1" zwift`                                              |
+| Config file usage | `INTERACTIVE="1"`                                                    |
 
 ---
 
