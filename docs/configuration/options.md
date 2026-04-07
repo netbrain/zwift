@@ -75,7 +75,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir)         |                            | Set the screenshots directory location                                                                                                 |
 | [`ZWIFT_OVERRIDE_GRAPHICS`](#zwift_override_graphics)     | `0`                        | If set to `1`, override the default zwift graphics profiles                                                                            |
 | [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution) |                            | If set, change the game resolution                                                                                                     |
-| [`ZWIFT_FG`](#zwift_fg)                                   | `0`                        | If set to `1`, run the process in fg instead of bg (`-d`)                                                                              |
+| [`ZWIFT_FG`](#zwift_fg)                                   | `0`                        | If set to `1`, run the container in the foreground                                                                                     |
 | [`ZWIFT_NO_GAMEMODE`](#zwift_no_gamemode)                 | `0`                        | If set to `1`, don't run game mode                                                                                                     |
 | [`WINE_EXPERIMENTAL_WAYLAND`](#wine_experimental_wayland) | `0`                        | If set to `1`, try to use experimental wayland support in wine 9                                                                       |
 | [`NETWORKING`](#networking)                               | `bridge`                   | Sets the type of container networking to use.                                                                                          |
@@ -569,6 +569,35 @@ Set this option to a value to change the Zwift game resolution. For details on h
 ---
 
 ### `ZWIFT_FG`
+
+If set to `1`, launch the container in the foreground instead of the background. Use this option if you want to see the output
+of the scripts that run inside the container or if you need to wait for the container to finish to automatically perform a task.
+
+| Item              | Description                                   |
+|:------------------|:----------------------------------------------|
+| Allowed values    | `0` - Launch the container in the background. |
+|                   | `1` - Launch the container in the foreground. |
+| Default value     | `0`                                           |
+| Commandline usage | `ZWIFT_FG="1" zwift`                          |
+| Config file usage | `ZWIFT_FG="1"`                                |
+
+#### Example: Automatically perform a task after the container exits
+
+```bash
+#!/usr/bin/env bash
+set -uo pipefail
+
+exit_task() {
+    echo "The script finished, so the container exited"
+}
+trap exit_task EXIT
+
+export ZWIFT_FG=1
+
+echo "Launching Zwift in the foregound"
+zwift
+echo "The Zwift container has exited"
+```
 
 ---
 
