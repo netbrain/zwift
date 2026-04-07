@@ -72,7 +72,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir)                 |                            | Set the workouts directory location                                                                                                    |
 | [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir)               |                            | Set the activities directory location                                                                                                  |
 | [`ZWIFT_LOG_DIR`](#zwift_log_dir)                         |                            | Set the logs directory location                                                                                                        |
-| [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir)         |                            | Set the screenshots directory location, recommended to set `ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift"`                    |
+| [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir)         |                            | Set the screenshots directory location                                                                                                 |
 | [`ZWIFT_OVERRIDE_GRAPHICS`](#zwift_override_graphics)     | `0`                        | If set to `1`, override the default zwift graphics profiles                                                                            |
 | [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution) |                            | If set, change game resolution (2560x1440, 3840x2160, ...)                                                                             |
 | [`ZWIFT_FG`](#zwift_fg)                                   | `0`                        | If set to `1`, run the process in fg instead of bg (`-d`)                                                                              |
@@ -439,12 +439,48 @@ It is not recommended to store your password as plain text in the config file. R
 See also [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir), [`ZWIFT_LOG_DIR`](#zwift_log_dir),
 [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir).
 
+Zwift workouts are stored inside the container, in the zwift user volume. If you need to access that directory to add or remove
+custom workout files, use `ZWIFT_WORKOUT_DIR` to map it to a directory on the host.
+
+| Item              | Description                                                          |
+|:------------------|:---------------------------------------------------------------------|
+| Allowed values    | string                                                               |
+| Default value     |                                                                      |
+| Recommended value | `$(xdg-user-dir DOCUMENTS)/Zwift/Workouts`                           |
+| Commandline usage | `ZWIFT_WORKOUT_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Workouts" zwift` |
+| Config file usage | `ZWIFT_WORKOUT_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Workouts"`       |
+
+{: .note }
+> The directory must exist on the host, you can create it using:
+>
+> ```bash
+> mkdir -p "$(xdg-user-dir DOCUMENTS)/Zwift/Workouts"
+> ```
+
 ---
 
 ### `ZWIFT_ACTIVITY_DIR`
 
 See also [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir), [`ZWIFT_LOG_DIR`](#zwift_log_dir),
 [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir).
+
+Zwift activities are stored inside the container, in the zwift user volume. If you need access to that directory to recover fit
+files after Zwift crashed, use `ZWIFT_ACTIVITY_DIR` to map it to a directory on the host.
+
+| Item              | Description                                                             |
+|:------------------|:------------------------------------------------------------------------|
+| Allowed values    | string                                                                  |
+| Default value     |                                                                         |
+| Recommended value | `$(xdg-user-dir DOCUMENTS)/Zwift/Activities`                            |
+| Commandline usage | `ZWIFT_ACTIVITY_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Activities" zwift` |
+| Config file usage | `ZWIFT_ACTIVITY_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Activities"`       |
+
+{: .note }
+> The directory must exist on the host, you can create it using:
+>
+> ```bash
+> mkdir -p "$(xdg-user-dir DOCUMENTS)/Zwift/Activities"
+> ```
 
 ---
 
@@ -453,12 +489,49 @@ See also [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir), [`ZWIFT_LOG_DIR`](#zwift_log
 See also [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir), [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir),
 [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir).
 
+Zwift game and launcher logs are stored inside the container, in the zwift user volume. If you need to access the log files,
+use `ZWIFT_LOG_DIR` to map the logs directory to a directory on the host.
+
+| Item              | Description                                                  |
+|:------------------|:-------------------------------------------------------------|
+| Allowed values    | string                                                       |
+| Default value     |                                                              |
+| Recommended value | `$(xdg-user-dir DOCUMENTS)/Zwift/Logs`                       |
+| Commandline usage | `ZWIFT_LOG_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Logs" zwift` |
+| Config file usage | `ZWIFT_LOG_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Logs"`       |
+
+{: .note }
+> The directory must exist on the host, you can create it using:
+>
+> ```bash
+> mkdir -p "$(xdg-user-dir DOCUMENTS)/Zwift/Logs"
+> ```
+
 ---
 
 ### `ZWIFT_SCREENSHOTS_DIR`
 
 See also [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir), [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir),
 [`ZWIFT_LOG_DIR`](#zwift_log_dir).
+
+Zwift (video) screenshots are stored inside the container, in the zwift user volume. To access screenshots taken in Zwift, use
+`ZWIFT_SCREENSHOTS_DIR` to map the screenshots directory to a directory on the host. It is recommended to use this option to map
+the screenshots directory to a Zwift subdirectory in your user pictures directory.
+
+| Item              | Description                                                    |
+|:------------------|:---------------------------------------------------------------|
+| Allowed values    | string                                                         |
+| Default value     |                                                                |
+| Recommended value | `$(xdg-user-dir PICTURES)/Zwift`                               |
+| Commandline usage | `ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift" zwift` |
+| Config file usage | `ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift"`       |
+
+{: .note }
+> The directory must exist on the host, you can create it using:
+>
+> ```bash
+> mkdir -p "$(xdg-user-dir PICTURES)/Zwift"
+> ```
 
 ---
 
