@@ -83,7 +83,9 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override GPU/device flags for container (`--gpus=all`)                                                                                 |
 | [`PRIVILEGED_CONTAINER`](#privileged_container)           | `0`                        | If set, container will run in privileged mode, SELinux label separation will be disabled (`--privileged --security-opt label=disable`) |
 
-### DEBUG
+---
+
+### `DEBUG`
 
 If enabled, echo all bash commands in the terminal (enables `set -x` for all scripts).
 
@@ -100,7 +102,9 @@ If DEBUG is enabled, your username and password will be printed in the console i
 script output into for example an issue, make sure to censor your zwift username and password! If ZWIFT_FG is enabled, you
 should also remove the contents of the authentication token before sharing the output.
 
-### VERBOSITY
+---
+
+### `VERBOSITY`
 
 Set the verbosity level. The output shown by the zwift scripts depends on this setting.
 
@@ -117,7 +121,9 @@ Set the verbosity level. The output shown by the zwift scripts depends on this s
 {: .note }
 Questions where user input is required are always shown, regardless of the verbosity level.
 
-### USER
+---
+
+### `USER`
 
 Use a different user to avoid configuration conflicts. Especially useful if you want to be able to use multiple zwift accounts
 on a single linux user account.
@@ -155,7 +161,9 @@ on a single linux user account.
   Running `USER="fred" zwift` will first load the `config` file and then the `fred-config` file. The values in the `fred-config`
   file will overwrite the values in the `config` file. So the zwift script will use Fred's username and password.
 
-### IMAGE
+---
+
+### `IMAGE`
 
 See also [`VERSION`](#version), [`DONT_PULL`](#dont_pull).
 
@@ -171,7 +179,9 @@ Specify which container image to use.
 {: .important }
 When using a local image, you should also set `DONT_PULL="1"` to prevent the zwift script from trying to pull the image.
 
-### VERSION
+---
+
+### `VERSION`
 
 See also [`IMAGE`](#image), [`DONT_PULL`](#dont_pull).
 
@@ -187,7 +197,9 @@ Specify which container image version/tag to use. This can be useful to pin the 
 {: .warning }
 Pinning to a specific image version may result in Zwift failing to launch. Only use this option if you have a good reason.
 
-### SCRIPT_VERSION
+---
+
+### `SCRIPT_VERSION`
 
 See also [`DONT_CHECK`](#dont_check).
 
@@ -209,7 +221,9 @@ Pin the `zwift.sh` script to a specific version.
 {: .warning }
 Pinning to a specific image version may result in Zwift failing to launch. Only use this option if you have a good reason.
 
-### DONT_CHECK
+---
+
+### `DONT_CHECK`
 
 See also [`SCRIPT_VERSION`](#script_version).
 
@@ -229,7 +243,9 @@ Prefer pinning the zwift script to a specific version using `SCRIPT_VERSION="...
 {: .warning }
 Not updating the zwift script may result in Zwift failing to launch. Only use this option if you have a good reason.
 
-### DONT_PULL
+---
+
+### `DONT_PULL`
 
 See also [`IMAGE`](#image), [`VERSION`](#version).
 
@@ -249,7 +265,9 @@ Prefer pinning the container image to a specific version using `VERSION="..."` i
 {: .warning }
 Not updating the container image may result in Zwift failing to launch. Only use this option if you have a good reason.
 
-### DONT_CLEAN
+---
+
+### `DONT_CLEAN`
 
 See also [`DONT_PULL`](#dont_pull).
 
@@ -263,13 +281,21 @@ If set to `1`, don't clean up previous image versions after pulling.
 | Commandline usage | `DONT_CLEAN="1" zwift`                                      |
 | Config file usage | `DONT_CLEAN="1"`                                            |
 
-### DRYRUN
+---
 
-### INTERACTIVE
+### `DRYRUN`
 
-### CONTAINER_TOOL
+---
 
-### CONTAINER_EXTRA_ARGS
+### `INTERACTIVE`
+
+---
+
+### `CONTAINER_TOOL`
+
+---
+
+### `CONTAINER_EXTRA_ARGS`
 
 {: .note }
 > To pass extra environment variables to the container, they can be added to `CONTAINER_EXTRA_ARGS` with the `-e` flag.
@@ -277,67 +303,101 @@ If set to `1`, don't clean up previous image versions after pulling.
 > For example, to increase the cursor size in Zwift to 48, set the `XCURSOR_SIZE` environment variable using:
 > `CONTAINER_EXTRA_ARGS=(-e XCURSOR_SIZE=48)`
 
-### ZWIFT_USERNAME
+---
+
+### `ZWIFT_USERNAME`
 
 See also [`ZWIFT_PASSWORD`](#zwift_password).
 
-### ZWIFT_PASSWORD
+---
+
+### `ZWIFT_PASSWORD`
 
 See also [`ZWIFT_USERNAME`](#zwift_username).
 
-### ZWIFT_WORKOUT_DIR
+---
+
+### `ZWIFT_WORKOUT_DIR`
 
 See also [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir), [`ZWIFT_LOG_DIR`](#zwift_log_dir),
 [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir).
 
-### ZWIFT_ACTIVITY_DIR
+---
+
+### `ZWIFT_ACTIVITY_DIR`
 
 See also [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir), [`ZWIFT_LOG_DIR`](#zwift_log_dir),
 [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir).
 
-### ZWIFT_LOG_DIR
+---
+
+### `ZWIFT_LOG_DIR`
 
 See also [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir), [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir),
 [`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir).
 
-### ZWIFT_SCREENSHOTS_DIR
+---
+
+### `ZWIFT_SCREENSHOTS_DIR`
 
 See also [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir), [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir),
 [`ZWIFT_LOG_DIR`](#zwift_log_dir).
 
-### ZWIFT_OVERRIDE_GRAPHICS
+---
+
+### `ZWIFT_OVERRIDE_GRAPHICS`
 
 See also [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution).
 
-### ZWIFT_OVERRIDE_RESOLUTION
+---
+
+### `ZWIFT_OVERRIDE_RESOLUTION`
 
 See also [`ZWIFT_OVERRIDE_GRAPHICS`](#zwift_override_graphics).
 
-### ZWIFT_FG
+---
 
-### ZWIFT_NO_GAMEMODE
+### `ZWIFT_FG`
 
-### WINE_EXPERIMENTAL_WAYLAND
+---
 
-### NETWORKING
+### `ZWIFT_NO_GAMEMODE`
 
-### ZWIFT_UID
+---
+
+### `WINE_EXPERIMENTAL_WAYLAND`
+
+---
+
+### `NETWORKING`
+
+---
+
+### `ZWIFT_UID`
 
 See also [`ZWIFT_GID`](#zwift_gid).
 
 {: .important }
 `ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
 
-### ZWIFT_GID
+---
+
+### `ZWIFT_GID`
 
 See also [`ZWIFT_UID`](#zwift_uid).
 
 {: .important }
 `ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
 
-### VGA_DEVICE_FLAG
+---
 
-### PRIVILEGED_CONTAINER
+### `VGA_DEVICE_FLAG`
+
+---
+
+### `PRIVILEGED_CONTAINER`
+
+---
 
 ## Syntax
 
