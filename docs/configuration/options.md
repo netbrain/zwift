@@ -55,7 +55,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | Key                                                       | Default                    | Description                                                                                                                            |
 |:----------------------------------------------------------|:---------------------------|:---------------------------------------------------------------------------------------------------------------------------------------|
 | [`DEBUG`](#debug)                                         | `0`                        | Enable `set -x` for all scripts                                                                                                        |
-| [`VERBOSITY`](#verbosity)                                 | `1`                        | Configure how much output should be shown by the scripts                                                                               |
+| [`VERBOSITY`](#verbosity)                                 | `1`                        | Configure how much output should be shown                                                                                              |
 | [`USER`](#user)                                           | `$USER`                    | Use a different user to avoid configuration conflicts                                                                                  |
 | [`IMAGE`](#image)                                         | `docker.io/netbrain/zwift` | The image to use                                                                                                                       |
 | [`VERSION`](#version)                                     | `latest`                   | The image version/tag to use                                                                                                           |
@@ -81,7 +81,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`NETWORKING`](#networking)                               | `bridge`                   | Sets the type of container networking to use                                                                                           |
 | [`ZWIFT_UID`](#zwift_uid)                                 | `$(id -u)`                 | Sets the UID that Zwift will run as                                                                                                    |
 | [`ZWIFT_GID`](#zwift_gid)                                 | `$(id -g)`                 | Sets the GID that Zwift will run as                                                                                                    |
-| [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override GPU/device flags for container (`--gpus=all`)                                                                                 |
+| [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override container GPU/device flags                                                                                                    |
 | [`PRIVILEGED_CONTAINER`](#privileged_container)           | `0`                        | If set, container will run in privileged mode, SELinux label separation will be disabled (`--privileged --security-opt label=disable`) |
 
 ---
@@ -206,13 +206,13 @@ See also [`DONT_CHECK`](#dont_check).
 
 Pin the `zwift.sh` script to a specific version.
 
-| Item              | Description                              |
-|:------------------|:-----------------------------------------|
-| Allowed values    | master - Use the latest version.         |
-|                   | commit hash - Pin to a specific version. |
-| Default value     | `master`                                 |
-| Commandline usage | `SCRIPT_VERSION="cd50c7" zwift`          |
-| Config file usage | `SCRIPT_VERSION="cd50c7"`                |
+| Item              | Description                                |
+|:------------------|:-------------------------------------------|
+| Allowed values    | `master` - Use the latest version.         |
+|                   | `commit hash` - Pin to a specific version. |
+| Default value     | `master`                                   |
+| Commandline usage | `SCRIPT_VERSION="cd50c7" zwift`            |
+| Config file usage | `SCRIPT_VERSION="cd50c7"`                  |
 
 - To find the commit hashes, look at the zwift script git history on github at:
   <https://github.com/netbrain/zwift/commits/master/src/zwift.sh>.
@@ -671,9 +671,8 @@ Use this option to launch Zwift from a different user id.
 | Config file usage | `ZWIFT_UID="1001"`       |
 
 {: .warning }
-> It is strongly discouraged to use a `ZWIFT_UID` that is different from your user uid.
->
-> If you decide to do so anyway, know that:
+> It is strongly discouraged to use a `ZWIFT_UID` that is different from your user uid. If you decide to do so anyway, know
+> that:
 >
 > - It does not work with podman
 > - It does not work with Wayland
@@ -695,9 +694,8 @@ Use this option to launch Zwift from a different group id.
 | Config file usage | `ZWIFT_GID="1001"`       |
 
 {: .warning }
-> It is strongly discouraged to use a `ZWIFT_GID` that is different from your user gid.
->
-> If you decide to do so anyway, know that:
+> It is strongly discouraged to use a `ZWIFT_GID` that is different from your user gid. If you decide to do so anyway, know
+> that:
 >
 > - It does not work with podman
 > - It does not work with Wayland
@@ -706,6 +704,27 @@ Use this option to launch Zwift from a different group id.
 ---
 
 ### `VGA_DEVICE_FLAG`
+
+See also [Prerequisites for NVIDIA graphics cards](../../getting-started/prerequisites/#additional-dependencies-for-nvidia-graphics-cards).
+
+Override the container GPU/device flags.
+
+| Item              | Description                                          |
+|:------------------|:-----------------------------------------------------|
+| Allowed values    | list                                                 |
+|                   | string                                               |
+| Default value     | `--device="nvidia.com/gpu=all"` - nvidia + podman    |
+|                   | `--gpus="all"` - nvidia + docker                     |
+|                   | `--device="/dev/dri:/dev/dri"` - not nvidia          |
+| Commandline usage | `VGA_DEVICE_FLAG="--gpus=all" zwift` - Use a string. |
+| Config file usage | `VGA_DEVICE_FLAG=(--gpus=all)` - Use a list.         |
+
+{: .important }
+> It is not possible to pass values with spaces using the commandline. It is however possible to do so in the config file using
+> an array.
+>
+> For this reason the zwift script will issue a warning if the `VGA_DEVICE_FLAG` option is defined as a string instead of as a
+> list.
 
 ---
 
