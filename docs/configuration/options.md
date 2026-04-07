@@ -613,6 +613,9 @@ If set to `1`, don't use game mode.
 | Commandline usage | `ZWIFT_NO_GAMEMODE="1" zwift`        |
 | Config file usage | `ZWIFT_NO_GAMEMODE="1"`              |
 
+{: .note }
+Disabling game mode could result in reduced performance and screen saver issues.
+
 ---
 
 ### `WINE_EXPERIMENTAL_WAYLAND`
@@ -636,6 +639,21 @@ This feature is experimental. Reduced performance and other sporadic issues are 
 ---
 
 ### `NETWORKING`
+
+See also [Connecting Devices](../../getting-started/setup).
+
+Configure how the container connects to the Internet.
+
+- The default value, bridge mode, is safer.
+- The alternative value, host mode, is required when using direct connect for your trainer.
+
+| Item              | Description                          |
+|:------------------|:-------------------------------------|
+| Allowed values    | `bridge` - Use a network bridge.     |
+|                   | `host` - Use host networking.        |
+| Default value     | `bridge`                             |
+| Commandline usage | `NETWORKING="host" zwift`            |
+| Config file usage | `NETWORKING="host"`                  |
 
 ---
 
