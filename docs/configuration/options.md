@@ -52,9 +52,9 @@ These environment variables can be used to alter the execution of the zwift bash
 ### Overview
 
 | Key                                                       | Default                    | Description                                                                                                                            |
-|-----------------------------------------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| [`DEBUG`](#debug)                                         | `0`                        | Enable `set -x` for all scripts, must be set on the commandline `DEBUG=1 zwift`                                                        |
-| [`VERBOSITY`](#verbosity)                                 | `1`                        | Verbosity level: 0 = ok, warning, error; 1 = 0 + info; 2 = 1 + show timestamps; 3 = 2 + debug messages                                 |
+|:----------------------------------------------------------|:---------------------------|:---------------------------------------------------------------------------------------------------------------------------------------|
+| [`DEBUG`](#debug)                                         | `0`                        | Enable `set -x` for all scripts                                                                                                        |
+| [`VERBOSITY`](#verbosity)                                 | `1`                        | Configure how much output should be shown by the scripts                                                                               |
 | [`USER`](#user)                                           | `$USER`                    | Used in creating the zwift volume `zwift-$USER`                                                                                        |
 | [`IMAGE`](#image)                                         | `docker.io/netbrain/zwift` | The image to use                                                                                                                       |
 | [`VERSION`](#version)                                     | `latest`                   | The image version/tag to use                                                                                                           |
@@ -78,14 +78,44 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_NO_GAMEMODE`](#zwift_no_gamemode)                 | `0`                        | If set to `1`, don't run game mode                                                                                                     |
 | [`WINE_EXPERIMENTAL_WAYLAND`](#wine_experimental_wayland) | `0`                        | If set to `1`, try to use experimental wayland support in wine 9                                                                       |
 | [`NETWORKING`](#networking)                               | `bridge`                   | Sets the type of container networking to use.                                                                                          |
-| [`ZWIFT_UID`](#zwift_uid)                                 | current users id           | Sets the UID that Zwift will run as (docker only)                                                                                      |
-| [`ZWIFT_GID`](#zwift_gid)                                 | current users group id     | Sets the GID that Zwift will run as (docker only)                                                                                      |
+| [`ZWIFT_UID`](#zwift_uid)                                 | `$(id -u)`                 | Sets the UID that Zwift will run as                                                                                                    |
+| [`ZWIFT_GID`](#zwift_gid)                                 | `$(id -g)`                 | Sets the GID that Zwift will run as                                                                                                    |
 | [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override GPU/device flags for container (`--gpus=all`)                                                                                 |
 | [`PRIVILEGED_CONTAINER`](#privileged_container)           | `0`                        | If set, container will run in privileged mode, SELinux label separation will be disabled (`--privileged --security-opt label=disable`) |
 
 ### DEBUG
 
+If enabled, echo all bash commands in the terminal (enables `set -x` for all scripts).
+
+| Item               | Description               |
+|:-------------------|:--------------------------|
+| Allowed values     | `0` - Disable debug mode. |
+|                    | `1` - Enable debug mode.  |
+| Default value      | `0`                       |
+| Commandline usage  | `DEBUG="1" zwift`         |
+| Config file usage  | :x:                       |
+
+{: .warning }
+If DEBUG is enabled, your username and password will be printed in the console in plain text. Before copy-pasting the zwift
+script output into for example an issue, make sure to censor your zwift username and password! If ZWIFT_FG is enabled, you
+should also remove the contents of the authentication token before sharing the output.
+
 ### VERBOSITY
+
+Set the verbosity level. The output shown by the zwift scripts depends on this setting.
+
+| Item               | Description                                                                   |
+|:-------------------|:------------------------------------------------------------------------------|
+| Allowed values     | `0` - Show ok, warning and error messages.                                    |
+|                    | `1` - Show ok, warning, error and info messages.                              |
+|                    | `2` - Show ok, warning, error and info messages. Also show timestamps.        |
+|                    | `3` - Show ok, warning, error, info and debug messages. Also show timestamps. |
+| Default value      | `1`                                                                           |
+| Commandline usage  | `VERBOSITY="1" zwift`                                                         |
+| Config file usage  | `VERBOSITY="3"`                                                               |
+
+{: .note }
+Questions where user input is required are always shown, regardless of the verbosity level.
 
 ### USER
 
@@ -108,6 +138,12 @@ These environment variables can be used to alter the execution of the zwift bash
 ### CONTAINER_TOOL
 
 ### CONTAINER_EXTRA_ARGS
+
+{: .note }
+> To pass extra environment variables to the container, they can be added to `CONTAINER_EXTRA_ARGS` with the `-e` flag.
+>
+> For example, to increase the cursor size in Zwift to 48, set the `XCURSOR_SIZE` environment variable using:
+> `CONTAINER_EXTRA_ARGS=(-e XCURSOR_SIZE=48)`
 
 ### ZWIFT_USERNAME
 
@@ -135,10 +171,14 @@ These environment variables can be used to alter the execution of the zwift bash
 
 ### ZWIFT_UID
 
+See also [ZWIFT_GID](#zwift_gid).
+
 {: .important }
 `ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
 
 ### ZWIFT_GID
+
+See also [ZWIFT_UID](#zwift_uid).
 
 {: .important }
 `ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
@@ -146,12 +186,6 @@ These environment variables can be used to alter the execution of the zwift bash
 ### VGA_DEVICE_FLAG
 
 ### PRIVILEGED_CONTAINER
-
-{: .note }
-> To pass extra environment variables to the container, they can be added to `CONTAINER_EXTRA_ARGS` with the `-e` flag.
->
-> For example, to increase the cursor size in Zwift to 48, set the `XCURSOR_SIZE` environment variable using:
-> `CONTAINER_EXTRA_ARGS=(-e XCURSOR_SIZE=48)`
 
 ## Syntax
 
