@@ -67,8 +67,8 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`INTERACTIVE`](#interactive)                             | `0`                        | If set to `1`, force `-it` and use `--entrypoint bash` for debugging                                                                   |
 | [`CONTAINER_TOOL`](#container_tool)                       |                            | Defaults to podman if installed, else docker                                                                                           |
 | [`CONTAINER_EXTRA_ARGS`](#container_extra_args)           |                            | Extra arguments to pass to podman/docker                                                                                               |
-| [`ZWIFT_USERNAME`](#zwift_username)                       |                            | If set, try to login to zwift automatically                                                                                            |
-| [`ZWIFT_PASSWORD`](#zwift_password)                       |                            | If set, try to login to zwift automatically                                                                                            |
+| [`ZWIFT_USERNAME`](#zwift_username)                       |                            | Zwift username. If set, try to login to zwift automatically.                                                                           |
+| [`ZWIFT_PASSWORD`](#zwift_password)                       |                            | Zwift password.                                                                                                                        |
 | [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir)                 |                            | Set the workouts directory location                                                                                                    |
 | [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir)               |                            | Set the activities directory location                                                                                                  |
 | [`ZWIFT_LOG_DIR`](#zwift_log_dir)                         |                            | Set the logs directory location                                                                                                        |
@@ -385,13 +385,52 @@ CONTAINER_EXTRA_ARGS=(
 
 ### `ZWIFT_USERNAME`
 
-See also [`ZWIFT_PASSWORD`](#zwift_password).
+See also [`ZWIFT_PASSWORD`](#zwift_password), [Authentication](../authentication).
+
+Set your zwift username to automatically log into Zwift.
+
+| Item              | Description                            |
+|:------------------|:---------------------------------------|
+| Allowed values    | string                                 |
+| Default value     |                                        |
+| Commandline usage | `ZWIFT_USERNAME='user@mail.com' zwift` |
+| Config file usage | `ZWIFT_USERNAME='user@mail.com'`       |
 
 ---
 
 ### `ZWIFT_PASSWORD`
 
-See also [`ZWIFT_USERNAME`](#zwift_username).
+See also [`ZWIFT_USERNAME`](#zwift_username), [Authentication](../authentication).
+
+Set your zwift password to automatically log into Zwift.
+
+| Item              | Description                          |
+|:------------------|:-------------------------------------|
+| Allowed values    | string                               |
+| Default value     |                                      |
+| Commandline usage | `ZWIFT_PASSWORD='P4$w0rd\123' zwift` |
+| Config file usage | `ZWIFT_PASSWORD='P4$w0rd\123'`       |
+
+{: .important }
+Use single quotes around your password instead of double quotes! When using double quotes `"` special sequences are substituted,
+when using single quotes `'` all characters are treated literally.
+
+{: .important }
+> Special care needs to be taken if your password contains single quotes `'`!
+>
+> The solution is a bit different depending on whether the `'` appears at the start, somewhere in the middle or at the end of
+> the password:
+>
+> - For a password with value `p'as`, set `ZWIFT_PASSWORD='p'"'"'as'` (replace `'` with `'"'"'`)
+> - For a password with value `'pas`, set `ZWIFT_PASSWORD="'"'pas'` (prepend `'pas'` with `"'"`)
+> - For a password with value `pas'`, set `ZWIFT_PASSWORD='pas'"'"` (append `"'"` to `'pas'`)
+>
+> If the password contains multiple single quotes, the above rules can be combined. For multiple consecutive quotes, use the
+> same rule as for a single quote (for example to use password `p''as`, set `ZWIFT_PASSWORD='p'"''"'as'`).
+
+{: .warning }
+It is not recommended to store your password as plain text in the config file. Read the
+[Authentication section](../authentication) to learn how to store your password using the Linux secret tool.
 
 ---
 
@@ -474,56 +513,3 @@ See also [`ZWIFT_UID`](#zwift_uid).
 ---
 
 ### `PRIVILEGED_CONTAINER`
-
----
-
-## Syntax
-
-Special characters in the value of environment variables need to be escaped to make sure they are interpreted literally. For
-example `ZWIFT_PASSWORD=my password` would cause the `ZWIFT_PASSWORD` variable to have two values `my` and `password` instead
-of the single value `my password`.
-
-{: .important }
-> Use single quotes to escape the value of the username and password!
->
-> - `ZWIFT_USERNAME='user@mail.com'`
-> - `ZWIFT_PASSWORD='my password'`
-
-{: .important }
-> Use an array for `CONTAINER_EXTRA_ARGS` and `VGA_DEVICE_FLAG`!
->
-> - `CONTAINER_EXTRA_ARGS=(--cpus="1.5" -e XCURSOR_SIZE=48)`
-> - `VGA_DEVICE_FLAG=(--gpus="all")`
->
-> **Note**: When passing these arguments directly on the commandline, arrays cannot be used. Use `VARIABLE="value"` or
-> `VARIABLE='value'` instead.
-
-{: .important }
-> Use double quotes to escape the value of all other environment variables!
->
-> - `ZWIFT_SCREENSHOTS_DIR="$(xdg-user-dir PICTURES)/Zwift"`
-> - `DONT_PULL="1"`
-
-Most environment variables don't have special characters aside from spaces. For those variables is it enough to wrap them in
-double quotes.
-
-Passwords (and to some extend email addresses) can however contain nearly every possible character sequence. Double quotes are
-not enough to stop escape sequences and bash code from being substituted. For example writing `ZWIFT_PASSWORD="Pa$word\n123"`
-would try to substitute `$word` for the value of the variable `word`, which would most likely be empty. It would also replace
-`\n` with a new line. This is not desirable. Instead of double quotes, single quotes can be used to prevent this expansion from
-happening. Using `ZWIFT_PASSWORD='Pa$word\n123'` would treat all characters literally and behave as expected.
-
-{: .important }
-> Since we use single quotes around the password, passwords that contain single quotes still pose an issue. For example
-> `bob's excellent pa$$w0rd` would cause all sorts of nasty errors being spit out by the zwift script. Single quotes in the
-> password need to be replaced by a different character sequence to make them work. If multiple single quotes are present in the
-> password, each of them needs to be replaced according to the rules below.
->
-> `ZWIFT_PASSWORD='bob'"'"'s excellent pa$$w0rd'`
->
-> The sequence is a bit different depending on whether the `'` appears at the start, somewhere in the middle or at the end of
-> the password.
->
-> - For a password with value `p'as`, set `ZWIFT_PASSWORD='p'"'"'as'` (replace `'` with `'"'"'`)
-> - For a password with value `'pas`, set `ZWIFT_PASSWORD="'"'pas'` (prepend `'pas'` with `"'"`)
-> - For a password with value `pas'`, set `ZWIFT_PASSWORD='pas'"'"` (append `'"'` to `'pas'`)
