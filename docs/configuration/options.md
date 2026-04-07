@@ -16,6 +16,7 @@ is sourced by the zwift script.
 The zwift script uses environment variables passed on the commandline.
 
 ```console
+foo@bar:~$ # examples using the commandline
 foo@bar:~$ DONT_PULL="1" zwift # prevent docker/podman pull before launch
 foo@bar:~$ DRYRUN="1" zwift # print the underlying container run command and exit
 foo@bar:~$ DONT_PULL="1" DRYRUN="1" zwift # combine the previous two options
@@ -35,7 +36,7 @@ The zwift script automatically loads environment variables from the following co
 - `$HOME/.config/zwift/$USER-config`
 
 ```bash
-# Example configuration file
+# example configuration file
 ZWIFT_USERNAME='user@mail.com'
 ZWIFT_WORKOUT_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Workouts"
 ZWIFT_LOG_DIR="$(xdg-user-dir DOCUMENTS)/Zwift/Logs"
@@ -65,7 +66,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`DRYRUN`](#dryrun)                                       | `0`                        | If set to `1`, print the full container run command and exit                                                                           |
 | [`INTERACTIVE`](#interactive)                             | `0`                        | If set to `1`, force `-it` and use `--entrypoint bash` for debugging                                                                   |
 | [`CONTAINER_TOOL`](#container_tool)                       |                            | Defaults to podman if installed, else docker                                                                                           |
-| [`CONTAINER_EXTRA_ARGS`](#container_extra_args)           |                            | Extra args passed to docker/podman (`--cpus=1.5`)                                                                                      |
+| [`CONTAINER_EXTRA_ARGS`](#container_extra_args)           |                            | Extra arguments to pass to podman/docker                                                                                               |
 | [`ZWIFT_USERNAME`](#zwift_username)                       |                            | If set, try to login to zwift automatically                                                                                            |
 | [`ZWIFT_PASSWORD`](#zwift_password)                       |                            | If set, try to login to zwift automatically                                                                                            |
 | [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir)                 |                            | Set the workouts directory location                                                                                                    |
@@ -319,15 +320,66 @@ container bash. This option will launch the container interactively with `-it` a
 
 ### `CONTAINER_TOOL`
 
+Configure which container tool to use.
+
+| Item              | Description                                         |
+|:------------------|:----------------------------------------------------|
+| Allowed values    | `podman` - Use podman as container tool.            |
+|                   | `docker` - Use docker as container tool.            |
+| Default value     | `podman` if available, otherwise fall back `docker` |
+| Commandline usage | `CONTAINER_TOOL="docker" zwift`                     |
+| Config file usage | `CONTAINER_TOOL="docker"`                           |
+
 ---
 
 ### `CONTAINER_EXTRA_ARGS`
 
-{: .note }
-> To pass extra environment variables to the container, they can be added to `CONTAINER_EXTRA_ARGS` with the `-e` flag.
+See also [Script Arguments](../arguments).
+
+Provide a list of extra arguments to pass to the container tool (podman or docker).
+
+| Item              | Description                                                                  |
+|:------------------|:-----------------------------------------------------------------------------|
+| Allowed values    | list                                                                         |
+|                   | string                                                                       |
+| Default value     |                                                                              |
+| Commandline usage | `CONTAINER_EXTRA_ARGS="-e XCURSOR_SIZE=48 --cpus=1.5" zwift` - Use a string. |
+| Config file usage | `CONTAINER_EXTRA_ARGS=(-e XCURSOR_SIZE=48 --cpus=1.5)` - Use a list.         |
+
+The `CONTAINER_EXTRA_ARGS` option can also be used to pass extra environment variables to the container. To do so, use the `-e`
+option. For example, to set the `XCURSOR_SIZE` environment variable to increase the Zwift cursor size, use:
+
+```console
+foo@bar:~$ # example using the commandline
+foo@bar:~$ CONTAINER_EXTRA_ARGS="-e XCURSOR_SIZE=48" zwift
+```
+
+```bash
+# example config file
+CONTAINER_EXTRA_ARGS=(
+    -e XCURSOR_SIZE=48             # set the Zwift cursor size
+    -e HELLO_WORLD="Hello, world!" # pass another environment variable to the container
+    --cpus=1.5                     # maybe also limit the cpu cores for the container
+)
+```
+
+{: .important }
+> It is not possible to pass values with spaces using the commandline. The following example will cause the zwift script to exit
+> with an error!
 >
-> For example, to increase the cursor size in Zwift to 48, set the `XCURSOR_SIZE` environment variable using:
-> `CONTAINER_EXTRA_ARGS=(-e XCURSOR_SIZE=48)`
+> ```console
+> foo@bar:~$ CONTAINER_EXTRA_ARGS="-e HELLO_WORLD='Hello, world!'" zwift
+> ```
+>
+> It is however possible to do so in the config file using an array:
+>
+> ```bash
+> # config file
+> CONTAINER_EXTRA_ARGS=(-e HELLO_WORLD="Hello, world!")
+> ```
+>
+> For this reason the zwift script will issue a warning if the `CONTAINER_EXTRA_ARGS` option is defined as a string instead of
+> as a list.
 
 ---
 
