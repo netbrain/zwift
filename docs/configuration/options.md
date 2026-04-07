@@ -165,15 +165,37 @@ on a single linux user account.
 
 ### IMAGE
 
+See also [`VERSION`](#version), [`DONT_PULL`](#dont_pull).
+
+| Item              | Description                     |
+|:------------------|:--------------------------------|
+| Allowed values    | string                          |
+| Default value     | `docker.io/netbrain/zwift`      |
+| Commandline usage | `IMAGE="localhost/zwift" zwift` |
+| Config file usage | `IMAGE="localhost/zwift"`       |
+
+{: .important }
+When using a local image, you should also set `DONT_PULL="1"`.
+
 ### VERSION
+
+See also [`IMAGE`](#image), [`DONT_PULL`](#dont_pull).
 
 ### SCRIPT_VERSION
 
+See also [`DONT_CHECK`](#dont_check).
+
 ### DONT_CHECK
+
+See also [`SCRIPT_VERSION`](#script_version).
 
 ### DONT_PULL
 
+See also [`IMAGE`](#image), [`VERSION`](#version).
+
 ### DONT_CLEAN
+
+See also [`DONT_PULL`](#dont_pull).
 
 ### DRYRUN
 
@@ -191,19 +213,39 @@ on a single linux user account.
 
 ### ZWIFT_USERNAME
 
+See also [`ZWIFT_PASSWORD`](#zwift_password).
+
 ### ZWIFT_PASSWORD
+
+See also [`ZWIFT_USERNAME`](#zwift_username).
 
 ### ZWIFT_WORKOUT_DIR
 
+See also [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir), [`ZWIFT_LOG_DIR`](#zwift_log_dir),
+[`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir).
+
 ### ZWIFT_ACTIVITY_DIR
+
+See also [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir), [`ZWIFT_LOG_DIR`](#zwift_log_dir),
+[`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir).
 
 ### ZWIFT_LOG_DIR
 
+See also [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir), [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir),
+[`ZWIFT_SCREENSHOTS_DIR`](#zwift_screenshots_dir).
+
 ### ZWIFT_SCREENSHOTS_DIR
+
+See also [`ZWIFT_WORKOUT_DIR`](#zwift_workout_dir), [`ZWIFT_ACTIVITY_DIR`](#zwift_activity_dir),
+[`ZWIFT_LOG_DIR`](#zwift_log_dir).
 
 ### ZWIFT_OVERRIDE_GRAPHICS
 
+See also [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution).
+
 ### ZWIFT_OVERRIDE_RESOLUTION
+
+See also [`ZWIFT_OVERRIDE_GRAPHICS`](#zwift_override_graphics).
 
 ### ZWIFT_FG
 
@@ -215,14 +257,14 @@ on a single linux user account.
 
 ### ZWIFT_UID
 
-See also [ZWIFT_GID](#zwift_gid).
+See also [`ZWIFT_GID`](#zwift_gid).
 
 {: .important }
 `ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
 
 ### ZWIFT_GID
 
-See also [ZWIFT_UID](#zwift_uid).
+See also [`ZWIFT_UID`](#zwift_uid).
 
 {: .important }
 `ZWIFT_UID` and `ZWIFT_GID` can only be used with X11. They do not work in wayland!
