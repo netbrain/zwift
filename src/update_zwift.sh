@@ -46,12 +46,13 @@ msgbox() {
 }
 
 wine_task_info() {
-    local task="${1:?}"
-    wine tasklist /fo list /fi "IMAGENAME eq ${task}"
+    local task_name="${1:?}"
+    wine tasklist /fo list /fi "IMAGENAME eq ${task_name}"
 }
 
 is_wine_task_running() {
-    [[ -n $(wine_task_info "${@}" || true) ]]
+    local task_name="${1:?}"
+    [[ -n $(wine_task_info "${task_name}" || true) ]]
 }
 
 get_current_version() {

@@ -51,16 +51,24 @@ msgbox() {
 }
 
 wine_task_info() {
-    local task="${1:?}"
-    wine tasklist /fo list /fi "IMAGENAME eq ${task}"
+    local task_name="${1:?}"
+    local filter="${2:-IMAGENAME}"
+    wine tasklist /fo list /fi "${filter} eq ${task_name}"
 }
 
 wine_task_pid() {
-    wine_task_info "${@}" | grep -m1 -Po '^PID:[\t ]*\K[0-9]+'
+    local task_name="${1:?}"
+    wine_task_info "${task_name}" | grep -m1 -Po '^PID:[\t ]*\K[0-9]+'
 }
 
 is_wine_task_running() {
-    [[ -n $(wine_task_info "${@}" || true) ]]
+    local task_name="${1:?}"
+    [[ -n $(wine_task_info "${task_name}" || true) ]]
+}
+
+is_wine_window_open() {
+    local window_title="${1:?}"
+    [[ -n $(wine_task_info "${window_title}" WINDOWTITLE || true) ]]
 }
 
 kill_wine_task() {
