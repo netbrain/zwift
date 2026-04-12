@@ -45,6 +45,15 @@ msgbox() {
     esac
 }
 
+wine_task_info() {
+    local task="${1:?}"
+    wine tasklist /fo list /fi "IMAGENAME eq ${task}"
+}
+
+is_wine_task_running() {
+    [[ -n $(wine_task_info "${@}" || true) ]]
+}
+
 get_current_version() {
     # if Zwift_ver_cur_filename.txt exists, it holds the true current version filename
     # if it does not exist, use Zwift_ver_cur.xml as fallback
@@ -90,7 +99,7 @@ update_zwift_using_launcher() {
     local counter=1
     local max_iterations=60 # 60 * 5s = 5 minutes max
     # also stop if launcher exits before update finishes, so we don't hang forever
-    while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
+    while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && is_wine_task_running ZwiftLauncher.exe; do
         if [[ ${counter} -gt ${max_iterations} ]]; then
             msgbox error "Update timed out after $((max_iterations * 5)) seconds"
             return 1
