@@ -167,20 +167,16 @@ if ! "${wine_cmd[@]}"; then
     exit 1
 fi
 
-# Important, without this sleep Zwift gets stuck in the launcher!
-for i in $(seq 3 -1 1); do
-    msgbox info "Waiting for Zwift to start... (${i})"
-    sleep 1
+# Wait for Zwift to start
+counter=1
+max_iterations=10
+while ! is_wine_window_open Zwift && [[ ${counter} -le ${max_iterations} ]]; do
+    msgbox info "Waiting for Zwift to start... (${counter}/${max_iterations})"
+    sleep 0.5
+    ((counter++))
 done
-
-if ! is_wine_task_running ZwiftApp.exe; then
+if ! is_wine_window_open Zwift; then
     msgbox error "Zwift has not started yet, giving up!"
-    exit 1
-fi
-
-# If launcher crashed, ZwiftApp.exe starts but does not do anything
-if ! is_wine_task_running ZwiftLauncher.exe; then
-    msgbox error "Zwift launcher exited unexpectedly. Did it crash?"
     exit 1
 fi
 
