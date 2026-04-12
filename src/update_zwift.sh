@@ -98,12 +98,9 @@ update_zwift_using_launcher() {
 
     local counter=1
     local max_iterations=60 # 60 * 5s = 5 minutes max
+
     # also stop if launcher exits before update finishes, so we don't hang forever
-    while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && is_wine_task_running ZwiftLauncher.exe; do
-        if [[ ${counter} -gt ${max_iterations} ]]; then
-            msgbox error "Update timed out after $((max_iterations * 5)) seconds"
-            return 1
-        fi
+    while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && [[ ${counter} -le ${max_iterations} ]] && is_wine_task_running ZwiftLauncher.exe; do
         msgbox info "Updating Zwift... (${counter}/${max_iterations})"
         msgbox debug "Current version: ${zwift_current_version}; Latest version: ${zwift_latest_version}"
         sleep 5
@@ -111,9 +108,13 @@ update_zwift_using_launcher() {
         ((counter++))
     done
 
-    # if launcher exited unexpectedly, Zwift is still at the old version
+    # if launcher exited unexpectedly or update timeout, Zwift is still at the old version
     if [[ ${zwift_current_version} != "${zwift_latest_version}" ]]; then
-        msgbox error "Launcher exited unexpectedly, update did not complete"
+        if [[ ${counter} -gt ${max_iterations} ]]; then
+            msgbox error "Update timed out after $((counter * 5)) seconds"
+        else
+            msgbox error "Launcher exited unexpectedly, update did not complete"
+        fi
         return 1
     fi
 
