@@ -32,16 +32,8 @@ msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
     local msg="${2:?}"  # Message: the message to display
 
-    make_timestamp() {
-        if [[ ${VERBOSITY} -ge 2 ]]; then
-            printf '%(%T)T|' -1
-        else
-            printf ''
-        fi
-    }
-
-    local timestamp
-    timestamp="$(make_timestamp)"
+    local timestamp=""
+    [[ ${VERBOSITY} -ge 2 ]] && printf -v timestamp '%(%T)T|' -1
 
     case ${type} in
         info) [[ ${VERBOSITY} -ge 1 ]] && echo -e "${COLOR_BLUE}[${CONTAINER_TOOL}|${timestamp}*] ${msg}${RESET_STYLE}" ;;
