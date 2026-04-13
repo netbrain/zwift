@@ -59,8 +59,7 @@ jobs:
                         -H "Authorization: Bearer ${token}")"
 
                     if [[ ${http_code} -eq 204 ]]; then
-                        echo "  Deleted successfully"
-                        ((deleted++))
+                        ((deleted++)) || true
                     else
                         echo "::warning::Failed to delete tag ${tag} (HTTP ${http_code})"
                     fi
@@ -73,7 +72,7 @@ jobs:
             if [[ -z ${next} ]]; then
                 break
             fi
-            ((page++))
+            ((page++)) || true
         done
 
         echo "Pruned ${deleted} tag(s)"
