@@ -70,7 +70,7 @@ jobs:
     - name: Checkout repository code
       uses: actions/checkout@v6
     - name: Check markdown files for errors
-      uses: DavidAnson/markdownlint-cli2-action@v22
+      uses: DavidAnson/markdownlint-cli2-action@v23
       with:
         config: .markdownlint-cli2.yaml
         globs: ''
