@@ -52,8 +52,7 @@ msgbox() {
 
 wine_task_info() {
     local task_name="${1:?}"
-    local filter="${2:-IMAGENAME}"
-    wine tasklist /fo list /fi "${filter} eq ${task_name}"
+    wine tasklist /fo list /fi "IMAGENAME eq ${task_name}"
 }
 
 wine_task_pid() {
@@ -66,12 +65,7 @@ is_wine_task_running() {
     [[ -n $(wine_task_info "${task_name}" || true) ]]
 }
 
-is_wine_window_open() {
-    local window_title="${1:?}"
-    [[ -n $(wine_task_info "${window_title}" WINDOWTITLE || true) ]]
-}
-
-kill_wine_task() {
+kill_wine_tasks() {
     for task in "${@}"; do
         msgbox debug "Killing wine task '${task}'"
         wine taskkill /f /im "${task}" > /dev/null 2>&1 || true
@@ -144,6 +138,19 @@ fi
 ##################################
 ##### Start Zwift using wine #####
 
+# The Zwift launcher is not fully functional in wine:
+# - It cannot show the login page (1)
+# - It cannot launch Zwift (2)
+# - If Zwift itself is started independently, it will automatically start the launcher (3)
+# Workaround for (1):
+# 1. Manually invoke the Zwift API to login and obtain an authentication token using the zwift-auth.sh script
+# 2. Pass the authentication token to ZwiftApp.exe using the --token=... argument
+# Workaround for (2) and (3):
+# 1. Start the launcher ZwiftLauncher.exe in the background using SilentLaunch
+# 2. Obtain the launcher wine process id
+# 3. Use runfromprocess to launch ZwiftApp.exe with the launcher process as parent
+# 4. Kill ZwiftLauncher.exe
+
 msgbox info "Starting Zwift launcher using wine"
 
 if ! wine start ZwiftLauncher.exe SilentLaunch; then
@@ -167,22 +174,8 @@ if ! "${wine_cmd[@]}"; then
     exit 1
 fi
 
-# Wait for Zwift to start
-counter=1
-max_iterations=10
-while ! is_wine_window_open Zwift && [[ ${counter} -le ${max_iterations} ]]; do
-    msgbox info "Waiting for Zwift to start... (${counter}/${max_iterations})"
-    sleep 0.5
-    ((counter++))
-done
-if ! is_wine_window_open Zwift; then
-    msgbox error "Zwift has not started yet, giving up!"
-    exit 1
-fi
-
-# Kill launcher as soon as possible to prevent it from updating Zwift
 msgbox info "Killing Zwift launcher and background tasks"
-kill_wine_task ZwiftLauncher.exe ZwiftWindowsCrashHandler.exe MicrosoftEdgeUpdate.exe
+kill_wine_tasks ZwiftLauncher.exe ZwiftWindowsCrashHandler.exe MicrosoftEdgeUpdate.exe
 
 msgbox ok "Zwift started using wine"
 
