@@ -119,12 +119,6 @@ update_zwift_using_launcher() {
         return 1
     fi
 
-    local i
-    for i in $(seq 5 -1 1); do
-        msgbox info "Waiting for update to finish... (${i})"
-        sleep 1
-    done
-
     msgbox ok "Zwift updated to version ${zwift_latest_version}"
 }
 
