@@ -33,7 +33,7 @@ jobs:
         working-directory: ${{ github.workspace }}/docs
     - name: Setup Pages
       id: pages
-      uses: actions/configure-pages@v5
+      uses: actions/configure-pages@v6
     - name: Build with Jekyll
       run: |
         bundle install
@@ -53,4 +53,4 @@ jobs:
     steps:
     - name: Deploy to github pages
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@v5
