@@ -64,6 +64,8 @@ RUN dpkg --add-architecture i386 \
         gosu \
         libegl1 \
         libgl1 \
+        libgamemode0.i386 \
+        libgamemodeauto0.i386 \
         libvulkan1 \
         procps \
         sudo \
