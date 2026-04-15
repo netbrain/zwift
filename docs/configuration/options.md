@@ -571,7 +571,8 @@ Set this option to a value to change the Zwift game resolution. For details on h
 ### `ZWIFT_FG`
 
 If set to `1`, launch the container in the foreground instead of the background. Use this option if you want to see the output
-of the scripts that run inside the container or if you need to wait for the container to finish to automatically perform a task.
+of the scripts that run inside the container, if you need to wait for the container to finish to automatically perform a task,
+or if you want to run Zwift with a 3rd party launcher (e.g. Steam).
 
 | Item              | Description                                   |
 |:------------------|:----------------------------------------------|
