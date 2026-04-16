@@ -131,7 +131,7 @@ install_zwift() {
     WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u || return 1
 
     msgbox info "Installing prerequisites using winetricks"
-    winetricks -q dotnet20 dotnet48 d3dcompiler_47 || return 1
+    winetricks -q dotnet48 d3dcompiler_47 || return 1
 
     msgbox info "Downloading and installing webview2"
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
