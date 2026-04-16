@@ -181,7 +181,25 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         exit 1
     fi
 
-    startup_cmd=(gosu user:user "${startup_cmd[@]}")
+    # Add DRI render group to user so gosu preserves GPU access.
+    # gosu sets supplementary groups from /etc/group, not from Docker's --group-add,
+    # so we must register the DRI device's GID in the container before dropping privileges.
+    # Note: do not use groupadd -f (silently no-ops if group name exists with different GID).
+    if [[ -d /dev/dri ]]; then
+        dri_gid="$(stat -c '%g' /dev/dri/renderD128 2>/dev/null || stat -c '%g' /dev/dri/card0 2>/dev/null || true)"
+        if [[ -n ${dri_gid} ]]; then
+            if ! getent group "${dri_gid}" > /dev/null 2>&1; then
+                groupadd -g "${dri_gid}" dri_render 2>/dev/null || true
+            fi
+            dri_group="$(getent group "${dri_gid}" | cut -d: -f1)"
+            if [[ -n ${dri_group} ]]; then
+                usermod -aG "${dri_group}" user 2>/dev/null || true
+                msgbox info "Added user to ${dri_group} group (gid=${dri_gid}) for DRI access"
+            fi
+        fi
+    fi
+
+    startup_cmd=(gosu user "${startup_cmd[@]}")
 fi
 
 #########################################

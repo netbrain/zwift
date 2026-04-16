@@ -619,6 +619,8 @@ if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; t
 
     if [[ -d /tmp/.X11-unix ]]; then
         container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
+        # Share host IPC namespace so Mesa can attach to X11 shared memory (needed for DRI2/DRI3)
+        container_args+=(--ipc=host)
     else
         msgbox error "X11 socket does not exist at /tmp/.X11-unix"
         exit 1

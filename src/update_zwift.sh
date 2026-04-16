@@ -137,10 +137,9 @@ install_zwift() {
     msgbox info "Installing prerequisites using winetricks"
     winetricks -q dotnet20 dotnet48 d3dcompiler_47 || return 1
 
-    # download and install webview 2
-    msgbox info "Downloading and installing webview2"
-    wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
-    wine webview2-setup.exe /silent /install || return 1
+    # WebView2 install skipped: both bootstrapper and standalone require the
+    # MicrosoftEdgeUpdate COM service which Wine cannot activate. SilentLaunch
+    # bypasses the launcher UI so WebView2 is not needed at runtime.
 
     # enable Wayland support, requires DISPLAY to be blank to use Wayland
     msgbox info "Enabling Wayland support"
