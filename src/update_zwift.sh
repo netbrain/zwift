@@ -126,10 +126,6 @@ update_zwift_using_launcher() {
 }
 
 install_zwift() {
-    # prevent wine from trying to install a different mono version
-    msgbox info "Starting wine with custom mono version"
-    WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u || return 1
-
     msgbox info "Installing prerequisites using winetricks"
     winetricks -q corefonts dotnet48 d3dcompiler_47 || return 1
 

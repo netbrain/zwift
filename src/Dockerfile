@@ -26,10 +26,18 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 # For Specific version fix add WINE_VERSION,
 # make sure to add "=" to the start, comment out for latest
 #    WINE_VERSION="=9.9~bookworm-1"
+# Mono
+# - https://gitlab.winehq.org/wine/wine/-/wikis/Wine-Mono
+# - version depends on wine version!
+# Gecko
+# - https://gitlab.winehq.org/wine/wine/-/wikis/Gecko
+# - version depends on wine version!
 ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=20240105
+ARG MONO_VERSION=9.1.0
+ARG GECKO_VERSION=2.47.4
 
 # Install prerequisites
 # - ca-certificates for wget and curl
@@ -82,6 +90,12 @@ RUN adduser --disabled-password --gecos '' user \
  && echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+
+# Download wine mono and gecko installers
+# Place them where wine can find them, this avoids the confirmation dialog when booting wine
+# Avoid WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u workaround
+ADD --chown=user:user https://dl.winehq.org/wine/wine-mono/${MONO_VERSION}/wine-mono-${MONO_VERSION}-x86.msi /opt/wine/mono/
+ADD --chown=user:user https://dl.winehq.org/wine/wine-gecko/${GECKO_VERSION}/wine-gecko-${GECKO_VERSION}-x86_64.msi /opt/wine/gecko/
 
 # Required for non-glvnd setups
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
