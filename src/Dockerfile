@@ -1,6 +1,6 @@
 ARG DEBIAN_VERSION=trixie
 
-FROM rust:1.90-slim AS build-runfromprocess
+FROM rust:1.94.1-slim AS build-runfromprocess
 
 # Install prerequisites
 # - mingw to cross-compile for windows
