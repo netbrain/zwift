@@ -130,23 +130,16 @@ install_zwift() {
     msgbox info "Starting wine with custom mono version"
     WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u || return 1
 
-    # install prerequisites using winetricks
-    # dotnet20: to prevent error dialog with CloseLauncher.exe
-    # dotnet48: required by Zwift
-    # d3dcompiler_47: required for Vulkan shaders
     msgbox info "Installing prerequisites using winetricks"
     winetricks -q dotnet20 dotnet48 d3dcompiler_47 || return 1
 
-    # download and install webview 2
     msgbox info "Downloading and installing webview2"
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
     wine webview2-setup.exe /silent /install || return 1
 
-    # enable Wayland support, requires DISPLAY to be blank to use Wayland
     msgbox info "Enabling Wayland support"
     wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland || return 1
 
-    # download and install zwift
     msgbox info "Downloading and installing Zwift"
     wget https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
