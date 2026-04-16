@@ -72,6 +72,22 @@ kill_wine_tasks() {
     done
 }
 
+wait_until_running() {
+    local process_name="${1:?}"
+    local timeout="${2:-20}"
+    local counter=1
+
+    msgbox info "Waiting for ${process_name} to start..."
+
+    while ! pgrep -f "${process_name}" > /dev/null 2>&1 && [[ ${counter} -le ${timeout} ]]; do
+        msgbox debug "Waiting for ${process_name} to start... (${counter}/${timeout})"
+        sleep 0.1
+        ((counter++))
+    done
+
+    pgrep -f "${process_name}" > /dev/null 2>&1
+}
+
 ###########################
 ##### Configure Zwift #####
 
@@ -116,23 +132,19 @@ cleanup() {
 
 trap cleanup EXIT
 
-msgbox info "Launching wine server"
-
-declare -a wineserver_cmd
-wineserver_cmd=(wineserver)
-
 if [[ ${ZWIFT_NO_GAMEMODE} -eq 1 ]]; then
     msgbox warning "Not using gamemode"
 else
-    msgbox info "Using gamemode"
-    wineserver_cmd=(/usr/games/gamemoderun "${wineserver_cmd[@]}")
-fi
+    msgbox info "Starting wine server in gamemode"
 
-if "${wineserver_cmd[@]}"; then
-    msgbox ok "Launched wine server"
-else
-    msgbox error "Failed to launch wine server!"
-    exit 1
+    /usr/games/gamemoderun wineserver -w &
+
+    if wait_until_running wineserver; then
+        msgbox ok "Started wine server"
+    else
+        msgbox error "Failed to start wine server!"
+        exit 1
+    fi
 fi
 
 ##################################
