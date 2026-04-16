@@ -6,8 +6,8 @@ FROM rust:1.94.1-slim AS build-runfromprocess
 # - mingw to cross-compile for windows
 # - git to fetch runfromprocess source code
 # - rust cross-compiler for windows
-RUN apt-get update \
- && apt-get install --no-install-recommends -y \
+RUN DEBIAN_FRONTEND="noninteractive" apt-get update \
+ && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
         g++-mingw-w64-x86-64 \
         git \
  && rm -rf /var/lib/apt/lists/* \
@@ -44,8 +44,8 @@ ARG WINETRICKS_VERSION=20240105
 # - winbind for ntml_auth required by zwift/wine
 # - xdg-utils seems to be a dependency of wayland
 RUN dpkg --add-architecture i386 \
- && apt-get update \
- && apt-get install --no-install-recommends -y \
+ && DEBIAN_FRONTEND="noninteractive" apt-get update \
+ && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
         ca-certificates \
         curl \
         gamemode \
@@ -64,8 +64,8 @@ RUN dpkg --add-architecture i386 \
 # hadolint ignore=DL3015
 RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key \
  && echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list \
- && apt-get update \
- && apt-get install -y \
+ && DEBIAN_FRONTEND="noninteractive" apt-get update \
+ && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
         wine-${WINE_BRANCH}${WINE_VERSION} \
         wine-${WINE_BRANCH}-amd64${WINE_VERSION} \
         wine-${WINE_BRANCH}-i386${WINE_VERSION} \
