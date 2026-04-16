@@ -17,7 +17,7 @@ readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 
 if [[ -t 1 ]]; then
-    readonly COLORED_OUTPUT_SUPPORTED="1"
+    readonly INTERACTIVE_TERMINAL="1"
     readonly COLOR_WHITE="\033[0;37m"
     readonly COLOR_RED="\033[0;31m"
     readonly COLOR_GREEN="\033[0;32m"
@@ -29,7 +29,7 @@ if [[ -t 1 ]]; then
     readonly OVERWRITE_PREV_LINE="\033[1A\033[K"
     readonly OVERWRITE_CURRENT_LINE="\r\033[K"
 else
-    readonly COLORED_OUTPUT_SUPPORTED="0"
+    readonly INTERACTIVE_TERMINAL="0"
     readonly COLOR_WHITE=""
     readonly COLOR_RED=""
     readonly COLOR_GREEN=""
@@ -462,10 +462,10 @@ fi
 
 # Interactive mode and run in foreground/background
 if [[ ${INTERACTIVE} -eq 1 ]]; then
-    container_env_vars+=(COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}")
+    container_env_vars+=(COLORED_OUTPUT="${INTERACTIVE_TERMINAL}")
     container_args+=(-it --entrypoint bash)
 elif [[ ${ZWIFT_FG} -eq 1 ]]; then
-    container_env_vars+=(COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}")
+    container_env_vars+=(COLORED_OUTPUT="${INTERACTIVE_TERMINAL}")
 else
     container_env_vars+=(COLORED_OUTPUT="0")
     container_args+=(-d)
