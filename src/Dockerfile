@@ -21,11 +21,13 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs . \
 
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 
-# As at May 2024 Wayland Native works wine 9.9 or later:
-#    WINE_BRANCH="devel"
-# For Specific version fix add WINE_VERSION,
-# make sure to add "=" to the start, comment out for latest
-#    WINE_VERSION="=9.9~bookworm-1"
+# Wine
+# - 11.0     : support 32-bit applications through wow64
+# - 10.17    : default to egl for opengl in x11
+# - 9.9      : support native wayland
+# Winetricks
+# - 20260125 : webview2 in zwift launcher works
+# - 20240105 : first version used in this Dockerfile
 # Mono
 # - https://gitlab.winehq.org/wine/wine/-/wikis/Wine-Mono
 # - version depends on wine version!
@@ -35,7 +37,7 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
-ARG WINETRICKS_VERSION=20240105
+ARG WINETRICKS_VERSION=20260125
 ARG MONO_VERSION=9.1.0
 ARG GECKO_VERSION=2.47.4
 
