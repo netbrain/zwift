@@ -175,10 +175,17 @@ readonly ZWIFT_FG="${ZWIFT_FG:-0}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly NETWORKING="${NETWORKING:-bridge}"
-readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
-readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
+
+# No longer supported configuration environment variables
+readonly ZWIFT_UID="${ZWIFT_UID:-}"
+readonly ZWIFT_GID="${ZWIFT_GID:-}"
+if [[ -n ${ZWIFT_UID} ]] || [[ -n ${ZWIFT_GID} ]]; then
+    msgbox error "ZWIFT_UID and ZWIFT_GID options are no longer supported"
+    msgbox error "  To start Zwift as a different user, use: sudo -i username zwift"
+    exit 1
+fi
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -206,8 +213,8 @@ declare -a parameters_to_print
 parameters_to_print=(
     DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_CHECK DONT_PULL DONT_CLEAN DRYRUN INTERACTIVE
     CONTAINER_EXTRA_ARGS ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR ZWIFT_SCREENSHOTS_DIR
-    ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE WINE_EXPERIMENTAL_WAYLAND NETWORKING ZWIFT_UID
-    ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
+    ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE WINE_EXPERIMENTAL_WAYLAND NETWORKING
+    VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
 )
 for parameter_to_print in "${parameters_to_print[@]}"; do
     parameter_print_value="$(declare -p "${parameter_to_print}")"
@@ -316,6 +323,9 @@ if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_PULL} -ne 1 ]]; then
     fi
 fi
 
+container_image="${IMAGE}"
+container_image_version="${VERSION}"
+
 ###############################
 ##### Basic configuration #####
 
@@ -332,41 +342,15 @@ fi
 
 # Create array for container environment variables
 declare -a container_env_vars
-container_env_vars=()
-
-# Create array for container arguments
-declare -a container_args
-container_args=()
-
-# Create array for entrypoint arguments
-declare -a entrypoint_args
-entrypoint_args=()
-
-if [[ ${CONTAINER_TOOL} == "podman" ]]; then
-    # Podman has to use container id 1000
-    # Local user is mapped to the container id
-    local_uid="${ZWIFT_UID}"
-    container_uid=1000
-    container_gid=1000
-    container_args+=(--userns "keep-id:uid=${container_uid},gid=${container_gid}")
-else
-    # Docker will run as the id's provided.
-    local_uid="${UID}"
-    container_uid="${ZWIFT_UID}"
-    container_gid="${ZWIFT_GID}"
-fi
-
-# Define base container environment variables
-container_env_vars+=(
+container_env_vars=(
     DEBUG="${DEBUG}"
     VERBOSITY="${VERBOSITY}"
-    ZWIFT_UID="${container_uid}"
-    ZWIFT_GID="${container_gid}"
     CONTAINER_TOOL="${CONTAINER_TOOL}"
 )
 
-# Define base container parameters
-container_args+=(
+# Create array for container arguments
+declare -a container_args
+container_args=(
     --rm
     --network "${NETWORKING}"
     --name "zwift-${USER}"
@@ -374,6 +358,10 @@ container_args+=(
     --env-file "${container_env_file}"
     -v "zwift-${USER}:${ZWIFT_DOCS}"
 )
+
+# Create array for entrypoint arguments
+declare -a entrypoint_args
+entrypoint_args=()
 
 ###################################################
 ##### Forward arguments passed to this script #####
@@ -391,6 +379,158 @@ for arg; do
         container_args+=("${arg}")
     fi
 done
+
+#############################################
+##### Remap container user to host user #####
+
+image_repo_digest() {
+    # Local images do not have a remote repository, will return non-zero
+
+    local tag_name="${1:?}"
+
+    ${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .RepoDigests 0}}' 2> /dev/null
+}
+
+image_digest_label() {
+    local tag_name="${1:?}"
+
+    ${CONTAINER_TOOL} inspect "${tag_name}" --format '{{index .Config.Labels "org.opencontainers.image.base.digest"}}' 2> /dev/null
+}
+
+remap_build_required() {
+    local tag_name="${1:?}"
+
+    local latest_image_digest
+    if latest_image_digest="$(image_repo_digest "${IMAGE}:${VERSION}")"; then
+        msgbox debug "Latest image digest is ${latest_image_digest}"
+    else
+        msgbox info "Failed to get ${IMAGE}:${VERSION} image repository digest, assuming rebuild is required"
+        return 0
+    fi
+
+    local current_image_digest
+    if current_image_digest="$(image_digest_label "${tag_name}")"; then
+        msgbox debug "Base image digest is ${current_image_digest}"
+    else
+        msgbox info "Failed to get ${tag_name} base image digest, may not exist yet, assuming rebuild is required"
+        return 0
+    fi
+
+    [[ ${current_image_digest} != "${latest_image_digest}" ]]
+}
+
+create_remap_dockerfile() {
+    local user_uid="${1:?}"
+    local user_gid="${2:?}"
+
+    local image_digest
+    if ! image_digest="$(image_repo_digest "${IMAGE}:${VERSION}")"; then
+        image_digest="Unknown"
+    fi
+
+    echo "FROM ${IMAGE}:${VERSION}"
+    echo "USER root"
+    echo "RUN sed -i \"s|/run/user/\$(id -u user)|/run/user/${user_uid}|g\" /etc/pulse/client.conf \\"
+    echo " && usermod -ou ${user_uid} user \\"
+    echo " && groupmod -og ${user_gid} user \\"
+    echo " && mkdir -p /run/user/${user_uid} \\"
+    echo " && chown -R user:user /run/user/${user_uid}"
+    echo "USER user"
+    echo 'ENTRYPOINT ["entrypoint"]'
+    echo "LABEL org.opencontainers.image.base.digest=\"${image_digest}\""
+}
+
+build_remap_dockerfile() {
+    local tag_name="${1:?}"
+    local dockerfile="${2:?}"
+
+    msgbox info "Building container image with remapped user"
+
+    msgbox debug "Using dockerfile:"
+    local dockerfile_lines line
+    readarray -t dockerfile_lines <<< "${dockerfile}"
+    for line in "${dockerfile_lines[@]}"; do
+        msgbox debug "  ${line/\\/\\\\}"
+    done
+
+    if ${CONTAINER_TOOL} build -t "${tag_name}" - <<< "${dockerfile}"; then
+        msgbox info "Created ${CONTAINER_TOOL} image ${tag_name}"
+    else
+        msgbox error "Failed to create ${CONTAINER_TOOL} image ${tag_name}"
+        return 1
+    fi
+}
+
+host_uid="${UID}"
+host_gid="$(id -g)"
+
+if [[ ${CONTAINER_TOOL} == "podman" ]]; then
+    container_uid=1000
+    container_gid=1000
+
+    container_args+=(--userns="keep-id:uid=${container_uid},gid=${container_gid}")
+else
+    container_uid="${host_uid}"
+    container_gid="${host_gid}"
+
+    container_image="${IMAGE#docker.io/}"
+    container_image_version="uid_${container_uid}_gid_${container_gid}"
+
+    msgbox info "Remapping container user to host user"
+    if remap_build_required "${container_image}:${container_image_version}"; then
+        remap_dockerfile="$(create_remap_dockerfile "${container_uid}" "${container_gid}")"
+        if build_remap_dockerfile "${container_image}:${container_image_version}" "${remap_dockerfile}"; then
+            msgbox ok "Remapped container user to host user"
+        else
+            msgbox error "Failed to remap container user to host user"
+            exit 1
+        fi
+    else
+        msgbox ok "${container_image}:${container_image_version} is up to date"
+    fi
+fi
+
+# Create the volume for the zwift documents directory if it does not already exist
+if ! ${CONTAINER_TOOL} volume inspect "zwift-${USER}" > /dev/null 2>&1; then
+    msgbox info "Creating ${CONTAINER_TOOL} volume zwift-${USER}"
+    if ${CONTAINER_TOOL} volume create "zwift-${USER}" > /dev/null 2>&1; then
+        msgbox ok "Created volume zwift-${USER}"
+    else
+        msgbox error "Failed to create volume zwift-${USER}"
+        exit 1
+    fi
+fi
+
+volume_remap_required() {
+    ${CONTAINER_TOOL} run --rm \
+        -v "zwift-${USER}:/zwift-docs" \
+        --entrypoint bash \
+        "${container_image}:${container_image_version}" \
+        -c "[[ ! -O /zwift-docs ]] || [[ ! -G /zwift-docs ]]"
+}
+
+remap_volume() {
+    ${CONTAINER_TOOL} run --rm \
+        --user root \
+        -v "zwift-${USER}:/zwift-docs" \
+        --entrypoint bash \
+        "${container_image}:${container_image_version}" \
+        -c "chown -R \"${container_uid}:${container_gid}\" /zwift-docs"
+}
+
+# Docker: Remap volume to container user
+# Necessary in two cases:
+# - Volume was just created, owner will be root, remap required
+# - End user changed user uid/gid, remap required
+if [[ ${CONTAINER_TOOL} != "podman" ]] && volume_remap_required; then
+    msgbox info "Updating owner of volume zwift-${USER}"
+    if remap_volume; then
+        msgbox ok "Updated zwift-${USER} volume owner to ${container_uid}:${container_gid}"
+    else
+        msgbox error "Failed to update zwift-${USER} volume owner to ${container_uid}:${container_gid}"
+        exit 1
+    fi
+fi
 
 ##############################################
 ##### User defined environment variables #####
@@ -587,18 +727,13 @@ fi
 if [[ ${window_manager} == "Wayland" ]]; then
     msgbox info "Using Wayland window manager"
 
-    if [[ ${ZWIFT_UID} -ne ${UID} ]]; then
-        msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}"
-        exit 1
-    fi
-
     if [[ -n ${XDG_RUNTIME_DIR} ]] && [[ -n ${WAYLAND_DISPLAY} ]]; then
         container_env_vars+=(
-            XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}"
+            XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR//${host_uid}/${container_uid}}"
             WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
             WINE_EXPERIMENTAL_WAYLAND="1"
         )
-        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
+        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${host_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
     else
         msgbox error "Required environment variables XDG_RUNTIME_DIR and/or WAYLAND_DISPLAY are not set"
         msgbox error "Falling back to XWayland" 5
@@ -625,8 +760,8 @@ if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; t
     fi
 
     if [[ -n ${XAUTHORITY} ]]; then
-        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${local_uid}/${container_uid}}")
-        container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${local_uid}/${container_uid}}")
+        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${host_uid}/${container_uid}}")
+        container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${host_uid}/${container_uid}}")
     else
         msgbox info "XAUTHORITY environment variable not set, container access to X11 needs to be granted with xhost"
         xhost_access_required=1
@@ -641,17 +776,17 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
     [[ ${DBUS_SESSION_BUS_ADDRESS} =~ ^unix:path=([^,]+) ]]
     dbus_unix_socket=${BASH_REMATCH[1]}
     if [[ -n ${dbus_unix_socket} ]]; then
-        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${local_uid}/${container_uid}}")
-        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${local_uid}/${container_uid}}")
+        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${host_uid}/${container_uid}}")
+        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${host_uid}/${container_uid}}")
     fi
 fi
 
 # Configure sound driver
 container_env_vars+=(PULSE_SERVER="/run/user/${container_uid}/pulse/native")
-if [[ -d "/run/user/${local_uid}/pulse" ]]; then
-    container_args+=(-v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse")
+if [[ -d "/run/user/${host_uid}/pulse" ]]; then
+    container_args+=(-v "/run/user/${host_uid}/pulse:/run/user/${container_uid}/pulse")
 else
-    msgbox warning "PulseAudio socket /run/user/${local_uid}/pulse not found — audio may not work (PipeWire-only system?)"
+    msgbox warning "PulseAudio socket /run/user/${host_uid}/pulse not found — audio may not work (PipeWire-only system?)"
 fi
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
@@ -674,7 +809,7 @@ fi
 ##### Start container #####
 
 declare -a container_command
-container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${IMAGE}:${VERSION}" "${entrypoint_args[@]}")
+container_command=("${CONTAINER_TOOL}" run "${container_args[@]}" "${container_image}:${container_image_version}" "${entrypoint_args[@]}")
 
 # Print the exact command that would be executed
 
@@ -699,18 +834,6 @@ if [[ ${DRYRUN} -eq 1 ]]; then
 else
     msgbox debug "Starting ${CONTAINER_TOOL} container with the following arguments:"
     print_container_command debug
-fi
-
-# Create a volume if not already exists, this is done now as
-# if left to the run command the directory can get the wrong permissions
-if [[ ${CONTAINER_TOOL} == "podman" ]] && ! ${CONTAINER_TOOL} volume inspect "zwift-${USER}" > /dev/null 2>&1; then
-    msgbox info "Creating ${CONTAINER_TOOL} volume zwift-${USER}"
-    if ${CONTAINER_TOOL} volume create "zwift-${USER}"; then
-        msgbox ok "Created volume zwift-${USER}"
-    else
-        msgbox error "Failed to create volume zwift-${USER}"
-        exit 1
-    fi
 fi
 
 # Only write environment variables to file when needed
