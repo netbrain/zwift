@@ -33,6 +33,7 @@ ARG WINETRICKS_VERSION=20240105
 
 # Install prerequisites
 # - ca-certificates for wget and curl
+# - cabextract for winetricks
 # - curl used in zwift authentication script
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
@@ -47,6 +48,7 @@ RUN dpkg --add-architecture i386 \
  && DEBIAN_FRONTEND="noninteractive" apt-get update \
  && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
         ca-certificates \
+        cabextract \
         curl \
         gamemode \
         gosu \
