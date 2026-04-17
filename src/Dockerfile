@@ -21,15 +21,16 @@ RUN git clone https://github.com/quietvoid/runfromprocess-rs . \
 
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 
-# As at May 2024 Wayland Native works wine 9.9 or later:
-#    WINE_BRANCH="devel"
-# For Specific version fix add WINE_VERSION,
-# make sure to add "=" to the start, comment out for latest
-#    WINE_VERSION="=9.9~bookworm-1"
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# As at April 2026 Wine 11.x (devel) includes NTSYNC and WoW64 rewrites
+# for significantly improved performance. For a specific version pin add
+# WINE_VERSION, make sure to add "=" to the start, comment out for latest:
+#    WINE_VERSION="=11.6~trixie-1"
 ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
-ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
-ARG WINETRICKS_VERSION=20240105
+ARG WINE_VERSION="=11.6~${DEBIAN_VERSION}-1"
+ARG WINETRICKS_VERSION=20260125
 
 # Install prerequisites
 # - ca-certificates for wget and curl
