@@ -77,6 +77,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_OVERRIDE_RESOLUTION`](#zwift_override_resolution) |                            | If set, change the game resolution                  |
 | [`ZWIFT_FG`](#zwift_fg)                                   | `0`                        | If set to `1`, run the container in the foreground  |
 | [`ZWIFT_NO_GAMEMODE`](#zwift_no_gamemode)                 | `0`                        | If set to `1`, don't run game mode                  |
+| [`ZWIFT_NO_VULKAN`](#zwift_no_vulkan)                     | `0`                        | If set to `1`, disable Vulkan inside the container  |
 | [`WINE_EXPERIMENTAL_WAYLAND`](#wine_experimental_wayland) | `0`                        | If set to `1`, use native Wayland                   |
 | [`NETWORKING`](#networking)                               | `bridge`                   | Sets the type of container networking to use        |
 | [`ZWIFT_UID`](#zwift_uid)                                 | `$(id -u)`                 | Sets the UID that Zwift will run as                 |
@@ -616,6 +617,24 @@ If set to `1`, don't use game mode.
 
 {: .note }
 Disabling game mode could result in reduced performance and screen saver issues.
+
+---
+
+### `ZWIFT_NO_VULKAN`
+
+If set to `1`, disable Vulkan inside the container by setting `WINEDLLOVERRIDES=vulkan-1=`.
+
+| Item              | Description                            |
+|:------------------|:---------------------------------------|
+| Allowed values    | `0` - Enable Vulkan (default).         |
+|                   | `1` - Disable Vulkan inside Wine.      |
+| Default value     | `0`                                    |
+| Commandline usage | `ZWIFT_NO_VULKAN="1" zwift`            |
+| Config file usage | `ZWIFT_NO_VULKAN="1"`                  |
+
+{: .note }
+Use this if Wine crashes or causes kernel panics when Vulkan is active.
+This has been observed with Wine 11 on certain GPU/driver combinations.
 
 ---
 
