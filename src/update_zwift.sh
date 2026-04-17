@@ -67,7 +67,7 @@ get_current_version() {
 }
 
 get_latest_version() {
-    wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
+    wget --no-cache --quiet -O - https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
         | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ' \
         || return 1
 }
@@ -96,7 +96,7 @@ update_zwift_using_launcher() {
     msgbox ok "Zwift launcher started using wine"
 
     local counter=1
-    local max_iterations=60 # 60 * 5s = 5 minutes max
+    local max_iterations=720 # 720 * 5s = 60 minutes max
     # also stop if launcher exits before update finishes, so we don't hang forever
     while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
         if [[ ${counter} -gt ${max_iterations} ]]; then

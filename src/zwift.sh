@@ -239,16 +239,21 @@ check_script_up_to_date() {
 }
 
 upgrade_script() {
-    local install_script
+    local install_script_file
+    install_script_file="$(mktemp -q /tmp/zwift-install.XXXXXXXXXX.sh)" || {
+        msgbox error "Failed to create temporary file for install script"
+        return 1
+    }
+    trap 'rm -f -- "${install_script_file}"' RETURN
 
     msgbox info "Downloading latest install script"
-    if ! install_script="$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"; then
+    if ! curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh -o "${install_script_file}"; then
         msgbox error "Failed to download install script"
         return 1
     fi
 
-    msgbox info "Running install script"
-    if ! pkexec env PATH="${PATH}" bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}"; then
+    msgbox info "Running install script (inspect ${install_script_file} before proceeding)"
+    if ! pkexec env PATH="${PATH}" bash "${install_script_file}" -- --script-version="${SCRIPT_VERSION}"; then
         msgbox error "Install script failed"
         return 1
     fi
@@ -486,8 +491,7 @@ elif is_selinux_active; then
     msgbox info "SELinux is active, using secure container flags"
     container_args+=(--security-opt label=type:container_runtime_t)
 else
-    msgbox warning "Not using SELinux, running container in privileged mode to be able to access the GPU"
-    container_args+=(--privileged --security-opt label=disable)
+    msgbox info "Running container without privileged mode; GPU access is provided via --device flags below"
 fi
 
 # Append extra arguments provided by user
