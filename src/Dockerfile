@@ -53,6 +53,7 @@ RUN dpkg --add-architecture i386 \
         libegl1 \
         libgl1 \
         libvulkan1 \
+        mesa-vulkan-drivers \
         procps \
         sudo \
         wget \
