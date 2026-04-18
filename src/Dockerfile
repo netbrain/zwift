@@ -2,22 +2,21 @@ ARG DEBIAN_VERSION=trixie
 
 FROM rust:1.94.1-slim AS build-runfromprocess
 
+ARG RUNFROMPROCESS_VERSION=a3d003c07d1bd11ff93c4cac96d2c3aa5deb8471
+
 # Install prerequisites
 # - mingw to cross-compile for windows
-# - git to fetch runfromprocess source code
 # - rust cross-compiler for windows
 RUN DEBIAN_FRONTEND="noninteractive" apt-get update \
  && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
         g++-mingw-w64-x86-64 \
-        git \
  && rm -rf /var/lib/apt/lists/* \
  && rustup target add x86_64-pc-windows-gnu
 
 # Build runfromprocess
 WORKDIR /usr/src
-RUN git clone https://github.com/quietvoid/runfromprocess-rs . \
- && git checkout d8754035b1b8a38f96ec6806a772a944ef5396c0 \
- && cargo build --target x86_64-pc-windows-gnu --release
+ADD https://github.com/quietvoid/runfromprocess-rs.git#${RUNFROMPROCESS_VERSION} .
+RUN cargo build --target x86_64-pc-windows-gnu --release
 
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 
@@ -102,7 +101,6 @@ ADD --checksum=sha256:${GECKO_CHECKSUM} https://dl.winehq.org/wine/wine-gecko/${
 RUN adduser --disabled-password --gecos '' user \
  && adduser user sudo \
  && echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
- && chown -R user:user /opt/wine \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
