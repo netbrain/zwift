@@ -69,7 +69,7 @@ get_current_version() {
 }
 
 get_latest_version() {
-    wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
+    wget --no-cache --quiet -O - https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
         | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ' \
         || return 1
 }
