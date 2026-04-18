@@ -179,6 +179,7 @@ readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
+readonly ZWIFT_NO_PRIVILEGED="${ZWIFT_NO_PRIVILEGED:-0}"
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -207,7 +208,7 @@ parameters_to_print=(
     DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_CHECK DONT_PULL DONT_CLEAN DRYRUN INTERACTIVE
     CONTAINER_EXTRA_ARGS ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR ZWIFT_SCREENSHOTS_DIR
     ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE WINE_EXPERIMENTAL_WAYLAND NETWORKING ZWIFT_UID
-    ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
+    ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER ZWIFT_NO_PRIVILEGED DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
 )
 for parameter_to_print in "${parameters_to_print[@]}"; do
     parameter_print_value="$(declare -p "${parameter_to_print}")"
@@ -490,8 +491,11 @@ if [[ ${PRIVILEGED_CONTAINER} -eq 1 ]]; then
 elif is_selinux_active; then
     msgbox info "SELinux is active, using secure container flags"
     container_args+=(--security-opt label=type:container_runtime_t)
+elif [[ ${ZWIFT_NO_PRIVILEGED} -eq 1 ]]; then
+    msgbox info "ZWIFT_NO_PRIVILEGED is set, running without privileged mode"
 else
-    msgbox info "Running container without privileged mode; GPU access is provided via --device flags below"
+    msgbox warning "Not using SELinux, running container in privileged mode to be able to access the GPU"
+    container_args+=(--privileged --security-opt label=disable)
 fi
 
 # Append extra arguments provided by user

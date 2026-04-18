@@ -83,6 +83,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_GID`](#zwift_gid)                                 | `$(id -g)`                 | Sets the GID that Zwift will run as                 |
 | [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override container GPU/device flags                 |
 | [`PRIVILEGED_CONTAINER`](#privileged_container)           | `0`                        | If set to `1`, run the container in privileged mode |
+| [`ZWIFT_NO_PRIVILEGED`](#zwift_no_privileged)             | `0`                        | If set to `1`, disable privileged mode on non-SELinux systems |
 
 ---
 
@@ -747,3 +748,20 @@ will fallback to privileged mode.
 
 {: .note }
 Running the container in privileged mode is less secure. Only use this option if you have to.
+
+---
+
+### `ZWIFT_NO_PRIVILEGED`
+
+If set to `1`, the container will not run in privileged mode on non-SELinux systems. By default, non-SELinux systems (e.g. Ubuntu with AppArmor) use `--privileged` for GPU compatibility. Set this if you have verified that Zwift runs correctly on your system without it.
+
+| Item              | Description                                              |
+|:------------------|:---------------------------------------------------------|
+| Allowed values    | `0` - Use privileged mode on non-SELinux systems.        |
+|                   | `1` - Disable privileged mode.                           |
+| Default value     | `0`                                                      |
+| Commandline usage | `ZWIFT_NO_PRIVILEGED="1" zwift`                          |
+| Config file usage | `ZWIFT_NO_PRIVILEGED="1"`                                |
+
+{: .note }
+Some hardware/driver combinations (notably Intel integrated graphics on Ubuntu) may experience low framerates without privileged mode. See [#285](https://github.com/netbrain/zwift/issues/285).
