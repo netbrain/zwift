@@ -72,20 +72,31 @@ kill_wine_tasks() {
     done
 }
 
-wait_until_running() {
-    local process_name="${1:?}"
+wait_until() {
+    local condition="${1:?}"
     local timeout="${2:-20}"
+    local delay="${3:-0.1}"
     local counter=1
 
-    msgbox info "Waiting for ${process_name} to start..."
-
-    while ! pgrep -f "${process_name}" > /dev/null 2>&1 && [[ ${counter} -le ${timeout} ]]; do
-        msgbox debug "Waiting for ${process_name} to start... (${counter}/${timeout})"
-        sleep 0.1
+    while ! eval "${condition}" && [[ ${counter} -le ${timeout} ]]; do
+        msgbox debug "Waiting... (${counter}/${timeout})"
+        sleep "${delay}"
         ((counter++))
     done
 
-    pgrep -f "${process_name}" > /dev/null 2>&1
+    eval "${condition}"
+}
+
+wait_until_wine_task_started() {
+    local task_name="${1:?}"
+    msgbox info "Waiting for ${task_name} to start..."
+    wait_until "is_wine_task_running ${task_name}"
+}
+
+wait_until_process_started() {
+    local process_name="${1:?}"
+    msgbox info "Waiting for ${process_name} to start..."
+    wait_until "pgrep -f ${process_name} > /dev/null 2>&1"
 }
 
 ###########################
@@ -139,7 +150,7 @@ else
 
     /usr/games/gamemoderun wineserver -w &
 
-    if wait_until_running wineserver; then
+    if wait_until_process_started wineserver; then
         msgbox ok "Started wine server"
     else
         msgbox error "Failed to start wine server!"
@@ -165,7 +176,7 @@ fi
 
 msgbox info "Starting Zwift launcher using wine"
 
-if ! wine start ZwiftLauncher.exe SilentLaunch; then
+if ! wine start ZwiftLauncher.exe SilentLaunch || ! wait_until_wine_task_started ZwiftLauncher.exe; then
     msgbox error "Failed to start Zwift launcher using wine!"
     exit 1
 fi
@@ -181,7 +192,7 @@ msgbox info "Starting Zwift using wine"
 declare -a wine_cmd
 wine_cmd=(wine start /exec /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe "${zwift_args[@]}")
 
-if ! "${wine_cmd[@]}"; then
+if ! "${wine_cmd[@]}" || ! wait_until_wine_task_started ZwiftApp.exe; then
     msgbox error "Failed to start Zwift using wine!"
     exit 1
 fi
@@ -194,8 +205,9 @@ msgbox ok "Zwift started using wine"
 ##################################
 ##### Wait for Zwift to exit #####
 
+counter=1
 while is_wine_task_running ZwiftApp.exe; do
-    msgbox debug "Waiting for Zwift to exit..."
+    msgbox debug "Waiting for Zwift to exit... ($((counter++)))"
     sleep 5
 done
 
