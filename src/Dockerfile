@@ -52,7 +52,6 @@ ARG GECKO_CHECKSUM=e590b7d988a32d6aa4cf1d8aa3aa3d33766fdd4cf4c89c2dcc2095ecb28d0
 # - libegl1 and libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
-# - sudo for normal user installation
 # - wget for downloading winehq key
 # - winbind for ntml_auth required by zwift/wine
 # - xdg-utils seems to be a dependency of wayland
@@ -70,7 +69,6 @@ RUN dpkg --add-architecture i386 \
         libgamemodeauto0.i386 \
         libvulkan1 \
         procps \
-        sudo \
         wget \
         winbind \
         xdg-utils \
@@ -99,8 +97,6 @@ ADD --checksum=sha256:${GECKO_CHECKSUM} https://dl.winehq.org/wine/wine-gecko/${
 
 # Create passwordless user and make nvidia libraries discoverable
 RUN adduser --disabled-password --gecos '' user \
- && adduser user sudo \
- && echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
