@@ -75,6 +75,9 @@ RUN dpkg --add-architecture i386 \
  && rm -rf /var/lib/apt/lists/*
 
 # Install wine and winetricks (including recommends, which appear to be required)
+# Download wine mono and gecko installers
+# - Place them where wine can find them, this avoids the confirmation dialog when booting wine
+# - Avoid WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u workaround
 # hadolint ignore=DL3015
 RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key \
  && echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list \
@@ -86,20 +89,18 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
         winehq-${WINE_BRANCH}${WINE_VERSION} \
  && rm -rf /var/lib/apt/lists/* \
  && wget -qO /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
- && chmod +x /usr/local/bin/winetricks
+ && chmod +x /usr/local/bin/winetricks \
+ && mkdir -p /opt/wine/mono /opt/wine/gecko \
+ && wget -qO /opt/wine/mono/wine-mono-${MONO_VERSION}-x86.msi https://dl.winehq.org/wine/wine-mono/${MONO_VERSION}/wine-mono-${MONO_VERSION}-x86.msi \
+ && wget -qO /opt/wine/gecko/wine-gecko-${GECKO_VERSION}-x86_64.msi https://dl.winehq.org/wine/wine-gecko/${GECKO_VERSION}/wine-gecko-${GECKO_VERSION}-x86_64.msi
 
 # Create passwordless user and make nvidia libraries discoverable
 RUN adduser --disabled-password --gecos '' user \
  && adduser user sudo \
  && echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
+ && chown -R user:user /opt/wine \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-
-# Download wine mono and gecko installers
-# Place them where wine can find them, this avoids the confirmation dialog when booting wine
-# Avoid WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u workaround
-ADD --chown=user:user https://dl.winehq.org/wine/wine-mono/${MONO_VERSION}/wine-mono-${MONO_VERSION}-x86.msi /opt/wine/mono/
-ADD --chown=user:user https://dl.winehq.org/wine/wine-gecko/${GECKO_VERSION}/wine-gecko-${GECKO_VERSION}-x86_64.msi /opt/wine/gecko/
 
 # Required for non-glvnd setups
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
