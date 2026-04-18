@@ -83,7 +83,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_GID`](#zwift_gid)                                 | `$(id -g)`                 | Sets the GID that Zwift will run as                 |
 | [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override container GPU/device flags                 |
 | [`PRIVILEGED_CONTAINER`](#privileged_container)           | `0`                        | If set to `1`, run the container in privileged mode |
-| [`ZWIFT_NO_PRIVILEGED`](#zwift_no_privileged)             | `0`                        | If set to `1`, disable privileged mode on non-SELinux systems |
+| [`ZWIFT_NO_PRIVILEGED`](#zwift_no_privileged)             | `0`                        | Disable privileged mode on non-SELinux systems      |
 
 ---
 
