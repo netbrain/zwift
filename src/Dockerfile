@@ -1,6 +1,6 @@
 ARG DEBIAN_VERSION=trixie
 
-FROM rust:1.94.1-slim AS build-runfromprocess
+FROM rust:1.95.0-slim-trixie AS build-runfromprocess
 
 ARG RUNFROMPROCESS_VERSION=a3d003c07d1bd11ff93c4cac96d2c3aa5deb8471
 
