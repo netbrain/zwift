@@ -9,6 +9,7 @@
 let
   cfg = config.programs.zwift;
   inherit (lib) mkEnableOption mkOption types mkIf;
+  commonOptions = import ./module-options-common.nix { inherit lib; };
 in
 {
   options.programs.zwift = {
@@ -20,21 +21,6 @@ in
       description = "The Zwift package to use.";
     };
 
-    zwiftUsername = mkOption {
-      type = types.str;
-      default = "";
-      description = "Zwift account email for automatic login.";
-    };
-
-    zwiftPassword = mkOption {
-      type = types.str;
-      default = "";
-      description = ''
-        Zwift account password for automatic login.
-        Consider using a secrets management solution instead of storing passwords in your config.
-      '';
-    };
-
     winePrefix = mkOption {
       type = types.str;
       default = "";
@@ -43,68 +29,7 @@ in
         Defaults to ~/.wine-zwift if not specified.
       '';
     };
-
-    zwiftWorkoutDir = mkOption {
-      type = types.str;
-      default = "";
-      description = "Custom directory for Zwift workouts.";
-    };
-
-    zwiftActivityDir = mkOption {
-      type = types.str;
-      default = "";
-      description = "Custom directory for Zwift activities.";
-    };
-
-    zwiftLogDir = mkOption {
-      type = types.str;
-      default = "";
-      description = "Custom directory for Zwift logs.";
-    };
-
-    zwiftScreenshotsDir = mkOption {
-      type = types.str;
-      default = "";
-      description = "Custom directory for Zwift screenshots.";
-    };
-
-    zwiftOverrideGraphics = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Use custom graphics configuration.";
-    };
-
-    zwiftOverrideResolution = mkOption {
-      type = types.str;
-      default = "";
-      example = "1920x1080";
-      description = "Override the Zwift display resolution.";
-    };
-
-    zwiftFg = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Run Zwift in foreground mode.";
-    };
-
-    zwiftNoGameMode = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Disable GameMode integration.";
-    };
-
-    wineExperimentalWayland = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable experimental Wayland support in Wine.";
-    };
-
-    debug = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable debug output.";
-    };
-  };
+  } // commonOptions;
 
   config = mkIf cfg.enable {
     environment.systemPackages = [ cfg.package ];

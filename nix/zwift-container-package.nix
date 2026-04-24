@@ -1,7 +1,4 @@
-{
-  pkgs,
-  zwift-sh,
-  zwift-icon,
+{ pkgs, zwift-sh, zwift-icon,
   image ? "",
   tag ? "",
   dontCheck ? "",
@@ -30,6 +27,7 @@
   privilegedContainer ? "",
 }:
 let
+  common = import ./zwift-common.nix { inherit pkgs; };
   nixosRun = pkgs.writeShellScript "zwift-nixos.sh" ''
     ${pkgs.lib.optionalString (image != "") "export IMAGE=${image}"}
     ${pkgs.lib.optionalString (tag != "") "export VERSION=${tag}"}
@@ -76,26 +74,7 @@ pkgs.stdenv.mkDerivation {
     runHook postInstall
   '';
 
-  desktopItems = [ (pkgs.makeDesktopItem {
-    name = "Zwift";
-    desktopName = "Zwift";
-    genericName = "Zwift";
-    comment = "Zwift Cycling";
-    exec = "zwift";
-    icon = "zwift";
-    terminal = true;
-    type = "Application";
-    startupNotify = true;
-    categories = [ "Game" "Sports" ];
-    keywords = [ "Fitness" "Game" "Cycling" ];
-    startupWMClass = "zwiftapp.exe";
-  }) ];
+  desktopItems = [ common.desktopItem ];
 
-  meta = with pkgs.lib; {
-    description = "Run Zwift on Linux using Docker/Podman containers";
-    homepage = "https://github.com/netbrain/zwift";
-    license = licenses.mit;
-    platforms = [ "x86_64-linux" ];
-    mainProgram = "zwift";
-  };
+  meta = common.makeMeta "Run Zwift on Linux using Docker/Podman containers";
 }

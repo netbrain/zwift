@@ -45,61 +45,9 @@
       };
 
       # Final Zwift package that wraps everything
-      zwift = pkgs.stdenv.mkDerivation {
-        pname = "zwift";
-        version = "0-unstable";
-
-        dontUnpack = true;
-
-        nativeBuildInputs = [ pkgs.copyDesktopItems ];
-
-        installPhase = ''
-          runHook preInstall
-
-          # Install main executable that launches the FHS environment
-          mkdir -p $out/bin
-          cat > $out/bin/zwift << 'EOF'
-          #!/usr/bin/env bash
-          exec ${zwift-fhs}/bin/zwift-fhs -c "zwift-wrapper $*"
-          EOF
-          chmod +x $out/bin/zwift
-
-          # Install zwift-auth helper
-          cat > $out/bin/zwift-auth << 'EOF'
-          #!/usr/bin/env bash
-          exec ${zwift-fhs}/bin/zwift-fhs -c "zwift-auth"
-          EOF
-          chmod +x $out/bin/zwift-auth
-
-          # Install icon
-          install -Dm644 ${./bin/Zwift.svg} \
-                  -T $out/share/icons/hicolor/scalable/apps/zwift.svg
-
-          runHook postInstall
-        '';
-
-        desktopItems = [ (pkgs.makeDesktopItem {
-          name = "Zwift";
-          desktopName = "Zwift";
-          genericName = "Zwift";
-          comment = "Zwift Cycling";
-          exec = "zwift";
-          icon = "zwift";
-          terminal = true;
-          type = "Application";
-          startupNotify = true;
-          categories = [ "Game" "Sports" ];
-          keywords = [ "Fitness" "Game" "Cycling" ];
-          startupWMClass = "zwiftapp.exe";
-        }) ];
-
-        meta = with pkgs.lib; {
-          description = "Run Zwift on Linux natively using Wine";
-          homepage = "https://github.com/netbrain/zwift";
-          license = licenses.mit;
-          platforms = [ "x86_64-linux" ];
-          mainProgram = "zwift";
-        };
+      zwift = import ./nix/zwift-native-package.nix {
+        inherit pkgs zwift-fhs;
+        zwift-icon = ./bin/Zwift.svg;
       };
 
       # Container-based package with all defaults (for nix run .#zwift-container)
