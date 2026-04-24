@@ -102,13 +102,25 @@
         };
       };
 
-      # NixOS module
+      # Container-based package with all defaults (for nix run .#zwift-container)
+      zwift-container = import ./nix/zwift-container-package.nix {
+        inherit pkgs;
+        zwift-sh = ./src/zwift.sh;
+        zwift-icon = ./bin/Zwift.svg;
+      };
+
+      # NixOS modules
       nixosModule = import ./nix/module.nix { zwift-package = zwift; };
+      nixosModuleContainer = import ./nix/module-container.nix {
+        zwift-sh = ./src/zwift.sh;
+        zwift-icon = ./bin/Zwift.svg;
+      };
     in
     {
       # NixOS modules
       nixosModules = {
         zwift = nixosModule;
+        zwift-container = nixosModuleContainer;
         default = nixosModule;
       };
 
@@ -153,7 +165,7 @@
 
       # Packages
       packages.${system} = {
-        inherit runfromprocess zwift-fhs zwift zwift-scripts;
+        inherit runfromprocess zwift-fhs zwift zwift-scripts zwift-container;
         default = zwift;
 
         # Legacy package for compatibility
@@ -181,6 +193,10 @@
         zwift = {
           type = "app";
           program = "${zwift}/bin/zwift";
+        };
+        zwift-container = {
+          type = "app";
+          program = "${zwift-container}/bin/zwift";
         };
         default = self.apps.${system}.zwift;
       };
