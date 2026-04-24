@@ -97,6 +97,7 @@ LABEL org.opencontainers.image.title="netbrain/zwift"
 LABEL org.opencontainers.image.description="Easily zwift on linux"
 LABEL org.opencontainers.image.url="https://github.com/netbrain/zwift"
 
+COPY --chmod=644 lib.sh /bin/lib.sh
 COPY --chmod=755 entrypoint.sh /bin/entrypoint
 COPY --chmod=755 update_zwift.sh /bin/update_zwift.sh
 COPY --chmod=755 run_zwift.sh /bin/run_zwift.sh

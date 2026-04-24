@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly DEBUG="${DEBUG:-0}"
-if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
+# shellcheck source=./lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-readonly ZWIFT_USERNAME="${ZWIFT_USERNAME:?}"
-readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:?}"
+readonly ZWIFT_USERNAME="${ZWIFT_USERNAME:?ZWIFT_USERNAME is required}"
+readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:?ZWIFT_PASSWORD is required}"
 
 readonly LAUNCHER_CLIENT_ID="Game_Launcher"
 readonly LAUNCHER_HOME="https://launcher.zwift.com/launcher"
 readonly ZWIFT_REALM_URL="https://secure.zwift.com/auth/realms/zwift"
-readonly COOKIE="cookie.jar"
+readonly COOKIE="$(mktemp)"
+trap 'rm -f "${COOKIE}"' EXIT
 
 curl -sS "${LAUNCHER_HOME}" --cookie-jar "${COOKIE}"
 request_state="$(grep -oP "OAuth_Token_Request_State\s+\K.*$" "${COOKIE}")"
@@ -40,7 +41,5 @@ auth_token_json="$(curl -sS --cookie "${COOKIE}" --cookie-jar "${COOKIE}" \
     --data-urlencode "grant_type=authorization_code" \
     --data-urlencode "scope=openid" \
     "${ZWIFT_REALM_URL}/protocol/openid-connect/token")"
-
-rm "${COOKIE}"
 
 echo "${auth_token_json}"
