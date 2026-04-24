@@ -18,35 +18,6 @@ WORKDIR /usr/src
 ADD https://github.com/quietvoid/runfromprocess-rs.git#${RUNFROMPROCESS_VERSION} .
 RUN cargo build --target x86_64-pc-windows-gnu --release
 
-FROM debian:${DEBIAN_VERSION}-slim AS build-wine-mono-gecko
-
-# Mono
-# - https://gitlab.winehq.org/wine/wine/-/wikis/Wine-Mono
-# - version depends on wine version!
-# Gecko
-# - https://gitlab.winehq.org/wine/wine/-/wikis/Gecko
-# - version depends on wine version!
-ARG MONO_VERSION=9.1.0
-ARG MONO_CHECKSUM=601169d0203b291fbfd946b356a9538855e01de22abd470ded73baf312c88767
-ARG GECKO_VERSION=2.47.4
-ARG GECKO_CHECKSUM=fd88fc7e537d058d7a8abf0c1ebc90c574892a466de86706a26d254710a82814
-
-# Install prerequisites
-# - xz-utils to extract .tar.xz archives
-RUN DEBIAN_FRONTEND="noninteractive" apt-get update \
- && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
-        xz-utils \
- && rm -rf /var/lib/apt/lists/*
-
-# Download wine mono and gecko
-ADD --checksum=sha256:${MONO_CHECKSUM} https://dl.winehq.org/wine/wine-mono/${MONO_VERSION}/wine-mono-${MONO_VERSION}-x86.tar.xz /tmp/
-ADD --checksum=sha256:${GECKO_CHECKSUM} https://dl.winehq.org/wine/wine-gecko/${GECKO_VERSION}/wine-gecko-${GECKO_VERSION}-x86_64.tar.xz /tmp/
-
-# Extract wine mono and gecko
-RUN mkdir -p /opt/wine/mono /opt/wine/gecko \
- && tar -xJ -C /opt/wine/mono/ -f /tmp/wine-mono-${MONO_VERSION}-x86.tar.xz \
- && tar -xJ -C /opt/wine/gecko/ -f /tmp/wine-gecko-${GECKO_VERSION}-x86_64.tar.xz
-
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 
 # Wine
@@ -56,8 +27,14 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 # Winetricks
 # - 20260125 : webview2 in zwift launcher works
 # - 20240105 : first version used in this Dockerfile
+# Mono
+# - https://gitlab.winehq.org/wine/wine/-/wikis/Wine-Mono
+# - version depends on wine version!
+# Gecko
+# - https://gitlab.winehq.org/wine/wine/-/wikis/Gecko
+# - version depends on wine version!
 ARG DEBIAN_VERSION
-ARG WINE_BRANCH=devel
+ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=20260125
 ARG WINETRICKS_CHECKSUM=431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc45179312a7b
@@ -107,10 +84,6 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
 
 # Download winetricks
 ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks /usr/local/bin/
-
-# Install wine mono and gecko (instead of dotnet framework)
-COPY --from=build-wine-mono-gecko /opt/wine/mono/ /usr/share/wine/mono/
-COPY --from=build-wine-mono-gecko /opt/wine/gecko/ /usr/share/wine/gecko/
 
 # Create passwordless user and make nvidia libraries discoverable
 RUN adduser --disabled-password --gecos '' user \

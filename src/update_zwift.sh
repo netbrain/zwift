@@ -123,6 +123,10 @@ update_zwift_using_launcher() {
 }
 
 install_zwift() {
+    # prevent wine from installing mono and gecko
+    msgbox info "Initializing wine"
+    WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u || return 1
+
     msgbox info "Installing prerequisites using winetricks"
     winetricks -q corefonts dotnet48 d3dcompiler_47 || return 1
 
