@@ -179,6 +179,7 @@ readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
+readonly ZWIFT_NO_PRIVILEGED="${ZWIFT_NO_PRIVILEGED:-0}"
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -207,7 +208,7 @@ parameters_to_print=(
     DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_CHECK DONT_PULL DONT_CLEAN DRYRUN INTERACTIVE
     CONTAINER_EXTRA_ARGS ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR ZWIFT_SCREENSHOTS_DIR
     ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE WINE_EXPERIMENTAL_WAYLAND NETWORKING ZWIFT_UID
-    ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
+    ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER ZWIFT_NO_PRIVILEGED DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
 )
 for parameter_to_print in "${parameters_to_print[@]}"; do
     parameter_print_value="$(declare -p "${parameter_to_print}")"
@@ -239,16 +240,21 @@ check_script_up_to_date() {
 }
 
 upgrade_script() {
-    local install_script
+    local install_script_file
+    install_script_file="$(mktemp -q /tmp/zwift-install.XXXXXXXXXX.sh)" || {
+        msgbox error "Failed to create temporary file for install script"
+        return 1
+    }
+    trap 'rm -f -- "${install_script_file}"' RETURN
 
     msgbox info "Downloading latest install script"
-    if ! install_script="$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"; then
+    if ! curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh -o "${install_script_file}"; then
         msgbox error "Failed to download install script"
         return 1
     fi
 
-    msgbox info "Running install script"
-    if ! pkexec env PATH="${PATH}" bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}"; then
+    msgbox info "Running install script (inspect ${install_script_file} before proceeding)"
+    if ! pkexec env PATH="${PATH}" bash "${install_script_file}" -- --script-version="${SCRIPT_VERSION}"; then
         msgbox error "Install script failed"
         return 1
     fi
@@ -485,6 +491,8 @@ if [[ ${PRIVILEGED_CONTAINER} -eq 1 ]]; then
 elif is_selinux_active; then
     msgbox info "SELinux is active, using secure container flags"
     container_args+=(--security-opt label=type:container_runtime_t)
+elif [[ ${ZWIFT_NO_PRIVILEGED} -eq 1 ]]; then
+    msgbox info "ZWIFT_NO_PRIVILEGED is set, running without privileged mode"
 else
     msgbox warning "Not using SELinux, running container in privileged mode to be able to access the GPU"
     container_args+=(--privileged --security-opt label=disable)

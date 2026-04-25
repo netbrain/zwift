@@ -39,7 +39,6 @@ ARG WINETRICKS_VERSION=20240105
 # - libegl1 and libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
-# - sudo for normal user installation
 # - wget for downloading winehq key
 # - winbind for ntml_auth required by zwift/wine
 # - xdg-utils seems to be a dependency of wayland
@@ -54,7 +53,6 @@ RUN dpkg --add-architecture i386 \
         libgl1 \
         libvulkan1 \
         procps \
-        sudo \
         wget \
         winbind \
         xdg-utils \
@@ -74,10 +72,8 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
  && wget -qO /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
  && chmod +x /usr/local/bin/winetricks
 
-# Create passwordless user and make nvidia libraries discoverable
+# Create user and make nvidia libraries discoverable
 RUN adduser --disabled-password --gecos '' user \
- && adduser user sudo \
- && echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
