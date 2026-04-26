@@ -32,16 +32,8 @@ msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
     local msg="${2:?}"  # Message: the message to display
 
-    make_timestamp() {
-        if [[ ${VERBOSITY} -ge 2 ]]; then
-            printf '%(%T)T|' -1
-        else
-            printf ''
-        fi
-    }
-
-    local timestamp
-    timestamp="$(make_timestamp)"
+    local timestamp=""
+    [[ ${VERBOSITY} -ge 2 ]] && printf -v timestamp '%(%T)T|' -1
 
     case ${type} in
         info) [[ ${VERBOSITY} -ge 1 ]] && echo -e "${COLOR_BLUE}[${CONTAINER_TOOL}|${timestamp}*] ${msg}${RESET_STYLE}" ;;
@@ -51,6 +43,16 @@ msgbox() {
         debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${CONTAINER_TOOL}|${timestamp}◉] ${msg}${RESET_STYLE}" ;;
         *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
+}
+
+wine_task_info() {
+    local task_name="${1:?}"
+    wine tasklist /fo list /fi "IMAGENAME eq ${task_name}"
+}
+
+is_wine_task_running() {
+    local task_name="${1:?}"
+    [[ -n $(wine_task_info "${task_name}" || true) ]]
 }
 
 get_current_version() {
@@ -67,7 +69,7 @@ get_current_version() {
 }
 
 get_latest_version() {
-    wget --no-cache --quiet -O - http://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
+    wget --no-cache --quiet -O - https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml \
         | grep -oP 'sversion="\K.*?(?=")' | cut -f 1 -d ' ' \
         || return 1
 }
@@ -97,12 +99,9 @@ update_zwift_using_launcher() {
 
     local counter=1
     local max_iterations=60 # 60 * 5s = 5 minutes max
+
     # also stop if launcher exits before update finishes, so we don't hang forever
-    while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && pgrep -f ZwiftLauncher.exe > /dev/null 2>&1; do
-        if [[ ${counter} -gt ${max_iterations} ]]; then
-            msgbox error "Update timed out after $((max_iterations * 5)) seconds"
-            return 1
-        fi
+    while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && [[ ${counter} -le ${max_iterations} ]] && is_wine_task_running ZwiftLauncher.exe; do
         msgbox info "Updating Zwift... (${counter}/${max_iterations})"
         msgbox debug "Current version: ${zwift_current_version}; Latest version: ${zwift_latest_version}"
         sleep 5
@@ -110,43 +109,34 @@ update_zwift_using_launcher() {
         ((counter++))
     done
 
-    # if launcher exited unexpectedly, Zwift is still at the old version
+    # if launcher exited unexpectedly or update timeout, Zwift is still at the old version
     if [[ ${zwift_current_version} != "${zwift_latest_version}" ]]; then
-        msgbox error "Launcher exited unexpectedly, update did not complete"
+        if [[ ${counter} -gt ${max_iterations} ]]; then
+            msgbox error "Update timed out after $((counter * 5)) seconds"
+        else
+            msgbox error "Launcher exited unexpectedly, update did not complete"
+        fi
         return 1
     fi
-
-    local i
-    for i in $(seq 5 -1 1); do
-        msgbox info "Waiting for update to finish... (${i})"
-        sleep 1
-    done
 
     msgbox ok "Zwift updated to version ${zwift_latest_version}"
 }
 
 install_zwift() {
-    # prevent wine from trying to install a different mono version
-    msgbox info "Starting wine with custom mono version"
+    # prevent wine from installing mono and gecko
+    msgbox info "Initializing wine"
     WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u || return 1
 
-    # install prerequisites using winetricks
-    # dotnet20: to prevent error dialog with CloseLauncher.exe
-    # dotnet48: required by Zwift
-    # d3dcompiler_47: required for Vulkan shaders
     msgbox info "Installing prerequisites using winetricks"
-    winetricks -q dotnet20 dotnet48 d3dcompiler_47 || return 1
+    winetricks -q corefonts dotnet48 d3dcompiler_47 || return 1
 
-    # download and install webview 2
     msgbox info "Downloading and installing webview2"
     wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
     wine webview2-setup.exe /silent /install || return 1
 
-    # enable Wayland support, requires DISPLAY to be blank to use Wayland
     msgbox info "Enabling Wayland support"
     wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland || return 1
 
-    # download and install zwift
     msgbox info "Downloading and installing Zwift"
     wget https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
     wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1

@@ -128,6 +128,9 @@ podman build -t zwift:dev .
 
 # Or use the build script
 ./build-image.sh
+
+# Or only update the scripts if you already built the imgage
+./update-image.sh
 ```
 
 ## Testing Changes

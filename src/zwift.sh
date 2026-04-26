@@ -47,16 +47,9 @@ msgbox() {
     local msg="${2:?}"     # Message: the message to display
     local timeout="${3:-}" # Optional timeout: if explicitly set to 0, wait for user input to continue
 
-    make_timestamp() {
-        if [[ ${VERBOSITY} -ge 2 ]]; then
-            printf '%(%T)T|' -1
-        else
-            printf ''
-        fi
-    }
-
-    local timestamp
-    timestamp="$(make_timestamp)"
+    local timestamp=""
+    update_timestamp() { [[ ${VERBOSITY} -ge 2 ]] && printf -v timestamp '%(%T)T|' -1; }
+    update_timestamp
 
     case ${type} in
         info) [[ ${VERBOSITY} -ge 1 ]] && echo -e "${COLOR_BLUE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
@@ -67,7 +60,7 @@ msgbox() {
             local ans=""
             if [[ -n ${timeout} ]] && [[ ${timeout} -gt 0 ]]; then
                 while [[ ${timeout} -gt 0 ]]; do
-                    timestamp="$(make_timestamp)"
+                    update_timestamp
                     echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
                     read -rt 1 -n 1 ans
                     if [[ -n ${ans} ]]; then
@@ -93,7 +86,7 @@ msgbox() {
     if [[ -n ${timeout} ]]; then
         if [[ ${timeout} -gt 0 ]]; then
             while [[ ${timeout} -gt 0 ]]; do
-                timestamp="$(make_timestamp)"
+                update_timestamp
                 echo -e "${COLOR_BLUE}[${timestamp}*] Continuing in ${timeout} seconds...${RESET_STYLE}"
                 sleep 1
                 ((timeout--))

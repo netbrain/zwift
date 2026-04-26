@@ -1,83 +1,86 @@
 ARG DEBIAN_VERSION=trixie
 
-FROM rust:1.90-slim AS build-runfromprocess
+FROM rust:1.95.0-slim-trixie AS build-runfromprocess
+
+ARG RUNFROMPROCESS_VERSION=a3d003c07d1bd11ff93c4cac96d2c3aa5deb8471
 
 # Install prerequisites
 # - mingw to cross-compile for windows
-# - git to fetch runfromprocess source code
 # - rust cross-compiler for windows
-RUN apt-get update \
- && apt-get install --no-install-recommends -y \
+RUN DEBIAN_FRONTEND="noninteractive" apt-get update \
+ && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
         g++-mingw-w64-x86-64 \
-        git \
  && rm -rf /var/lib/apt/lists/* \
  && rustup target add x86_64-pc-windows-gnu
 
 # Build runfromprocess
 WORKDIR /usr/src
-RUN git clone https://github.com/quietvoid/runfromprocess-rs . \
- && git checkout d8754035b1b8a38f96ec6806a772a944ef5396c0 \
- && cargo build --target x86_64-pc-windows-gnu --release
+ADD https://github.com/quietvoid/runfromprocess-rs.git#${RUNFROMPROCESS_VERSION} .
+RUN cargo build --target x86_64-pc-windows-gnu --release
 
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 
-# As at May 2024 Wayland Native works wine 9.9 or later:
-#    WINE_BRANCH="devel"
-# For Specific version fix add WINE_VERSION,
-# make sure to add "=" to the start, comment out for latest
-#    WINE_VERSION="=9.9~bookworm-1"
+# Wine
+# - 11.0     : support 32-bit applications through wow64
+# - 10.17    : default to egl for opengl in x11
+# - 9.9      : support native wayland
+# Winetricks
+# - 20260125 : webview2 in zwift launcher works
+# - 20240105 : first version used in this Dockerfile
 ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
-ARG WINETRICKS_VERSION=20240105
+ARG WINETRICKS_VERSION=20260125
+ARG WINETRICKS_CHECKSUM=431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc45179312a7b
 
 # Install prerequisites
 # - ca-certificates for wget and curl
+# - cabextract for winetricks
 # - curl used in zwift authentication script
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
 # - libegl1 and libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
-# - sudo for normal user installation
 # - wget for downloading winehq key
 # - winbind for ntml_auth required by zwift/wine
 # - xdg-utils seems to be a dependency of wayland
 RUN dpkg --add-architecture i386 \
- && apt-get update \
- && apt-get install --no-install-recommends -y \
+ && DEBIAN_FRONTEND="noninteractive" apt-get update \
+ && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
         ca-certificates \
+        cabextract \
         curl \
         gamemode \
         gosu \
         libegl1 \
         libgl1 \
+        libgamemode0.i386 \
+        libgamemodeauto0.i386 \
         libvulkan1 \
         procps \
-        sudo \
         wget \
         winbind \
         xdg-utils \
  && rm -rf /var/lib/apt/lists/*
 
-# Install wine and winetricks (including recommends, which appear to be required)
+# Install wine (including recommends, which appear to be required)
 # hadolint ignore=DL3015
 RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds/winehq.key \
  && echo "deb https://dl.winehq.org/wine-builds/debian/ ${DEBIAN_VERSION} main" > /etc/apt/sources.list.d/winehq.list \
- && apt-get update \
- && apt-get install -y \
+ && DEBIAN_FRONTEND="noninteractive" apt-get update \
+ && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
         wine-${WINE_BRANCH}${WINE_VERSION} \
         wine-${WINE_BRANCH}-amd64${WINE_VERSION} \
         wine-${WINE_BRANCH}-i386${WINE_VERSION} \
         winehq-${WINE_BRANCH}${WINE_VERSION} \
- && rm -rf /var/lib/apt/lists/* \
- && wget -qO /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks \
- && chmod +x /usr/local/bin/winetricks
+ && rm -rf /var/lib/apt/lists/*
+
+# Download winetricks
+ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks /usr/local/bin/
 
 # Create passwordless user and make nvidia libraries discoverable
 RUN adduser --disabled-password --gecos '' user \
- && adduser user sudo \
- && echo '%SUDO ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
@@ -102,6 +105,6 @@ COPY --chmod=755 entrypoint.sh /bin/entrypoint
 COPY --chmod=755 update_zwift.sh /bin/update_zwift.sh
 COPY --chmod=755 run_zwift.sh /bin/run_zwift.sh
 COPY --chmod=755 zwift-auth.sh /bin/zwift-auth
-COPY --chmod=755 --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/runfromprocess-rs.exe /bin/runfromprocess-rs.exe
+COPY --from=build-runfromprocess /usr/src/target/x86_64-pc-windows-gnu/release/runfromprocess-rs.exe /bin/runfromprocess-rs.exe
 
 ENTRYPOINT ["entrypoint"]
