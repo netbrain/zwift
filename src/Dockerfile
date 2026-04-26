@@ -27,12 +27,6 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 # Winetricks
 # - 20260125 : webview2 in zwift launcher works
 # - 20240105 : first version used in this Dockerfile
-# Mono
-# - https://gitlab.winehq.org/wine/wine/-/wikis/Wine-Mono
-# - version depends on wine version!
-# Gecko
-# - https://gitlab.winehq.org/wine/wine/-/wikis/Gecko
-# - version depends on wine version!
 ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
