@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly DEBUG="${DEBUG:-0}"
-if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
+# shellcheck source=./lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 readonly ZWIFT_USERNAME="${ZWIFT_USERNAME:?}"
 readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:?}"
