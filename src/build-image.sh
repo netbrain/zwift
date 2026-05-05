@@ -32,16 +32,8 @@ msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
     local msg="${2:?}"  # Message: the message to display
 
-    make_timestamp() {
-        if [[ ${VERBOSITY} -ge 2 ]]; then
-            printf '%(%T)T|' -1
-        else
-            printf ''
-        fi
-    }
-
-    local timestamp
-    timestamp="$(make_timestamp)"
+    local timestamp=""
+    [[ ${VERBOSITY} -ge 2 ]] && printf -v timestamp '%(%T)T|' -1
 
     case ${type} in
         info) [[ ${VERBOSITY} -ge 1 ]] && echo -e "${COLOR_BLUE}[${timestamp}*] ${msg}${RESET_STYLE}" ;;
@@ -188,7 +180,7 @@ msgbox info "Building image ${IMAGE}"
 if ${CONTAINER_TOOL} build --force-rm -t "${BUILD_NAME}" "${SCRIPT_DIR}"; then
     msgbox ok "Successfully built image ${IMAGE}"
 else
-    msgbox error "Failed to build image"
+    msgbox error "Failed to build image! 😭"
     exit 1
 fi
 
@@ -196,7 +188,7 @@ msgbox info "Launching temporary container to install Zwift"
 if ${CONTAINER_TOOL} run "${container_args[@]}" "${IMAGE}:latest" "${@}"; then
     msgbox ok "Successfully installed Zwift in container"
 else
-    msgbox error "Failed to start container"
+    msgbox error "Failed to install Zwift in container! 😭"
     exit 1
 fi
 
@@ -204,11 +196,13 @@ msgbox info "Updating image with changes from temporary container"
 if ${CONTAINER_TOOL} commit zwift "${BUILD_NAME}:latest"; then
     msgbox ok "Tagged Zwift container as ${IMAGE}:latest"
 else
-    msgbox error "Failed to commit container changes to image"
+    msgbox error "Failed to commit container changes to image! 😭"
     exit 1
 fi
 
 cleanup
+
+msgbox ok "Successfully created Zwift container image ${IMAGE}:latest! 🥳"
 
 ########################
 ##### Launch Zwift #####
