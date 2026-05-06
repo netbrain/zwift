@@ -133,8 +133,8 @@ if [[ -n ${ZWIFT_USERNAME} ]] && [[ -n ${ZWIFT_PASSWORD} ]]; then
     fi
 fi
 
-######################################################
-##### Start (and automatically stop) wine server #####
+##########################################
+##### Automatically stop wine server #####
 
 cleanup() {
     msgbox info "Stopping wine server"
@@ -142,21 +142,6 @@ cleanup() {
 }
 
 trap cleanup EXIT
-
-if [[ ${ZWIFT_NO_GAMEMODE} -eq 1 ]]; then
-    msgbox warning "Not using gamemode"
-else
-    msgbox info "Starting wine server in gamemode"
-
-    /usr/games/gamemoderun wineserver -w &
-
-    if wait_until_process_started wineserver; then
-        msgbox ok "Started wine server"
-    else
-        msgbox error "Failed to start wine server!"
-        exit 1
-    fi
-fi
 
 ##################################
 ##### Start Zwift using wine #####
@@ -189,10 +174,17 @@ fi
 msgbox ok "Zwift launcher started using wine"
 msgbox info "Starting Zwift using wine"
 
-declare -a wine_cmd
-wine_cmd=(wine start /exec /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe "${zwift_args[@]}")
+declare -a zwift_cmd
 
-if ! "${wine_cmd[@]}" || ! wait_until_wine_task_started ZwiftApp.exe; then
+if [[ ${ZWIFT_NO_GAMEMODE} -eq 1 ]]; then
+    msgbox info "Not using gamemode"
+    zwift_cmd=(wine start /exec /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe "${zwift_args[@]}")
+else
+    msgbox info "Using gamemode"
+    zwift_cmd=(/usr/games/gamemoderun wine /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe "${zwift_args[@]}")
+fi
+
+if ! "${zwift_cmd[@]}" || ! wait_until_wine_task_started ZwiftApp.exe; then
     msgbox error "Failed to start Zwift using wine!"
     exit 1
 fi
