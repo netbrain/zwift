@@ -93,12 +93,6 @@ wait_until_wine_task_started() {
     wait_until "is_wine_task_running ${task_name}"
 }
 
-wait_until_process_started() {
-    local process_name="${1:?}"
-    msgbox info "Waiting for ${process_name} to start..."
-    wait_until "pgrep -f ${process_name} > /dev/null 2>&1"
-}
-
 ###########################
 ##### Configure Zwift #####
 
