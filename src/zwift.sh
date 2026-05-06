@@ -448,8 +448,13 @@ if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
     container_env_vars+=(ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION}")
 fi
 
-# Pass environment variable to container if gamemode should be disabled
+# Check if gamemode should be enabled
 if [[ ${ZWIFT_NO_GAMEMODE} -eq 1 ]]; then
+    container_env_vars+=(ZWIFT_NO_GAMEMODE="1")
+elif command_exists gamemoded; then
+    msgbox ok "Gamemode is installed, enabling gamemode for Zwift"
+else
+    msgbox info "Gamemode is not installed, disabling gamemode for Zwift"
     container_env_vars+=(ZWIFT_NO_GAMEMODE="1")
 fi
 
