@@ -30,7 +30,8 @@ foo@bar:~$ WINE_EXPERIMENTAL_WAYLAND="1" zwift # start zwift using Wayland inste
 
 ### Configuration file
 
-The zwift script automatically loads environment variables from the following configuration files:
+You can persist configuration options by creating a file. The zwift script will automatically load environment variables from
+these files, if present:
 
 - `$HOME/.config/zwift/config`
 - `$HOME/.config/zwift/$USER-config`
