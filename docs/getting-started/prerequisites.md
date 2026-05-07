@@ -18,32 +18,32 @@ nav_order: 1
 
 ## Required Software
 
-### Container Runtimes
+### Supported Container Runtimes
 
-- **Docker**
-  - Install from [Docker documentation](https://docs.docker.com/get-docker/)
-- **Podman** (Alternative)
-  - Version 4.3+ recommended
-  - Install from [Podman installation guide](https://podman.io/getting-started/installation)
+#### Podman (Recommended)
 
-{: .warning }
-**Podman 4.3 and earlier**: Does not support `--userns=keep-id:uid=xxx,gid=xxx` and will not start correctly, this impacts
-Ubuntu 22.04 and related builds such as PopOS! 22.04.
+- Install by following the [Podman install guide](https://podman.io/docs/installation#installing-on-linux)
+- Podman 4.3 and earlier do not support `--userns=keep-id` and will not start correctly. This impacts Ubuntu 22.04 and related
+  builds such as PopOS! 22.04.
+
+#### Docker
+
+- Rootless docker is not supported!
+- Install by following the [Docker CE install guide](https://docs.docker.com/engine/install/)
+- Add your user account to the docker group to be able to use docker without requiring sudo `sudo usermod -aG docker $USER`.
 
 ### Additional Dependencies for NVIDIA graphics cards
 
-- **NVIDIA Container Toolkit**
-  - Install from [NVIDIA Container Toolkit installation guide](
-    https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
-  - Podman: Also follow the [Container Device Interface guide](
-    https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html)
+#### NVIDIA Container Toolkit
 
-{: .note }
-**Podman and NVIDIA Container Toolkit before v1.18.0**: The cdi specification file needs to be generated manually each time the
-NVIDIA driver is updated using the following command: `sudo nvidia-ctk cdi generate --output=/var/run/cdi/nvidia.yaml`
+- Install by following the [NVIDIA Container Toolkit installation guide][install-nvctk]
+- Podman
+  - Also follow the [Container Device Interface guide][install-nvcdi]
+  - Container Toolkit version v1.17.9 and earlier do not automatically update the cdi specification file. Regenerate it manually
+    after NVIDIA driver updates by running the command: `sudo nvidia-ctk cdi generate --output=/var/run/cdi/nvidia.yaml`.
+- Docker
+  - If Zwift fails to launch, try setting `VGA_DEVICE_FLAG=(--device="nvidia.com/gpu=all")`. See
+    [this issue](https://github.com/netbrain/zwift/issues/208) for context.
 
-{: .note }
-> If you're running Docker with cdi and Zwift fails to launch, try the long form
-> `VGA_DEVICE_FLAG=(--device="nvidia.com/gpu=all")` (instead of `--gpus=all`).
->
-> See <https://github.com/netbrain/zwift/issues/208> for context.
+[install-nvctk]: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+[install-nvcdi]: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html
