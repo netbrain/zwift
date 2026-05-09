@@ -23,6 +23,16 @@ and give me a ride on from time to time.
 
 ![example.gif](https://raw.githubusercontent.com/netbrain/zwift/master/docs/assets/images/example.gif)
 
+<!-- cSpell:disable -->
+<!--
+example.gif is created from example.mp4 using ffmpeg
+
+foo@bar:~$ ffmpeg -i example.mp4 -vf "setpts=0.75*PTS,fps=10,scale=720:-1:flags=lanczos,palettegen" -y palette.png
+foo@bar:~$ ffmpeg -i example.mp4 -i palette.png -filter_complex \
+                  "setpts=0.75*PTS,fps=10,scale=720:-1:flags=lanczos[x];[x][1:v]paletteuse" -y example.gif
+-->
+<!-- cSpell:enable -->
+
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker) or
