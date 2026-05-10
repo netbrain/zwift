@@ -24,7 +24,7 @@ foo@bar:~$ INTERACTIVE="1" zwift # run in the foreground and set entrypoint to b
 foo@bar:~$ CONTAINER_TOOL="docker" zwift # launch zwift with docker even if podman is installed
 foo@bar:~$ CONTAINER_EXTRA_ARGS="--cpus=1.5" zwift # pass --cpus=1.5 to docker/podman
 foo@bar:~$ USER="fred" zwift # perfect if your neighbor Fred wants to try zwift
-foo@bar:~$ NETWORKING="host" zwift # use host networking which is needed for wifi enabled trainers
+foo@bar:~$ NETWORKING="host" zwift # use host networking which is needed for Wi-Fi enabled trainers
 foo@bar:~$ WINE_EXPERIMENTAL_WAYLAND="1" zwift # start zwift using Wayland instead of XWayland
 ```
 
