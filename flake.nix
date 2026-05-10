@@ -30,8 +30,6 @@
           zwiftNoGameMode,
           wineExperimentalWayland,
           networking,
-          zwiftUid,
-          zwiftGid,
           vgaDeviceFlag,
           debug,
           verbosity,
@@ -77,8 +75,6 @@
               wineExperimentalWayland != ""
             ) "export WINE_EXPERIMENTAL_WAYLAND=${wineExperimentalWayland}"}
             ${pkgs.lib.optionalString (networking != "") "export NETWORKING='${networking}'"}
-            ${pkgs.lib.optionalString (zwiftUid != "") "export ZWIFT_UID='${zwiftUid}'"}
-            ${pkgs.lib.optionalString (zwiftGid != "") "export ZWIFT_GID='${zwiftGid}'"}
             ${pkgs.lib.optionalString (debug != "") "export DEBUG=${debug}"}
             ${pkgs.lib.optionalString (verbosity != "") "export VERBOSITY='${verbosity}'"}
             ${pkgs.lib.optionalString (vgaDeviceFlag != "") "export VGA_DEVICE_FLAG='${vgaDeviceFlag}'"}
@@ -201,14 +197,6 @@
                 type = str;
                 default = "";
               };
-              zwiftUid = mkOption {
-                type = str;
-                default = "";
-              };
-              zwiftGid = mkOption {
-                type = str;
-                default = "";
-              };
               vgaDeviceFlag = mkOption {
                 type = str;
                 default = "";
@@ -250,8 +238,6 @@
                       zwiftScreenshotsDir
                       zwiftOverrideResolution
                       networking
-                      zwiftUid
-                      zwiftGid
                       vgaDeviceFlag
                       verbosity
                       ;
