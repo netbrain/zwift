@@ -25,6 +25,9 @@ bluetooth devices to Zwift.
 For example, your Wahoo Kickr and Apple Watch connect to the Zwift Companion app on your iPhone, then the Companion app connects
 over Wi-Fi to your PC running Zwift.
 
+If you are having troubles trying to get Zwift to connect to the Zwift Companion app, read
+[Wi-Fi Device Not Detected](../../troubleshooting/wifi-devices).
+
 ![Zwift Pairing Companion App](/assets/images/zwift-pairing-companion-scaled.png)
 ![Companion App Pairing](/assets/images/companion-pairing-scaled.png)
 
@@ -43,6 +46,9 @@ as a bluetooth bridge are the [Wahoo Kickr Core 2 and Wahoo Kickr Bike Pro][waho
 
 For example, your heart rate monitor and Zwift Ride controllers connect to your Kickr Core 2 over bluetooth, then the Kickr Core
 2 connects over Wi-Fi to your PC running Zwift.
+
+If you are having troubles trying to get Zwift to connect to the Zwift Companion app or discover your direct connect enabled
+trainer, read [Wi-Fi Device Not Detected](../../troubleshooting/wifi-devices).
 
 [wahoo-trainer-bridge]: https://support.wahoofitness.com/hc/en-us/articles/28126062260370-How-to-use-the-KICKR-Bridge
 [zwift-trainer-bridge]: https://support.zwift.com/en_us/using-your-trainer-as-a-bridge-rJ1JwU6Ee
