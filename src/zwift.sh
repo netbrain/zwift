@@ -250,7 +250,7 @@ upgrade_script() {
 
     msgbox info "Running install script"
 
-    install_cmd=(bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}")
+    install_cmd=(bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}" --auto-confirm)
     if installed_as_root; then
         install_cmd=(pkexec env PATH="${PATH}" "${install_cmd[@]}")
     fi
