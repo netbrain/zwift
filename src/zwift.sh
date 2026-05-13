@@ -60,6 +60,7 @@ msgbox() {
         warning) echo -e "${COLOR_YELLOW}[${timestamp}!] ${msg}${RESET_STYLE}" ;;
         error) echo -e "${COLOR_RED}[${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
+            [[ ${INTERACTIVE_TERMINAL} -eq 0 ]] && return 0
             local ans=""
             if [[ -n ${timeout} ]] && [[ ${timeout} -gt 0 ]]; then
                 while [[ ${timeout} -gt 0 ]]; do
@@ -86,7 +87,7 @@ msgbox() {
         *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
 
-    if [[ -n ${timeout} ]]; then
+    if [[ -n ${timeout} ]] && [[ ${INTERACTIVE_TERMINAL} -eq 1 ]]; then
         if [[ ${timeout} -gt 0 ]]; then
             while [[ ${timeout} -gt 0 ]]; do
                 update_timestamp
