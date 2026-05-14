@@ -128,7 +128,7 @@ uninstall_netbrain_zwift() {
 
         msgbox info "  Removing ${file}"
 
-        if ! rm -f -- "${file}"; then
+        if ! rm -- "${file}" > /dev/null 2>&1; then
             msgbox warning "  Failed to remove ${file}"
         fi
     }
