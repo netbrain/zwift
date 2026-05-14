@@ -22,10 +22,18 @@ else
 fi
 
 readonly VERBOSITY="${VERBOSITY:-1}"
-readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
+readonly CONTAINER_TOOL="${CONTAINER_TOOL:-}"
 
-readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
-readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
+if [[ -n ${CONTAINER_TOOL} ]]; then
+    readonly WINEPREFIX="/home/user/.wine"
+    readonly WINE_USER_HOME="${WINEPREFIX}/drive_c/users/user"
+else
+    readonly WINEPREFIX="${WINEPREFIX:-${HOME}/.wine-zwift}"
+    readonly WINE_USER_HOME="${WINEPREFIX}/drive_c/users/${USER}"
+    export WINEPREFIX
+    export WINEARCH=win64
+fi
+readonly ZWIFT_HOME="${WINEPREFIX}/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 
 msgbox() {
@@ -35,12 +43,17 @@ msgbox() {
     local timestamp=""
     [[ ${VERBOSITY} -ge 2 ]] && printf -v timestamp '%(%T)T|' -1
 
+    local prefix="${timestamp}"
+    if [[ -n ${CONTAINER_TOOL} ]]; then
+        prefix="${CONTAINER_TOOL}|${timestamp}"
+    fi
+
     case ${type} in
-        info) [[ ${VERBOSITY} -ge 1 ]] && echo -e "${COLOR_BLUE}[${CONTAINER_TOOL}|${timestamp}*] ${msg}${RESET_STYLE}" ;;
-        ok) echo -e "${COLOR_GREEN}[${CONTAINER_TOOL}|${timestamp}✓] ${msg}${RESET_STYLE}" ;;
-        warning) echo -e "${COLOR_YELLOW}[${CONTAINER_TOOL}|${timestamp}!] ${msg}${RESET_STYLE}" ;;
-        error) echo -e "${COLOR_RED}[${CONTAINER_TOOL}|${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
-        debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${CONTAINER_TOOL}|${timestamp}◉] ${msg}${RESET_STYLE}" ;;
+        info) [[ ${VERBOSITY} -ge 1 ]] && echo -e "${COLOR_BLUE}[${prefix}*] ${msg}${RESET_STYLE}" ;;
+        ok) echo -e "${COLOR_GREEN}[${prefix}✓] ${msg}${RESET_STYLE}" ;;
+        warning) echo -e "${COLOR_YELLOW}[${prefix}!] ${msg}${RESET_STYLE}" ;;
+        error) echo -e "${COLOR_RED}[${prefix}✗] ${msg}${RESET_STYLE}" >&2 ;;
+        debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${prefix}◉] ${msg}${RESET_STYLE}" ;;
         *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
 }
@@ -157,14 +170,16 @@ cleanup() {
     msgbox info "Stopping wine server"
     wineserver -k || true # important, Zwift launcher won't stop until wine server is killed
 
-    msgbox info "Removing installation artifacts"
-    # remove downloads and cache
-    rm -- "${ZWIFT_HOME}/ZwiftSetup.exe" || true
-    rm -- "${ZWIFT_HOME}/webview2-setup.exe" || true
-    rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
-    rm -rf -- "/home/user/.cache/wine*" || true
-    # remove Zwift documents because it causes permission errors with podman
-    rm -rf -- "${ZWIFT_DOCS}" || true
+    if [[ -n ${CONTAINER_TOOL} ]]; then
+        msgbox info "Removing installation artifacts"
+        # remove downloads and cache
+        rm -- "${ZWIFT_HOME}/ZwiftSetup.exe" || true
+        rm -- "${ZWIFT_HOME}/webview2-setup.exe" || true
+        rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
+        rm -rf -- "/home/user/.cache/wine*" || true
+        # remove Zwift documents because it causes permission errors with podman
+        rm -rf -- "${ZWIFT_DOCS}" || true
+    fi
 }
 
 trap cleanup EXIT
