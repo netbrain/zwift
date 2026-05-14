@@ -69,6 +69,7 @@ readonly ZWIFT_LOGO="https://raw.githubusercontent.com/netbrain/zwift/master/bin
 readonly ZWIFT_DESKTOP_ENTRY="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.desktop"
 
 if [[ -t 1 ]]; then
+    readonly INTERACTIVE_TERMINAL=1
     readonly COLOR_WHITE="\033[0;37m"
     readonly COLOR_RED="\033[0;31m"
     readonly COLOR_GREEN="\033[0;32m"
@@ -78,6 +79,7 @@ if [[ -t 1 ]]; then
     readonly STYLE_UNDERLINE="\033[4m"
     readonly RESET_STYLE="\033[0m"
 else
+    readonly INTERACTIVE_TERMINAL=0
     readonly COLOR_WHITE=""
     readonly COLOR_RED=""
     readonly COLOR_GREEN=""
@@ -274,6 +276,11 @@ install_netbrain_zwift() {
 
 echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
 echo -e "${COLOR_YELLOW}[!] ${STYLE_UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
+
+if [[ ${INTERACTIVE_TERMINAL} -eq 0 ]] && [[ ${auto_confirm} -eq 0 ]]; then
+    msgbox warning "Detected non-interactive environment, enabling auto-confirm"
+    auto_confirm=1
+fi
 
 if [[ ${uninstall} -eq 1 ]]; then
     uninstall_netbrain_zwift
