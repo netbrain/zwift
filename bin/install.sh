@@ -5,15 +5,29 @@ readonly DEBUG="${DEBUG:-0}"
 if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 
 print_usage() {
-    echo "Usage: install [ -v | --script-version COMMIT_HASH ]"
-    echo "               [ -y | --auto-confirm ]"
-    echo "               [ -h | --help ]"
+    echo "Install or uninstall netbrain/zwift"
+    echo "Invoking this script with sudo will perform a system wide install"
+    echo "Invoking this script without sudo will perform a user local install"
+    echo ""
+    echo "Usage:"
+    echo "    ${0} [ -v | --script-version COMMIT_HASH ]"
+    echo "    ${0//?/ } [ -y | --auto-confirm ]"
+    echo "    ${0//?/ } [ -u | --uninstall ] "
+    echo "    ${0//?/ } [ -h | --help ]"
+    echo ""
+    echo "Options:"
+    echo "    --script-version COMMIT_HASH    Install a specific netbrain/zwift version instead of master"
+    echo "    --auto-confirm                  Automatically confirm installation"
+    echo "    --uninstall                     Uninstall netbrain/zwift"
+    echo "    --help                          Print usage"
     exit 2
 }
 
+script_args=("${@}")
 script_version="master"
 auto_confirm=0
-if ! options="$(getopt -n install -o "v:yh" -l "script-version:,auto-confirm,help" -- "${@}")"; then
+uninstall=0
+if ! options="$(getopt -n install -o "v:yuh" -l "script-version:,auto-confirm,uninstall,help" -- "${@}")"; then
     print_usage
 fi
 eval set -- "${options}"
@@ -25,6 +39,10 @@ while :; do
             ;;
         -y | --auto-confirm)
             auto_confirm=1
+            shift
+            ;;
+        -u | --uninstall)
+            uninstall=1
             shift
             ;;
         -h | --help)
@@ -42,6 +60,10 @@ while :; do
 done
 
 readonly VERBOSITY="${VERBOSITY:-1}"
+readonly SYSTEM_BIN_DIR="/usr/local/bin"
+readonly SYSTEM_SHARE_DIR="/usr/local/share"
+readonly USER_BIN_DIR="${XDG_BIN_HOME:-${HOME}/.local/bin}"
+readonly USER_SHARE_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}"
 readonly ZWIFT_SCRIPT="https://raw.githubusercontent.com/netbrain/zwift/${script_version}/src/zwift.sh"
 readonly ZWIFT_LOGO="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.svg"
 readonly ZWIFT_DESKTOP_ENTRY="https://raw.githubusercontent.com/netbrain/zwift/master/bin/Zwift.desktop"
@@ -94,105 +116,167 @@ msgbox() {
     esac
 }
 
-exit_failure() {
-    msgbox error "Zwift install failed! 😭"
-    exit 1
+invoked_as_root() {
+    [[ ${EUID} -eq 0 ]]
 }
 
-determine_install_location() {
-    if [[ ${EUID} -eq 0 ]]; then
-        root_bin="/usr/local/bin"
-        root_share="/usr/local/share"
-    else
-        # user install
-        root_bin="${XDG_BIN_HOME:-${HOME}/.local/bin}"
-        root_share="${XDG_DATA_HOME:-${HOME}/.local/share}"
-    fi
+uninstall_netbrain_zwift() {
+    remove_file() {
+        local file="${1:?}"
 
-    msgbox info "Installing Zwift to:"
-    msgbox info "  binaries → ${root_bin}"
-    msgbox info "  data     → ${root_share}"
-}
+        msgbox info "  Removing ${file}"
 
-ask_user_confirmation() {
-    if msgbox question "Are you sure you want to install Zwift?"; then
-        msgbox ok "Proceeding with Zwift installation"
-    else
-        msgbox info "Aborted Zwift installation"
-        msgbox warning "Zwift not installed! 😥"
-        exit 2
-    fi
-}
-
-create_directories() {
-    create_directory() {
-        local directory="${1:?}"
-
-        msgbox info "  Creating directory ${directory}"
-
-        if ! mkdir -p "${directory}"; then
-            msgbox error "Could not create ${directory}, aborting"
-            exit_failure
+        if ! rm -f -- "${file}"; then
+            msgbox warning "  Failed to remove ${file}"
         fi
     }
 
-    msgbox info "Creating directories"
-
-    create_directory "${root_bin}"
-    create_directory "${root_share}/icons/hicolor/scalable/apps"
-    create_directory "${root_share}/applications"
-
-    msgbox ok "Directories created"
-}
-
-download_zwift() {
-    download_asset() {
-        local destination="${1:?}"
-        local url="${2:?}"
-
-        msgbox info "  Downloading ${url}"
-
-        if ! curl -fsSLo "${destination}" "${url}"; then
-            msgbox error "Downloading ${url} failed, aborting"
-            exit_failure
+    remove_user_install() {
+        if [[ -f "${USER_BIN_DIR}/zwift" ]]; then
+            if msgbox question "Found user install of netbrain/zwift, remove it?"; then
+                msgbox ok "Removing user install"
+                remove_file "${USER_BIN_DIR}/zwift"
+                remove_file "${USER_SHARE_DIR}/icons/hicolor/scalable/apps/zwift.svg"
+                remove_file "${USER_SHARE_DIR}/applications/Zwift.desktop}"
+            else
+                msgbox ok "Keeping netbrain/zwift user install 👌"
+            fi
+        else
+            msgbox info "No user install of netbrain/zwift found"
         fi
     }
 
-    msgbox info "Downloading Zwift"
+    remove_system_install() {
+        if [[ -f "${SYSTEM_BIN_DIR}/zwift" ]]; then
+            if invoked_as_root; then
+                if msgbox question "Found system install of netbrain/zwift, remove it?"; then
+                    msgbox ok "Removing system install"
+                    remove_file "${SYSTEM_BIN_DIR}/zwift"
+                    remove_file "${SYSTEM_SHARE_DIR}/icons/hicolor/scalable/apps/zwift.svg"
+                    remove_file "${SYSTEM_SHARE_DIR}/applications/Zwift.desktop}"
+                else
+                    msgbox ok "Keeping netbrain/zwift system install 👌"
+                fi
+            else
+                msgbox warning "Found system install of netbrain/zwift, but removing it requires root"
+                msgbox warning "  To uninstall run 'sudo ${0} ${script_args[*]}'"
+            fi
+        else
+            msgbox info "No system install of netbrain/zwift found"
+        fi
+    }
 
-    download_asset "${root_bin}/zwift" "${ZWIFT_SCRIPT}"
-    download_asset "${root_share}/icons/hicolor/scalable/apps/zwift.svg" "${ZWIFT_LOGO}"
-    download_asset "${root_share}/applications/Zwift.desktop" "${ZWIFT_DESKTOP_ENTRY}"
-
-    if ! chmod 755 "${root_bin}/zwift"; then
-        msgbox error "Failed to set permissions for ${root_bin}/zwift, aborting"
-        exit_failure
-    fi
-
-    msgbox ok "Zwift download complete"
+    msgbox info "Preparing to uninstall netbrain/zwift"
+    msgbox info "The zwift container image, volume, and configuration will not be removed"
+    remove_user_install
+    remove_system_install
+    msgbox ok "Uninstall complete!"
 }
 
-check_in_path() {
-    msgbox info "Checking if 'zwift' is in PATH"
+install_netbrain_zwift() {
+    exit_failure() {
+        msgbox error "Zwift install failed! 😭"
+        exit 1
+    }
 
-    if case ":${PATH}:" in *":${root_bin}:"*) true ;; *) false ;; esac then
-        msgbox info "  ${root_bin} is in your PATH"
-        msgbox ok "Zwift can be launched using the 'zwift' command"
-    else
-        msgbox warning "${root_bin} is not in your PATH"
-        msgbox warning "You may need to add it to your PATH for the 'zwift' command to work"
-    fi
+    determine_install_location() {
+        if invoked_as_root; then
+            root_bin="${SYSTEM_BIN_DIR}"
+            root_share="${SYSTEM_SHARE_DIR}"
+        else
+            root_bin="${USER_BIN_DIR}"
+            root_share="${USER_SHARE_DIR}"
+        fi
+
+        msgbox info "Installing Zwift to:"
+        msgbox info "  binaries → ${root_bin}"
+        msgbox info "  data     → ${root_share}"
+    }
+
+    ask_user_confirmation() {
+        if msgbox question "Are you sure you want to install Zwift?"; then
+            msgbox ok "Proceeding with netbrain/zwift installation"
+        else
+            msgbox info "Aborted netbrain/zwift installation"
+            msgbox warning "Zwift not installed! 😥"
+            exit 2
+        fi
+    }
+
+    create_directories() {
+        create_directory() {
+            local directory="${1:?}"
+
+            msgbox info "  Creating directory ${directory}"
+
+            if ! mkdir -p "${directory}"; then
+                msgbox error "Could not create ${directory}, aborting"
+                exit_failure
+            fi
+        }
+
+        msgbox info "Creating directories"
+
+        create_directory "${root_bin}"
+        create_directory "${root_share}/icons/hicolor/scalable/apps"
+        create_directory "${root_share}/applications"
+
+        msgbox ok "Directories created"
+    }
+
+    download_zwift() {
+        download_asset() {
+            local destination="${1:?}"
+            local url="${2:?}"
+
+            msgbox info "  Downloading ${url}"
+
+            if ! curl -fsSLo "${destination}" "${url}"; then
+                msgbox error "Downloading ${url} failed, aborting"
+                exit_failure
+            fi
+        }
+
+        msgbox info "Downloading netbrain/zwift"
+
+        download_asset "${root_bin}/zwift" "${ZWIFT_SCRIPT}"
+        download_asset "${root_share}/icons/hicolor/scalable/apps/zwift.svg" "${ZWIFT_LOGO}"
+        download_asset "${root_share}/applications/Zwift.desktop" "${ZWIFT_DESKTOP_ENTRY}"
+
+        if ! chmod 755 "${root_bin}/zwift"; then
+            msgbox error "Failed to set permissions for ${root_bin}/zwift, aborting"
+            exit_failure
+        fi
+
+        msgbox ok "Download complete"
+    }
+
+    check_in_path() {
+        msgbox info "Checking if 'zwift' is in PATH"
+
+        if case ":${PATH}:" in *":${root_bin}:"*) true ;; *) false ;; esac then
+            msgbox info "  ${root_bin} is in your PATH"
+            msgbox ok "Zwift can be launched using the 'zwift' command"
+        else
+            msgbox warning "${root_bin} is not in your PATH"
+            msgbox warning "You may need to add it to your PATH for the 'zwift' command to work"
+        fi
+    }
+
+    msgbox info "Preparing to install netbrain/zwift"
+    determine_install_location
+    ask_user_confirmation
+    create_directories
+    download_zwift
+    check_in_path
+    msgbox ok "Install complete! 🥳"
 }
 
 echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
 echo -e "${COLOR_YELLOW}[!] ${STYLE_UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
 
-msgbox info "Preparing to install Zwift"
-
-determine_install_location
-ask_user_confirmation
-create_directories
-download_zwift
-check_in_path
-
-msgbox ok "Zwift install complete! 🥳"
+if [[ ${uninstall} -eq 1 ]]; then
+    uninstall_netbrain_zwift
+else
+    install_netbrain_zwift
+fi
