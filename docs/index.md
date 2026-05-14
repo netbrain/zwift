@@ -11,8 +11,10 @@ Easily Zwift on Linux! :100:
 
 ## Quick Start
 
+Just one line to get Zwift up and running!
+
 ```bash
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
 ```
 
 ![example.gif](/assets/images/example.gif)

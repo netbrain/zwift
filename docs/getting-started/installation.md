@@ -4,11 +4,17 @@ parent: Getting Started
 nav_order: 2
 ---
 
-# Installation Methods
+# Installing, Updating and Uninstalling
 
 ## Automatic Installation
 
-![example.gif](/assets/images/example.gif)
+### User local Installation (Recommended)
+
+To install netbrain/zwift only for the current user, run:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+```
 
 ### System wide Installation
 
@@ -16,14 +22,6 @@ To install netbrain/zwift for all users on your system, run:
 
 ```bash
 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
-```
-
-### User local Installation
-
-To install netbrain/zwift only for the current user, run:
-
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
 ```
 
 This script will:
@@ -34,17 +32,17 @@ This script will:
 
 ## How can I update Zwift?
 
-The `zwift.sh` script will update Zwift by checking for new image versions on every launch, however if you are not using this
-then you will have to pull `netbrain/zwift:latest` from time to time in order to be on the latest version.
-
 There is a github action in place that will update Zwift on a scheduled basis and publish new versions to docker hub.
+
+The `zwift.sh` script will update Zwift by checking for new image and script versions on every launch, however if you are not
+using this then you will have to pull `netbrain/zwift:latest` from time to time in order to be on the latest version.
 
 ## How can I uninstall netbrain/zwift?
 
 Download the `install.sh` script and invoke it with the `--uninstall` argument.
 
-- If invoked with sudo, both the user local and system wide installation will be removed.
-- If invoked without sudo, only the user local installation will be removed.
+- If invoked with sudo, both the user local and system wide installation can be removed.
+- If invoked without sudo, only the user local installation can be removed.
 
 ```console
 foo@bar:~$ wget https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh
