@@ -139,7 +139,7 @@ uninstall_netbrain_zwift() {
                 msgbox ok "Removing user install"
                 remove_file "${USER_BIN_DIR}/zwift"
                 remove_file "${USER_SHARE_DIR}/icons/hicolor/scalable/apps/zwift.svg"
-                remove_file "${USER_SHARE_DIR}/applications/Zwift.desktop}"
+                remove_file "${USER_SHARE_DIR}/applications/Zwift.desktop"
             else
                 msgbox ok "Keeping netbrain/zwift user install 👌"
             fi
@@ -155,7 +155,7 @@ uninstall_netbrain_zwift() {
                     msgbox ok "Removing system install"
                     remove_file "${SYSTEM_BIN_DIR}/zwift"
                     remove_file "${SYSTEM_SHARE_DIR}/icons/hicolor/scalable/apps/zwift.svg"
-                    remove_file "${SYSTEM_SHARE_DIR}/applications/Zwift.desktop}"
+                    remove_file "${SYSTEM_SHARE_DIR}/applications/Zwift.desktop"
                 else
                     msgbox ok "Keeping netbrain/zwift system install 👌"
                 fi
