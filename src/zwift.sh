@@ -11,6 +11,9 @@ if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 # - VERBOSITY=3 (also debug messages)
 VERBOSITY="${VERBOSITY:-1}" # updated after loading user config files
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd)"
+readonly SCRIPT_DIR
+
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
@@ -57,6 +60,7 @@ msgbox() {
         warning) echo -e "${COLOR_YELLOW}[${timestamp}!] ${msg}${RESET_STYLE}" ;;
         error) echo -e "${COLOR_RED}[${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
+            [[ ${INTERACTIVE_TERMINAL} -eq 0 ]] && return 0
             local ans=""
             if [[ -n ${timeout} ]] && [[ ${timeout} -gt 0 ]]; then
                 while [[ ${timeout} -gt 0 ]]; do
@@ -83,7 +87,7 @@ msgbox() {
         *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
 
-    if [[ -n ${timeout} ]]; then
+    if [[ -n ${timeout} ]] && [[ ${INTERACTIVE_TERMINAL} -eq 1 ]]; then
         if [[ ${timeout} -gt 0 ]]; then
             while [[ ${timeout} -gt 0 ]]; do
                 update_timestamp
@@ -232,7 +236,12 @@ check_script_up_to_date() {
 }
 
 upgrade_script() {
+    installed_as_root() {
+        [[ ${SCRIPT_DIR} == "/usr/local/bin" ]]
+    }
+
     local install_script
+    local install_cmd
 
     msgbox info "Downloading latest install script"
     if ! install_script="$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"; then
@@ -241,7 +250,13 @@ upgrade_script() {
     fi
 
     msgbox info "Running install script"
-    if ! pkexec env PATH="${PATH}" bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}"; then
+
+    install_cmd=(bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}" --auto-confirm)
+    if installed_as_root; then
+        install_cmd=(pkexec env PATH="${PATH}" "${install_cmd[@]}")
+    fi
+
+    if ! "${install_cmd[@]}"; then
         msgbox error "Install script failed"
         return 1
     fi
