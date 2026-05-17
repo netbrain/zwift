@@ -10,7 +10,8 @@ readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:?}"
 readonly LAUNCHER_CLIENT_ID="Game_Launcher"
 readonly LAUNCHER_HOME="https://launcher.zwift.com/launcher"
 readonly ZWIFT_REALM_URL="https://secure.zwift.com/auth/realms/zwift"
-readonly COOKIE="cookie.jar"
+cookie="$(mktemp)"
+readonly COOKIE="${cookie}"
 trap 'rm -f "${COOKIE}"' EXIT
 
 curl -sS "${LAUNCHER_HOME}" --cookie-jar "${COOKIE}"
