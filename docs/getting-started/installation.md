@@ -60,3 +60,16 @@ Uninstalling netbrain/zwift will:
 - Remove the scripts and desktop shortcut
 - Keep the Zwift container image
 - Keep your Zwift settings (volume and configuration files)
+
+To remove the netbrain/zwift container image, run:
+
+```console
+foo@bar:~$ podman rmi docker.io/netbrain/zwift    # or docker rmi docker.io/netbrain/zwift
+```
+
+To remove your Zwift settings, run:
+
+```console
+foo@bar:~$ podman volume rm zwift-$USER           # or docker volume rm zwift-$USER
+foo@bar:~$ rm -rf ~/.config/zwift
+```
