@@ -29,12 +29,16 @@ experimental-features = nix-command flakes
 
 ### Entering the Development Shell
 
-```bash
-# One-time use
-nix develop
+#### With direnv (recommended)
 
-# Or with direnv (recommended)
-direnv allow
+```console
+foo@bar:~$ direnv allow
+```
+
+#### One-time use (alternative)
+
+```console
+foo@bar:~$ nix develop
 ```
 
 ### Available Tools
@@ -78,72 +82,3 @@ The devcontainer includes:
 - Nix with `nil` language server
 - shellcheck and hadolint
 - VS Code extensions for real-time linting feedback
-
-## Running Linters Locally
-
-Run these before submitting a PR to catch issues early:
-
-```bash
-# Bash scripts
-find . -path ./.git -prune -o -name "*.sh" -exec shellcheck {} +
-shfmt -d .
-
-# Nix files
-nil diagnostics -- *.nix
-nixfmt --check -- *.nix
-
-# Dockerfile
-hadolint src/Dockerfile
-
-# Markdown
-markdownlint-cli2
-cspell
-
-# GitHub Actions
-actionlint
-
-# YAML
-yamllint .
-```
-
-## Building the Documentation Locally
-
-The documentation uses Jekyll with the just-the-docs theme.
-
-```bash
-cd docs
-bundle install
-bundle exec jekyll serve
-```
-
-Then open <http://localhost:4000> in your browser.
-
-## Building the Container Image
-
-```bash
-cd src
-
-# Build the image
-podman build -t zwift:dev .
-
-# Or use the build script
-./build-image.sh
-
-# Or only update the scripts if you already built the imgage
-./update-image.sh
-```
-
-## Testing Changes
-
-```bash
-cd src
-
-# Dry run to see what would be executed
-DRYRUN=1 ./zwift.sh
-
-# Run in foreground for debugging
-ZWIFT_FG=1 ./zwift.sh
-
-# Interactive mode (drops into container shell)
-INTERACTIVE=1 ./zwift.sh
-```
