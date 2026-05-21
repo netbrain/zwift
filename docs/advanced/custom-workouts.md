@@ -4,25 +4,52 @@ nav_order: 1
 parent: Advanced
 ---
 
-# How can I add custom .zwo files?
+# Custom Workout files
 
-You can map the zwift Workout folder using the environment variable `ZWIFT_WORKOUT_DIR`, for example if your workout directory
-is in `$HOME/zwift_workouts` then you would provide the environment variable `ZWIFT_WORKOUT_DIR="$HOME/zwift_workouts"`.
+Zwift supports manually importing custom workout files with the `.zwo` file type.
 
-You can add this variable into `$HOME/.config/zwift/config` or `$HOME/.config/zwift/$USER-config`.
+## How can I add custom workout files?
 
-The workouts folder will contain subdirectories e.g. `$HOME/.config/zwift/workouts/393938`. The number is your internal zwift
-id and you store you zwo files in the relevant folder. There will usually be only one ID, however if you have multiple zwift
-logins it may show one subdirectory for each, to find the ID you can use the following link:
+1. Zwift workout files are stored in the workouts directory inside the container. To map the workouts directory to a directory
+   on your PC, use the [`ZWIFT_WORKOUT_DIR`](../../configuration/options/#zwift_workout_dir) option. Make sure to create the
+   target directory first if it does not exist yet.
 
-Webpage for finding internal ID: <https://www.virtualonlinecycling.com/p/zwiftid.html>
+   ```bash
+   ZWIFT_WORKOUT_DIR="${xdg-user-dir DOCUMENTS}/Zwift/Workouts"
+   ```
 
-{: .note }
-Any workouts created already will be copied into this folder on first start
+2. Launch Zwift so the workouts directory in the container gets mirrored to the directory on your PC. After the copying is done,
+   close Zwift again.
+3. The workouts folder will contain subdirectories e.g. `~/Documents/Zwift/Workouts/393938`. The number is your Zwift user ID.
+   There will usually be only one ID, however if you have multiple Zwift accounts it may show one subdirectory for each user.
+   To find the correct user ID you can use the following link: <https://www.virtualonlinecycling.com/p/zwiftid.html>.
+4. Place your custom .zwo files in the directory with your Zwift user ID. It is also allowed to create subdirectories if you
+   have a lot of .zwo files and you want to organize them.
+5. Zwift will pick up the new workouts the first time it is launched after adding the files to the correct directory. They will
+   be uploaded to the Zwift servers and are available on all devices you Zwift on, not only on the PC where you added the files.
 
-{: .note }
-To add a new workout just copy the zwo file to this directory
+## How can I delete custom workout files?
 
-{: .note }
-Deleting files from the directory will not delete them, they will be re-added when re-starting zwift, you must delete from the
-zwift menu
+It is not enough to just delete the .zwo file. If you do so, it will be downloaded again the next time you launch Zwift. There
+are two options to delete custom workout files:
+
+1. Delete the custom workout in Zwift by following [the instructions in the Zwift documentation][delete-custom-workout].
+2. Manually remove the workout file by setting the deleted flag:
+   1. Open the `~/Documents/Zwift/Workouts/<zwift id>/workouts.files` file.
+   2. Find the workout you want to delete, for example:
+
+      ```xml
+      <custom_file>
+          <name>my_fancy_workout.zwo</name>
+          <time>1702588908</time>
+          <guid>12345</guid>
+          <checksum>123</checksum>
+          <deleted>false</deleted>
+      </custom_file>
+      ```
+
+   3. Change the deleted line from `false` to `true`.
+   4. Delete the workout .zwo file.
+   5. The workout will be removed when you launch Zwift.
+
+[delete-custom-workout]: https://support.zwift.com/en_us/custom-workouts-ryGOTVEPs#Deleting_a_Custom_Workout
