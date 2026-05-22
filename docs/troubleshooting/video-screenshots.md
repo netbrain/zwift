@@ -1,8 +1,10 @@
 ---
 title: Video Screenshots Crash
 parent: Troubleshooting
-nav_order: 5
+nav_order: 4
 ---
+
+# Video screenshots make Zwift crash
 
 ## Symptoms
 
@@ -17,9 +19,6 @@ Disable video screenshots in Zwift settings:
 1. Open Zwift
 2. Go to **Settings** (menu icon in bottom left)
 3. Disable **Video Screenshots**
-
-You may also want to set **Auto Upload Screenshots** to "Never" as an extra
-precaution.
 
 ## Related
 
