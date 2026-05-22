@@ -33,23 +33,27 @@ Zwift supports manually importing custom workout files with the `.zwo` file type
 It is not enough to just delete the .zwo file. If you do so, it will be downloaded again the next time you launch Zwift. There
 are two options to delete custom workout files:
 
-1. Delete the custom workout in Zwift by following [the instructions in the Zwift documentation][delete-custom-workout].
-2. Manually remove the workout file by setting the deleted flag:
-   1. Open the `~/Documents/Zwift/Workouts/<zwift id>/workouts.files` file.
-   2. Find the workout you want to delete, for example:
+### Option 1: Delete custom workouts in Zwift
 
-      ```xml
-      <custom_file>
-          <name>my_fancy_workout.zwo</name>
-          <time>1702588908</time>
-          <guid>12345</guid>
-          <checksum>123</checksum>
-          <deleted>false</deleted>
-      </custom_file>
-      ```
+Delete the custom workout in Zwift by following [the instructions in the Zwift documentation][delete-custom-workout].
 
-   3. Change the deleted line from `false` to `true`.
-   4. Delete the workout .zwo file.
-   5. The workout will be removed when you launch Zwift.
+### Option 2: Manually remove custom workouts
+
+1. Open the `~/Documents/Zwift/Workouts/<zwift id>/workouts.files` file.
+2. Find the workout you want to delete, for example:
+
+   ```xml
+   <custom_file>
+         <name>my_fancy_workout.zwo</name>
+         <time>1702588908</time>
+         <guid>12345</guid>
+         <checksum>123</checksum>
+         <deleted>false</deleted>
+   </custom_file>
+   ```
+
+3. Change the deleted line from `false` to `true`.
+4. Delete the workout .zwo file.
+5. The workout will be removed when you launch Zwift.
 
 [delete-custom-workout]: https://support.zwift.com/en_us/custom-workouts-ryGOTVEPs#Deleting_a_Custom_Workout
