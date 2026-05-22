@@ -10,6 +10,7 @@ Gnome (Mutter) has a standard timeout of 5 seconds in which it expects applicati
 enough when launching heavier applications such as a game.
 
 !["Zwift" Is Not Responding](/assets/images/gnome-not-responding.png)
+{: .text-center }
 
 The solution is to simply extend the timeout or disable it entirely.
 

@@ -16,6 +16,7 @@ sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/mast
 ```
 
 ![example.gif](/assets/images/example.gif)
+{: .text-center }
 
 ## Key Features
 
