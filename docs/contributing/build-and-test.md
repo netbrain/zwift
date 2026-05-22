@@ -8,7 +8,7 @@ nav_order: 1
 
 ## Building the Container Image
 
-```bash
+```console
 foo@bar:~$ cd src
 foo@bar:~$ podman build -t zwift:dev . # Manually build the image (not recommended)
 foo@bar:~$ ./build-image.sh            # It's recommended to use the build script
