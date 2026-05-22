@@ -4,10 +4,23 @@ parent: Troubleshooting
 nav_order: 2
 ---
 
-# I sometimes get a popup Not responding why?
+# I sometimes get a popup "Zwift Is Not Responding", why?
 
-For Gnome it is just timing out before zwift responds, extend the timeout.
+Gnome (Mutter) has a standard timeout of 5 seconds in which it expects applications to respond. This is often not
+enough when launching heavier applications such as a game.
 
-```bash
-gsettings set org.gnome.mutter check-alive-timeout 60000
+!["Zwift" Is Not Responding](/assets/images/gnome-not-responding.png)
+
+The solution is to simply extend the timeout or disable it entirely.
+
+To extend the timeout to 1 minute (recommended):
+
+```console
+foo@bar:~$ gsettings set org.gnome.mutter check-alive-timeout 60000
+```
+
+To disable the timeout entirely:
+
+```console
+foo@bar:~$ gsettings set org.gnome.mutter check-alive-timeout 0
 ```
