@@ -18,18 +18,14 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bi
 
 ### System wide Installation
 
-To install netbrain/zwift for all users on your system, run:
+To install netbrain/zwift for all users on your system, run the `install.sh` script as root with sudo.
 
-```bash
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
-```
-
-This script will:
+### The install script will
 
 - Add the zwift command to your system path
-- Create a desktop shortcut
+- Create a desktop shortcut (you may need to log off and on again for the icon to show up)
 
-## First Launch
+### First Launch
 
 The first time zwift is started, it will download the netbrain/zwift container image. This image is approximately 5.5 GiB in
 size, so it will take some time to download. After the container image is downloaded, the Zwift game will be launched.
