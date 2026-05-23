@@ -11,9 +11,6 @@ if [[ ${DEBUG} -eq 1 ]]; then set -x; fi
 # - VERBOSITY=3 (also debug messages)
 VERBOSITY="${VERBOSITY:-1}" # updated after loading user config files
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd)"
-readonly SCRIPT_DIR
-
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
@@ -116,8 +113,17 @@ command_exists() {
     cmd_path="$(command -v "${cmd}" 2> /dev/null)" && [[ -x ${cmd_path} ]]
 }
 
+invoked_as_root() {
+    [[ ${EUID} -eq 0 ]]
+}
+
 echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
 echo -e "${COLOR_YELLOW}[!] ${STYLE_UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
+
+if invoked_as_root; then
+    msgbox error "It is not supported to run the zwift script as root."
+    exit 1
+fi
 
 msgbox info "Preparing to launch Zwift"
 
@@ -236,8 +242,8 @@ check_script_up_to_date() {
 }
 
 upgrade_script() {
-    installed_as_root() {
-        [[ ${SCRIPT_DIR} == "/usr/local/bin" ]]
+    installed_as_user() {
+        [[ -O ${0} ]]
     }
 
     local install_script
@@ -252,7 +258,7 @@ upgrade_script() {
     msgbox info "Running install script"
 
     install_cmd=(bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}" --auto-confirm)
-    if installed_as_root; then
+    if ! installed_as_user; then
         install_cmd=(pkexec env PATH="${PATH}" "${install_cmd[@]}")
     fi
 
