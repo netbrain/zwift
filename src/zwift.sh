@@ -195,7 +195,7 @@ if [[ -z ${CONTAINER_TOOL} ]]; then
 fi
 readonly CONTAINER_TOOL
 if command_exists "${CONTAINER_TOOL}"; then
-    msgbox ok "Found container tool: ${CONTAINER_TOOL}"
+    msgbox ok "Found container tool: ${CONTAINER_TOOL} ($(${CONTAINER_TOOL} --version || true))"
 else
     msgbox error "Container tool ${CONTAINER_TOOL} not found"
     msgbox error "  To install podman, see: https://podman.io/docs/installation"
