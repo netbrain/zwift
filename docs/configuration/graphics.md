@@ -70,7 +70,7 @@ The full list of available resolutions is:
 
 | name   | resolution | pixels    |
 |--------|------------|-----------|
-| Low    | 576p       | 720x576   |
+| Low    | 576p       | 1024x576  |
 | Medium | 720p       | 1280x720  |
 | High   | 1080p      | 1920x1080 |
 | Ultra  | 1440p      | 2560x1440 |
