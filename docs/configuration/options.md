@@ -661,7 +661,7 @@ Configure how the container connects to the Internet.
 
 ### `ZWIFT_UID`
 
-See also [`ZWIFT_GID`](#zwift_gid).
+See also [`ZWIFT_GID`](#zwift_gid), [Remap User UID/GID](../../advanced/remap-user-id).
 
 Use this option to launch Zwift from a different user id.
 
@@ -684,7 +684,7 @@ Use this option to launch Zwift from a different user id.
 
 ### `ZWIFT_GID`
 
-See also [`ZWIFT_UID`](#zwift_uid).
+See also [`ZWIFT_UID`](#zwift_uid), [Remap User UID/GID](../../advanced/remap-user-id).
 
 Use this option to launch Zwift from a different group id.
 
