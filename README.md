@@ -44,10 +44,10 @@ foo@bar:~$ ffmpeg -i example.mp4 -i palette.png -filter_complex \
 ### Install
 
 ```console
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"
 ```
 
-This will put the `zwift.sh` script on your `$PATH` and add a desktop icon to `/usr/local/share/applications`.
+This will put the `zwift.sh` script on your `$PATH` and add a desktop icon to `$HOME/.local/share/applications`.
 
 **NOTE**: Icon may not show until logging off and back in.
 

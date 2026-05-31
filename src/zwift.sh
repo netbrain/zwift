@@ -57,6 +57,7 @@ msgbox() {
         warning) echo -e "${COLOR_YELLOW}[${timestamp}!] ${msg}${RESET_STYLE}" ;;
         error) echo -e "${COLOR_RED}[${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
         question)
+            [[ ${INTERACTIVE_TERMINAL} -eq 0 ]] && return 0
             local ans=""
             if [[ -n ${timeout} ]] && [[ ${timeout} -gt 0 ]]; then
                 while [[ ${timeout} -gt 0 ]]; do
@@ -83,7 +84,7 @@ msgbox() {
         *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
 
-    if [[ -n ${timeout} ]]; then
+    if [[ -n ${timeout} ]] && [[ ${INTERACTIVE_TERMINAL} -eq 1 ]]; then
         if [[ ${timeout} -gt 0 ]]; then
             while [[ ${timeout} -gt 0 ]]; do
                 update_timestamp
@@ -112,8 +113,17 @@ command_exists() {
     cmd_path="$(command -v "${cmd}" 2> /dev/null)" && [[ -x ${cmd_path} ]]
 }
 
+invoked_as_root() {
+    [[ ${EUID} -eq 0 ]]
+}
+
 echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
 echo -e "${COLOR_YELLOW}[!] ${STYLE_UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
+
+if invoked_as_root; then
+    msgbox error "It is not supported to run the zwift script as root."
+    exit 1
+fi
 
 msgbox info "Preparing to launch Zwift"
 
@@ -185,7 +195,7 @@ if [[ -z ${CONTAINER_TOOL} ]]; then
 fi
 readonly CONTAINER_TOOL
 if command_exists "${CONTAINER_TOOL}"; then
-    msgbox ok "Found container tool: ${CONTAINER_TOOL}"
+    msgbox ok "Found container tool: ${CONTAINER_TOOL} ($(${CONTAINER_TOOL} --version || true))"
 else
     msgbox error "Container tool ${CONTAINER_TOOL} not found"
     msgbox error "  To install podman, see: https://podman.io/docs/installation"
@@ -232,7 +242,12 @@ check_script_up_to_date() {
 }
 
 upgrade_script() {
+    installed_as_user() {
+        [[ -O ${0} ]]
+    }
+
     local install_script
+    local install_cmd
 
     msgbox info "Downloading latest install script"
     if ! install_script="$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"; then
@@ -241,7 +256,13 @@ upgrade_script() {
     fi
 
     msgbox info "Running install script"
-    if ! pkexec env PATH="${PATH}" bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}"; then
+
+    install_cmd=(bash -c "${install_script}" -- --script-version="${SCRIPT_VERSION}" --auto-confirm)
+    if ! installed_as_user; then
+        install_cmd=(pkexec env PATH="${PATH}" "${install_cmd[@]}")
+    fi
+
+    if ! "${install_cmd[@]}"; then
         msgbox error "Install script failed"
         return 1
     fi
