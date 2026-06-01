@@ -24,13 +24,14 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 # - 10.17    : default to egl for opengl in x11
 # - 9.9      : support native wayland
 # Winetricks
+# - cf0fe6   : webview2 verb added (not officially released yet)
 # - 20260125 : webview2 in zwift launcher works
 # - 20240105 : first version used in this Dockerfile
 ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
-ARG WINETRICKS_VERSION=20260125
-ARG WINETRICKS_CHECKSUM=431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc45179312a7b
+ARG WINETRICKS_VERSION=f3890f670867b5ffbc3938726db45c0f7d16c8ba
+ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731e9e9837e
 
 # Install prerequisites
 # - bluez for bluetooth
