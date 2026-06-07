@@ -727,8 +727,8 @@ Override the container GPU/device flags.
 | Allowed values    | list                                                 |
 |                   | string                                               |
 | Default value     | `--device="nvidia.com/gpu=all"` - nvidia + podman    |
-|                   | `--gpus="all"` - nvidia + docker                     |
-|                   | `--device="/dev/dri:/dev/dri"` - not nvidia          |
+|                   | `--runtime=nvidia --gpus="all"` - nvidia + docker    |
+|                   | `--device="/dev/dri"` - not nvidia                   |
 | Commandline usage | `VGA_DEVICE_FLAG="--gpus=all" zwift` - Use a string. |
 | Config file usage | `VGA_DEVICE_FLAG=(--gpus=all)` - Use a list.         |
 
