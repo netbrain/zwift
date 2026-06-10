@@ -39,7 +39,7 @@ ARG WINETRICKS_CHECKSUM=431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc451
 # - curl used in zwift authentication script
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
-# - libegl1 and libgl1 for GL library
+# - libglvnd0 for graphics libraries
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
 # - rsync to synchronize zwift volume with zwift appdata
@@ -55,10 +55,9 @@ RUN dpkg --add-architecture i386 \
         curl \
         gamemode \
         gosu \
-        libegl1 \
-        libgl1 \
         libgamemode0.i386 \
         libgamemodeauto0.i386 \
+        libglvnd0 \
         libvulkan1 \
         procps \
         rsync \
