@@ -60,22 +60,37 @@ has this capability is the JetBlack Victory.
 1. Allow rootless access to the USB device by creating a udev rule:
 
    ```console
-   foo@bar:~$ sudo echo 'ACTION=="add|change", SUBSYSTEM=="usb|tty", ATTRS{idVendor}=="393c", ATTRS{idProduct}=="0006", MODE="0660", GROUP="plugdev", TAG+="uaccess"' > /etc/udev/rules.d/99-jetblack-victory.rules
+   foo@bar:~$ sudo echo 'ACTION=="add|change", SUBSYSTEM=="usb|tty", ATTRS{idVendor}=="393c", ATTRS{idProduct}=="0006", MODE="0660", GROUP="dialout", SYMLINK+="jetblack_victory", TAG+="uaccess"' > /etc/udev/rules.d/71-jetblack-victory.rules
    foo@bar:~$ sudo udevadm control --reload-rules
    foo@bar:~$ sudo udevadm trigger
    ```
 
-   If you are not using a JetBlack Victory, change the vendor id and product id attributes to the USB VID/PID of your device.
+   - `ACTION=="add|change` -- Trigger the rule if a device is added or its properties changed.
+   - `SUBSYSTEM=="usb|tty"` -- We are only interested in USB and tty devices.
+   - `ATTRS{idVendor}=="393c"` -- The USB vendor identifier. If you are not using a JetBlack Victory, change this to your
+     trainer's USB vendor id.
+   - `ATTRS{idProduct}=="0006"` -- The USB product identifier. If you are not using a JetBlack Victory, change this to your
+     trainer's USB product id.
+   - `MODE="0660"` -- Allow read and write access to the device owner and assigned group.
+   - `GROUP="dialout"` -- The group to assign to the USB device. This value is different for most Linux distributions. To figure
+     out the correct group, look at `ls -l /dev/tty*`. On Fedora the group is `dialout` or `plugdev`, on Arch Linux the group is
+     `uucp`. Also make sure your user is a member of the correct group `sudo usermod -aG dialout $USER`. Adding a group is not
+     needed if your system supports the `uaccess` mechanism.
+   - `SYMLINK+="jetblack_victory"` -- Your device is assigned a filename such as `/dev/ttyACM0`. It is possible that your device
+     gets a different number, for example `/dev/ttyACM1`. If you are not using a JetBlack Victory, it is also possible that your
+     device is recognized as `/dev/ttyUSB0`. The number can also change if you have multiple USB devices connected. To make it
+     easier to refer to the device, you can assign an extra name to it. You can then refer to your device using
+     `/dev/jetblack_victory` instead of having to figure out the correct filename.
+   - `TAG+="uaccess"` -- Make the device accessible to all logged-in users.
+   - `/etc/udev/rules.d/71-jetblack-victory.rules` -- The filename to use for the udev rule. For the `uaccess` tag to work, the
+     number at the start of the filename has to be less than 73. It is recommended to use 71.
 
 2. Pass the USB device to the netbrain/zwift container using the
    [CONTAINER_EXTRA_ARGS](../../configuration/options/#container_extra_args) configuration option:
 
    ```bash
-   CONTAINER_EXTRA_ARGS=(--device=/dev/ttyACM0)
+   CONTAINER_EXTRA_ARGS=(--device=/dev/jetblack_victory)
    ```
-
-   It is possible that your device gets a different number, for example `ttyACM1`. If you are not using a JetBlack Victory,
-   it is also possible that your device is recognized as `ttyUSB0`.
 
 3. On the Zwift pairing screen, use the USB option when connecting your trainer. Read the
    [JetBlack Victory Adds USB Connection Support][jetblack-victory-usb] Zwift Insider article for detailed instructions.
