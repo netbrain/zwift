@@ -591,9 +591,13 @@ if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
     fi
 fi
 if [[ -z ${window_manager} ]]; then
+    # DISPLAY is [host]:displaynumber[.screennumber] but the X11 socket is named
+    # by the display number alone, so strip the host prefix and screen suffix.
+    x11_display="${DISPLAY#*:}"
+    x11_display="${x11_display%.*}"
     if [[ -n ${WAYLAND_DISPLAY} ]]; then
         window_manager="XWayland"
-    elif [[ -n ${DISPLAY} ]] && [[ -S /tmp/.X11-unix/X${DISPLAY#*:} ]]; then
+    elif [[ -n ${DISPLAY} ]] && [[ -S /tmp/.X11-unix/X${x11_display} ]]; then
         window_manager="XOrg"
     else # no window manager, tty?
         msgbox error "Can't run Zwift without window manager"

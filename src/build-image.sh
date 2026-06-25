@@ -127,7 +127,11 @@ fi
 
 # Configure window manager
 msgbox info "Using X11 window manager"
-if [[ -z ${DISPLAY} ]] || [[ ! -S /tmp/.X11-unix/X${DISPLAY#*:} ]]; then
+# DISPLAY is [host]:displaynumber[.screennumber] but the X11 socket is named
+# by the display number alone, so strip the host prefix and screen suffix.
+x11_display="${DISPLAY#*:}"
+x11_display="${x11_display%.*}"
+if [[ -z ${DISPLAY} ]] || [[ ! -S /tmp/.X11-unix/X${x11_display} ]]; then
     msgbox error "X11 is not running!"
     exit 1
 fi
