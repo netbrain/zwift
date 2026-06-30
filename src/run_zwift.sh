@@ -28,8 +28,14 @@ readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:-}"
 readonly ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION:-}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 
-readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
-readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
+if [[ ${CONTAINER_TOOL} == "nix-fhs" ]]; then
+    readonly WINEPREFIX="${WINEPREFIX:-${HOME}/.wine-zwift}"
+    readonly WINE_USER_HOME="${WINEPREFIX}/drive_c/users/${USER}"
+else
+    readonly WINEPREFIX="/home/user/.wine"
+    readonly WINE_USER_HOME="${WINEPREFIX}/drive_c/users/user"
+fi
+readonly ZWIFT_HOME="${WINEPREFIX}/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 readonly ZWIFT_PREFS="${ZWIFT_DOCS}/prefs.xml"
 
