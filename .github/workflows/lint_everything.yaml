@@ -120,7 +120,7 @@ jobs:
     - name: Build nix flake
       run: |
         cd tests/nix-flake
-        nix build --no-write-lock-file --dry-run
+        nix build --no-write-lock-file --dry-run .#podman .#docker .#fhs
   yaml-lint:
     name: Yaml - Lint with yamllint
     runs-on: ubuntu-latest
