@@ -40,7 +40,7 @@ environment variables in camelCase:
     image = "docker.io/netbrain/zwift";
     # The zwift game version to run
     version = "1.67.0";
-    # Container tool to run zwift (e.g., "podman" or "docker")
+    # Container tool to run zwift ("podman", "docker", or "fhs" for native Wine)
     containerTool = "podman";
     # If true, do not pull the image (use locally cached image)
     dontPull = false;
@@ -82,6 +82,8 @@ environment variables in camelCase:
     debug = false;
     # If set, run container in privileged mode ("--privileged --security-opt label=disable")
     privilegedContainer = false;
+    # Custom Wine prefix directory (only used when containerTool = "fhs", defaults to ~/.wine-zwift)
+    winePrefix = "";
   };
 }
 ```
