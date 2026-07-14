@@ -1,17 +1,33 @@
 {
   description = "Easily zwift on linux";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+
+    runfromprocess-rs.url = "github:quietvoid/runfromprocess-rs?rev=a3d003c07d1bd11ff93c4cac96d2c3aa5deb8471";
+  };
 
   outputs =
-    { nixpkgs, self }:
+    {
+      nixpkgs,
+      runfromprocess-rs,
+      self,
+    }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
 
+      zwift-fhs = import ./nix/zwift-fhs-package.nix {
+        inherit
+          pkgs
+          system
+          runfromprocess-rs
+          ;
+      };
+
       zwift-container = import ./nix/zwift-container-package.nix { inherit pkgs; };
 
-      nixosModule = import ./nix/module.nix;
+      nixosModule = import ./nix/module.nix { zwift-fhs-package = zwift-fhs; };
     in
     {
       nixosModules = {
@@ -57,7 +73,10 @@
       };
 
       packages.${system} = {
-        inherit zwift-container;
+        inherit
+          zwift-fhs
+          zwift-container
+          ;
         default = zwift-container;
 
         zwift-unwrapped = pkgs.stdenv.mkDerivation rec {
