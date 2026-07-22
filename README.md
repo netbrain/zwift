@@ -116,15 +116,8 @@ and tricks :smiley:
 
 ## ⭐ Star History (for fun and giggles)
 
-<!-- markdownlint-disable line-length -->
-<a href="https://www.star-history.com/?repos=netbrain%2Fzwift&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=netbrain/zwift&type=date&theme=dark&legend=top-left&sealed_token=P-GZDYcjNPXSdBBWv6fYd1q9l2QYn8RwOAazVYzhNjLm13SxhxXvWH23XUounM3eZAJJBr5inEk9A_US1aG03d8WpTJXkWZMl4s2nD8aVFNAqxc9p1YG9phmq_aCPO5FmQt7BOSE_8SvTJe7rKLd-9uaVV2NATlbf0_I9s5jVTorIS9JBoDqfSw99rm3" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=netbrain/zwift&type=date&legend=top-left&sealed_token=P-GZDYcjNPXSdBBWv6fYd1q9l2QYn8RwOAazVYzhNjLm13SxhxXvWH23XUounM3eZAJJBr5inEk9A_US1aG03d8WpTJXkWZMl4s2nD8aVFNAqxc9p1YG9phmq_aCPO5FmQt7BOSE_8SvTJe7rKLd-9uaVV2NATlbf0_I9s5jVTorIS9JBoDqfSw99rm3" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=netbrain/zwift&type=date&legend=top-left&sealed_token=P-GZDYcjNPXSdBBWv6fYd1q9l2QYn8RwOAazVYzhNjLm13SxhxXvWH23XUounM3eZAJJBr5inEk9A_US1aG03d8WpTJXkWZMl4s2nD8aVFNAqxc9p1YG9phmq_aCPO5FmQt7BOSE_8SvTJe7rKLd-9uaVV2NATlbf0_I9s5jVTorIS9JBoDqfSw99rm3" />
- </picture>
-</a>
-<!-- markdownlint-enable line-length -->
+[![Star History Chart](https://api.star-history.com/chart?repos=netbrain/zwift&type=date&legend=top-left&sealed_token=P-GZDYcjNPXSdBBWv6fYd1q9l2QYn8RwOAazVYzhNjLm13SxhxXvWH23XUounM3eZAJJBr5inEk9A_US1aG03d8WpTJXkWZMl4s2nD8aVFNAqxc9p1YG9phmq_aCPO5FmQt7BOSE_8SvTJe7rKLd-9uaVV2NATlbf0_I9s5jVTorIS9JBoDqfSw99rm3)](https://www.star-history.com/?repos=netbrain%2Fzwift&type=date&legend=top-left)
+
 
 [lint-everything-src]: https://github.com/netbrain/zwift/actions/workflows/lint_everything.yaml/badge.svg
 [lint-everything-href]: https://github.com/netbrain/zwift/actions/workflows/lint_everything.yaml
