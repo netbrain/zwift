@@ -14,7 +14,7 @@ VERBOSITY="${VERBOSITY:-1}" # updated after loading user config files
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
-readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
+readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/ZwiftVolume" # WORKAROUND issue 366 (change ZwiftVolume to Zwift when fixed)
 
 if [[ -t 1 ]]; then
     readonly INTERACTIVE_TERMINAL="1"

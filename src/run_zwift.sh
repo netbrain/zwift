@@ -30,6 +30,7 @@ readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
+readonly ZWIFT_VOLUME="${WINE_USER_HOME}/AppData/Local/ZwiftVolume" # WORKAROUND issue 366 (remove when fixed)
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 readonly ZWIFT_PREFS="${ZWIFT_DOCS}/prefs.xml"
 
@@ -92,6 +93,16 @@ wait_until_wine_task_started() {
     msgbox info "Waiting for ${task_name} to start..."
     wait_until "is_wine_task_running ${task_name}"
 }
+
+#########################################################################################
+##### Sync Zwift volume to Zwift AppData - WORKAROUND issue 366 (remove when fixed) #####
+
+msgbox info "Synchronizing Zwift settings"
+if rsync -au "${ZWIFT_VOLUME}/" "${ZWIFT_DOCS}/"; then
+    msgbox ok "Synchronized Zwift settings"
+else
+    msgbox warning "Failed to synchronize Zwift settings"
+fi
 
 ###########################
 ##### Configure Zwift #####
@@ -196,5 +207,13 @@ while is_wine_task_running ZwiftApp.exe; do
     msgbox debug "Waiting for Zwift to exit... ($((counter++)))"
     sleep 5
 done
+
+# WORKAROUND issue 366 (remove when fixed)
+msgbox info "Synchronizing Zwift settings"
+if rsync -au "${ZWIFT_DOCS}/" "${ZWIFT_VOLUME}/"; then
+    msgbox ok "Synchronized Zwift settings"
+else
+    msgbox warning "Failed to synchronize Zwift settings"
+fi
 
 msgbox info "Zwift closed, exiting"
