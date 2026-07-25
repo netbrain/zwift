@@ -1,33 +1,22 @@
 {
   description = "Easily zwift on linux";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-
-    runfromprocess-rs.url = "github:quietvoid/runfromprocess-rs?rev=a3d003c07d1bd11ff93c4cac96d2c3aa5deb8471";
-  };
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
   outputs =
     {
       nixpkgs,
-      runfromprocess-rs,
       self,
     }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
 
-      zwift-fhs = import ./nix/zwift-fhs-package.nix {
-        inherit
-          pkgs
-          system
-          runfromprocess-rs
-          ;
-      };
+      zwift-fhs = import ./nix/zwift-fhs-package.nix { inherit pkgs; };
 
       zwift-container = import ./nix/zwift-container-package.nix { inherit pkgs; };
 
-      nixosModule = import ./nix/module.nix { zwift-fhs-package = zwift-fhs; };
+      nixosModule = import ./nix/module.nix;
     in
     {
       nixosModules = {
@@ -49,8 +38,8 @@
           hadolint
 
           # Markdown
-          nodePackages.markdownlint-cli2
-          nodePackages.cspell
+          markdownlint-cli2
+          cspell
 
           # Documentation (Jekyll)
           ruby
@@ -78,24 +67,6 @@
           zwift-container
           ;
         default = zwift-container;
-
-        zwift-unwrapped = pkgs.stdenv.mkDerivation rec {
-          pname = "zwift-unwrapped";
-          version = "0-unstable";
-
-          src = ./.;
-
-          nativeBuildInputs = [ pkgs.copyDesktopItems ];
-
-          installPhase = ''
-            runHook preInstall
-            install -Dm755 $src/src/zwift.sh -T $out/bin/${pname}
-            install -Dm644 $src/bin/Zwift.svg -T $out/share/icons/hicolor/scalable/apps/zwift.svg
-            runHook postInstall
-          '';
-
-          desktopItems = [ "bin/Zwift.desktop" ];
-        };
       };
     };
 }
