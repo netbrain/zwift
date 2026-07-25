@@ -1,15 +1,13 @@
 {
   pkgs,
-  system,
-  runfromprocess-rs,
+  winePrefix ? "",
+  debug ? "",
 }:
 let
   common = import ./zwift-common.nix { inherit pkgs; };
 
-  runfromprocess = runfromprocess-rs.packages.${system}.x86_64-pc-windows-gnu;
-
-  zwift-scripts = pkgs.stdenv.mkDerivation {
-    pname = "zwift-scripts";
+  zwift-nix-fhs = pkgs.stdenv.mkDerivation {
+    pname = "zwift-nix-fhs";
     version = "0-unstable";
 
     dontUnpack = true;
@@ -18,10 +16,7 @@ let
       runHook preInstall
 
       mkdir -p $out/bin
-      install -Dm755 ${../src/zwift-auth.sh}    $out/bin/zwift-auth
-      install -Dm755 ${../src/run_zwift.sh}     $out/bin/zwift-run
       install -Dm755 ${../src/zwift-nix-fhs.sh} $out/bin/zwift-nix-fhs
-      install -Dm775 ${../src/update_zwift.sh}  $out/bin/zwift-update
 
       runHook postInstall
     '';
@@ -36,7 +31,7 @@ let
     targetPkgs =
       pkgs: with pkgs; [
         # Wine (staging has better compatibility than devel/unstable)
-        wineWowPackages.stagingFull
+        wineWow64Packages.stagingFull
         winetricks
 
         # Graphics - Vulkan
@@ -50,21 +45,21 @@ let
         libglvnd
 
         # X11 libraries
-        xorg.libX11
-        xorg.libXext
-        xorg.libXrandr
-        xorg.libXrender
-        xorg.libXcursor
-        xorg.libXfixes
-        xorg.libXi
-        xorg.libXcomposite
-        xorg.libXdamage
-        xorg.libXtst
-        xorg.libXScrnSaver
-        xorg.libxcb
-        xorg.libICE
-        xorg.libSM
-        xorg.xrandr
+        libx11
+        libxext
+        libxrandr
+        libxrender
+        libxcursor
+        libxfixes
+        libxi
+        libxcomposite
+        libxdamage
+        libxtst
+        libxscrnsaver
+        libxcb
+        libice
+        libsm
+        xrandr
 
         # Wayland
         wayland
@@ -72,11 +67,9 @@ let
         wayland-protocols
 
         # Audio
-        pulseaudio
         pipewire
         alsa-lib
         alsa-plugins
-        libpulseaudio
 
         # System libraries
         glib
@@ -129,11 +122,8 @@ let
         gtk3
         gdk-pixbuf
 
-        # The runfromprocess Windows binary
-        runfromprocess
-
-        # Our wrapper scripts
-        zwift-scripts
+        # Our wrapper script
+        zwift-nix-fhs
       ];
 
     # 32-bit packages for Wine compatibility
@@ -147,23 +137,21 @@ let
         libglvnd
 
         # X11
-        xorg.libX11
-        xorg.libXext
-        xorg.libXrandr
-        xorg.libXrender
-        xorg.libXcursor
-        xorg.libXfixes
-        xorg.libXi
-        xorg.libXcomposite
-        xorg.libXdamage
-        xorg.libXtst
-        xorg.libxcb
+        libx11
+        libxext
+        libxrandr
+        libxrender
+        libxcursor
+        libxfixes
+        libxi
+        libxcomposite
+        libxdamage
+        libxtst
+        libxcb
 
         # Audio
-        pulseaudio
         alsa-lib
         alsa-plugins
-        libpulseaudio
 
         # System
         glib
@@ -188,7 +176,11 @@ let
       ];
 
     profile = ''
-      export WINEPREFIX="''${WINEPREFIX:-$HOME/.wine-zwift}"
+      ${if winePrefix != "" then ''
+        export WINEPREFIX="${winePrefix}"
+      '' else ''
+        export WINEPREFIX="''${WINEPREFIX:-$HOME/.wine-zwift}"
+      ''}
       export WINEDEBUG="''${WINEDEBUG:--all}"
       export WINEARCH=win64
 
@@ -220,6 +212,12 @@ let
 
     runScript = "bash";
   };
+  nixosRun = pkgs.writeShellScript "zwift-nixos.sh" ''
+    ${pkgs.lib.optionalString (winePrefix != "") "export WINE_PREFIX=${winePrefix}"}
+    ${pkgs.lib.optionalString (debug != "") "export DEBUG=${debug}"}
+
+    exec ${zwift-fhs}/bin/zwift-fhs -c "zwift-nix-fhs"
+  '';
 
 in
 pkgs.stdenv.mkDerivation {
@@ -232,22 +230,8 @@ pkgs.stdenv.mkDerivation {
 
   installPhase = ''
     runHook preInstall
-
-    mkdir -p $out/bin
-    cat > $out/bin/zwift << 'EOF'
-    #!/usr/bin/env bash
-    exec ${zwift-fhs}/bin/zwift-fhs -c "zwift-nix-fhs $*"
-    EOF
-    chmod +x $out/bin/zwift
-
-    cat > $out/bin/zwift-auth << 'EOF'
-    #!/usr/bin/env bash
-    exec ${zwift-fhs}/bin/zwift-fhs -c "zwift-auth"
-    EOF
-    chmod +x $out/bin/zwift-auth
-
+    install -Dm755 ${nixosRun} -T $out/bin/zwift
     install -Dm644 ${../bin/Zwift.svg} -T $out/share/icons/hicolor/scalable/apps/zwift.svg
-
     runHook postInstall
   '';
 

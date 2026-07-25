@@ -22,16 +22,10 @@ else
 fi
 
 readonly VERBOSITY="${VERBOSITY:-1}"
-readonly CONTAINER_TOOL="${CONTAINER_TOOL:-}"
+readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 
-if [[ ${CONTAINER_TOOL} == "nix-fhs" ]]; then
-    readonly WINEPREFIX="${WINEPREFIX:-${HOME}/.wine-zwift}"
-    readonly WINE_USER_HOME="${WINEPREFIX}/drive_c/users/${USER}"
-else
-    readonly WINEPREFIX="/home/user/.wine"
-    readonly WINE_USER_HOME="${WINEPREFIX}/drive_c/users/user"
-fi
-readonly ZWIFT_HOME="${WINEPREFIX}/drive_c/Program Files (x86)/Zwift"
+readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
+readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
 
 msgbox() {
@@ -104,7 +98,7 @@ update_zwift_using_launcher() {
     msgbox ok "Zwift launcher started using wine"
 
     local counter=1
-    local max_iterations=120 # 120 * 5s = 10 minutes max
+    local max_iterations=60 # 60 * 5s = 5 minutes max
 
     # also stop if launcher exits before update finishes, so we don't hang forever
     while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && [[ ${counter} -le ${max_iterations} ]] && is_wine_task_running ZwiftLauncher.exe; do
@@ -163,16 +157,14 @@ cleanup() {
     msgbox info "Stopping wine server"
     wineserver -k || true # important, Zwift launcher won't stop until wine server is killed
 
-    if [[ ${CONTAINER_TOOL} != "nix-fhs" ]]; then
-        msgbox info "Removing installation artifacts"
-        # remove downloads and cache
-        rm -- "${ZWIFT_HOME}/ZwiftSetup.exe" || true
-        rm -- "${ZWIFT_HOME}/webview2-setup.exe" || true
-        rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
-        rm -rf -- "/home/user/.cache/wine*" || true
-        # remove Zwift documents because it causes permission errors with podman
-        rm -rf -- "${ZWIFT_DOCS}" || true
-    fi
+    msgbox info "Removing installation artifacts"
+    # remove downloads and cache
+    rm -- "${ZWIFT_HOME}/ZwiftSetup.exe" || true
+    rm -- "${ZWIFT_HOME}/webview2-setup.exe" || true
+    rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
+    rm -rf -- "/home/user/.cache/wine*" || true
+    # remove Zwift documents because it causes permission errors with podman
+    rm -rf -- "${ZWIFT_DOCS}" || true
 }
 
 trap cleanup EXIT
