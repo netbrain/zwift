@@ -58,14 +58,14 @@ is_wine_task_running() {
 get_current_version() {
     # if Zwift_ver_cur_filename.txt exists, it holds the true current version filename
     # if it does not exist, use Zwift_ver_cur.xml as fallback
-    # if neither exist or contain a valid version, use 0.0.0 (Zwift not installed)
+    # if neither exist or contain a valid version, use undefined (Zwift not installed)
 
     local version_filename="Zwift_ver_cur.xml"
     if [[ -f Zwift_ver_cur_filename.txt ]]; then
         version_filename="$(tr '\0' '\n' < Zwift_ver_cur_filename.txt)"
     fi
 
-    grep -oP 'sversion="\K.*?(?=\s)' "${version_filename}" 2> /dev/null | cut -f 1 -d ' ' || echo "0.0.0"
+    grep -oP 'sversion="\K.*?(?=\s)' "${version_filename}" 2> /dev/null | cut -f 1 -d ' ' || echo "undefined"
 }
 
 get_latest_version() {
@@ -86,9 +86,9 @@ update_zwift_using_launcher() {
     if [[ ${zwift_current_version} == "${zwift_latest_version}" ]]; then
         msgbox ok "Nothing to do, already at latest version ${zwift_latest_version}"
         return 0
-    else
-        msgbox info "Updating Zwift from version ${zwift_current_version} to ${zwift_latest_version}"
     fi
+
+    msgbox info "Updating Zwift from version ${zwift_current_version} to ${zwift_latest_version}"
 
     msgbox info "Starting Zwift launcher using wine"
     if ! wine start ZwiftLauncher.exe SilentLaunch; then
@@ -99,9 +99,10 @@ update_zwift_using_launcher() {
 
     local counter=1
     local max_iterations=60 # 60 * 5s = 5 minutes max
+    local zwift_original_version="${zwift_current_version}"
 
     # also stop if launcher exits before update finishes, so we don't hang forever
-    while [[ ${zwift_current_version} != "${zwift_latest_version}" ]] && [[ ${counter} -le ${max_iterations} ]] && is_wine_task_running ZwiftLauncher.exe; do
+    while [[ ${zwift_current_version} == "${zwift_original_version}" ]] && [[ ${counter} -le ${max_iterations} ]] && is_wine_task_running ZwiftLauncher.exe; do
         msgbox info "Updating Zwift... (${counter}/${max_iterations})"
         msgbox debug "Current version: ${zwift_current_version}; Latest version: ${zwift_latest_version}"
         sleep 5
@@ -110,7 +111,7 @@ update_zwift_using_launcher() {
     done
 
     # if launcher exited unexpectedly or update timeout, Zwift is still at the old version
-    if [[ ${zwift_current_version} != "${zwift_latest_version}" ]]; then
+    if [[ ${zwift_current_version} == "${zwift_original_version}" ]]; then
         if [[ ${counter} -gt ${max_iterations} ]]; then
             msgbox error "Update timed out after $((counter * 5)) seconds"
         else
@@ -119,7 +120,13 @@ update_zwift_using_launcher() {
         return 1
     fi
 
-    msgbox ok "Zwift updated to version ${zwift_latest_version}"
+    # zwift updated to unexpected version?
+    if [[ ${zwift_current_version} != "${zwift_latest_version}" ]]; then
+        msgbox error "Zwift updated to unexpected version (Expected: ${zwift_latest_version}, Actual: ${zwift_current_version}"
+        return 1
+    fi
+
+    msgbox ok "Zwift updated to version ${zwift_current_version}"
 }
 
 install_zwift() {
