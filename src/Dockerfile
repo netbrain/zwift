@@ -81,21 +81,21 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
 # Download winetricks
 ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks /usr/local/bin/
 
-# Create passwordless user and make nvidia libraries discoverable
-RUN useradd --create-home --shell /bin/bash user \
- && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
- && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-
-# Required for non-glvnd setups
+# Configure nvidia driver
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
+ && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
 # Configure audio driver
 COPY pulse-client.conf /etc/pulse/client.conf
 
+# Create passwordless user
+RUN useradd --create-home --shell /bin/bash user
+
 FROM wine-base
 
-ENV NVIDIA_VISIBLE_DEVICES=all
-ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV WINEDEBUG=fixme-all
 ENV WINE_PREFIX="/home/user/.wine"
 ENV WINE_USER_HOME="${WINE_PREFIX}/drive_c/users/user"
