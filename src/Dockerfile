@@ -91,8 +91,8 @@ COPY pulse-client.conf /etc/pulse/client.conf
 # - Create runtime directory
 # - Update audio driver config file
 # - Make nvidia libraries discoverable
-RUN addgroup --gid ${USER_GID} user \
- && adduser --uid ${USER_UID} --gid ${USER_GID} --disabled-password --comment '' user \
+RUN groupadd --gid ${USER_GID} user \
+ && useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --shell /bin/bash --no-log-init user \
  && sed -i "s|/run/user/1000|/run/user/${USER_UID}|g" /etc/pulse/client.conf \
  && mkdir -p /run/user/${USER_UID} \
  && chown -R user:user /run/user/${USER_UID} \
