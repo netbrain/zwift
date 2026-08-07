@@ -1,6 +1,6 @@
 ARG DEBIAN_VERSION=trixie
 
-FROM rust:1.98.0-slim-trixie AS build-runfromprocess
+FROM rust:1.98.1-slim-trixie AS build-runfromprocess
 
 ARG RUNFROMPROCESS_VERSION=a3d003c07d1bd11ff93c4cac96d2c3aa5deb8471
 
@@ -8,8 +8,7 @@ ARG RUNFROMPROCESS_VERSION=a3d003c07d1bd11ff93c4cac96d2c3aa5deb8471
 # - mingw to cross-compile for windows
 # - rust cross-compiler for windows
 RUN DEBIAN_FRONTEND="noninteractive" apt-get update \
- && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
-        g++-mingw-w64-x86-64 \
+ && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y g++-mingw-w64-x86-64 \
  && rm -rf /var/lib/apt/lists/* \
  && rustup target add x86_64-pc-windows-gnu
 
@@ -84,7 +83,7 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
 ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks /usr/local/bin/
 
 # Create passwordless user and make nvidia libraries discoverable
-RUN adduser --disabled-password --gecos '' user \
+RUN useradd --create-home --shell /bin/bash user \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
