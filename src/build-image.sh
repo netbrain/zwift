@@ -89,7 +89,8 @@ else
     exit 1
 fi
 
-# Update information based on container tool
+# Container and image names
+readonly TEMP_CONTAINER_NAME="zwift-build"
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     readonly BUILD_NAME="zwift"
     readonly IMAGE="localhost/zwift"
@@ -107,7 +108,7 @@ declare -a container_args
 container_args=(
     -it
     --network bridge
-    --name zwift
+    --name "${TEMP_CONTAINER_NAME}"
     --security-opt label=type:container_runtime_t
     --hostname "${HOSTNAME}"
 
@@ -169,7 +170,7 @@ cleanup_invoked=0
 cleanup() {
     if [[ ${cleanup_invoked} -ne 1 ]]; then
         msgbox info "Checking for temporary container"
-        if ${CONTAINER_TOOL} container rm zwift > /dev/null 2>&1; then
+        if ${CONTAINER_TOOL} container rm "${TEMP_CONTAINER_NAME}" > /dev/null 2>&1; then
             msgbox ok "Removed temporary container"
         else
             msgbox info "No temporary container to remove"
@@ -197,8 +198,8 @@ else
 fi
 
 msgbox info "Updating image with changes from temporary container"
-if ${CONTAINER_TOOL} commit zwift "${BUILD_NAME}:latest"; then
-    msgbox ok "Tagged Zwift container as ${IMAGE}:latest"
+if ${CONTAINER_TOOL} commit "${TEMP_CONTAINER_NAME}" "${BUILD_NAME}:latest"; then
+    msgbox ok "Tagged ${TEMP_CONTAINER_NAME} container as ${IMAGE}:latest"
 else
     msgbox error "Failed to commit container changes to image! 😭"
     exit 1

@@ -44,7 +44,7 @@ jobs:
 
         xhost +
         docker run \
-            --name zwift \
+            --name zwift-update \
             -e DISPLAY="${DISPLAY}" \
             -e CONTAINER_TOOL="docker" \
             --device="/dev/dri:/dev/dri" \
@@ -57,7 +57,7 @@ jobs:
             --change="LABEL org.opencontainers.image.version=${version}" \
             --change='CMD [""]' \
             -m "updated to version ${version}" \
-            zwift \
+            zwift-update \
             "netbrain/zwift:${version}"
 
         docker tag "netbrain/zwift:${version}" netbrain/zwift:latest

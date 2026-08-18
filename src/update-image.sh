@@ -91,7 +91,7 @@ readonly VERSION="${VERSION:-latest}"
 msgbox info "Updating image ${IMAGE}:${VERSION}"
 
 # Initialize script constants
-readonly TEMP_CONTAINER_NAME="zwift-update-image"
+readonly TEMP_CONTAINER_NAME="zwift-push"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd)"
 readonly SCRIPT_DIR
 declare -A SCRIPTS_MAP

@@ -23,7 +23,7 @@ jobs:
     - name: Get latest zwift container and diff script files
       run: |
         docker pull netbrain/zwift:latest
-        docker create --name zwift netbrain/zwift:latest
+        docker create --name zwift-push netbrain/zwift:latest
 
         declare -A files_map
         files_map["/bin/entrypoint"]="src/entrypoint.sh"
@@ -35,11 +35,11 @@ jobs:
         for container_path in "${!files_map[@]}"; do
             local_file="${files_map[${container_path}]}"
             mkdir -p "$(dirname "/tmp/${local_file}")"
-            docker cp "zwift:${container_path}" "/tmp/${local_file}"
+            docker cp "zwift-push:${container_path}" "/tmp/${local_file}"
             diff "${local_file}" "/tmp/${local_file}" > /dev/null || {
                 if [[ ${?} -eq 1 ]]; then
                     has_changes=1
-                    docker cp "${local_file}" "zwift:${container_path}"
+                    docker cp "${local_file}" "zwift-push:${container_path}"
                 else
                     echo "::error::Failed to diff '${local_file}'"
                     exit 1
@@ -52,7 +52,7 @@ jobs:
             docker commit \
                 --change="LABEL org.opencontainers.image.created=${build_date}" \
                 -m "Updated script files from git (${GITHUB_SHA})" \
-                zwift \
+                zwift-push \
                 netbrain/zwift:latest
             docker push "netbrain/zwift:latest"
         fi
