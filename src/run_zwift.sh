@@ -27,13 +27,11 @@ readonly ZWIFT_USERNAME="${ZWIFT_USERNAME:-}"
 readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:-}"
 readonly ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION:-}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
-
-readonly WINE_USER_HOME="${WINE_USER_HOME:?}"
 readonly ZWIFT_DATA_DIR="${ZWIFT_DATA_DIR:?}"
 readonly ZWIFT_INSTALL_DIR="${ZWIFT_INSTALL_DIR:?}"
 readonly ZWIFT_OLD_DATA_DIR="${WINE_USER_HOME:?}/Documents/Zwift"
-readonly ZWIFT_VOLUME="${WINE_USER_HOME}/AppData/Local/ZwiftVolume" # WORKAROUND issue 366 (remove when fixed)
 readonly ZWIFT_PREFS_FILE="${ZWIFT_DATA_DIR}/prefs.xml"
+readonly ZWIFT_VOLUME="${ZWIFT_VOLUME:-}"
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
@@ -95,14 +93,16 @@ wait_until_wine_task_started() {
     wait_until "is_wine_task_running ${task_name}"
 }
 
-#########################################################################################
-##### Sync Zwift volume to Zwift AppData - WORKAROUND issue 366 (remove when fixed) #####
+##############################################
+##### Sync Zwift volume to Zwift AppData #####
 
-msgbox info "Synchronizing Zwift settings"
-if rsync -au "${ZWIFT_VOLUME}/" "${ZWIFT_DATA_DIR}/"; then
-    msgbox ok "Synchronized Zwift settings"
-else
-    msgbox warning "Failed to synchronize Zwift settings"
+if [[ -n ${ZWIFT_VOLUME} ]] && [[ ${ZWIFT_VOLUME} != "${ZWIFT_DATA_DIR}" ]]; then
+    msgbox info "Synchronizing Zwift settings"
+    if rsync -au "${ZWIFT_VOLUME}/" "${ZWIFT_DATA_DIR}/"; then
+        msgbox ok "Synchronized Zwift settings"
+    else
+        msgbox warning "Failed to synchronize Zwift settings"
+    fi
 fi
 
 ###########################
@@ -213,12 +213,19 @@ while is_wine_task_running ZwiftApp.exe; do
     sleep 5
 done
 
-# WORKAROUND issue 366 (remove when fixed)
-msgbox info "Synchronizing Zwift settings"
-if rsync -au "${ZWIFT_DATA_DIR}/" "${ZWIFT_VOLUME}/"; then
-    msgbox ok "Synchronized Zwift settings"
-else
-    msgbox warning "Failed to synchronize Zwift settings"
+##############################################
+##### Sync Zwift volume to Zwift AppData #####
+
+if [[ -n ${ZWIFT_VOLUME} ]] && [[ ${ZWIFT_VOLUME} != "${ZWIFT_DATA_DIR}" ]]; then
+    msgbox info "Synchronizing Zwift settings"
+    if rsync -au "${ZWIFT_DATA_DIR}/" "${ZWIFT_VOLUME}/"; then
+        msgbox ok "Synchronized Zwift settings"
+    else
+        msgbox warning "Failed to synchronize Zwift settings"
+    fi
 fi
+
+################
+##### Exit #####
 
 msgbox info "Zwift closed, exiting"

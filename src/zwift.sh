@@ -13,7 +13,7 @@ VERBOSITY="${VERBOSITY:-1}" # updated after loading user config files
 
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
-readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
+readonly ZWIFT_VOLUME="/tmp/zwift-data" # WORKAROUND issue 366 (change to WINE_USER_HOME/AppData/Local/Zwift when fixed)
 readonly ZWIFT_INSTALL_DIR="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 
 if [[ -t 1 ]]; then
@@ -374,6 +374,7 @@ fi
 container_env_vars+=(
     DEBUG="${DEBUG}"
     VERBOSITY="${VERBOSITY}"
+    ZWIFT_VOLUME="${ZWIFT_VOLUME}"
     ZWIFT_UID="${container_uid}"
     ZWIFT_GID="${container_gid}"
     CONTAINER_TOOL="${CONTAINER_TOOL}"
@@ -386,7 +387,7 @@ container_args+=(
     --name "zwift-${USER}"
     --hostname "${HOSTNAME}"
     --env-file "${container_env_file}"
-    -v "zwift-${USER}:${ZWIFT_DOCS}"
+    -v "zwift-${USER}:${ZWIFT_VOLUME}"
 )
 
 ###################################################
@@ -411,17 +412,17 @@ done
 
 # If a workout directory is specified then map to that directory.
 if [[ -n ${ZWIFT_WORKOUT_DIR} ]]; then
-    container_args+=(-v "${ZWIFT_WORKOUT_DIR}:${ZWIFT_DOCS}/Workouts")
+    container_args+=(-v "${ZWIFT_WORKOUT_DIR}:${ZWIFT_VOLUME}/Workouts")
 fi
 
 # If an activity directory is specified then map to that directory.
 if [[ -n ${ZWIFT_ACTIVITY_DIR} ]]; then
-    container_args+=(-v "${ZWIFT_ACTIVITY_DIR}:${ZWIFT_DOCS}/Activities")
+    container_args+=(-v "${ZWIFT_ACTIVITY_DIR}:${ZWIFT_VOLUME}/Activities")
 fi
 
 # If a log directory is specified then map to that directory.
 if [[ -n ${ZWIFT_LOG_DIR} ]]; then
-    container_args+=(-v "${ZWIFT_LOG_DIR}:${ZWIFT_DOCS}/Logs")
+    container_args+=(-v "${ZWIFT_LOG_DIR}:${ZWIFT_VOLUME}/Logs")
 fi
 
 # If a screenshots directory is specified then map to that directory.

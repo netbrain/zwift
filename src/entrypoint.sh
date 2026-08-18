@@ -26,10 +26,8 @@ readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
-
-readonly WINE_USER_HOME="${WINE_USER_HOME:?}"
-readonly ZWIFT_DATA_DIR="${ZWIFT_DATA_DIR:?}"
 readonly ZWIFT_INSTALL_DIR="${ZWIFT_INSTALL_DIR:?}"
+readonly ZWIFT_VOLUME="${ZWIFT_VOLUME:-}"
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
@@ -142,7 +140,7 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         if [[ ${update_required} -eq 1 ]]; then
             target="/home/user"
         else
-            target="${ZWIFT_DATA_DIR}"
+            target="${ZWIFT_VOLUME}"
         fi
 
         if ! ownership_needs_update "${target}"; then
