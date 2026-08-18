@@ -195,4 +195,4 @@ export DONT_CHECK=1
 export DONT_PULL=1
 export ZWIFT_FG=1
 
-"${SCRIPT_DIR}/zwift.sh"
+"${SCRIPT_DIR}/zwift.sh" "${@}"

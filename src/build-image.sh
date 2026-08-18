@@ -190,7 +190,7 @@ else
 fi
 
 msgbox info "Launching temporary container to install Zwift"
-if ${CONTAINER_TOOL} run "${container_args[@]}" "${IMAGE}:latest" "${@}"; then
+if ${CONTAINER_TOOL} run "${container_args[@]}" "${IMAGE}:latest"; then
     msgbox ok "Successfully installed Zwift in container"
 else
     msgbox error "Failed to install Zwift in container! 😭"
@@ -217,4 +217,4 @@ export DONT_CHECK=1
 export DONT_PULL=1
 export ZWIFT_FG=1
 
-"${SCRIPT_DIR}/zwift.sh"
+"${SCRIPT_DIR}/zwift.sh" "${@}"
