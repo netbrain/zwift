@@ -138,24 +138,16 @@ install_zwift() {
     winetricks -q corefonts dotnet48 d3dcompiler_47 || return 1
 
     msgbox info "Downloading and installing webview2"
-    wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
-    wine webview2-setup.exe /silent /install || return 1
+    wget -O /tmp/webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
+    wine /tmp/webview2-setup.exe /silent /install || return 1
 
     msgbox info "Enabling Wayland support"
     wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland || return 1
 
     msgbox info "Downloading and installing Zwift"
-    wget https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
-    wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
+    wget -O /tmp/ZwiftSetup.exe https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
+    wine /tmp/ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
 }
-
-###########################
-##### Configure Zwift #####
-
-if ! mkdir -p "${ZWIFT_INSTALL_DIR}" || ! cd "${ZWIFT_INSTALL_DIR}"; then
-    msgbox error "Zwift home directory '${ZWIFT_INSTALL_DIR}' does not exist or is not accessible!"
-    exit 1
-fi
 
 #########################################
 ##### Automatically cleanup on exit #####
@@ -165,9 +157,8 @@ cleanup() {
     wineserver -k || true # important, Zwift launcher won't stop until wine server is killed
 
     msgbox info "Removing installation artifacts"
-    # remove downloads and cache
-    rm -- "${ZWIFT_INSTALL_DIR}/ZwiftSetup.exe" || true
-    rm -- "${ZWIFT_INSTALL_DIR}/webview2-setup.exe" || true
+    rm -- "/tmp/ZwiftSetup.exe" || true
+    rm -- "/tmp/webview2-setup.exe" || true
     rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
     rm -rf -- "/home/user/.cache/wine*" || true
     # remove Zwift documents because it causes permission errors with podman
