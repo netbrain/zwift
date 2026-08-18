@@ -31,6 +31,7 @@ readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 readonly WINE_USER_HOME="${WINE_USER_HOME:?}"
 readonly ZWIFT_DATA_DIR="${ZWIFT_DATA_DIR:?}"
 readonly ZWIFT_INSTALL_DIR="${ZWIFT_INSTALL_DIR:?}"
+readonly ZWIFT_OLD_DATA_DIR="${WINE_USER_HOME:?}/Documents/Zwift"
 readonly ZWIFT_VOLUME="${WINE_USER_HOME}/AppData/Local/ZwiftVolume" # WORKAROUND issue 366 (remove when fixed)
 readonly ZWIFT_PREFS="${ZWIFT_DATA_DIR}/prefs.xml"
 
@@ -196,6 +197,10 @@ fi
 
 msgbox info "Killing Zwift launcher and background tasks"
 kill_wine_tasks ZwiftLauncher.exe ZwiftWindowsCrashHandler.exe MicrosoftEdgeUpdate.exe
+
+if [[ -d ${ZWIFT_OLD_DATA_DIR} ]]; then
+    msgbox error "Zwift is using Documents/Zwift instead of AppData/Local/Zwift as data directory"
+fi
 
 msgbox ok "Zwift started using wine"
 
