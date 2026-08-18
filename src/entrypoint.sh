@@ -27,9 +27,9 @@ readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 
-readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
-readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
-readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
+readonly WINE_USER_HOME="${WINE_USER_HOME:?}"
+readonly ZWIFT_DATA_DIR="${ZWIFT_DATA_DIR:?}"
+readonly ZWIFT_INSTALL_DIR="${ZWIFT_INSTALL_DIR:?}"
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
@@ -61,8 +61,8 @@ is_empty_directory() {
 ###########################
 ##### Configure Zwift #####
 
-if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
-    msgbox error "Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!"
+if ! mkdir -p "${ZWIFT_INSTALL_DIR}" || ! cd "${ZWIFT_INSTALL_DIR}"; then
+    msgbox error "Zwift home directory '${ZWIFT_INSTALL_DIR}' does not exist or is not accessible!"
     exit 1
 fi
 
@@ -80,7 +80,7 @@ declare -a startup_cmd
 startup_cmd=(/bin/run_zwift.sh)
 update_required=0
 
-if is_empty_directory "${ZWIFT_HOME}"; then
+if is_empty_directory "${ZWIFT_INSTALL_DIR}"; then
     startup_cmd=(/bin/update_zwift.sh --install)
     update_required=1
 elif [[ ${1:-} == "--update" ]]; then
@@ -142,7 +142,7 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         if [[ ${update_required} -eq 1 ]]; then
             target="/home/user"
         else
-            target="${ZWIFT_DOCS}"
+            target="${ZWIFT_DATA_DIR}"
         fi
 
         if ! ownership_needs_update "${target}"; then

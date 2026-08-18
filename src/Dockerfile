@@ -97,6 +97,10 @@ FROM wine-base
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV WINEDEBUG=fixme-all
+ENV WINE_PREFIX="/home/user/.wine"
+ENV WINE_USER_HOME="${WINE_PREFIX}/drive_c/users/user"
+ENV ZWIFT_DATA_DIR="${WINE_USER_HOME}/AppData/Local/Zwift"
+ENV ZWIFT_INSTALL_DIR="${WINE_PREFIX}/drive_c/Program Files (x86)/Zwift"
 
 LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"

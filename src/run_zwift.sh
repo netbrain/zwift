@@ -28,11 +28,11 @@ readonly ZWIFT_PASSWORD="${ZWIFT_PASSWORD:-}"
 readonly ZWIFT_OVERRIDE_RESOLUTION="${ZWIFT_OVERRIDE_RESOLUTION:-}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 
-readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
-readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
+readonly WINE_USER_HOME="${WINE_USER_HOME:?}"
+readonly ZWIFT_DATA_DIR="${ZWIFT_DATA_DIR:?}"
+readonly ZWIFT_INSTALL_DIR="${ZWIFT_INSTALL_DIR:?}"
 readonly ZWIFT_VOLUME="${WINE_USER_HOME}/AppData/Local/ZwiftVolume" # WORKAROUND issue 366 (remove when fixed)
-readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
-readonly ZWIFT_PREFS="${ZWIFT_DOCS}/prefs.xml"
+readonly ZWIFT_PREFS="${ZWIFT_DATA_DIR}/prefs.xml"
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
@@ -98,7 +98,7 @@ wait_until_wine_task_started() {
 ##### Sync Zwift volume to Zwift AppData - WORKAROUND issue 366 (remove when fixed) #####
 
 msgbox info "Synchronizing Zwift settings"
-if rsync -au "${ZWIFT_VOLUME}/" "${ZWIFT_DOCS}/"; then
+if rsync -au "${ZWIFT_VOLUME}/" "${ZWIFT_DATA_DIR}/"; then
     msgbox ok "Synchronized Zwift settings"
 else
     msgbox warning "Failed to synchronize Zwift settings"
@@ -111,8 +111,8 @@ fi
 declare -a zwift_args
 zwift_args=()
 
-if [[ ! -d ${ZWIFT_HOME} ]] || ! cd "${ZWIFT_HOME}"; then
-    msgbox error "Directory ${ZWIFT_HOME} does not exist. Has Zwift been installed?"
+if [[ ! -d ${ZWIFT_INSTALL_DIR} ]] || ! cd "${ZWIFT_INSTALL_DIR}"; then
+    msgbox error "Directory ${ZWIFT_INSTALL_DIR} does not exist. Has Zwift been installed?"
     exit 1
 fi
 
@@ -210,7 +210,7 @@ done
 
 # WORKAROUND issue 366 (remove when fixed)
 msgbox info "Synchronizing Zwift settings"
-if rsync -au "${ZWIFT_DOCS}/" "${ZWIFT_VOLUME}/"; then
+if rsync -au "${ZWIFT_DATA_DIR}/" "${ZWIFT_VOLUME}/"; then
     msgbox ok "Synchronized Zwift settings"
 else
     msgbox warning "Failed to synchronize Zwift settings"

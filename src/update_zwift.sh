@@ -24,9 +24,9 @@ fi
 readonly VERBOSITY="${VERBOSITY:-1}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 
-readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
-readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
-readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
+readonly WINE_USER_HOME="${WINE_USER_HOME:?}"
+readonly ZWIFT_DATA_DIR="${ZWIFT_DATA_DIR:?}"
+readonly ZWIFT_INSTALL_DIR="${ZWIFT_INSTALL_DIR:?}"
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
@@ -152,8 +152,8 @@ install_zwift() {
 ###########################
 ##### Configure Zwift #####
 
-if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
-    msgbox error "Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!"
+if ! mkdir -p "${ZWIFT_INSTALL_DIR}" || ! cd "${ZWIFT_INSTALL_DIR}"; then
+    msgbox error "Zwift home directory '${ZWIFT_INSTALL_DIR}' does not exist or is not accessible!"
     exit 1
 fi
 
@@ -166,12 +166,12 @@ cleanup() {
 
     msgbox info "Removing installation artifacts"
     # remove downloads and cache
-    rm -- "${ZWIFT_HOME}/ZwiftSetup.exe" || true
-    rm -- "${ZWIFT_HOME}/webview2-setup.exe" || true
+    rm -- "${ZWIFT_INSTALL_DIR}/ZwiftSetup.exe" || true
+    rm -- "${ZWIFT_INSTALL_DIR}/webview2-setup.exe" || true
     rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
     rm -rf -- "/home/user/.cache/wine*" || true
     # remove Zwift documents because it causes permission errors with podman
-    rm -rf -- "${ZWIFT_DOCS}" || true
+    rm -rf -- "${ZWIFT_DATA_DIR}" || true
 }
 
 trap cleanup EXIT
