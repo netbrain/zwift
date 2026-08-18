@@ -190,7 +190,7 @@ else
 fi
 
 msgbox info "Launching temporary container to install Zwift"
-if ${CONTAINER_TOOL} run "${container_args[@]}" "${IMAGE}:latest"; then
+if ${CONTAINER_TOOL} run "${container_args[@]}" "${IMAGE}:latest" --install; then
     msgbox ok "Successfully installed Zwift in container"
 else
     msgbox error "Failed to install Zwift in container! 😭"
@@ -198,7 +198,8 @@ else
 fi
 
 msgbox info "Updating image with changes from temporary container"
-if ${CONTAINER_TOOL} commit "${TEMP_CONTAINER_NAME}" "${BUILD_NAME}:latest"; then
+# Note: --change='ENTRYPOINT ["entrypoint"]' is needed because podman incorrectly clears the entrypoint when doing --change='CMD [""]'
+if ${CONTAINER_TOOL} commit --change='CMD [""]' --change='ENTRYPOINT ["entrypoint"]' "${TEMP_CONTAINER_NAME}" "${BUILD_NAME}:latest"; then
     msgbox ok "Tagged ${TEMP_CONTAINER_NAME} container as ${IMAGE}:latest"
 else
     msgbox error "Failed to commit container changes to image! 😭"

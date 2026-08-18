@@ -49,7 +49,8 @@ jobs:
             -e CONTAINER_TOOL="docker" \
             --device="/dev/dri:/dev/dri" \
             -v /tmp/.X11-unix:/tmp/.X11-unix \
-            netbrain/zwift:build
+            netbrain/zwift:build \
+            --install
 
         docker commit \
             --change="LABEL org.opencontainers.image.created=${build_date}" \

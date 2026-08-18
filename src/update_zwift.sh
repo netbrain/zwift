@@ -177,7 +177,9 @@ trap cleanup EXIT
 
 if [[ ${1:-} == "--install" ]]; then
     msgbox info "Installing Zwift..."
-    if ! install_zwift; then
+    if [[ -f "${ZWIFT_INSTALL_DIR}/ZwiftLauncher.exe" ]]; then
+        msgbox warning "Zwift is already installed, skipping"
+    elif ! install_zwift; then
         msgbox error "Failed to install Zwift!"
         exit 1
     fi

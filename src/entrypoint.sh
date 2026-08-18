@@ -26,7 +26,6 @@ readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
-readonly ZWIFT_INSTALL_DIR="${ZWIFT_INSTALL_DIR:?}"
 readonly ZWIFT_VOLUME="${ZWIFT_VOLUME:-}"
 
 msgbox() {
@@ -46,16 +45,6 @@ msgbox() {
     esac
 }
 
-is_empty_directory() {
-    local directory="${1:?}"
-    if [[ ! -d ${directory} ]]; then
-        msgbox error "${directory} is not a directory"
-        exit 1
-    fi
-    local contents
-    ! contents="$(ls -A "${directory}" 2> /dev/null)" || [[ -z ${contents} ]]
-}
-
 ###########################
 ##### Configure Zwift #####
 
@@ -69,16 +58,14 @@ fi
 ############################################
 ##### Clean install, update or launch? #####
 
-declare -a startup_cmd
-startup_cmd=(/bin/run_zwift.sh)
-update_required=0
+msgbox debug "Entrypoint script invoked with arguments: ${*:-none}"
 
-if is_empty_directory "${ZWIFT_INSTALL_DIR}"; then
-    startup_cmd=(/bin/update_zwift.sh --install)
-    update_required=1
-elif [[ ${1:-} == "--update" ]]; then
-    startup_cmd=(/bin/update_zwift.sh)
-    update_required=1
+declare -a startup_cmd
+
+if [[ ${1:-} == "--install" ]] || [[ ${1:-} == "--update" ]]; then
+    startup_cmd=(/bin/update_zwift.sh "${1:-}")
+else
+    startup_cmd=(/bin/run_zwift.sh)
 fi
 
 ######################################
