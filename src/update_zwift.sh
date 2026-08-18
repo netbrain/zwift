@@ -23,7 +23,6 @@ fi
 
 readonly VERBOSITY="${VERBOSITY:-1}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
-
 readonly WINE_USER_HOME="${WINE_USER_HOME:?}"
 readonly ZWIFT_DATA_DIR="${ZWIFT_DATA_DIR:?}"
 readonly ZWIFT_INSTALL_DIR="${ZWIFT_INSTALL_DIR:?}"
@@ -61,11 +60,11 @@ get_current_version() {
     # if neither exist or contain a valid version, use undefined (Zwift not installed)
 
     local version_filename="Zwift_ver_cur.xml"
-    if [[ -f Zwift_ver_cur_filename.txt ]]; then
-        version_filename="$(tr '\0' '\n' < Zwift_ver_cur_filename.txt)"
+    if [[ -f "${ZWIFT_INSTALL_DIR}/Zwift_ver_cur_filename.txt" ]]; then
+        version_filename="$(tr '\0' '\n' < "${ZWIFT_INSTALL_DIR}/Zwift_ver_cur_filename.txt")"
     fi
 
-    grep -oP 'sversion="\K.*?(?=\s)' "${version_filename}" 2> /dev/null | cut -f 1 -d ' ' || echo "undefined"
+    grep -oP 'sversion="\K.*?(?=\s)' "${ZWIFT_INSTALL_DIR}/${version_filename}" 2> /dev/null | cut -f 1 -d ' ' || echo "none"
 }
 
 get_latest_version() {
@@ -91,7 +90,14 @@ update_zwift_using_launcher() {
     msgbox info "Updating Zwift from version ${zwift_current_version} to ${zwift_latest_version}"
 
     msgbox info "Starting Zwift launcher using wine"
-    if ! wine start ZwiftLauncher.exe SilentLaunch; then
+    local zwift_wine_dir
+    if ! zwift_wine_dir="$(winepath -w "${ZWIFT_INSTALL_DIR}")" || [[ -z ${zwift_wine_dir} ]]; then
+        msgbox error "Failed to convert Zwift installation path to win32 path for wine"
+        exit 1
+    else
+        msgbox debug "Zwift installation wine path is: ${zwift_wine_dir}"
+    fi
+    if ! wine start /d "${zwift_wine_dir}" ZwiftLauncher.exe SilentLaunch; then
         msgbox error "Failed to start Zwift launcher using wine!"
         return 1
     fi
@@ -175,8 +181,13 @@ if [[ ${1:-} == "--install" ]]; then
         msgbox error "Failed to install Zwift!"
         exit 1
     fi
-else
-    msgbox info "Updating Zwift..."
+fi
+
+msgbox info "Updating Zwift..."
+
+if ! [[ -f "${ZWIFT_INSTALL_DIR}/ZwiftLauncher.exe" ]]; then
+    msgbox error "ZwiftLauncher.exe not found. Is Zwift installed?"
+    exit 1
 fi
 
 if ! update_zwift_using_launcher; then

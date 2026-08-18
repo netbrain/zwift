@@ -93,6 +93,21 @@ wait_until_wine_task_started() {
     wait_until "is_wine_task_running ${task_name}"
 }
 
+####################################
+#### Verify Zwift is installed #####
+
+if ! [[ -f "${ZWIFT_INSTALL_DIR}/ZwiftApp.exe" ]]; then
+    msgbox error "ZwiftApp.exe not found. Is Zwift installed?"
+    exit 1
+fi
+
+if ! zwift_wine_dir="$(winepath -w "${ZWIFT_INSTALL_DIR}")" || [[ -z ${zwift_wine_dir} ]]; then
+    msgbox error "Failed to convert Zwift installation path to win32 path for wine"
+    exit 1
+else
+    msgbox debug "Zwift installation wine path is: ${zwift_wine_dir}"
+fi
+
 ##############################################
 ##### Sync Zwift volume to Zwift AppData #####
 
@@ -111,11 +126,6 @@ fi
 # Create array for zwift arguments
 declare -a zwift_args
 zwift_args=()
-
-if [[ ! -d ${ZWIFT_INSTALL_DIR} ]] || ! cd "${ZWIFT_INSTALL_DIR}"; then
-    msgbox error "Directory ${ZWIFT_INSTALL_DIR} does not exist. Has Zwift been installed?"
-    exit 1
-fi
 
 if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
     if [[ -f ${ZWIFT_PREFS_FILE} ]]; then
@@ -167,7 +177,7 @@ trap cleanup EXIT
 
 msgbox info "Starting Zwift launcher using wine"
 
-if ! wine start ZwiftLauncher.exe SilentLaunch || ! wait_until_wine_task_started ZwiftLauncher.exe; then
+if ! wine start /d "${zwift_wine_dir}" ZwiftLauncher.exe SilentLaunch || ! wait_until_wine_task_started ZwiftLauncher.exe; then
     msgbox error "Failed to start Zwift launcher using wine!"
     exit 1
 fi
@@ -181,13 +191,13 @@ msgbox ok "Zwift launcher started using wine"
 msgbox info "Starting Zwift using wine"
 
 declare -a zwift_cmd
+zwift_cmd=(wine start /d "${zwift_wine_dir}" /unix /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe "${zwift_args[@]}")
 
 if [[ ${ZWIFT_NO_GAMEMODE} -eq 1 ]]; then
     msgbox info "Not using gamemode"
-    zwift_cmd=(wine start /exec /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe "${zwift_args[@]}")
 else
     msgbox info "Using gamemode"
-    zwift_cmd=(/usr/games/gamemoderun wine /bin/runfromprocess-rs.exe "${launcher_pid}" ZwiftApp.exe "${zwift_args[@]}")
+    zwift_cmd=(/usr/games/gamemoderun "${zwift_cmd[@]}")
 fi
 
 if ! "${zwift_cmd[@]}" || ! wait_until_wine_task_started ZwiftApp.exe; then

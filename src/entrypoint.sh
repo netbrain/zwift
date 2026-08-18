@@ -59,11 +59,6 @@ is_empty_directory() {
 ###########################
 ##### Configure Zwift #####
 
-if ! mkdir -p "${ZWIFT_INSTALL_DIR}" || ! cd "${ZWIFT_INSTALL_DIR}"; then
-    msgbox error "Zwift home directory '${ZWIFT_INSTALL_DIR}' does not exist or is not accessible!"
-    exit 1
-fi
-
 # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
 # NOTE: DISPLAY must be unset here before run_zwift to work
 #       Registry entries are set in the container install or won't work.
@@ -136,14 +131,9 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     }
 
     update_ownership() {
-        local target
-        if [[ ${update_required} -eq 1 ]]; then
-            target="/home/user"
-        else
-            target="${ZWIFT_VOLUME}"
-        fi
+        local target="${ZWIFT_VOLUME}"
 
-        if ! ownership_needs_update "${target}"; then
+        if [[ -z ${target} ]] || ! ownership_needs_update "${target}"; then
             msgbox ok "Ownership already correct, skipping"
             return 0
         fi
