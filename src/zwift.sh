@@ -14,7 +14,7 @@ VERBOSITY="${VERBOSITY:-1}" # updated after loading user config files
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
 readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
-readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/ZwiftVolume" # WORKAROUND issue 366 (change ZwiftVolume to Zwift when fixed)
+readonly ZWIFT_INSTALL_DIR="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 
 if [[ -t 1 ]]; then
     readonly INTERACTIVE_TERMINAL="1"
@@ -457,10 +457,10 @@ if [[ ${ZWIFT_OVERRIDE_GRAPHICS} -eq 1 ]]; then
     # Override all zwift graphics profiles with the custom config file.
     msgbox info "Overriding zwift graphics profiles with ${zwift_graphics_config}"
     container_args+=(
-        -v "${zwift_graphics_config}:${ZWIFT_HOME}/data/configs/basic.txt"
-        -v "${zwift_graphics_config}:${ZWIFT_HOME}/data/configs/medium.txt"
-        -v "${zwift_graphics_config}:${ZWIFT_HOME}/data/configs/high.txt"
-        -v "${zwift_graphics_config}:${ZWIFT_HOME}/data/configs/ultra.txt"
+        -v "${zwift_graphics_config}:${ZWIFT_INSTALL_DIR}/data/configs/basic.txt"
+        -v "${zwift_graphics_config}:${ZWIFT_INSTALL_DIR}/data/configs/medium.txt"
+        -v "${zwift_graphics_config}:${ZWIFT_INSTALL_DIR}/data/configs/high.txt"
+        -v "${zwift_graphics_config}:${ZWIFT_INSTALL_DIR}/data/configs/ultra.txt"
     )
 fi
 

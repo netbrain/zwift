@@ -33,7 +33,7 @@ readonly ZWIFT_DATA_DIR="${ZWIFT_DATA_DIR:?}"
 readonly ZWIFT_INSTALL_DIR="${ZWIFT_INSTALL_DIR:?}"
 readonly ZWIFT_OLD_DATA_DIR="${WINE_USER_HOME:?}/Documents/Zwift"
 readonly ZWIFT_VOLUME="${WINE_USER_HOME}/AppData/Local/ZwiftVolume" # WORKAROUND issue 366 (remove when fixed)
-readonly ZWIFT_PREFS="${ZWIFT_DATA_DIR}/prefs.xml"
+readonly ZWIFT_PREFS_FILE="${ZWIFT_DATA_DIR}/prefs.xml"
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
@@ -118,13 +118,13 @@ if [[ ! -d ${ZWIFT_INSTALL_DIR} ]] || ! cd "${ZWIFT_INSTALL_DIR}"; then
 fi
 
 if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
-    if [[ -f ${ZWIFT_PREFS} ]]; then
+    if [[ -f ${ZWIFT_PREFS_FILE} ]]; then
         msgbox info "Setting zwift resolution to ${ZWIFT_OVERRIDE_RESOLUTION}."
         updated_prefs="$(awk -v resolution="${ZWIFT_OVERRIDE_RESOLUTION}" '{
             gsub(/<USER_RESOLUTION_PREF>.*<\/USER_RESOLUTION_PREF>/,
                  "<USER_RESOLUTION_PREF>" resolution "</USER_RESOLUTION_PREF>")
-        } 1' "${ZWIFT_PREFS}")"
-        echo "${updated_prefs}" > "${ZWIFT_PREFS}"
+        } 1' "${ZWIFT_PREFS_FILE}")"
+        echo "${updated_prefs}" > "${ZWIFT_PREFS_FILE}"
     else
         msgbox warning "Preferences file does not exist yet. Resolution ${ZWIFT_OVERRIDE_RESOLUTION} cannot be set."
     fi
