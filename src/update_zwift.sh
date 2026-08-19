@@ -128,7 +128,7 @@ update_zwift_using_launcher() {
 
     # zwift updated to unexpected version?
     if [[ ${zwift_current_version} != "${zwift_latest_version}" ]]; then
-        msgbox error "Zwift updated to unexpected version (Expected: ${zwift_latest_version}, Actual: ${zwift_current_version}"
+        msgbox error "Zwift updated to unexpected version (Expected: ${zwift_latest_version}, Actual: ${zwift_current_version})"
         return 1
     fi
 
