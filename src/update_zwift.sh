@@ -163,8 +163,8 @@ cleanup() {
     wineserver -k || true # important, Zwift launcher won't stop until wine server is killed
 
     msgbox info "Removing installation artifacts"
-    rm -- "/tmp/ZwiftSetup.exe" || true
-    rm -- "/tmp/webview2-setup.exe" || true
+    rm -f -- "/tmp/ZwiftSetup.exe" || true
+    rm -f -- "/tmp/webview2-setup.exe" || true
     rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
     rm -rf -- "/home/user/.cache/wine*" || true
     rm -rf -- "${ZWIFT_DATA_DIR:?}/*" || true
