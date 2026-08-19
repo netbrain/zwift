@@ -113,7 +113,7 @@ fi
 
 if [[ -n ${ZWIFT_VOLUME} ]] && [[ ${ZWIFT_VOLUME} != "${ZWIFT_DATA_DIR}" ]]; then
     msgbox info "Synchronizing Zwift settings"
-    if rsync -au "${ZWIFT_VOLUME}/" "${ZWIFT_DATA_DIR}/"; then
+    if rsync -qa "${ZWIFT_VOLUME}/" "${ZWIFT_DATA_DIR}/"; then
         msgbox ok "Synchronized Zwift settings"
     else
         msgbox warning "Failed to synchronize Zwift settings"
@@ -228,7 +228,7 @@ done
 
 if [[ -n ${ZWIFT_VOLUME} ]] && [[ ${ZWIFT_VOLUME} != "${ZWIFT_DATA_DIR}" ]]; then
     msgbox info "Synchronizing Zwift settings"
-    if rsync -au "${ZWIFT_DATA_DIR}/" "${ZWIFT_VOLUME}/"; then
+    if rsync -qau "${ZWIFT_DATA_DIR}/" "${ZWIFT_VOLUME}/"; then
         msgbox ok "Synchronized Zwift settings"
     else
         msgbox warning "Failed to synchronize Zwift settings"
