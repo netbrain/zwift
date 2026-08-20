@@ -56,4 +56,3 @@ jobs:
                 netbrain/zwift:latest
             docker push "netbrain/zwift:latest"
         fi
-        docker rm zwift
