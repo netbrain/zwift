@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Install bash language tools
       run: sudo apt-get install -y shellcheck
     - name: Check bash scripts for errors and warnings
@@ -21,9 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Install Go
-      uses: actions/setup-go@v6
+      uses: actions/setup-go@v7
       with:
         go-version: '>=1.23'
         cache: false
@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Install docker buildx
       uses: docker/setup-buildx-action@v4
     - name: Check Dockerfile for errors
@@ -49,9 +49,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Check Dockerfile for errors
-      uses: hadolint/hadolint-action@master
+      uses: hadolint/hadolint-action@v3.4.0
       with:
         config: .hadolint.yaml
         dockerfile: src/Dockerfile
@@ -60,17 +60,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Check github actions for errors
-      uses: devops-actions/actionlint@e7ee33fbf5aa8c9f9ee1145137f3e52e25d6a35b
+      uses: devops-actions/actionlint@9fb9c192862f19e684586ca84b500461bcd8a541
   markdown-lint:
     name: Markdown - Lint with markdownlint
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Check markdown files for errors
-      uses: DavidAnson/markdownlint-cli2-action@v23
+      uses: DavidAnson/markdownlint-cli2-action@v24
       with:
         config: .markdownlint-cli2.yaml
         globs: ''
@@ -79,9 +79,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Spellcheck markdown files
-      uses: streetsidesoftware/cspell-action@v8
+      uses: streetsidesoftware/cspell-action@v9
       with:
         config: .cspell.yaml
         suggestions: true
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Install nix
       uses: cachix/install-nix-action@v31
     - name: Install nix language tools
@@ -102,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Install nix
       uses: cachix/install-nix-action@v31
     - name: Install nix language tools
@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Install nix
       uses: cachix/install-nix-action@v31
     - name: Build nix flake
@@ -126,7 +126,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Install yamllint
       run: sudo apt-get install -y yamllint
     - name: Check yaml files for errors
