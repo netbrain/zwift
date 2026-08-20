@@ -89,7 +89,8 @@ else
     exit 1
 fi
 
-# Update information based on container tool
+# Container and image names
+readonly TEMP_CONTAINER_NAME="zwift-build"
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     readonly BUILD_NAME="zwift"
     readonly IMAGE="localhost/zwift"
@@ -107,7 +108,7 @@ declare -a container_args
 container_args=(
     -it
     --network bridge
-    --name zwift
+    --name "${TEMP_CONTAINER_NAME}"
     --security-opt label=type:container_runtime_t
     --hostname "${HOSTNAME}"
 
@@ -169,7 +170,7 @@ cleanup_invoked=0
 cleanup() {
     if [[ ${cleanup_invoked} -ne 1 ]]; then
         msgbox info "Checking for temporary container"
-        if ${CONTAINER_TOOL} container rm zwift > /dev/null 2>&1; then
+        if ${CONTAINER_TOOL} container rm "${TEMP_CONTAINER_NAME}" > /dev/null 2>&1; then
             msgbox ok "Removed temporary container"
         else
             msgbox info "No temporary container to remove"
@@ -189,7 +190,7 @@ else
 fi
 
 msgbox info "Launching temporary container to install Zwift"
-if ${CONTAINER_TOOL} run "${container_args[@]}" "${IMAGE}:latest" "${@}"; then
+if ${CONTAINER_TOOL} run "${container_args[@]}" "${IMAGE}:latest" --install; then
     msgbox ok "Successfully installed Zwift in container"
 else
     msgbox error "Failed to install Zwift in container! 😭"
@@ -197,8 +198,9 @@ else
 fi
 
 msgbox info "Updating image with changes from temporary container"
-if ${CONTAINER_TOOL} commit zwift "${BUILD_NAME}:latest"; then
-    msgbox ok "Tagged Zwift container as ${IMAGE}:latest"
+# Note: --change='ENTRYPOINT ["entrypoint"]' is needed because podman incorrectly clears the entrypoint when doing --change='CMD [""]'
+if ${CONTAINER_TOOL} commit --change='CMD [""]' --change='ENTRYPOINT ["entrypoint"]' "${TEMP_CONTAINER_NAME}" "${BUILD_NAME}:latest"; then
+    msgbox ok "Tagged ${TEMP_CONTAINER_NAME} container as ${IMAGE}:latest"
 else
     msgbox error "Failed to commit container changes to image! 😭"
     exit 1
@@ -216,4 +218,4 @@ export DONT_CHECK=1
 export DONT_PULL=1
 export ZWIFT_FG=1
 
-"${SCRIPT_DIR}/zwift.sh"
+"${SCRIPT_DIR}/zwift.sh" "${@}"

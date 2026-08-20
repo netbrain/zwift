@@ -42,7 +42,7 @@ ARG WINETRICKS_CHECKSUM=431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc451
 # - libegl1 and libgl1 for GL library
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
-# - rsync to synchronize zwift volume with zwift appdata (WORKAROUND issue 366)
+# - rsync to synchronize zwift volume with zwift appdata
 # - wget for downloading winehq key
 # - winbind for ntml_auth required by zwift/wine
 # - xdg-utils seems to be a dependency of wayland
@@ -97,6 +97,10 @@ FROM wine-base
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV WINEDEBUG=fixme-all
+ENV WINE_PREFIX="/home/user/.wine"
+ENV WINE_USER_HOME="${WINE_PREFIX}/drive_c/users/user"
+ENV ZWIFT_DATA_DIR="${WINE_USER_HOME}/AppData/Local/Zwift"
+ENV ZWIFT_INSTALL_DIR="${WINE_PREFIX}/drive_c/Program Files (x86)/Zwift"
 
 LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"

@@ -23,10 +23,9 @@ fi
 
 readonly VERBOSITY="${VERBOSITY:-1}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
-
-readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
-readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
-readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
+readonly WINE_USER_HOME="${WINE_USER_HOME:?}"
+readonly ZWIFT_DATA_DIR="${ZWIFT_DATA_DIR:?}"
+readonly ZWIFT_INSTALL_DIR="${ZWIFT_INSTALL_DIR:?}"
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
@@ -61,11 +60,11 @@ get_current_version() {
     # if neither exist or contain a valid version, use undefined (Zwift not installed)
 
     local version_filename="Zwift_ver_cur.xml"
-    if [[ -f Zwift_ver_cur_filename.txt ]]; then
-        version_filename="$(tr '\0' '\n' < Zwift_ver_cur_filename.txt)"
+    if [[ -f "${ZWIFT_INSTALL_DIR}/Zwift_ver_cur_filename.txt" ]]; then
+        version_filename="$(tr '\0' '\n' < "${ZWIFT_INSTALL_DIR}/Zwift_ver_cur_filename.txt")"
     fi
 
-    grep -oP 'sversion="\K.*?(?=\s)' "${version_filename}" 2> /dev/null | cut -f 1 -d ' ' || echo "undefined"
+    grep -oP 'sversion="\K.*?(?=\s)' "${ZWIFT_INSTALL_DIR}/${version_filename}" 2> /dev/null | cut -f 1 -d ' ' || echo "none"
 }
 
 get_latest_version() {
@@ -91,7 +90,14 @@ update_zwift_using_launcher() {
     msgbox info "Updating Zwift from version ${zwift_current_version} to ${zwift_latest_version}"
 
     msgbox info "Starting Zwift launcher using wine"
-    if ! wine start ZwiftLauncher.exe SilentLaunch; then
+    local zwift_wine_dir
+    if ! zwift_wine_dir="$(winepath -w "${ZWIFT_INSTALL_DIR}")" || [[ -z ${zwift_wine_dir} ]]; then
+        msgbox error "Failed to convert Zwift installation path to win32 path for wine"
+        exit 1
+    else
+        msgbox debug "Zwift installation wine path is: ${zwift_wine_dir}"
+    fi
+    if ! wine start /d "${zwift_wine_dir}" ZwiftLauncher.exe SilentLaunch; then
         msgbox error "Failed to start Zwift launcher using wine!"
         return 1
     fi
@@ -122,7 +128,7 @@ update_zwift_using_launcher() {
 
     # zwift updated to unexpected version?
     if [[ ${zwift_current_version} != "${zwift_latest_version}" ]]; then
-        msgbox error "Zwift updated to unexpected version (Expected: ${zwift_latest_version}, Actual: ${zwift_current_version}"
+        msgbox error "Zwift updated to unexpected version (Expected: ${zwift_latest_version}, Actual: ${zwift_current_version})"
         return 1
     fi
 
@@ -138,24 +144,16 @@ install_zwift() {
     winetricks -q corefonts dotnet48 d3dcompiler_47 || return 1
 
     msgbox info "Downloading and installing webview2"
-    wget -O webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
-    wine webview2-setup.exe /silent /install || return 1
+    wget -O /tmp/webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
+    wine /tmp/webview2-setup.exe /silent /install || return 1
 
     msgbox info "Enabling Wayland support"
-    wine reg.exe add HKCU\\Software\\Wine\\Drivers /v Graphics /d x11,wayland || return 1
+    wine reg.exe add HKCU\\Software\\Wine\\Drivers /f /v Graphics /d x11,wayland || return 1
 
     msgbox info "Downloading and installing Zwift"
-    wget https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
-    wine ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
+    wget -O /tmp/ZwiftSetup.exe https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
+    wine /tmp/ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
 }
-
-###########################
-##### Configure Zwift #####
-
-if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
-    msgbox error "Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!"
-    exit 1
-fi
 
 #########################################
 ##### Automatically cleanup on exit #####
@@ -165,13 +163,11 @@ cleanup() {
     wineserver -k || true # important, Zwift launcher won't stop until wine server is killed
 
     msgbox info "Removing installation artifacts"
-    # remove downloads and cache
-    rm -- "${ZWIFT_HOME}/ZwiftSetup.exe" || true
-    rm -- "${ZWIFT_HOME}/webview2-setup.exe" || true
+    rm -f -- "/tmp/ZwiftSetup.exe" || true
+    rm -f -- "/tmp/webview2-setup.exe" || true
     rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
     rm -rf -- "/home/user/.cache/wine*" || true
-    # remove Zwift documents because it causes permission errors with podman
-    rm -rf -- "${ZWIFT_DOCS}" || true
+    rm -rf -- "${ZWIFT_DATA_DIR:?}/*" || true
 }
 
 trap cleanup EXIT
@@ -181,12 +177,19 @@ trap cleanup EXIT
 
 if [[ ${1:-} == "--install" ]]; then
     msgbox info "Installing Zwift..."
-    if ! install_zwift; then
+    if [[ -f "${ZWIFT_INSTALL_DIR}/ZwiftLauncher.exe" ]]; then
+        msgbox warning "Zwift is already installed, skipping"
+    elif ! install_zwift; then
         msgbox error "Failed to install Zwift!"
         exit 1
     fi
-else
-    msgbox info "Updating Zwift..."
+fi
+
+msgbox info "Updating Zwift..."
+
+if ! [[ -f "${ZWIFT_INSTALL_DIR}/ZwiftLauncher.exe" ]]; then
+    msgbox error "ZwiftLauncher.exe not found. Is Zwift installed?"
+    exit 1
 fi
 
 if ! update_zwift_using_launcher; then

@@ -26,10 +26,7 @@ readonly ZWIFT_UID="${ZWIFT_UID:-$(id -u user)}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g user)}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
-
-readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
-readonly ZWIFT_HOME="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
-readonly ZWIFT_DOCS="${WINE_USER_HOME}/AppData/Local/Zwift"
+readonly ZWIFT_VOLUME="${ZWIFT_VOLUME:-}"
 
 msgbox() {
     local type="${1:?}" # Type: info, ok, warning, error, debug
@@ -48,23 +45,8 @@ msgbox() {
     esac
 }
 
-is_empty_directory() {
-    local directory="${1:?}"
-    if [[ ! -d ${directory} ]]; then
-        msgbox error "${directory} is not a directory"
-        exit 1
-    fi
-    local contents
-    ! contents="$(ls -A "${directory}" 2> /dev/null)" || [[ -z ${contents} ]]
-}
-
 ###########################
 ##### Configure Zwift #####
-
-if ! mkdir -p "${ZWIFT_HOME}" || ! cd "${ZWIFT_HOME}"; then
-    msgbox error "Zwift home directory '${ZWIFT_HOME}' does not exist or is not accessible!"
-    exit 1
-fi
 
 # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
 # NOTE: DISPLAY must be unset here before run_zwift to work
@@ -76,16 +58,14 @@ fi
 ############################################
 ##### Clean install, update or launch? #####
 
-declare -a startup_cmd
-startup_cmd=(/bin/run_zwift.sh)
-update_required=0
+msgbox debug "Entrypoint script invoked with arguments: ${*:-none}"
 
-if is_empty_directory "${ZWIFT_HOME}"; then
-    startup_cmd=(/bin/update_zwift.sh --install)
-    update_required=1
-elif [[ ${1:-} == "--update" ]]; then
-    startup_cmd=(/bin/update_zwift.sh)
-    update_required=1
+declare -a startup_cmd
+
+if [[ ${1:-} == "--install" ]] || [[ ${1:-} == "--update" ]]; then
+    startup_cmd=(/bin/update_zwift.sh "${1:-}")
+else
+    startup_cmd=(/bin/run_zwift.sh)
 fi
 
 ######################################
@@ -138,14 +118,9 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     }
 
     update_ownership() {
-        local target
-        if [[ ${update_required} -eq 1 ]]; then
-            target="/home/user"
-        else
-            target="${ZWIFT_DOCS}"
-        fi
+        local target="${ZWIFT_VOLUME}"
 
-        if ! ownership_needs_update "${target}"; then
+        if [[ -z ${target} ]] || ! ownership_needs_update "${target}"; then
             msgbox ok "Ownership already correct, skipping"
             return 0
         fi
