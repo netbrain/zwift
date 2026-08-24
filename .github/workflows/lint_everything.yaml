@@ -62,7 +62,7 @@ jobs:
     - name: Checkout repository code
       uses: actions/checkout@v7
     - name: Check github actions for errors
-      uses: devops-actions/actionlint@9fb9c192862f19e684586ca84b500461bcd8a541
+      uses: devops-actions/actionlint@ec02b36684b2f574f1d219ad0a43b082e46bf3e4
   markdown-lint:
     name: Markdown - Lint with markdownlint
     runs-on: ubuntu-latest
