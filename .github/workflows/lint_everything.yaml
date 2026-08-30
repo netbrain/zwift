@@ -51,7 +51,7 @@ jobs:
     - name: Checkout repository code
       uses: actions/checkout@v7
     - name: Check Dockerfile for errors
-      uses: hadolint/hadolint-action@v3.4.0
+      uses: hadolint/hadolint-action@v3.5.0
       with:
         config: .hadolint.yaml
         dockerfile: src/Dockerfile
