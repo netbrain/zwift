@@ -23,7 +23,7 @@ foo@bar:~$ DONT_PULL="1" DRYRUN="1" zwift # combine the previous two options
 foo@bar:~$ INTERACTIVE="1" zwift # run in the foreground and set entrypoint to bash for debugging
 foo@bar:~$ CONTAINER_TOOL="docker" zwift # launch zwift with docker even if podman is installed
 foo@bar:~$ CONTAINER_EXTRA_ARGS="--cpus=1.5" zwift # pass --cpus=1.5 to docker/podman
-foo@bar:~$ USER="fred" zwift # perfect if your neighbor Fred wants to try zwift
+foo@bar:~$ ZWIFT_RIDER="fred" zwift # perfect if your neighbor Fred wants to try zwift
 foo@bar:~$ NETWORKING="host" zwift # use host networking which is needed for Wi-Fi enabled trainers
 foo@bar:~$ WINE_EXPERIMENTAL_WAYLAND="1" zwift # start zwift using Wayland instead of XWayland
 ```
@@ -34,7 +34,7 @@ You can persist configuration options by creating a file. The zwift script will 
 these files, if present:
 
 - `$HOME/.config/zwift/config`
-- `$HOME/.config/zwift/$USER-config`
+- `$HOME/.config/zwift/$ZWIFT_RIDER-config` (`ZWIFT_RIDER` defaults to `$USER`)
 
 ```bash
 # example configuration file
@@ -57,7 +57,7 @@ These environment variables can be used to alter the execution of the zwift bash
 |:----------------------------------------------------------|:---------------------------|:----------------------------------------------------|
 | [`DEBUG`](#debug)                                         | `0`                        | Enable `set -x` for all scripts                     |
 | [`VERBOSITY`](#verbosity)                                 | `1`                        | Configure how much output should be shown           |
-| [`USER`](#user)                                           | `$USER`                    | Use a different user to avoid conflicts             |
+| [`ZWIFT_RIDER`](#zwift_rider)                             | `$USER`                    | Select a rider profile to avoid conflicts           |
 | [`IMAGE`](#image)                                         | `docker.io/netbrain/zwift` | The image to use                                    |
 | [`VERSION`](#version)                                     | `latest`                   | The image version/tag to use                        |
 | [`SCRIPT_VERSION`](#script_version)                       | `master`                   | The `zwift.sh` script version to use                |
@@ -125,20 +125,29 @@ Questions where user input is required are always shown, regardless of the verbo
 
 ---
 
-### `USER`
+### `ZWIFT_RIDER`
 
-Use a different user to avoid configuration conflicts. Especially useful if you want to be able to use multiple zwift accounts
-on a single linux user account.
+Select a rider profile to avoid configuration conflicts. Especially useful if you want to be able to use multiple zwift accounts
+on a single linux user account, for example on a shared or kiosk PC.
 
-- Used in sourcing the configuration file `$HOME/.config/zwift/$USER-config`.
-- Used in creating the zwift volume `zwift-$USER`.
+- Used in sourcing the configuration file `$HOME/.config/zwift/$ZWIFT_RIDER-config`.
+- Used in creating the zwift volume `zwift-$ZWIFT_RIDER`.
+- Used in naming the container `zwift-$ZWIFT_RIDER`.
+- Used in looking up the rider graphics config file `$HOME/.config/zwift/$ZWIFT_RIDER-graphics.txt`.
 
-| Item              | Description         |
-|:------------------|:--------------------|
-| Allowed values    | string              |
-| Default value     | `$USER`             |
-| Commandline usage | `USER="fred" zwift` |
-| Config file usage | :x:                 |
+| Item              | Description                |
+|:------------------|:---------------------------|
+| Allowed values    | string                     |
+| Default value     | `$USER`                    |
+| Commandline usage | `ZWIFT_RIDER="fred" zwift` |
+| Config file usage | :x:                        |
+
+{: .important }
+In older versions of the zwift script, the rider profile was selected by overriding the `USER` environment variable
+(`USER="fred" zwift`). This no longer works with rootless podman 5.x: podman/crun resolve `$USER` to a real account on the host,
+and the container fails to start if no such account exists (`setgroups: Invalid argument`). Use `ZWIFT_RIDER` instead, it keeps
+`$USER` intact. `USER="fred" zwift` still selects the `fred` profile (because `ZWIFT_RIDER` defaults to `$USER`), so existing
+setups keep working where the container tool allows it.
 
 #### Example: Two Zwift users sharing a single Linux user account
 
@@ -160,8 +169,9 @@ on a single linux user account.
   ZWIFT_PASSWORD='the password for fred'
   ```
 
-  Running `USER="fred" zwift` will first load the `config` file and then the `fred-config` file. The values in the `fred-config`
-  file will overwrite the values in the `config` file. So the zwift script will use Fred's username and password.
+  Running `ZWIFT_RIDER="fred" zwift` will first load the `config` file and then the `fred-config` file. The values in the
+  `fred-config` file will overwrite the values in the `config` file. So the zwift script will use Fred's username and password,
+  and store Fred's game data in the `zwift-fred` volume.
 
 ---
 
@@ -735,16 +745,19 @@ Override the container GPU/device flags.
 ### `PRIVILEGED_CONTAINER`
 
 If set to `1`, the container will run in privileged mode (`--privileged --security-opt label=disable`). If set to `0`, SELinux
-label separation (`--security-opt label=type:container_runtime_t`) will be used if SELinux is available and active, otherwise it
-will fallback to privileged mode.
+label separation (`--security-opt label=type:container_runtime_t`) will be used if SELinux is available and active, otherwise
+label separation is disabled (`--security-opt label=disable`) without privileged mode.
 
 | Item              | Description                             |
 |:------------------|:----------------------------------------|
-| Allowed values    | `0` - Use SELinux label separation.     |
+| Allowed values    | `0` - Run container non-privileged.     |
 |                   | `1` - Run container in privileged mode. |
 | Default value     | `0`                                     |
 | Commandline usage | `PRIVILEGED_CONTAINER="1" zwift`        |
 | Config file usage | `PRIVILEGED_CONTAINER="1"`              |
 
 {: .note }
-Running the container in privileged mode is less secure. Only use this option if you have to.
+Running the container in privileged mode is less secure. Only use this option if you have to. GPU access does not require
+privileged mode: the GPU is passed to the container through CDI (`--device=nvidia.com/gpu=all`), `--gpus=all` or
+`--device=/dev/dri`. Privileged mode also breaks rootless podman 5.x, which cannot populate `/dev` in a rootless user
+namespace.

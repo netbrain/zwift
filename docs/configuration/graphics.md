@@ -14,7 +14,7 @@ which graphics profile the game uses. When the default options of the profile ar
 recognize your graphics card and you only get the `medium` profile or when your cpu is the bottleneck and your fps is on the low
 side because zwift assigned the ultra profile), it is possible to manually tweak the graphics settings by setting
 `ZWIFT_OVERRIDE_GRAPHICS="1"`, and editing the settings in the `$HOME/.config/zwift/graphics.txt` or
-`$HOME/.config/zwift/$USER-graphics.txt` file as you see fit. To find out which profile zwift assigned, you can upload your
+`$HOME/.config/zwift/$ZWIFT_RIDER-graphics.txt` file as you see fit. To find out which profile zwift assigned, upload your
 zwift log to <https://trainerdx.com>.
 
 The default settings for the different profiles are:

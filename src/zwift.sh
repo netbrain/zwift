@@ -144,8 +144,14 @@ load_config_file() {
     fi
 }
 mkdir -p "${USER_CONFIG_DIR}"
+
+# Rider profile selector, defaults to the login user. Unlike overriding USER,
+# this keeps $USER intact, which rootless podman/crun need to resolve to a real
+# account. Resolved before loading config files as it selects the rider config.
+readonly ZWIFT_RIDER="${ZWIFT_RIDER:-${USER}}"
+
 load_config_file "${USER_CONFIG_DIR}/config"
-load_config_file "${USER_CONFIG_DIR}/${USER}-config"
+load_config_file "${USER_CONFIG_DIR}/${ZWIFT_RIDER}-config"
 
 # Initialize system environment variables
 readonly DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-}"
@@ -208,7 +214,7 @@ msgbox debug "Script was invoked with the following parameters:"
 declare -a parameters_to_print
 parameters_to_print=(
     DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_CHECK DONT_PULL DONT_CLEAN DRYRUN INTERACTIVE
-    CONTAINER_EXTRA_ARGS ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR ZWIFT_SCREENSHOTS_DIR
+    CONTAINER_EXTRA_ARGS ZWIFT_RIDER ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR ZWIFT_SCREENSHOTS_DIR
     ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE WINE_EXPERIMENTAL_WAYLAND NETWORKING ZWIFT_UID
     ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
 )
@@ -363,6 +369,10 @@ if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     container_uid=1000
     container_gid=1000
     container_args+=(--userns "keep-id:uid=${container_uid},gid=${container_gid}")
+    # Keep host supplementary groups (e.g. video/render) so GPU devices stay
+    # accessible without --privileged. On rootless podman 5.x setgroups can
+    # otherwise fail with unmapped groups. Honored by crun, ignored by runc.
+    container_args+=(--group-add keep-groups)
 else
     # Docker will run as the id's provided.
     local_uid="${UID}"
@@ -384,10 +394,10 @@ container_env_vars+=(
 container_args+=(
     --rm
     --network "${NETWORKING}"
-    --name "zwift-${USER}"
+    --name "zwift-${ZWIFT_RIDER}"
     --hostname "${HOSTNAME}"
     --env-file "${container_env_file}"
-    -v "zwift-${USER}:${ZWIFT_VOLUME}"
+    -v "zwift-${ZWIFT_RIDER}:${ZWIFT_VOLUME}"
 )
 
 ###################################################
@@ -434,8 +444,8 @@ fi
 if [[ ${ZWIFT_OVERRIDE_GRAPHICS} -eq 1 ]]; then
     zwift_graphics_config="${USER_CONFIG_DIR}/graphics.txt"
 
-    # Check for $USER specific graphics config file.
-    zwift_user_graphics_config="${USER_CONFIG_DIR}/${USER}-graphics.txt"
+    # Check for rider specific graphics config file.
+    zwift_user_graphics_config="${USER_CONFIG_DIR}/${ZWIFT_RIDER}-graphics.txt"
     if [[ -f ${zwift_user_graphics_config} ]]; then
         zwift_graphics_config="${zwift_user_graphics_config}"
     # Create graphics.txt file if it does not exist.
@@ -506,8 +516,11 @@ elif is_selinux_active; then
     msgbox info "SELinux is active, using secure container flags"
     container_args+=(--security-opt label=type:container_runtime_t)
 else
-    msgbox warning "Not using SELinux, running container in privileged mode to be able to access the GPU"
-    container_args+=(--privileged --security-opt label=disable)
+    # Privileged mode breaks rootless podman 5.x (the runtime cannot populate
+    # /dev in a rootless user namespace) and is not needed for GPU access,
+    # which is provided through CDI/--gpus/--device flags below.
+    msgbox info "SELinux is not active, disabling container label separation"
+    container_args+=(--security-opt label=disable)
 fi
 
 # Append extra arguments provided by user
@@ -727,12 +740,12 @@ fi
 
 # Create a volume if not already exists, this is done now as
 # if left to the run command the directory can get the wrong permissions
-if ! ${CONTAINER_TOOL} volume inspect "zwift-${USER}" > /dev/null 2>&1; then
-    msgbox info "Creating ${CONTAINER_TOOL} volume zwift-${USER}"
-    if ${CONTAINER_TOOL} volume create "zwift-${USER}"; then
-        msgbox ok "Created volume zwift-${USER}"
+if ! ${CONTAINER_TOOL} volume inspect "zwift-${ZWIFT_RIDER}" > /dev/null 2>&1; then
+    msgbox info "Creating ${CONTAINER_TOOL} volume zwift-${ZWIFT_RIDER}"
+    if ${CONTAINER_TOOL} volume create "zwift-${ZWIFT_RIDER}"; then
+        msgbox ok "Created volume zwift-${ZWIFT_RIDER}"
     else
-        msgbox error "Failed to create volume zwift-${USER}"
+        msgbox error "Failed to create volume zwift-${ZWIFT_RIDER}"
         exit 1
     fi
 fi
