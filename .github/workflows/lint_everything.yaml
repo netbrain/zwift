@@ -121,6 +121,18 @@ jobs:
       run: |
         cd tests/nix-flake
         nix build --no-write-lock-file --dry-run
+  nix-flake-check-develop:
+    name: Nix Flake - Try to run nix develop
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v7
+    - name: Install nix
+      uses: cachix/install-nix-action@v31
+    - name: Check nix flake
+      run: nix flake check
+    - name: Check nix develop
+      run: nix develop -c true
   yaml-lint:
     name: Yaml - Lint with yamllint
     runs-on: ubuntu-latest
