@@ -289,8 +289,8 @@
           hadolint
 
           # Markdown
-          nodePackages.markdownlint-cli2
-          nodePackages.cspell
+          markdownlint-cli2
+          cspell
 
           # Documentation (Jekyll)
           ruby
