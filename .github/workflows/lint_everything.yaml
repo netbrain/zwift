@@ -106,9 +106,9 @@ jobs:
     - name: Install nix
       uses: cachix/install-nix-action@v31
     - name: Install nix language tools
-      run: nix profile add github:nixos/nixfmt
+      run: nix profile add github:nixos/nixfmt nixpkgs#nixfmt-tree
     - name: Check if nix flake is formatted
-      run: nixfmt --check -- *.nix
+      run: treefmt -f nixfmt --ci
   nix-flake-check-build:
     name: Nix Flake - Try to build flake
     runs-on: ubuntu-latest

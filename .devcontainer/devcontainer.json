@@ -11,7 +11,7 @@
     "ghcr.io/devcontainers/features/go": {},
     "ghcr.io/devcontainers/features/node": {},
     "ghcr.io/devcontainers/features/nix": {
-      "packages": "nil,nixfmt",
+      "packages": "nil,nixfmt,nixfmt-tree",
       "extraNixConfig": "experimental-features = nix-command flakes"
     },
     "ghcr.io/devcontainers-extra/features/actionlint": {},

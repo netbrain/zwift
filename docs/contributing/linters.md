@@ -40,7 +40,7 @@ foo@bar:~$ cspell
 
 ```console
 foo@bar:~$ nil diagnostics -- *.nix
-foo@bar:~$ nixfmt --check -- *.nix
+foo@bar:~$ treefmt -f nixfmt --ci
 ```
 
 #### YAML
