@@ -28,6 +28,7 @@
           # Nix
           nil
           nixfmt
+          nixfmt-tree
 
           # Docker
           hadolint

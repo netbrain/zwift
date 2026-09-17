@@ -1,4 +1,5 @@
-{ config,
+{
+  config,
   lib,
   pkgs,
   ...
@@ -11,8 +12,7 @@ let
     types
     mkIf
     ;
-  wrapContainerPackage =
-    args: import ./zwift-container-package.nix ({ inherit pkgs; } // args);
+  wrapContainerPackage = args: import ./zwift-container-package.nix ({ inherit pkgs; } // args);
 in
 {
   options.programs.zwift = {
