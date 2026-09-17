@@ -295,7 +295,7 @@ else
     msgbox warning "DONT_CHECK: Not checking for new zwift.sh"
     msgbox warning "  Zwift may fail to launch if you are not using the latest zwift.sh script"
     # shellcheck disable=SC2016 # using a command as literal string on the next line
-    msgbox warning '  To update manually, run: sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"'
+    msgbox warning '  To update manually, run: bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"'
     msgbox warning "  To use a specific version of the script, it is recommended to set SCRIPT_VERSION=... instead"
 fi
 
