@@ -47,3 +47,31 @@ nav_order: 1
 
 [install-nvctk]: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
 [install-nvcdi]: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html
+
+## Optional Software
+
+### Recommended
+
+#### GameMode
+
+- If [GameMode](https://feralinteractive.github.io/gamemode/) is installed on the host system, it will automatically be used to
+  launch Zwift inside the container. Some benefits are:
+  - GameMode prevents the system from going idle (the screensaver won't activate)
+  - GameMode enables extra optimizations
+- Most Linux distributions come with GameMode pre-installed. If it is not
+  installed on your system, it is most likely available through the package manager:
+  - To check if GameMode is installed, run: `gamemoded --version`
+  - To install GameMode, run: `sudo apt install gamemode`, `sudo dnf install gamemode`, ...
+- To benefit from all possible optimizations GameMode has to offer, you can add your user to the GameMode group using
+  `sudo usermod -aG gamemode $USER`, this is optional.
+
+#### secret-tool
+
+- If [secret-tool](https://linuxcommandlibrary.com/man/secret-tool) is installed, it can be used to
+  [store your Zwift credentials securely](../../configuration/authentication)
+  - secret-tool provides an easy to use interface to store passwords to and retrieve passwords from keyring daemons such as
+    gnome-keyring and KWallet
+- Most Linux distributions come with secret-tool pre-installed. If it is not
+  installed on your system, it is most likely available through the package manager:
+  - To check if secret-tool is installed, run: `secret-tool`
+  - To install secret-tool, run: `sudo apt install libsecret-tools`, `sudo dnf install libsecret`, ...
