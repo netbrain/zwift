@@ -295,7 +295,7 @@ else
     msgbox warning "DONT_CHECK: Not checking for new zwift.sh"
     msgbox warning "  Zwift may fail to launch if you are not using the latest zwift.sh script"
     # shellcheck disable=SC2016 # using a command as literal string on the next line
-    msgbox warning '  To update manually, run: sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"'
+    msgbox warning '  To update manually, run: bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"'
     msgbox warning "  To use a specific version of the script, it is recommended to set SCRIPT_VERSION=... instead"
 fi
 
@@ -549,7 +549,7 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
             has_password_secret=1
         elif command_exists secret-tool; then
             msgbox info "Looking for password in secret-tool (application zwift username ${ZWIFT_USERNAME})"
-            plaintext_password=$(secret-tool lookup application zwift username "${ZWIFT_USERNAME}")
+            plaintext_password="$(secret-tool lookup application zwift username "${ZWIFT_USERNAME}")"
         fi
     fi
 
@@ -558,10 +558,18 @@ if [[ -n ${ZWIFT_USERNAME} ]]; then
     if [[ -n ${plaintext_password} ]]; then
         msgbox info "Password found for ${ZWIFT_USERNAME}"
         has_plaintext_password=1
-        if [[ ${CONTAINER_TOOL} == "podman" ]] && printf '%s' "${plaintext_password}" | ${CONTAINER_TOOL} secret create --replace=true "${password_secret_name}" - > /dev/null; then
-            msgbox info "Stored password in ${CONTAINER_TOOL} secret store"
-            has_password_secret=1
-        else
+        if [[ ${CONTAINER_TOOL} == "podman" ]]; then
+            # we support podman 4.3+, podman secret create --replace only works in newer versions
+            if ${CONTAINER_TOOL} secret exists "${password_secret_name}" && ${CONTAINER_TOOL} secret rm "${password_secret_name}"; then
+                msgbox debug "Removed old password from ${CONTAINER_TOOL} secret store"
+                has_password_secret=0
+            fi
+            if printf '%s' "${plaintext_password}" | ${CONTAINER_TOOL} secret create "${password_secret_name}" - > /dev/null; then
+                msgbox info "Stored password in ${CONTAINER_TOOL} secret store"
+                has_password_secret=1
+            fi
+        fi
+        if [[ ${has_password_secret} -eq 0 ]]; then
             msgbox info "Could not create secret for password, using environment variable instead"
         fi
     fi
