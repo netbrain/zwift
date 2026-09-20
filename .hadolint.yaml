@@ -1,4 +1,5 @@
 ---
 ignored:
-- DL3008
-- DL3059
+- DL3008 # allow unpinned versions in apt-get install
+- DL3059 # allow multiple consecutive RUN instructions
+- DL3066 # allow username instead of userid for USER instructions
