@@ -21,7 +21,8 @@ RUN cargo build --target x86_64-pc-windows-gnu --release
 FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 
 # Wine
-# - 11.0     : support 32-bit applications through wow64
+# - 11.17    : latest tested devel release, includes Wine 11.x BlueZ/Bluetooth work
+# - 11.0     : support 32-bit applications through wow64 and initial BlueZ/Bluetooth support
 # - 10.17    : default to egl for opengl in x11
 # - 9.9      : support native wayland
 # Winetricks
@@ -29,7 +30,7 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 # - 20240105 : first version used in this Dockerfile
 ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
-ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
+ARG WINE_VERSION="=11.17~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=20260125
 ARG WINETRICKS_CHECKSUM=431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc45179312a7b
 
@@ -83,6 +84,7 @@ ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubuserc
 
 # Create passwordless user and make nvidia libraries discoverable
 RUN adduser --disabled-password --gecos '' user \
+ && mkdir -p /run/dbus \
  && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
  && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 

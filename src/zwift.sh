@@ -690,6 +690,12 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
         container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${local_uid}/${container_uid}}")
     fi
 fi
+if [[ -S /run/dbus/system_bus_socket ]]; then
+    container_env_vars+=(DBUS_SYSTEM_BUS_ADDRESS="unix:path=/run/dbus/system_bus_socket")
+    container_args+=(-v /run/dbus/system_bus_socket:/run/dbus/system_bus_socket)
+else
+    msgbox warning "D-Bus system bus socket /run/dbus/system_bus_socket not found - Bluetooth via BlueZ may not work"
+fi
 
 # Configure sound driver
 container_env_vars+=(PULSE_SERVER="/run/user/${container_uid}/pulse/native")

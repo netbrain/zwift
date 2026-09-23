@@ -15,6 +15,8 @@ foo@bar:~$ ./build-image.sh            # It's recommended to use the build scrip
 foo@bar:~$ ./update-image.sh           # Or only update the scripts if you already built the image
 ```
 
+To compile and test a Wine fork instead of the packaged Wine, see [Test a custom Wine build](custom-wine).
+
 ## Testing Changes
 
 ```console

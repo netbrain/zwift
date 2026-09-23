@@ -14,8 +14,13 @@ ANT+ devices are not supported.
 
 ## Bluetooth
 
-Wine does not fully support Bluetooth Low Energy yet. Instead, you can [use your phone as a bridge][companion-app-bridge] to
-connect your bluetooth devices to Zwift.
+Direct Bluetooth support depends on Wine's BlueZ integration. Use an image built with Wine 11.0 or newer, make sure the host
+Bluetooth service is running, and allow the Zwift container to access the host system D-Bus socket. The current script forwards
+`/run/dbus/system_bus_socket` automatically when it exists. To test unreleased Wine Bluetooth changes, [build a custom Wine
+image](../contributing/custom-wine).
+
+Because Wine's Bluetooth Low Energy support is still young, the most reliable setup is still to [use your phone as a
+bridge][companion-app-bridge] to connect your bluetooth devices to Zwift.
 
 1. Open the Companion App on your phone (don't forget to enable bluetooth!)
 2. Start Zwift on your PC

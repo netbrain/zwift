@@ -1,0 +1,71 @@
+# syntax=docker/dockerfile:1
+
+ARG DEBIAN_VERSION=trixie
+ARG BASE_IMAGE=docker.io/netbrain/zwift:latest
+
+FROM debian:${DEBIAN_VERSION} AS wine-build
+
+ARG WINE_PREFIX=/opt/wine-custom
+
+# Debian's Wine build dependencies provide the optional graphics, audio, and
+# device libraries expected by Zwift. MinGW builds Wine's PE modules for both
+# sides of the modern WoW64 setup.
+RUN sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/debian.sources \
+ && dpkg --add-architecture i386 \
+ && DEBIAN_FRONTEND=noninteractive apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get build-dep -y wine \
+ && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        gcc-mingw-w64-i686 \
+        gcc-mingw-w64-x86-64 \
+ && rm -rf /var/lib/apt/lists/*
+
+# The build context carries a clone of the Wine sources (see
+# build-custom-wine.sh). Wine's Git tree ships a generated configure script, so
+# no autotools bootstrap is needed here.
+COPY wine/ /usr/src/wine/
+
+WORKDIR /usr/src/wine-build
+# Keep the out-of-tree build directory between image builds. A changed source
+# snapshot invalidates this RUN layer, while make can still reuse every object
+# file unaffected by that change. "locked" prevents concurrent builds from
+# modifying the same object tree.
+RUN --mount=type=cache,id=zwift-custom-wine-build3,target=/usr/src/wine-build,sharing=locked \
+    /usr/src/wine/configure \
+        --enable-archs=i386,x86_64 \
+        --prefix="${WINE_PREFIX}" \
+ && make -j"$(nproc)" \
+ && rm -rf /wine-install \
+ && make install DESTDIR=/wine-install
+
+FROM ${BASE_IMAGE}
+
+# Record where the Wine sources came from so launch scripts can name their
+# persistent logs after the revision they test (see launch-ble-wine.sh).
+ARG WINE_REPO=unknown
+ARG WINE_REF=unknown
+ARG WINE_COMMIT=unknown
+LABEL org.zwift.wine.commit="${WINE_COMMIT}" \
+    org.zwift.wine.repo="${WINE_REPO}" \
+    org.zwift.wine.ref="${WINE_REF}"
+
+ARG CUSTOM_WINE_PREFIX=/opt/wine-custom
+COPY --from=wine-build /wine-install/ /
+
+ENV PATH="${CUSTOM_WINE_PREFIX}/bin:${PATH}"
+
+# The base image baked its Wine prefix with a different Wine build, so the
+# first launch runs a prefix update (wineboot -> rundll32 wine.inf). That update
+# must still run: it refreshes the prefix's builtin/fake DLL list for this Wine
+# build (skipping it breaks advapi32 -> cryptbase forwarding). But the update
+# also registers mscoree.dll, and with only .NET 4.x installed the unmanaged
+# rundll32 host falls back to the legacy CLR 2.0 activation policy and pops up
+# the "This application could not be started" shim dialog (Wine bug 41727).
+# Force the shim to use the installed latest CLR so the update completes
+# silently; the key lives under .NET, so the update does not remove it.
+RUN sed -i '/^\[Software\\\\Microsoft\\\\.NETFramework\]/a "OnlyUseLatestCLR"=dword:00000001' "${WINE_PREFIX}/system.reg"
+
+# Fail the image build if the custom Wine installation is incomplete or PATH
+# accidentally resolves to the WineHQ package in the base image.
+RUN test "$(command -v wine)" = "${CUSTOM_WINE_PREFIX}/bin/wine" \
+ && test -x "${CUSTOM_WINE_PREFIX}/bin/wineserver" \
+ && wine --version
