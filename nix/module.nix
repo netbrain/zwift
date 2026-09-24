@@ -105,6 +105,12 @@ in
       description = "Run the container in privileged mode.";
     };
 
+    disableBluetooth = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Do not allow the container to access host bluetooth.";
+    };
+
     zwiftUsername = mkOption {
       type = types.str;
       default = "";
@@ -226,6 +232,7 @@ in
         wineExperimentalWayland = if cfg.wineExperimentalWayland then "1" else "";
         debug = if cfg.debug then "1" else "";
         privilegedContainer = if cfg.privilegedContainer then "1" else "";
+        disableBluetooth = if cfg.disableBluetooth then "1" else "";
       })
     ];
   };

@@ -84,6 +84,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`ZWIFT_GID`](#zwift_gid)                                 | `$(id -g)`                 | Sets the GID that Zwift will run as                 |
 | [`VGA_DEVICE_FLAG`](#vga_device_flag)                     |                            | Override container GPU/device flags                 |
 | [`PRIVILEGED_CONTAINER`](#privileged_container)           | `0`                        | If set to `1`, run the container in privileged mode |
+| [`DISABLE_BLUETOOTH`](#disable_bluetooth)                 | `1`                        | If set to `1`, disable bluetooth in the container   |
 
 ---
 
@@ -761,3 +762,22 @@ Running the container in privileged mode is less secure. Only use this option if
 privileged mode: the GPU is passed to the container through CDI (`--device=nvidia.com/gpu=all`), `--gpus=all` or
 `--device=/dev/dri`. Privileged mode also breaks rootless podman 5.x, which cannot populate `/dev` in a rootless user
 namespace.
+
+---
+
+### `DISABLE_BLUETOOTH`
+
+If set to `1`, do not allow the container access to the host bluetooth peripheral.
+
+| Item              | Description                               |
+|:------------------|:------------------------------------------|
+| Allowed values    | `0` - Enable bluetooth in the container.  |
+|                   | `1` - Disable bluetooth in the container. |
+| Default value     | `1`                                       |
+| Commandline usage | `DISABLE_BLUETOOTH="0" zwift`             |
+| Config file usage | `DISABLE_BLUETOOTH="0"`                   |
+
+{: .important }
+The Wine bluetooth implementation is still incomplete. Even if `DISABLE_BLUETOOTH` is set to `0`, Zwift will not be able to
+connect to your bluetooth devices without using the companion app. For now, this setting is only meant for testing bluetooth in
+the container.

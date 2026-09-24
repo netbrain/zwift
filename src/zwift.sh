@@ -188,6 +188,7 @@ readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
 readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
+readonly DISABLE_BLUETOOTH="${DISABLE_BLUETOOTH:-1}"
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -214,9 +215,10 @@ msgbox debug "Script was invoked with the following parameters:"
 declare -a parameters_to_print
 parameters_to_print=(
     DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_CHECK DONT_PULL DONT_CLEAN DRYRUN INTERACTIVE
-    CONTAINER_EXTRA_ARGS ZWIFT_RIDER ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR ZWIFT_SCREENSHOTS_DIR
-    ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE WINE_EXPERIMENTAL_WAYLAND NETWORKING ZWIFT_UID
-    ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
+    CONTAINER_EXTRA_ARGS ZWIFT_RIDER ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR
+    ZWIFT_SCREENSHOTS_DIR ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE
+    WINE_EXPERIMENTAL_WAYLAND NETWORKING ZWIFT_UID ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DISABLE_BLUETOOTH
+    DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
 )
 for parameter_to_print in "${parameters_to_print[@]}"; do
     parameter_print_value="$(declare -p "${parameter_to_print}")"
@@ -700,11 +702,13 @@ else
 fi
 
 # Configure bluetooth
-container_args+=(
-    --cap-add="NET_ADMIN"
-    --cap-add="NET_RAW"
-    -v "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket"
-)
+if [[ ${DISABLE_BLUETOOTH} -eq 0 ]]; then
+    container_args+=(
+        --cap-add="NET_ADMIN"
+        --cap-add="NET_RAW"
+        -v "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket"
+    )
+fi
 
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
 if is_array "VGA_DEVICE_FLAG"; then
