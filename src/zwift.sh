@@ -699,6 +699,13 @@ else
     msgbox warning "PulseAudio socket /run/user/${local_uid}/pulse not found — audio may not work (PipeWire-only system?)"
 fi
 
+# Configure bluetooth
+container_args+=(
+    --cap-add="NET_ADMIN"
+    --cap-add="NET_RAW"
+    -v "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket"
+)
+
 # Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
 if is_array "VGA_DEVICE_FLAG"; then
     container_args+=("${VGA_DEVICE_FLAG[@]}")
