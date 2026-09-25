@@ -27,6 +27,7 @@
   debug ? "",
   verbosity ? "",
   privilegedContainer ? "",
+  disableBluetooth ? "",
 }:
 let
   common = import ./zwift-common.nix { inherit pkgs; };
@@ -72,6 +73,7 @@ let
     ${pkgs.lib.optionalString (
       privilegedContainer != ""
     ) "export PRIVILEGED_CONTAINER=${privilegedContainer}"}
+    ${pkgs.lib.optionalString (disableBluetooth != "") "export DISABLE_BLUETOOTH=${disableBluetooth}"}
 
     ${../src/zwift.sh}
   '';

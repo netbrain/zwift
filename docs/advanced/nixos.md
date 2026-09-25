@@ -82,6 +82,8 @@ environment variables in camelCase:
     debug = false;
     # If set, run container in privileged mode ("--privileged --security-opt label=disable")
     privilegedContainer = false;
+    # If set to false, allow the container access to host bluetooth
+    disableBluetooth = false;
   };
 }
 ```
