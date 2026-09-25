@@ -13,7 +13,7 @@ VERBOSITY="${VERBOSITY:-1}" # updated after loading user config files
 
 readonly USER_CONFIG_DIR="${HOME}/.config/zwift"
 readonly WINE_USER_HOME="/home/user/.wine/drive_c/users/user"
-readonly ZWIFT_VOLUME="/tmp/zwift-data" # WORKAROUND issue 366 (change to WINE_USER_HOME/AppData/Local/Zwift when fixed)
+readonly ZWIFT_VOLUME="${WINE_USER_HOME}/AppData/Local/Zwift"
 readonly ZWIFT_INSTALL_DIR="/home/user/.wine/drive_c/Program Files (x86)/Zwift"
 
 if [[ -t 1 ]]; then
