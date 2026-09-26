@@ -107,6 +107,9 @@ LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"
 LABEL org.opencontainers.image.description="Easily zwift on linux"
 LABEL org.opencontainers.image.url="https://github.com/netbrain/zwift"
+LABEL org.opencontainers.image.source="https://github.com/netbrain/zwift"
+LABEL org.opencontainers.image.documentation="https://netbrain.github.io/zwift/"
+LABEL org.opencontainers.image.licenses="Unlicense"
 
 COPY --chmod=755 entrypoint.sh /bin/entrypoint
 COPY --chmod=755 update_zwift.sh /bin/update_zwift.sh
