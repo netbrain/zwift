@@ -206,7 +206,7 @@ if ! "${zwift_cmd[@]}" || ! wait_until_wine_task_started ZwiftApp.exe; then
 fi
 
 msgbox info "Killing Zwift launcher and background tasks"
-kill_wine_tasks ZwiftLauncher.exe ZwiftWindowsCrashHandler.exe MicrosoftEdgeUpdate.exe
+kill_wine_tasks ZwiftLauncher.exe ZwiftWindowsCrashHandler.exe
 
 if [[ -d ${ZWIFT_OLD_DATA_DIR} ]]; then
     msgbox error "Zwift is using Documents/Zwift instead of AppData/Local/Zwift as data directory"

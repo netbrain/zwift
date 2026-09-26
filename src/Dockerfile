@@ -1,6 +1,6 @@
 ARG DEBIAN_VERSION=trixie
 
-FROM rust:1.98.0-slim-trixie AS build-runfromprocess
+FROM rust:1.98.1-slim-trixie AS build-runfromprocess
 
 ARG RUNFROMPROCESS_VERSION=a3d003c07d1bd11ff93c4cac96d2c3aa5deb8471
 
@@ -8,8 +8,7 @@ ARG RUNFROMPROCESS_VERSION=a3d003c07d1bd11ff93c4cac96d2c3aa5deb8471
 # - mingw to cross-compile for windows
 # - rust cross-compiler for windows
 RUN DEBIAN_FRONTEND="noninteractive" apt-get update \
- && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
-        g++-mingw-w64-x86-64 \
+ && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y g++-mingw-w64-x86-64 \
  && rm -rf /var/lib/apt/lists/* \
  && rustup target add x86_64-pc-windows-gnu
 
@@ -25,13 +24,14 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 # - 10.17    : default to egl for opengl in x11
 # - 9.9      : support native wayland
 # Winetricks
+# - cf0fe6   : webview2 verb added (not officially released yet)
 # - 20260125 : webview2 in zwift launcher works
 # - 20240105 : first version used in this Dockerfile
 ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
 ARG WINE_VERSION="=9.9~${DEBIAN_VERSION}-1"
-ARG WINETRICKS_VERSION=20260125
-ARG WINETRICKS_CHECKSUM=431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc45179312a7b
+ARG WINETRICKS_VERSION=f3890f670867b5ffbc3938726db45c0f7d16c8ba
+ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731e9e9837e
 
 # Install prerequisites
 # - bluez for bluetooth
@@ -40,7 +40,7 @@ ARG WINETRICKS_CHECKSUM=431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc451
 # - curl used in zwift authentication script
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
-# - libegl1 and libgl1 for GL library
+# - libglvnd0 for graphics libraries
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
 # - rsync to synchronize zwift volume with zwift appdata
@@ -56,10 +56,9 @@ RUN dpkg --add-architecture i386 \
         curl \
         gamemode \
         gosu \
-        libegl1 \
-        libgl1 \
         libgamemode0.i386 \
         libgamemodeauto0.i386 \
+        libglvnd0 \
         libvulkan1 \
         procps \
         rsync \
@@ -83,21 +82,21 @@ RUN wget -qO /etc/apt/trusted.gpg.d/winehq.asc https://dl.winehq.org/wine-builds
 # Download winetricks
 ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubusercontent.com/Winetricks/winetricks/${WINETRICKS_VERSION}/src/winetricks /usr/local/bin/
 
-# Create passwordless user and make nvidia libraries discoverable
-RUN adduser --disabled-password --gecos '' user \
- && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
- && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-
-# Required for non-glvnd setups
+# Configure nvidia driver
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
+ && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
 # Configure audio driver
 COPY pulse-client.conf /etc/pulse/client.conf
 
+# Create passwordless user
+RUN useradd --create-home --shell /bin/bash user
+
 FROM wine-base
 
-ENV NVIDIA_VISIBLE_DEVICES=all
-ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV WINEDEBUG=fixme-all
 ENV WINE_PREFIX="/home/user/.wine"
 ENV WINE_USER_HOME="${WINE_PREFIX}/drive_c/users/user"
@@ -108,6 +107,9 @@ LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"
 LABEL org.opencontainers.image.description="Easily zwift on linux"
 LABEL org.opencontainers.image.url="https://github.com/netbrain/zwift"
+LABEL org.opencontainers.image.source="https://github.com/netbrain/zwift"
+LABEL org.opencontainers.image.documentation="https://netbrain.github.io/zwift/"
+LABEL org.opencontainers.image.licenses="Unlicense"
 
 COPY --chmod=755 entrypoint.sh /bin/entrypoint
 COPY --chmod=755 update_zwift.sh /bin/update_zwift.sh
