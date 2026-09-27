@@ -66,7 +66,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`DONT_CLEAN`](#dont_clean)                               | `0`                        | If set to `1`, don't clean up previous images       |
 | [`DRYRUN`](#dryrun)                                       | `0`                        | If set to `1`, only print the container run command |
 | [`INTERACTIVE`](#interactive)                             | `0`                        | If set to `1`, attach to the container terminal     |
-| [`CONTAINER_TOOL`](#container_tool)                       |                            | Defaults to podman if installed, else docker        |
+| [`CONTAINER_TOOL`](#container_tool)                       | `podman`                   | Set the container tool: `podman` or `docker`        |
 | [`CONTAINER_EXTRA_ARGS`](#container_extra_args)           |                            | Extra arguments to pass to podman/docker            |
 | [`ZWIFT_USERNAME`](#zwift_username)                       |                            | Zwift username. If set, login automatically         |
 | [`ZWIFT_PASSWORD`](#zwift_password)                       |                            | Zwift password.                                     |
@@ -338,7 +338,8 @@ Configure which container tool to use.
 |:------------------|:----------------------------------------------------|
 | Allowed values    | `podman` - Use podman as container tool.            |
 |                   | `docker` - Use docker as container tool.            |
-| Default value     | `podman` if available, otherwise fall back `docker` |
+| Default value     | `podman` - If installed.                            |
+|                   | `docker` - If podman is not installed.              |
 | Commandline usage | `CONTAINER_TOOL="docker" zwift`                     |
 | Config file usage | `CONTAINER_TOOL="docker"`                           |
 
@@ -727,8 +728,8 @@ Override the container GPU/device flags.
 | Allowed values    | list                                                 |
 |                   | string                                               |
 | Default value     | `--device="nvidia.com/gpu=all"` - nvidia + podman    |
-|                   | `--gpus="all"` - nvidia + docker                     |
-|                   | `--device="/dev/dri:/dev/dri"` - not nvidia          |
+|                   | `--runtime=nvidia --gpus="all"` - nvidia + docker    |
+|                   | `--device="/dev/dri"` - not nvidia                   |
 | Commandline usage | `VGA_DEVICE_FLAG="--gpus=all" zwift` - Use a string. |
 | Config file usage | `VGA_DEVICE_FLAG=(--gpus=all)` - Use a list.         |
 

@@ -42,7 +42,7 @@ nav_order: 1
   - Container Toolkit version v1.17.9 and earlier do not automatically update the cdi specification file. Regenerate it manually
     after NVIDIA driver updates by running the command: `sudo nvidia-ctk cdi generate --output=/var/run/cdi/nvidia.yaml`.
 - Docker
-  - If Zwift fails to launch, try setting `VGA_DEVICE_FLAG=(--device="nvidia.com/gpu=all")`. See
+  - If Zwift fails to launch, try setting `VGA_DEVICE_FLAG=(--runtime=nvidia --device="nvidia.com/gpu=all")`. See
     [this issue](https://github.com/netbrain/zwift/issues/208) for context.
 
 [install-nvctk]: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html

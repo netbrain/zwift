@@ -141,11 +141,7 @@ install_zwift() {
     WINEDLLOVERRIDES="mscoree,mshtml=" wineboot -u || return 1
 
     msgbox info "Installing prerequisites using winetricks"
-    winetricks -q corefonts dotnet48 d3dcompiler_47 || return 1
-
-    msgbox info "Downloading and installing webview2"
-    wget -O /tmp/webview2-setup.exe https://go.microsoft.com/fwlink/p/?LinkId=2124703 || return 1
-    wine /tmp/webview2-setup.exe /silent /install || return 1
+    winetricks -q corefonts dotnet48 d3dcompiler_47 webview2 || return 1
 
     msgbox info "Enabling Wayland support"
     wine reg.exe add HKCU\\Software\\Wine\\Drivers /f /v Graphics /d x11,wayland || return 1
@@ -164,7 +160,6 @@ cleanup() {
 
     msgbox info "Removing installation artifacts"
     rm -f -- "/tmp/ZwiftSetup.exe" || true
-    rm -f -- "/tmp/webview2-setup.exe" || true
     rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
     rm -rf -- "/home/user/.cache/wine*" || true
     rm -rf -- "${ZWIFT_DATA_DIR:?}/*" || true

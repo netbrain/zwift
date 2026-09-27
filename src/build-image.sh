@@ -51,6 +51,11 @@ command_exists() {
     cmd_path="$(command -v "${cmd}" 2> /dev/null)" && [[ -x ${cmd_path} ]]
 }
 
+nvidia_proprietary_driver() {
+    local nvidia_gpus
+    command_exists nvidia-smi && nvidia_gpus="$(nvidia-smi -L)" && [[ -n ${nvidia_gpus} ]]
+}
+
 echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
 echo -e "${COLOR_YELLOW}[!] ${STYLE_UNDERLINE}https://github.com/netbrain/zwift${RESET_STYLE}"
 
@@ -153,14 +158,14 @@ else
 fi
 
 # Check for proprietary nvidia driver and set correct device to use
-if [[ -f "/proc/driver/nvidia/version" ]]; then
+if nvidia_proprietary_driver; then
     if [[ ${CONTAINER_TOOL} == "podman" ]]; then
         container_args+=(--device="nvidia.com/gpu=all")
     else
-        container_args+=(--gpus="all")
+        container_args+=(--runtime=nvidia --gpus=all)
     fi
 else
-    container_args+=(--device="/dev/dri:/dev/dri")
+    container_args+=(--device="/dev/dri")
 fi
 
 #############################################
