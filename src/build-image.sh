@@ -89,8 +89,8 @@ if command_exists "${CONTAINER_TOOL}"; then
     msgbox ok "Found container tool: ${CONTAINER_TOOL} ($(${CONTAINER_TOOL} --version || true))"
 else
     msgbox error "Container tool ${CONTAINER_TOOL} not found"
-    msgbox error "  To install podman, see: https://podman.io/docs/installation"
-    msgbox error "  To install docker, see: https://docs.docker.com/get-started/get-docker/"
+    msgbox error "  To install podman, see: https://podman.io/docs/installation#installing-on-linux"
+    msgbox error "  To install docker, see: https://docs.docker.com/engine/install/"
     exit 1
 fi
 

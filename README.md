@@ -35,8 +35,7 @@ foo@bar:~$ ffmpeg -i example.mp4 -i palette.png -filter_complex \
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker) or
-  [Podman](https://podman.io/getting-started/installation)
+- [Podman](https://podman.io/docs/installation#installing-on-linux) or [Docker](https://docs.docker.com/engine/install/)
 - [nvidia-container-toolkit][nvidia-toolkit] if you have nvidia proprietary
   driver
 - ATI, Intel and Nouveau drivers should work out of the box
