@@ -20,9 +20,10 @@ connect your bluetooth devices to Zwift.
 1. Open the Companion App on your phone (don't forget to enable bluetooth!)
 2. Start Zwift on your PC
 3. The Companion App should show that it is connected to Zwift
-4. On the Zwift pairing screen, select *PAIR THROUGH PHONE*
-5. The Companion App should show *PAIRING DEVICES...*
-6. You can now select your bluetooth devices on the Zwift pairing screen
+4. On the Zwift paired devices screen, select *PAIRING OPTIONS*
+5. Select *ENABLE COMPANION BRIDGING* and press *SAVE*
+6. The Companion App should show *PAIRING DEVICES...*
+7. You can now select your bluetooth devices on the Zwift pairing screen
 
 For example, your Wahoo Kickr and Apple Watch connect to the Zwift Companion App on your iPhone, then the Companion App connects
 over Wi-Fi to your PC running Zwift.
