@@ -672,8 +672,8 @@ if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; t
     fi
 
     if [[ -n ${XAUTHORITY} ]]; then
-        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${host_uid}/${container_uid}}")
-        container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${host_uid}/${container_uid}}")
+        container_env_vars+=(XAUTHORITY="/tmp/.Xauthority")
+        container_args+=(-v "${XAUTHORITY}:/tmp/.Xauthority")
     else
         msgbox info "XAUTHORITY environment variable not set, container access to X11 needs to be granted with xhost"
         xhost_access_required=1

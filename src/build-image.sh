@@ -147,8 +147,8 @@ container_args+=(
 )
 if [[ -n ${XAUTHORITY} ]]; then
     container_args+=(
-        -e XAUTHORITY="${XAUTHORITY}"
-        -v "${XAUTHORITY}:${XAUTHORITY}"
+        -e XAUTHORITY="/tmp/.Xauthority"
+        -v "${XAUTHORITY}:/tmp/.Xauthority"
     )
 elif command_exists xhost && xhost +local: > /dev/null; then
     msgbox ok "Container X11 access provided through xhost"
