@@ -367,7 +367,7 @@ entrypoint_args=()
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     # Podman has to use container id 1000
     # Local user is mapped to the container id
-    local_uid="${ZWIFT_UID}"
+    host_uid="${ZWIFT_UID}"
     container_uid=1000
     container_gid=1000
     container_args+=(--userns "keep-id:uid=${container_uid},gid=${container_gid}")
@@ -377,7 +377,7 @@ if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     container_args+=(--group-add keep-groups)
 else
     # Docker will run as the id's provided.
-    local_uid="${UID}"
+    host_uid="${UID}"
     container_uid="${ZWIFT_UID}"
     container_gid="${ZWIFT_GID}"
 fi
@@ -641,11 +641,11 @@ if [[ ${window_manager} == "Wayland" ]]; then
 
     if [[ -n ${XDG_RUNTIME_DIR} ]] && [[ -n ${WAYLAND_DISPLAY} ]]; then
         container_env_vars+=(
-            XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}"
+            XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR//${host_uid}/${container_uid}}"
             WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
             WINE_EXPERIMENTAL_WAYLAND="1"
         )
-        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
+        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${host_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
     else
         msgbox error "Required environment variables XDG_RUNTIME_DIR and/or WAYLAND_DISPLAY are not set"
         msgbox error "Falling back to XWayland" 5
@@ -672,8 +672,8 @@ if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; t
     fi
 
     if [[ -n ${XAUTHORITY} ]]; then
-        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${local_uid}/${container_uid}}")
-        container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${local_uid}/${container_uid}}")
+        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${host_uid}/${container_uid}}")
+        container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${host_uid}/${container_uid}}")
     else
         msgbox info "XAUTHORITY environment variable not set, container access to X11 needs to be granted with xhost"
         xhost_access_required=1
@@ -693,17 +693,17 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
     [[ ${DBUS_SESSION_BUS_ADDRESS} =~ ^unix:path=([^,]+) ]]
     dbus_unix_socket=${BASH_REMATCH[1]}
     if [[ -n ${dbus_unix_socket} ]]; then
-        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${local_uid}/${container_uid}}")
-        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${local_uid}/${container_uid}}")
+        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${host_uid}/${container_uid}}")
+        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${host_uid}/${container_uid}}")
     fi
 fi
 
 # Configure sound driver
 container_env_vars+=(PULSE_SERVER="/run/user/${container_uid}/pulse/native")
-if [[ -d "/run/user/${local_uid}/pulse" ]]; then
-    container_args+=(-v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse")
+if [[ -d "/run/user/${host_uid}/pulse" ]]; then
+    container_args+=(-v "/run/user/${host_uid}/pulse:/run/user/${container_uid}/pulse")
 else
-    msgbox warning "PulseAudio socket /run/user/${local_uid}/pulse not found — audio may not work (PipeWire-only system?)"
+    msgbox warning "PulseAudio socket /run/user/${host_uid}/pulse not found — audio may not work (PipeWire-only system?)"
 fi
 
 # Configure bluetooth
