@@ -6,188 +6,370 @@
 }:
 let
   cfg = config.programs.zwift;
+
   inherit (lib)
-    mkEnableOption
+    mkIf
     mkOption
     types
-    mkIf
     ;
-  wrapContainerPackage = args: import ./zwift-container-package.nix ({ inherit pkgs; } // args);
-in
-{
-  options.programs.zwift = {
-    enable = mkEnableOption "Zwift on Linux";
 
-    containerTool = mkOption {
+  wrapContainerPackage = args: import ./zwift-container-package.nix ({ inherit pkgs; } // args);
+
+  wrapFhsPackage = args: import ./zwift-fhs-package.nix ({ inherit pkgs; } // args);
+
+  nullableToEmpty = value: if value == null then "" else value;
+
+  nullableBoolToString =
+    value: default:
+    let
+      boolValue = if value == null then default else value;
+    in
+    if boolValue then "1" else "";
+
+  isFhs = cfg.containerTool == "fhs";
+
+  optionDefinitions = {
+    enable = {
+      type = types.bool;
+      default = false;
+      description = "Enable Zwift on Linux.";
+    };
+
+    containerTool = {
       type = types.enum [
         "podman"
         "docker"
+        "fhs"
       ];
       default = "podman";
-      description = ''How to run Zwift: "podman" or "docker".'';
-    };
-
-    image = mkOption {
-      type = types.str;
-      default = "";
-      description = "Container image to use.";
-    };
-
-    version = mkOption {
-      type = types.str;
-      default = "";
-      description = "Container image tag/version.";
-    };
-
-    dontCheck = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Skip version check.";
-    };
-
-    dontPull = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Skip pulling the container image.";
-    };
-
-    dontClean = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Skip cleaning up the container after exit.";
-    };
-
-    dryRun = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Perform a dry run without actually starting Zwift.";
-    };
-
-    interactive = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Run the container interactively.";
-    };
-
-    containerExtraArgs = mkOption {
-      type = types.str;
-      default = "";
-      description = "Extra arguments passed to the container runtime.";
-    };
-
-    networking = mkOption {
-      type = types.str;
-      default = "";
-      description = "Container networking mode.";
-    };
-
-    zwiftUid = mkOption {
-      type = types.str;
-      default = "";
-      description = "UID to run Zwift as inside the container.";
-    };
-
-    zwiftGid = mkOption {
-      type = types.str;
-      default = "";
-      description = "GID to run Zwift as inside the container.";
-    };
-
-    vgaDeviceFlag = mkOption {
-      type = types.str;
-      default = "";
-      description = "VGA device flag for container GPU passthrough.";
-    };
-
-    privilegedContainer = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Run the container in privileged mode.";
-    };
-
-    disableBluetooth = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Do not allow the container to access host bluetooth.";
-    };
-
-    zwiftUsername = mkOption {
-      type = types.str;
-      default = "";
-      description = "Zwift account email for automatic login.";
-    };
-
-    zwiftPassword = mkOption {
-      type = types.str;
-      default = "";
       description = ''
-        Zwift account password for automatic login.
-        Consider using a secrets management solution instead of storing passwords in your config.
+        How to run Zwift: "podman" or "docker" use a container; "fhs" uses
+        native Wine via a FHS environment.
       '';
     };
 
-    zwiftWorkoutDir = mkOption {
-      type = types.str;
-      default = "";
-      description = "Custom directory for Zwift workouts.";
+    # FHS-only options
+    winePrefix = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [ "fhs" ];
+      description = ''
+        Custom Wine prefix directory. Defaults to ~/.wine-zwift if not specified.
+      '';
     };
 
-    zwiftActivityDir = mkOption {
-      type = types.str;
-      default = "";
-      description = "Custom directory for Zwift activities.";
+    # Container-only options
+    image = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Container image to use.
+      '';
     };
 
-    zwiftLogDir = mkOption {
-      type = types.str;
-      default = "";
-      description = "Custom directory for Zwift logs.";
+    version = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Container image tag/version.
+      '';
     };
 
-    zwiftScreenshotsDir = mkOption {
-      type = types.str;
-      default = "";
-      description = "Custom directory for Zwift screenshots.";
+    dontCheck = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Skip version check.
+      '';
     };
 
-    zwiftOverrideGraphics = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Use custom graphics configuration.";
+    dontPull = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Skip pulling the container image.
+      '';
     };
 
-    zwiftOverrideResolution = mkOption {
-      type = types.str;
-      default = "";
+    dontClean = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Skip cleaning up the container after exit.
+      '';
+    };
+
+    dryRun = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Perform a dry run without actually starting Zwift.
+      '';
+    };
+
+    interactive = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Run the container interactively.
+      '';
+    };
+
+    containerExtraArgs = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Extra arguments passed to the container runtime.
+      '';
+    };
+
+    networking = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Container networking mode.
+      '';
+    };
+
+    zwiftUid = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        UID to run Zwift as inside the container.
+      '';
+    };
+
+    zwiftGid = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        GID to run Zwift as inside the container.
+      '';
+    };
+
+    vgaDeviceFlag = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        VGA device flag for container GPU passthrough.
+      '';
+    };
+
+    privilegedContainer = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Run the container in privileged mode.
+      '';
+    };
+
+    zwiftUsername = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Zwift account email for automatic login.
+      '';
+    };
+
+    zwiftPassword = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Zwift account password for automatic login.
+
+        Consider using a secrets management solution instead of storing
+        passwords in your config.
+      '';
+    };
+
+    zwiftWorkoutDir = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Custom directory for Zwift workouts.
+      '';
+    };
+
+    zwiftActivityDir = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Custom directory for Zwift activities.
+      '';
+    };
+
+    zwiftLogDir = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Custom directory for Zwift logs.
+      '';
+    };
+
+    zwiftScreenshotsDir = {
+      type = types.nullOr types.str;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Custom directory for Zwift screenshots.
+      '';
+    };
+
+    zwiftOverrideGraphics = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Use custom graphics configuration.
+      '';
+    };
+
+    zwiftOverrideResolution = {
+      type = types.nullOr types.str;
+      default = null;
       example = "1920x1080";
-      description = "Override the Zwift display resolution.";
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Override the Zwift display resolution.
+      '';
     };
 
-    zwiftFg = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Run Zwift in foreground mode.";
+    zwiftFg = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Run Zwift in foreground mode.
+      '';
     };
 
-    zwiftNoGameMode = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Disable GameMode integration.";
+    zwiftNoGameMode = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Disable GameMode integration.
+        Note that GameMode is currently not supported with containerTool = fhs.
+      '';
     };
 
-    wineExperimentalWayland = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable experimental Wayland support in Wine.";
+    wineExperimentalWayland = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = ''
+        Enable experimental Wayland support in Wine.
+      '';
     };
 
-    debug = mkOption {
+    disableBluetooth = {
+      type = types.nullOr types.bool;
+      default = null;
+      supportedContainerTools = [
+        "podman"
+        "docker"
+      ];
+      description = "Do not allow the container to access host bluetooth.";
+    };
+
+    # Common options
+    debug = {
       type = types.bool;
       default = false;
       description = "Enable debug output.";
     };
 
-    verbosity = mkOption {
+    verbosity = {
       type = types.enum [
         "0"
         "1"
@@ -195,45 +377,68 @@ in
         "3"
       ];
       default = "1";
+      description = "Verbosity level.";
     };
   };
 
-  config = mkIf cfg.enable {
-    virtualisation.podman.enable = lib.mkDefault (cfg.containerTool == "podman");
-    virtualisation.docker.enable = lib.mkDefault (cfg.containerTool == "docker");
+  mkOptionDefinition =
+    _name: definition: mkOption (lib.removeAttrs definition [ "supportedContainerTools" ]);
 
-    environment.systemPackages = [
-      (wrapContainerPackage {
-        inherit (cfg)
-          image
-          containerTool
-          containerExtraArgs
-          zwiftUsername
-          zwiftPassword
-          zwiftWorkoutDir
-          zwiftActivityDir
-          zwiftLogDir
-          zwiftScreenshotsDir
-          zwiftOverrideResolution
-          networking
-          zwiftUid
-          zwiftGid
-          vgaDeviceFlag
-          ;
-        tag = cfg.version;
-        dontCheck = if cfg.dontCheck then "1" else "";
-        dontPull = if cfg.dontPull then "1" else "";
-        dontClean = if cfg.dontClean then "1" else "";
-        dryRun = if cfg.dryRun then "1" else "";
-        interactive = if cfg.interactive then "1" else "";
-        zwiftOverrideGraphics = if cfg.zwiftOverrideGraphics then "1" else "";
-        zwiftFg = if cfg.zwiftFg then "1" else "";
-        zwiftNoGameMode = if cfg.zwiftNoGameMode then "1" else "";
-        wineExperimentalWayland = if cfg.wineExperimentalWayland then "1" else "";
-        debug = if cfg.debug then "1" else "";
-        privilegedContainer = if cfg.privilegedContainer then "1" else "";
-        disableBluetooth = if cfg.disableBluetooth then "1" else "";
-      })
-    ];
+  assertions = lib.mapAttrsToList (name: definition: {
+    assertion = cfg.${name} == null || lib.elem cfg.containerTool definition.supportedContainerTools;
+
+    message = "programs.zwift.${name} is only valid with containerTool = ${lib.concatStringsSep ", " definition.supportedContainerTools}.";
+  }) (lib.filterAttrs (_name: definition: definition ? supportedContainerTools) optionDefinitions);
+in
+{
+  options.programs.zwift = lib.mapAttrs mkOptionDefinition optionDefinitions;
+
+  config = mkIf cfg.enable {
+    inherit assertions;
+
+    environment.systemPackages =
+      if isFhs then
+        [
+          (wrapFhsPackage {
+            winePrefix = nullableToEmpty cfg.winePrefix;
+            debug = if cfg.debug then "1" else "";
+          })
+        ]
+      else
+        [
+          (wrapContainerPackage {
+            containerTool = cfg.containerTool;
+            image = nullableToEmpty cfg.image;
+            tag = nullableToEmpty cfg.version;
+            containerExtraArgs = nullableToEmpty cfg.containerExtraArgs;
+            zwiftUsername = nullableToEmpty cfg.zwiftUsername;
+            zwiftPassword = nullableToEmpty cfg.zwiftPassword;
+            zwiftWorkoutDir = nullableToEmpty cfg.zwiftWorkoutDir;
+            zwiftActivityDir = nullableToEmpty cfg.zwiftActivityDir;
+            zwiftLogDir = nullableToEmpty cfg.zwiftLogDir;
+            zwiftScreenshotsDir = nullableToEmpty cfg.zwiftScreenshotsDir;
+            zwiftOverrideResolution = nullableToEmpty cfg.zwiftOverrideResolution;
+            networking = nullableToEmpty cfg.networking;
+            zwiftUid = nullableToEmpty cfg.zwiftUid;
+            zwiftGid = nullableToEmpty cfg.zwiftGid;
+            vgaDeviceFlag = nullableToEmpty cfg.vgaDeviceFlag;
+            dontCheck = nullableBoolToString cfg.dontCheck false;
+            dontPull = nullableBoolToString cfg.dontPull false;
+            dontClean = nullableBoolToString cfg.dontClean false;
+            dryRun = nullableBoolToString cfg.dryRun false;
+            interactive = nullableBoolToString cfg.interactive false;
+            zwiftOverrideGraphics = nullableBoolToString cfg.zwiftOverrideGraphics false;
+            zwiftFg = nullableBoolToString cfg.zwiftFg false;
+            zwiftNoGameMode = nullableBoolToString cfg.zwiftNoGameMode false;
+            wineExperimentalWayland = nullableBoolToString cfg.wineExperimentalWayland false;
+            debug = nullableBoolToString cfg.debug false;
+            privilegedContainer = nullableBoolToString cfg.privilegedContainer false;
+            disableBluetooth = nullableBoolToString cfg.disableBluetooth true;
+          })
+        ];
+
+    virtualisation.podman.enable = lib.mkDefault (cfg.containerTool == "podman");
+
+    virtualisation.docker.enable = lib.mkDefault (cfg.containerTool == "docker");
   };
 }
