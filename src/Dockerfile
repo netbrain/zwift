@@ -98,10 +98,10 @@ RUN useradd --create-home --shell /bin/bash user
 FROM wine-base
 
 ENV WINEDEBUG=fixme-all
-ENV WINE_PREFIX="/home/user/.wine"
-ENV WINE_USER_HOME="${WINE_PREFIX}/drive_c/users/user"
+ENV WINEPREFIX="/home/user/.wine"
+ENV WINE_USER_HOME="${WINEPREFIX}/drive_c/users/user"
 ENV ZWIFT_DATA_DIR="${WINE_USER_HOME}/AppData/Local/Zwift"
-ENV ZWIFT_INSTALL_DIR="${WINE_PREFIX}/drive_c/Program Files (x86)/Zwift"
+ENV ZWIFT_INSTALL_DIR="${WINEPREFIX}/drive_c/Program Files (x86)/Zwift"
 
 LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"
