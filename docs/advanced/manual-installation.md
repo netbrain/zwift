@@ -1,7 +1,7 @@
 ---
 title: Manual Installation
 parent: Advanced
-nav_order: 5
+nav_order: 4
 ---
 
 # Manual Installation Steps
