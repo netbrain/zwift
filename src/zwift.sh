@@ -43,9 +43,10 @@ else
 fi
 
 msgbox() {
-    local type="${1:?}"    # Type: info, ok, warning, error, question, debug
-    local msg="${2:?}"     # Message: the message to display
-    local timeout="${3:-}" # Optional timeout: if explicitly set to 0, wait for user input to continue
+    local type="${1:?}"         # Type: info, ok, warning, error, question, debug
+    local msg="${2:?}"          # Message: the message to display
+    local timeout="${3:-}"      # Optional timeout: if explicitly set to 0, wait for user input to continue
+    local extra_choice="${4:-}" # Optional extra choice for questions: a single character, returns 2 when chosen
 
     local timestamp=""
     update_timestamp() { [[ ${VERBOSITY} -ge 2 ]] && printf -v timestamp '%(%T)T|' -1; }
@@ -59,14 +60,26 @@ msgbox() {
         question)
             [[ ${INTERACTIVE_TERMINAL} -eq 0 ]] && return 0
             local ans=""
+            local choices="[y/N]"
+            [[ -n ${extra_choice} ]] && choices="[y/N/${extra_choice}]"
+            answer_return_code() {
+                case "${1}" in
+                    [yY] | [yY][eE][sS]) return 0 ;;
+                    *)
+                        [[ -n ${extra_choice} ]] && [[ ${1,,} == "${extra_choice,,}" ]] && return 2
+                        return 1
+                        ;;
+                esac
+            }
             if [[ -n ${timeout} ]] && [[ ${timeout} -gt 0 ]]; then
                 while [[ ${timeout} -gt 0 ]]; do
                     update_timestamp
-                    echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
+                    echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) ${choices}:${RESET_STYLE} "
                     read -rt 1 -n 1 ans
                     if [[ -n ${ans} ]]; then
                         echo
-                        case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
+                        answer_return_code "${ans}"
+                        return
                     fi
                     ((timeout--))
                     [[ ${timeout} -gt 0 ]] && echo -ne "${OVERWRITE_CURRENT_LINE}"
@@ -74,10 +87,11 @@ msgbox() {
                 echo
                 return 1
             else
-                echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
+                echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} ${choices}:${RESET_STYLE} "
                 read -rn 1 ans
                 echo
-                case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
+                answer_return_code "${ans}"
+                return
             fi
             ;;
         debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${timestamp}◉] ${msg}${RESET_STYLE}" ;;
@@ -276,6 +290,38 @@ upgrade_script() {
     fi
 }
 
+readonly BACKGROUND_UPDATE_LOG="/tmp/zwift-update-${ZWIFT_RIDER}.log"
+
+# Download the new script and container image without blocking the launch, so
+# Zwift starts right away using the versions that are already installed
+download_updates_in_background() {
+    (
+        # Don't inherit the cleanup trap, the parent is still using its
+        # temporary files, and keep downloading if the terminal goes away
+        trap - EXIT
+        trap '' HUP
+
+        # The container image is pulled first, it is the slow download and
+        # upgrading the script overwrites the file bash is still executing,
+        # which is only safe once the parent has finished reading it
+        if [[ ${DONT_PULL} -ne 1 ]] && ! ${CONTAINER_TOOL} pull "${IMAGE}:${VERSION}"; then
+            msgbox error "Failed to update container image"
+        fi
+
+        if upgrade_script; then
+            msgbox ok "Background download complete"
+        else
+            msgbox error "Failed to upgrade script"
+        fi
+    ) < /dev/null > "${BACKGROUND_UPDATE_LOG}" 2>&1 &
+
+    msgbox ok "Downloading new version in the background (pid ${!})"
+    msgbox info "  Progress is logged to ${BACKGROUND_UPDATE_LOG}"
+    msgbox info "  The new version will be used the next time Zwift is launched"
+}
+
+background_update=0
+
 if [[ ${SCRIPT_VERSION} != "${LATEST_SCRIPT_VERSION}" ]]; then
     msgbox warning "Using zwift.sh version ${SCRIPT_VERSION} instead of latest"
 fi
@@ -283,15 +329,28 @@ if [[ ${DONT_CHECK} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
     if check_script_up_to_date; then
         msgbox ok "You are running the latest zwift.sh 👏"
-    elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
-        if upgrade_script; then
-            msgbox ok "Switching to new zwift.sh script"
-            exec "${0}" "${@}"
-        else
-            msgbox error "Failed to upgrade script, continuing with old zwift.sh! 😔"
-        fi
     else
-        msgbox warning "Continuing with old zwift.sh"
+        msgbox info "Answer 'b' to download the new script and container image in the background and launch Zwift now"
+        msgbox question "You are not running the latest zwift.sh 😭, download?" 5 b
+        script_update_answer="${?}"
+        case ${script_update_answer} in
+            0)
+                if upgrade_script; then
+                    msgbox ok "Switching to new zwift.sh script"
+                    exec "${0}" "${@}"
+                else
+                    msgbox error "Failed to upgrade script, continuing with old zwift.sh! 😔"
+                fi
+                ;;
+            2)
+                background_update=1
+                download_updates_in_background
+                msgbox warning "Continuing with old zwift.sh while the new version downloads"
+                ;;
+            *)
+                msgbox warning "Continuing with old zwift.sh"
+                ;;
+        esac
     fi
 else
     msgbox warning "DONT_CHECK: Not checking for new zwift.sh"
@@ -305,7 +364,10 @@ fi
 if [[ "${IMAGE}:${VERSION}" != "docker.io/netbrain/zwift:latest" ]]; then
     msgbox warning "Using image ${IMAGE}:${VERSION} instead of docker.io/netbrain/zwift:latest"
 fi
-if [[ ${DONT_PULL} -ne 1 ]]; then
+if [[ ${background_update} -eq 1 ]]; then
+    msgbox warning "Not checking for new container image, it is being downloaded in the background"
+    msgbox warning "  Zwift is launched with the container image that is already installed"
+elif [[ ${DONT_PULL} -ne 1 ]]; then
     msgbox info "Checking for updated container image"
     if ${CONTAINER_TOOL} pull "${IMAGE}:${VERSION}"; then
         msgbox ok "Container image is up to date"
@@ -320,7 +382,9 @@ else
 fi
 
 # Clean previous container images (if any)
-if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_PULL} -ne 1 ]]; then
+# Skipped while downloading in the background, as the image that is about to be
+# launched becomes an outdated image as soon as the background pull completes
+if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_PULL} -ne 1 ]] && [[ ${background_update} -ne 1 ]]; then
     declare -a old_images
     old_images=()
     if images_output="$(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')"; then
