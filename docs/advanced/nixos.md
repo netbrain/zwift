@@ -42,10 +42,8 @@ environment variables in camelCase:
     version = "1.67.0";
     # Container tool to run zwift (e.g., "podman" or "docker")
     containerTool = "podman";
-    # If true, do not pull the image (use locally cached image)
-    dontPull = false;
     # If true, skip new version check
-    dontCheck = false;
+    dontUpdate = false;
     # If true, print the container run command and exit
     dryRun = false;
     # If set, launch container with "-it --entrypoint bash" for debugging

@@ -191,8 +191,7 @@ cleanup
 
 export IMAGE
 export VERSION
-export DONT_CHECK=1
-export DONT_PULL=1
+export DONT_UPDATE=1
 export ZWIFT_FG=1
 
 "${SCRIPT_DIR}/zwift.sh" "${@}"

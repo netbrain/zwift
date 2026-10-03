@@ -17,9 +17,9 @@ The zwift script uses environment variables passed on the commandline.
 
 ```console
 foo@bar:~$ # examples using the commandline
-foo@bar:~$ DONT_PULL="1" zwift # prevent docker/podman pull before launch
+foo@bar:~$ DONT_UPDATE="1" zwift # prevent script and image updates
 foo@bar:~$ DRYRUN="1" zwift # print the underlying container run command and exit
-foo@bar:~$ DONT_PULL="1" DRYRUN="1" zwift # combine the previous two options
+foo@bar:~$ DONT_UPDATE="1" DRYRUN="1" zwift # combine the previous two options
 foo@bar:~$ INTERACTIVE="1" zwift # run in the foreground and set entrypoint to bash for debugging
 foo@bar:~$ CONTAINER_TOOL="docker" zwift # launch zwift with docker even if podman is installed
 foo@bar:~$ CONTAINER_EXTRA_ARGS="--cpus=1.5" zwift # pass --cpus=1.5 to docker/podman
@@ -61,8 +61,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`IMAGE`](#image)                                         | `docker.io/netbrain/zwift` | The image to use                                    |
 | [`VERSION`](#version)                                     | `latest`                   | The image version/tag to use                        |
 | [`SCRIPT_VERSION`](#script_version)                       | `master`                   | The `zwift.sh` script version to use                |
-| [`DONT_CHECK`](#dont_check)                               | `0`                        | If set to `1`, don't check for updated `zwift.sh`   |
-| [`DONT_PULL`](#dont_pull)                                 | `0`                        | If set to `1`, don't pull for new image version     |
+| [`DONT_UPDATE`](#dont_update)                             | `0`                        | If set to `1`, don't update script or image         |
 | [`DONT_CLEAN`](#dont_clean)                               | `0`                        | If set to `1`, don't clean up previous images       |
 | [`DRYRUN`](#dryrun)                                       | `0`                        | If set to `1`, only print the container run command |
 | [`INTERACTIVE`](#interactive)                             | `0`                        | If set to `1`, attach to the container terminal     |
@@ -178,7 +177,7 @@ setups keep working where the container tool allows it.
 
 ### `IMAGE`
 
-See also [`VERSION`](#version), [`DONT_PULL`](#dont_pull).
+See also [`VERSION`](#version), [`DONT_UPDATE`](#dont_update).
 
 Specify which container image to use.
 
@@ -190,13 +189,13 @@ Specify which container image to use.
 | Config file usage | `IMAGE="localhost/zwift"`       |
 
 {: .important }
-When using a local image, you should also set `DONT_PULL="1"` to prevent the zwift script from trying to pull the image.
+When using a local image, you should also set `DONT_UPDATE="1"` to prevent the zwift script from trying to pull the image.
 
 ---
 
 ### `VERSION`
 
-See also [`IMAGE`](#image), [`DONT_PULL`](#dont_pull).
+See also [`IMAGE`](#image), [`DONT_UPDATE`](#dont_update).
 
 Specify which container image version/tag to use. This can be useful to pin the image to a specific Zwift version.
 
@@ -214,7 +213,7 @@ Pinning to a specific image version may result in Zwift failing to launch. Only 
 
 ### `SCRIPT_VERSION`
 
-See also [`DONT_CHECK`](#dont_check).
+See also [`DONT_UPDATE`](#dont_update).
 
 Pin the `zwift.sh` script to a specific version.
 
@@ -236,53 +235,35 @@ Pinning to a specific image version may result in Zwift failing to launch. Only 
 
 ---
 
-### `DONT_CHECK`
-
-See also [`SCRIPT_VERSION`](#script_version).
-
-If set to `1`, don't check for updated `zwift.sh` script.
-
-| Item              | Description                                      |
-|:------------------|:-------------------------------------------------|
-| Allowed values    | `0` - Check for updated `zwift.sh` script.       |
-|                   | `1` - Don't check for updated `zwift.sh` script. |
-| Default value     | `0`                                              |
-| Commandline usage | `DONT_CHECK="1" zwift`                           |
-| Config file usage | `DONT_CHECK="1"`                                 |
-
-{: .important }
-Prefer pinning the zwift script to a specific version using `SCRIPT_VERSION="..."` instead of using `DONT_CHECK="1"`.
-
-{: .warning }
-Not updating the zwift script may result in Zwift failing to launch. Only use this option if you have a good reason.
-
----
-
-### `DONT_PULL`
+### `DONT_UPDATE`
 
 See also [`IMAGE`](#image), [`VERSION`](#version).
 
-If set to `1`, don't pull for a new image version (implies `DONT_CLEAN=1`).
+If set to `1`, don't check for updated `zwift.sh` script and don't pull for a new image version (implies `DONT_CLEAN=1`).
 
-| Item              | Description                                    |
-|:------------------|:-----------------------------------------------|
-| Allowed values    | `0` - Check for updated container image.       |
-|                   | `1` - Don't check for updated container image. |
-| Default value     | `0`                                            |
-| Commandline usage | `DONT_PULL="1" zwift`                          |
-| Config file usage | `DONT_PULL="1"`                                |
+| Item              | Description                                               |
+|:------------------|:----------------------------------------------------------|
+| Allowed values    | `0` - Check for updated script and container image.       |
+|                   | `1` - Don't check for updated script and container image. |
+| Default value     | `0`                                                       |
+| Commandline usage | `DONT_UPDATE="1" zwift`                                   |
+| Config file usage | `DONT_UPDATE="1"`                                         |
 
 {: .important }
-Prefer pinning the container image to a specific version using `VERSION="..."` instead of using `DONT_PULL="1"`.
+Prefer pinning the zwift script to a specific version using `SCRIPT_VERSION="..."` instead of using `DONT_UPDATE="1"`.
+
+{: .important }
+Prefer pinning the container image to a specific version using `VERSION="..."` instead of using `DONT_UPDATE="1"`.
 
 {: .warning }
-Not updating the container image may result in Zwift failing to launch. Only use this option if you have a good reason.
+Not updating the script or container image may result in Zwift failing to launch. Only use this option if you have a good
+reason.
 
 ---
 
 ### `DONT_CLEAN`
 
-See also [`DONT_PULL`](#dont_pull).
+See also [`DONT_UPDATE`](#dont_update).
 
 If set to `1`, don't clean up previous image versions after pulling.
 
