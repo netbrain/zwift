@@ -39,16 +39,10 @@ in
       description = "Container image tag/version.";
     };
 
-    dontCheck = mkOption {
+    dontUpdate = mkOption {
       type = types.bool;
       default = false;
       description = "Skip version check.";
-    };
-
-    dontPull = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Skip pulling the container image.";
     };
 
     dontClean = mkOption {
@@ -221,8 +215,7 @@ in
           vgaDeviceFlag
           ;
         tag = cfg.version;
-        dontCheck = if cfg.dontCheck then "1" else "";
-        dontPull = if cfg.dontPull then "1" else "";
+        dontUpdate = if cfg.dontUpdate then "1" else "";
         dontClean = if cfg.dontClean then "1" else "";
         dryRun = if cfg.dryRun then "1" else "";
         interactive = if cfg.interactive then "1" else "";

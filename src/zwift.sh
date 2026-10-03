@@ -27,7 +27,6 @@ if [[ -t 1 ]]; then
     readonly STYLE_UNDERLINE="\033[4m"
     readonly RESET_STYLE="\033[0m"
     readonly OVERWRITE_PREV_LINE="\033[1A\033[K"
-    readonly OVERWRITE_CURRENT_LINE="\r\033[K"
 else
     readonly INTERACTIVE_TERMINAL="0"
     readonly COLOR_WHITE=""
@@ -39,11 +38,10 @@ else
     readonly STYLE_UNDERLINE=""
     readonly RESET_STYLE=""
     readonly OVERWRITE_PREV_LINE=""
-    readonly OVERWRITE_CURRENT_LINE="\n"
 fi
 
 msgbox() {
-    local type="${1:?}"    # Type: info, ok, warning, error, question, debug
+    local type="${1:?}"    # Type: info, ok, warning, error, debug
     local msg="${2:?}"     # Message: the message to display
     local timeout="${3:-}" # Optional timeout: if explicitly set to 0, wait for user input to continue
 
@@ -56,30 +54,6 @@ msgbox() {
         ok) echo -e "${COLOR_GREEN}[${timestamp}✓] ${msg}${RESET_STYLE}" ;;
         warning) echo -e "${COLOR_YELLOW}[${timestamp}!] ${msg}${RESET_STYLE}" ;;
         error) echo -e "${COLOR_RED}[${timestamp}✗] ${msg}${RESET_STYLE}" >&2 ;;
-        question)
-            [[ ${INTERACTIVE_TERMINAL} -eq 0 ]] && return 0
-            local ans=""
-            if [[ -n ${timeout} ]] && [[ ${timeout} -gt 0 ]]; then
-                while [[ ${timeout} -gt 0 ]]; do
-                    update_timestamp
-                    echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} (Default no in ${timeout} seconds.) [y/N]:${RESET_STYLE} "
-                    read -rt 1 -n 1 ans
-                    if [[ -n ${ans} ]]; then
-                        echo
-                        case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
-                    fi
-                    ((timeout--))
-                    [[ ${timeout} -gt 0 ]] && echo -ne "${OVERWRITE_CURRENT_LINE}"
-                done
-                echo
-                return 1
-            else
-                echo -ne "${COLOR_YELLOW}[${timestamp}?] ${STYLE_BOLD}${STYLE_UNDERLINE}${msg} [y/N]:${RESET_STYLE} "
-                read -rn 1 ans
-                echo
-                case "${ans}" in [yY] | [yY][eE][sS]) return 0 ;; *) return 1 ;; esac
-            fi
-            ;;
         debug) [[ ${VERBOSITY} -ge 3 ]] && echo -e "${COLOR_WHITE}[${timestamp}◉] ${msg}${RESET_STYLE}" ;;
         *) echo "msgbox - unknown type ${type}" >&2 && exit 1 ;;
     esac
@@ -166,8 +140,7 @@ readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
 readonly VERSION="${VERSION:-latest}"
 readonly LATEST_SCRIPT_VERSION="master"
 readonly SCRIPT_VERSION="${SCRIPT_VERSION:-${LATEST_SCRIPT_VERSION}}"
-readonly DONT_CHECK="${DONT_CHECK:-0}"
-readonly DONT_PULL="${DONT_PULL:-0}"
+readonly DONT_UPDATE="${DONT_UPDATE:-0}"
 readonly DONT_CLEAN="${DONT_CLEAN:-0}"
 readonly DRYRUN="${DRYRUN:-0}"
 readonly INTERACTIVE="${INTERACTIVE:-0}"
@@ -189,6 +162,23 @@ readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
 readonly DISABLE_BLUETOOTH="${DISABLE_BLUETOOTH:-1}"
+
+# No longer supported configuration environment variables
+declare -A deprecated_options=(
+    ["DONT_CHECK"]="DONT_CHECK is no longer supported, use DONT_UPDATE instead"
+    ["DONT_PULL"]="DONT_PULL is no longer supported, use DONT_UPDATE instead"
+)
+deprecated_options_used=0
+for deprecated_option in "${!deprecated_options[@]}"; do
+    if [[ -n ${!deprecated_option:-} ]]; then
+        msgbox error "${deprecated_options[${deprecated_option}]}"
+        deprecated_options_used=1
+    fi
+done
+if [[ ${deprecated_options_used} -eq 1 ]]; then
+    msgbox error "One or more deprecated options are used, check variables! 😢" 10
+    exit 1
+fi
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -214,7 +204,7 @@ fi
 msgbox debug "Script was invoked with the following parameters:"
 declare -a parameters_to_print
 parameters_to_print=(
-    DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_CHECK DONT_PULL DONT_CLEAN DRYRUN INTERACTIVE
+    DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_UPDATE DONT_CLEAN DRYRUN INTERACTIVE
     CONTAINER_EXTRA_ARGS ZWIFT_RIDER ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR
     ZWIFT_SCREENSHOTS_DIR ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE
     WINE_EXPERIMENTAL_WAYLAND NETWORKING ZWIFT_UID ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DISABLE_BLUETOOTH
@@ -279,22 +269,18 @@ upgrade_script() {
 if [[ ${SCRIPT_VERSION} != "${LATEST_SCRIPT_VERSION}" ]]; then
     msgbox warning "Using zwift.sh version ${SCRIPT_VERSION} instead of latest"
 fi
-if [[ ${DONT_CHECK} -ne 1 ]]; then
+if [[ ${DONT_UPDATE} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
     if check_script_up_to_date; then
         msgbox ok "You are running the latest zwift.sh 👏"
-    elif msgbox question "You are not running the latest zwift.sh 😭, download?" 5; then
-        if upgrade_script; then
-            msgbox ok "Switching to new zwift.sh script"
-            exec "${0}" "${@}"
-        else
-            msgbox error "Failed to upgrade script, continuing with old zwift.sh! 😔"
-        fi
+    elif upgrade_script; then
+        msgbox ok "Switching to new zwift.sh script"
+        exec "${0}" "${@}"
     else
-        msgbox warning "Continuing with old zwift.sh"
+        msgbox error "Failed to upgrade script, continuing with old zwift.sh! 😔"
     fi
 else
-    msgbox warning "DONT_CHECK: Not checking for new zwift.sh"
+    msgbox warning "DONT_UPDATE: Not checking for new zwift.sh"
     msgbox warning "  Zwift may fail to launch if you are not using the latest zwift.sh script"
     # shellcheck disable=SC2016 # using a command as literal string on the next line
     msgbox warning '  To update manually, run: bash -c "$(curl -fsSL https://raw.githubusercontent.com/netbrain/zwift/master/bin/install.sh)"'
@@ -305,7 +291,7 @@ fi
 if [[ "${IMAGE}:${VERSION}" != "docker.io/netbrain/zwift:latest" ]]; then
     msgbox warning "Using image ${IMAGE}:${VERSION} instead of docker.io/netbrain/zwift:latest"
 fi
-if [[ ${DONT_PULL} -ne 1 ]]; then
+if [[ ${DONT_UPDATE} -ne 1 ]]; then
     msgbox info "Checking for updated container image"
     if ${CONTAINER_TOOL} pull "${IMAGE}:${VERSION}"; then
         msgbox ok "Container image is up to date"
@@ -313,14 +299,14 @@ if [[ ${DONT_PULL} -ne 1 ]]; then
         msgbox error "Failed to update container image"
     fi
 else
-    msgbox warning "DONT_PULL: Not checking for new container image"
+    msgbox warning "DONT_UPDATE: Not checking for new container image"
     msgbox warning "  Zwift may fail to launch if you are not using the latest container image"
     msgbox warning "  To update manually, run: ${CONTAINER_TOOL} pull ${IMAGE}:${VERSION}"
     msgbox warning "  To use a specific version of the image, it is recommended to set VERSION=... instead"
 fi
 
 # Clean previous container images (if any)
-if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_PULL} -ne 1 ]]; then
+if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_UPDATE} -ne 1 ]]; then
     declare -a old_images
     old_images=()
     if images_output="$(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')"; then
