@@ -81,18 +81,6 @@ in
       description = "Container networking mode.";
     };
 
-    zwiftUid = mkOption {
-      type = types.str;
-      default = "";
-      description = "UID to run Zwift as inside the container.";
-    };
-
-    zwiftGid = mkOption {
-      type = types.str;
-      default = "";
-      description = "GID to run Zwift as inside the container.";
-    };
-
     vgaDeviceFlag = mkOption {
       type = types.str;
       default = "";
@@ -216,8 +204,6 @@ in
           zwiftScreenshotsDir
           zwiftOverrideResolution
           networking
-          zwiftUid
-          zwiftGid
           vgaDeviceFlag
           ;
         tag = cfg.version;

@@ -158,7 +158,7 @@ readonly DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-}"
 readonly DISPLAY="${DISPLAY:-}"
 readonly WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}"
 readonly XAUTHORITY="${XAUTHORITY:-}"
-readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}"
+readonly XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/${UID}}"
 
 # Initialize user configuration environment variables
 readonly VERBOSITY="${VERBOSITY:-1}"
@@ -184,11 +184,26 @@ readonly ZWIFT_FG="${ZWIFT_FG:-0}"
 readonly ZWIFT_NO_GAMEMODE="${ZWIFT_NO_GAMEMODE:-0}"
 readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
 readonly NETWORKING="${NETWORKING:-bridge}"
-readonly ZWIFT_UID="${ZWIFT_UID:-${UID}}"
-readonly ZWIFT_GID="${ZWIFT_GID:-$(id -g)}"
 readonly VGA_DEVICE_FLAG="${VGA_DEVICE_FLAG:-}"
 readonly PRIVILEGED_CONTAINER="${PRIVILEGED_CONTAINER:-0}"
 readonly DISABLE_BLUETOOTH="${DISABLE_BLUETOOTH:-1}"
+
+# No longer supported configuration environment variables
+declare -A deprecated_options=(
+    ["ZWIFT_UID"]="The ZWIFT_UID option has been removed, manually setting a user id is no longer supported"
+    ["ZWIFT_GID"]="The ZWIFT_GID option has been removed, manually setting a group id is no longer supported"
+)
+deprecated_options_used=0
+for deprecated_option in "${!deprecated_options[@]}"; do
+    if [[ -n ${!deprecated_option:-} ]]; then
+        msgbox error "${deprecated_options[${deprecated_option}]}"
+        deprecated_options_used=1
+    fi
+done
+if [[ ${deprecated_options_used} -eq 1 ]]; then
+    msgbox error "One or more deprecated options are used, check variables! 😢" 10
+    exit 1
+fi
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -217,8 +232,8 @@ parameters_to_print=(
     DEBUG VERBOSITY CONTAINER_TOOL IMAGE VERSION SCRIPT_VERSION DONT_CHECK DONT_PULL DONT_CLEAN DRYRUN INTERACTIVE
     CONTAINER_EXTRA_ARGS ZWIFT_RIDER ZWIFT_USERNAME ZWIFT_PASSWORD ZWIFT_WORKOUT_DIR ZWIFT_ACTIVITY_DIR ZWIFT_LOG_DIR
     ZWIFT_SCREENSHOTS_DIR ZWIFT_OVERRIDE_GRAPHICS ZWIFT_OVERRIDE_RESOLUTION ZWIFT_FG ZWIFT_NO_GAMEMODE
-    WINE_EXPERIMENTAL_WAYLAND NETWORKING ZWIFT_UID ZWIFT_GID VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DISABLE_BLUETOOTH
-    DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
+    WINE_EXPERIMENTAL_WAYLAND NETWORKING VGA_DEVICE_FLAG PRIVILEGED_CONTAINER DISABLE_BLUETOOTH DBUS_SESSION_BUS_ADDRESS
+    DISPLAY WAYLAND_DISPLAY XAUTHORITY XDG_RUNTIME_DIR
 )
 for parameter_to_print in "${parameters_to_print[@]}"; do
     parameter_print_value="$(declare -p "${parameter_to_print}")"
@@ -364,32 +379,33 @@ container_args=()
 declare -a entrypoint_args
 entrypoint_args=()
 
+# Initialize user ids
+host_uid="${UID}"
+host_gid="$(id -g)"
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
-    # Podman has to use container id 1000
-    # Local user is mapped to the container id
-    local_uid="${ZWIFT_UID}"
     container_uid=1000
-    container_gid=1000
-    container_args+=(--userns "keep-id:uid=${container_uid},gid=${container_gid}")
+    container_args+=(--userns "keep-id:uid=1000,gid=1000")
     # Keep host supplementary groups (e.g. video/render) so GPU devices stay
     # accessible without --privileged. On rootless podman 5.x setgroups can
     # otherwise fail with unmapped groups. Honored by crun, ignored by runc.
     container_args+=(--group-add keep-groups)
 else
-    # Docker will run as the id's provided.
-    local_uid="${UID}"
-    container_uid="${ZWIFT_UID}"
-    container_gid="${ZWIFT_GID}"
+    # Remap the container user to the host user
+    container_uid="${host_uid}"
+    container_env_vars+=(
+        -e HOST_UID="${host_uid}"
+        -e HOST_GID="${host_gid}"
+    )
 fi
+container_runtime_dir="${XDG_RUNTIME_DIR//${host_uid}/${container_uid}}"
 
 # Define base container environment variables
 container_env_vars+=(
     DEBUG="${DEBUG}"
     VERBOSITY="${VERBOSITY}"
     ZWIFT_VOLUME="${ZWIFT_VOLUME}"
-    ZWIFT_UID="${container_uid}"
-    ZWIFT_GID="${container_gid}"
     CONTAINER_TOOL="${CONTAINER_TOOL}"
+    XDG_RUNTIME_DIR="${container_runtime_dir}"
 )
 
 # Define base container parameters
@@ -634,18 +650,12 @@ fi
 if [[ ${window_manager} == "Wayland" ]]; then
     msgbox info "Using Wayland window manager"
 
-    if [[ ${ZWIFT_UID} -ne ${UID} ]]; then
-        msgbox error "Wayland does not support ZWIFT_UID different to your id of ${UID}"
-        exit 1
-    fi
-
     if [[ -n ${XDG_RUNTIME_DIR} ]] && [[ -n ${WAYLAND_DISPLAY} ]]; then
         container_env_vars+=(
-            XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}"
             WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
             WINE_EXPERIMENTAL_WAYLAND="1"
         )
-        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${XDG_RUNTIME_DIR//${local_uid}/${container_uid}}/${WAYLAND_DISPLAY}")
+        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${container_runtime_dir}/${WAYLAND_DISPLAY}")
     else
         msgbox error "Required environment variables XDG_RUNTIME_DIR and/or WAYLAND_DISPLAY are not set"
         msgbox error "Falling back to XWayland" 5
@@ -672,8 +682,8 @@ if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; t
     fi
 
     if [[ -n ${XAUTHORITY} ]]; then
-        container_env_vars+=(XAUTHORITY="${XAUTHORITY//${local_uid}/${container_uid}}")
-        container_args+=(-v "${XAUTHORITY}:${XAUTHORITY//${local_uid}/${container_uid}}")
+        container_env_vars+=(XAUTHORITY="/tmp/.Xauthority")
+        container_args+=(-v "${XAUTHORITY}:/tmp/.Xauthority")
     else
         msgbox info "XAUTHORITY environment variable not set, container access to X11 needs to be granted with xhost"
         xhost_access_required=1
@@ -693,17 +703,17 @@ if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
     [[ ${DBUS_SESSION_BUS_ADDRESS} =~ ^unix:path=([^,]+) ]]
     dbus_unix_socket=${BASH_REMATCH[1]}
     if [[ -n ${dbus_unix_socket} ]]; then
-        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${local_uid}/${container_uid}}")
-        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${local_uid}/${container_uid}}")
+        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${host_uid}/${container_uid}}")
+        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${host_uid}/${container_uid}}")
     fi
 fi
 
 # Configure sound driver
-container_env_vars+=(PULSE_SERVER="/run/user/${container_uid}/pulse/native")
-if [[ -d "/run/user/${local_uid}/pulse" ]]; then
-    container_args+=(-v "/run/user/${local_uid}/pulse:/run/user/${container_uid}/pulse")
+container_env_vars+=(PULSE_SERVER="${container_runtime_dir}/pulse/native")
+if [[ -d "${XDG_RUNTIME_DIR}/pulse" ]]; then
+    container_args+=(-v "${XDG_RUNTIME_DIR}/pulse:${container_runtime_dir}/pulse")
 else
-    msgbox warning "PulseAudio socket /run/user/${local_uid}/pulse not found — audio may not work (PipeWire-only system?)"
+    msgbox warning "PulseAudio socket ${XDG_RUNTIME_DIR}/pulse not found — audio may not work (PipeWire-only system?)"
 fi
 
 # Configure bluetooth

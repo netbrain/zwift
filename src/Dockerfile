@@ -38,8 +38,8 @@ ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731
 # - ca-certificates for wget and curl
 # - cabextract for winetricks
 # - curl used in zwift authentication script
-# - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
+# - libgamemode for freedesktop screensaver inhibit
 # - libglvnd0 for graphics libraries
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
@@ -56,8 +56,8 @@ RUN dpkg --add-architecture i386 \
         curl \
         gamemode \
         gosu \
-        libgamemode0.i386 \
-        libgamemodeauto0.i386 \
+        libgamemode0 libgamemode0.i386 \
+        libgamemodeauto0 libgamemodeauto0.i386 \
         libglvnd0 \
         libvulkan1 \
         procps \
@@ -98,10 +98,10 @@ RUN useradd --create-home --shell /bin/bash user
 FROM wine-base
 
 ENV WINEDEBUG=fixme-all
-ENV WINE_PREFIX="/home/user/.wine"
-ENV WINE_USER_HOME="${WINE_PREFIX}/drive_c/users/user"
+ENV WINEPREFIX="/home/user/.wine"
+ENV WINE_USER_HOME="${WINEPREFIX}/drive_c/users/user"
 ENV ZWIFT_DATA_DIR="${WINE_USER_HOME}/AppData/Local/Zwift"
-ENV ZWIFT_INSTALL_DIR="${WINE_PREFIX}/drive_c/Program Files (x86)/Zwift"
+ENV ZWIFT_INSTALL_DIR="${WINEPREFIX}/drive_c/Program Files (x86)/Zwift"
 
 LABEL org.opencontainers.image.authors="Kim Eik <kim@heldig.org>"
 LABEL org.opencontainers.image.title="netbrain/zwift"
