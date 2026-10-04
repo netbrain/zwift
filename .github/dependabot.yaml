@@ -8,6 +8,10 @@ updates:
     day: sunday
     time: !!str 05:17
     timezone: UTC
+  groups:
+    documentation-site:
+      patterns:
+      - '*'
 - package-ecosystem: docker
   directory: /src
   schedule:
