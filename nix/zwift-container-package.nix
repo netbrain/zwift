@@ -20,8 +20,6 @@
   zwiftNoGameMode ? "",
   wineExperimentalWayland ? "",
   networking ? "",
-  zwiftUid ? "",
-  zwiftGid ? "",
   vgaDeviceFlag ? "",
   debug ? "",
   verbosity ? "",
@@ -63,8 +61,6 @@ let
       wineExperimentalWayland != ""
     ) "export WINE_EXPERIMENTAL_WAYLAND=${wineExperimentalWayland}"}
     ${pkgs.lib.optionalString (networking != "") "export NETWORKING='${networking}'"}
-    ${pkgs.lib.optionalString (zwiftUid != "") "export ZWIFT_UID='${zwiftUid}'"}
-    ${pkgs.lib.optionalString (zwiftGid != "") "export ZWIFT_GID='${zwiftGid}'"}
     ${pkgs.lib.optionalString (debug != "") "export DEBUG=${debug}"}
     ${pkgs.lib.optionalString (verbosity != "") "export VERBOSITY='${verbosity}'"}
     ${pkgs.lib.optionalString (vgaDeviceFlag != "") "export VGA_DEVICE_FLAG='${vgaDeviceFlag}'"}

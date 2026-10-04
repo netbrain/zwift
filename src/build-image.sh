@@ -70,9 +70,7 @@ readonly XAUTHORITY="${XAUTHORITY:-}"
 
 # Initialize script constants
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd)"
-ZWIFT_UID="${UID}"
-ZWIFT_GID="$(id -g)"
-readonly SCRIPT_DIR ZWIFT_UID ZWIFT_GID
+readonly SCRIPT_DIR
 
 # Initialize CONTAINER_TOOL: Use podman if available
 msgbox info "Looking for container tool"
@@ -121,14 +119,16 @@ container_args=(
     -e VERBOSITY="${VERBOSITY}"
     -e COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}"
     -e CONTAINER_TOOL="${CONTAINER_TOOL}"
-    -e ZWIFT_UID="${ZWIFT_UID}"
-    -e ZWIFT_GID="${ZWIFT_GID}"
 )
 
+# Initialize user ids
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
-    # Podman maps the local user into the container as uid/gid 1000 (the container's user),
-    # consistent with zwift.sh. Using the host uid/gid here causes a uid mismatch at runtime.
     container_args+=(--userns "keep-id:uid=1000,gid=1000")
+else
+    container_args+=(
+        -e HOST_UID="${UID}"
+        -e HOST_GID="$(id -g)"
+    )
 fi
 
 # Configure window manager
@@ -147,8 +147,8 @@ container_args+=(
 )
 if [[ -n ${XAUTHORITY} ]]; then
     container_args+=(
-        -e XAUTHORITY="${XAUTHORITY}"
-        -v "${XAUTHORITY}:${XAUTHORITY}"
+        -e XAUTHORITY="/tmp/.Xauthority"
+        -v "${XAUTHORITY}:/tmp/.Xauthority"
     )
 elif command_exists xhost && xhost +local: > /dev/null; then
     msgbox ok "Container X11 access provided through xhost"
