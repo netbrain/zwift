@@ -106,6 +106,10 @@ msgbox info "Image will be called ${IMAGE}"
 ###############################
 ##### Basic configuration #####
 
+# Create array for build arguments
+declare -a build_args
+build_args=()
+
 # Create array for container arguments
 declare -a container_args
 container_args=(
@@ -125,9 +129,9 @@ container_args=(
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     container_args+=(--userns "keep-id:uid=1000,gid=1000")
 else
-    container_args+=(
-        -e HOST_UID="${UID}"
-        -e HOST_GID="$(id -g)"
+    build_args+=(
+        --build-arg USER_UID="${UID}"
+        --build-arg USER_GID="$(id -g)"
     )
 fi
 
@@ -187,7 +191,7 @@ cleanup() {
 trap cleanup EXIT
 
 msgbox info "Building image ${IMAGE}"
-if ${CONTAINER_TOOL} build --force-rm -t "${BUILD_NAME}" "${SCRIPT_DIR}"; then
+if ${CONTAINER_TOOL} build --force-rm "${build_args[@]}" -t "${BUILD_NAME}" "${SCRIPT_DIR}"; then
     msgbox ok "Successfully built image ${IMAGE}"
 else
     msgbox error "Failed to build image! 😭"
