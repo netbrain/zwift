@@ -364,8 +364,8 @@ else
     # Remap the container user to the host user
     container_uid="${host_uid}"
     container_env_vars+=(
-        -e HOST_UID="${host_uid}"
-        -e HOST_GID="${host_gid}"
+        HOST_UID="${host_uid}"
+        HOST_GID="${host_gid}"
     )
 fi
 container_runtime_dir="${XDG_RUNTIME_DIR//${host_uid}/${container_uid}}"
