@@ -104,9 +104,6 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     change_user_ids() {
         usermod -ou "${container_uid}" user || return 1
         groupmod -og "${container_gid}" user || return 1
-        mkdir -p "/run/user/${container_uid}" || return 1
-        chown -R user:user "/run/user/${container_uid}" || return 1
-        sed -i "s|/run/user/1000|/run/user/${container_uid}|g" /etc/pulse/client.conf || return 1
     }
 
     ownership_needs_update() {
