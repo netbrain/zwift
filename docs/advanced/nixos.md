@@ -29,21 +29,28 @@ To use the NixOS module, configure your flake.nix:
 ## Configuration
 
 Then enable and configure the module in your NixOS configuration. The configuration options are written analog to the
-environment variables in camelCase:
+environment variables in camelCase.
+
+The `containerTool` option selects the backend: `podman` (default), `docker` or `fhs`. The first two run Zwift in a
+container, `fhs` runs Zwift natively with Wine in an FHS environment.
+
+### Container backend
 
 ```nix
 {
   programs.zwift = {
     # Enable the zwift module and install required dependencies
     enable = true;
+    # Container tool to run zwift: "podman", "docker" or "fhs"
+    containerTool = "podman";
     # The Docker image to use for zwift
     image = "docker.io/netbrain/zwift";
     # The zwift game version to run
     version = "1.67.0";
-    # Container tool to run zwift (e.g., "podman" or "docker")
-    containerTool = "podman";
     # If true, skip new version check
     dontUpdate = false;
+    # If true, don't clean up previous images after pulling
+    dontClean = false;
     # If true, print the container run command and exit
     dryRun = false;
     # If set, launch container with "-it --entrypoint bash" for debugging
@@ -62,6 +69,10 @@ environment variables in camelCase:
     zwiftLogDir = "/var/lib/zwift/logs";
     # Directory to store zwift screenshots
     zwiftScreenshotsDir = "/var/lib/zwift/screenshots";
+    # Use custom graphics profiles if true
+    zwiftOverrideGraphics = false;
+    # Override the game resolution (e.g. "1920x1080")
+    zwiftOverrideResolution = "";
     # Run zwift in the foreground (set true for foreground mode)
     zwiftFg = false;
     # Disable Linux GameMode if true
@@ -70,18 +81,35 @@ environment variables in camelCase:
     wineExperimentalWayland = false;
     # Networking mode for the container ("bridge" is default)
     networking = "bridge";
-    # User ID for running the container (usually your own UID)
-    zwiftUid = "1000";
-    # Group ID for running the container (usually your own GID)
-    zwiftGid = "1000";
     # GPU/device flags override (Docker: "--gpus=all", Podman/CDI: "--device=nvidia.com/gpu=all")
     vgaDeviceFlag = "--device=nvidia.com/gpu=all";
     # Enable debug output and verbose logging if true
     debug = false;
+    # Verbosity level
+    verbosity = "1";
     # If set, run container in privileged mode ("--privileged --security-opt label=disable")
     privilegedContainer = false;
     # If set to false, allow the container access to host bluetooth
     disableBluetooth = false;
+  };
+}
+```
+
+### FHS backend
+
+```nix
+{
+  programs.zwift = {
+    # Enable the zwift module and install required dependencies
+    enable = true;
+    # Run zwift natively with Wine in an FHS environment
+    containerTool = "fhs";
+    # Custom Wine prefix, defaults to ~/.wine-zwift
+    winePrefix = "/home/example/.wine-zwift";
+    # Enable debug output if true
+    debug = false;
+    # Verbosity level
+    verbosity = "1";
   };
 }
 ```
