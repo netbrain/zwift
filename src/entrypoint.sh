@@ -24,7 +24,7 @@ fi
 readonly VERBOSITY="${VERBOSITY:-1}"
 readonly HOST_UID="${HOST_UID:-$(id -u user)}"
 readonly HOST_GID="${HOST_GID:-$(id -g user)}"
-readonly WINE_EXPERIMENTAL_WAYLAND="${WINE_EXPERIMENTAL_WAYLAND:-0}"
+readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-x11}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 readonly ZWIFT_VOLUME="${ZWIFT_VOLUME:-}"
 
@@ -51,7 +51,7 @@ msgbox() {
 # If Wayland Experimental need to blank DISPLAY here to enable Wayland.
 # NOTE: DISPLAY must be unset here before run_zwift to work
 #       Registry entries are set in the container install or won't work.
-if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
+if [[ ${XDG_SESSION_TYPE} == "wayland" ]]; then
     unset DISPLAY
 fi
 
@@ -104,9 +104,6 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     change_user_ids() {
         usermod -ou "${container_uid}" user || return 1
         groupmod -og "${container_gid}" user || return 1
-        mkdir -p "/run/user/${container_uid}" || return 1
-        chown -R user:user "/run/user/${container_uid}" || return 1
-        sed -i "s|/run/user/1000|/run/user/${container_uid}|g" /etc/pulse/client.conf || return 1
     }
 
     ownership_needs_update() {

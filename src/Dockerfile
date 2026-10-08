@@ -1,6 +1,6 @@
 ARG DEBIAN_VERSION=trixie
 
-FROM rust:1.98.1-slim-trixie AS build-runfromprocess
+FROM rust:1.99.0-slim-trixie AS build-runfromprocess
 
 ARG RUNFROMPROCESS_VERSION=a3d003c07d1bd11ff93c4cac96d2c3aa5deb8471
 
@@ -38,15 +38,15 @@ ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731
 # - ca-certificates for wget and curl
 # - cabextract for winetricks
 # - curl used in zwift authentication script
+# - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
-# - libgamemode for freedesktop screensaver inhibit
-# - libglvnd0 for graphics libraries
+# - libglvnd (libegl1 libgl1 libgles1 libgles2 libglvnd0 libglx0 libopengl0) for opengl
 # - libvulkan1 for vulkan loader library
 # - procps for pgrep
 # - rsync to synchronize zwift volume with zwift appdata
 # - wget for downloading winehq key
 # - winbind for ntml_auth required by zwift/wine
-# - xdg-utils seems to be a dependency of wayland
+# - xdg-utils for wayland
 RUN dpkg --add-architecture i386 \
  && DEBIAN_FRONTEND="noninteractive" apt-get update \
  && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
@@ -54,11 +54,9 @@ RUN dpkg --add-architecture i386 \
         ca-certificates \
         cabextract \
         curl \
-        gamemode \
+        gamemode libgamemode0:i386 libgamemodeauto0:i386 \
         gosu \
-        libgamemode0 libgamemode0.i386 \
-        libgamemodeauto0 libgamemodeauto0.i386 \
-        libglvnd0 \
+        libegl1 libgl1 libgles1 libgles2 libglvnd0 libglx0 libopengl0 \
         libvulkan1 \
         procps \
         rsync \

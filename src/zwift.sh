@@ -128,6 +128,7 @@ load_config_file "${USER_CONFIG_DIR}/config"
 load_config_file "${USER_CONFIG_DIR}/${ZWIFT_RIDER}-config"
 
 # Initialize system environment variables
+readonly DBUS_SYSTEM_BUS_ADDRESS="${DBUS_SYSTEM_BUS_ADDRESS:-"unix:path=/var/run/dbus/system_bus_socket"}"
 readonly DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-}"
 readonly DISPLAY="${DISPLAY:-}"
 readonly WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}"
@@ -354,7 +355,6 @@ entrypoint_args=()
 host_uid="${UID}"
 host_gid="$(id -g)"
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
-    container_uid=1000
     container_args+=(--userns "keep-id:uid=1000,gid=1000")
     # Keep host supplementary groups (e.g. video/render) so GPU devices stay
     # accessible without --privileged. On rootless podman 5.x setgroups can
@@ -362,13 +362,11 @@ if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     container_args+=(--group-add keep-groups)
 else
     # Remap the container user to the host user
-    container_uid="${host_uid}"
     container_env_vars+=(
-        -e HOST_UID="${host_uid}"
-        -e HOST_GID="${host_gid}"
+        HOST_UID="${host_uid}"
+        HOST_GID="${host_gid}"
     )
 fi
-container_runtime_dir="${XDG_RUNTIME_DIR//${host_uid}/${container_uid}}"
 
 # Define base container environment variables
 container_env_vars+=(
@@ -376,7 +374,7 @@ container_env_vars+=(
     VERBOSITY="${VERBOSITY}"
     ZWIFT_VOLUME="${ZWIFT_VOLUME}"
     CONTAINER_TOOL="${CONTAINER_TOOL}"
-    XDG_RUNTIME_DIR="${container_runtime_dir}"
+    XDG_RUNTIME_DIR="/tmp"
 )
 
 # Define base container parameters
@@ -593,64 +591,59 @@ fi
 # - On tty, manually starting x11 with xstart, it remains tty
 # So we cannot rely on XDG_SESSION_TYPE to detect the window manager
 
+is_wayland_supported() {
+    [[ -n ${WAYLAND_DISPLAY} ]] && [[ -S ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY} ]]
+}
+
+is_x11_supported() {
+    # DISPLAY is [host]:displaynumber[.screennumber] but the X11 socket is named
+    # by the display number alone, so strip the host prefix and screen suffix.
+    local x11_display="${DISPLAY#*:}"
+    x11_display="${x11_display%.*}"
+    [[ -n ${DISPLAY} ]] && [[ -d /tmp/.X11-unix ]] && [[ -S /tmp/.X11-unix/X${x11_display} ]]
+}
+
 window_manager=""
 if [[ ${WINE_EXPERIMENTAL_WAYLAND} -eq 1 ]]; then
-    if [[ -n ${WAYLAND_DISPLAY} ]]; then
+    if is_wayland_supported; then
         window_manager="Wayland"
     else
         msgbox warning "WINE_EXPERIMENTAL_WAYLAND: Window manager is not Wayland, ignoring"
     fi
 fi
 if [[ -z ${window_manager} ]]; then
-    # DISPLAY is [host]:displaynumber[.screennumber] but the X11 socket is named
-    # by the display number alone, so strip the host prefix and screen suffix.
-    x11_display="${DISPLAY#*:}"
-    x11_display="${x11_display%.*}"
-    if [[ -n ${WAYLAND_DISPLAY} ]]; then
-        window_manager="XWayland"
-    elif [[ -n ${DISPLAY} ]] && [[ -S /tmp/.X11-unix/X${x11_display} ]]; then
-        window_manager="XOrg"
+    if is_x11_supported; then
+        if is_wayland_supported; then
+            window_manager="XWayland"
+        else
+            window_manager="XOrg"
+        fi
     else # no window manager, tty?
-        msgbox error "Can't run Zwift without window manager"
+        msgbox error "No window manager found, neither Wayland nor X11 are supported"
         exit 1
     fi
 fi
 
 # Setup Flags for Window Managers
 
+xhost_access_required=0
 if [[ ${window_manager} == "Wayland" ]]; then
     msgbox info "Using Wayland window manager"
+    msgbox warning "WINE_EXPERIMENTAL_WAYLAND: Using experimental native Wayland window manager!"
 
-    if [[ -n ${XDG_RUNTIME_DIR} ]] && [[ -n ${WAYLAND_DISPLAY} ]]; then
-        container_env_vars+=(
-            WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
-            WINE_EXPERIMENTAL_WAYLAND="1"
-        )
-        container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:${container_runtime_dir}/${WAYLAND_DISPLAY}")
-    else
-        msgbox error "Required environment variables XDG_RUNTIME_DIR and/or WAYLAND_DISPLAY are not set"
-        msgbox error "Falling back to XWayland" 5
-        window_manager="XWayland"
-    fi
-fi
-
-xhost_access_required=0
-if [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
+    container_env_vars+=(
+        WAYLAND_DISPLAY="${WAYLAND_DISPLAY}"
+        XDG_SESSION_TYPE="wayland"
+    )
+    container_args+=(-v "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/tmp/${WAYLAND_DISPLAY}")
+elif [[ ${window_manager} == "XWayland" ]] || [[ ${window_manager} == "XOrg" ]]; then
     msgbox info "Using X11 window manager (${window_manager})"
 
-    if [[ -n ${DISPLAY} ]]; then
-        container_env_vars+=(DISPLAY="${DISPLAY}")
-    else
-        msgbox error "Required environment variable DISPLAY is not set"
-        exit 1
-    fi
-
-    if [[ -d /tmp/.X11-unix ]]; then
-        container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
-    else
-        msgbox error "X11 socket does not exist at /tmp/.X11-unix"
-        exit 1
-    fi
+    container_env_vars+=(
+        DISPLAY="${DISPLAY}"
+        XDG_SESSION_TYPE="x11"
+    )
+    container_args+=(-v /tmp/.X11-unix:/tmp/.X11-unix)
 
     if [[ -n ${XAUTHORITY} ]]; then
         container_env_vars+=(XAUTHORITY="/tmp/.Xauthority")
@@ -664,39 +657,53 @@ fi
 ####################################
 ##### Hardware driver settings #####
 
+dbus_socket() {
+    local socket_address="${1:?}"
+    local socket_path=""
+    if [[ ${socket_address} =~ ^unix:path=([^,]+) ]] && socket_path="${BASH_REMATCH[1]}" && [[ -S ${socket_path} ]]; then
+        echo "${socket_path}"
+        return 0
+    fi
+    return 1
+}
+
+# Allow container access to d-bus, required for gamemode
+if dbus_session_socket="$(dbus_socket "${DBUS_SESSION_BUS_ADDRESS}")"; then
+    container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="unix:path=/tmp/dbus-session-bus")
+    container_args+=(-v "${dbus_session_socket}:/tmp/dbus-session-bus")
+else
+    msgbox warning "D-bus session bus socket not found, gamemode may not work"
+fi
+
+# Configure bluetooth
+if [[ ${DISABLE_BLUETOOTH} -eq 0 ]]; then
+    if dbus_system_socket="$(dbus_socket "${DBUS_SYSTEM_BUS_ADDRESS}")"; then
+        container_env_vars+=(DBUS_SYSTEM_BUS_ADDRESS="unix:path=/tmp/dbus-system-bus")
+        container_args+=(
+            --cap-add="NET_ADMIN"
+            --cap-add="NET_RAW"
+            -v "${dbus_system_socket}:/tmp/dbus-system-bus"
+        )
+    else
+        msgbox warning "D-bus system bus socket not found, bluetooth may not work"
+    fi
+fi
+
+# Configure sound driver
+if [[ -S "${XDG_RUNTIME_DIR}/pulse/native" ]]; then
+    container_env_vars+=(PULSE_SERVER="unix:/tmp/pulse/native")
+    container_args+=(-v "${XDG_RUNTIME_DIR}/pulse:/tmp/pulse")
+else
+    msgbox warning "PulseAudio socket ${XDG_RUNTIME_DIR}/pulse/native not found — audio may not work (PipeWire-only system?)"
+fi
+
+# Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
+
 nvidia_proprietary_driver() {
     local nvidia_gpus
     command_exists nvidia-smi && nvidia_gpus="$(nvidia-smi -L)" && [[ -n ${nvidia_gpus} ]]
 }
 
-# Allow container access to d-bus
-if [[ -n ${DBUS_SESSION_BUS_ADDRESS} ]]; then
-    [[ ${DBUS_SESSION_BUS_ADDRESS} =~ ^unix:path=([^,]+) ]]
-    dbus_unix_socket=${BASH_REMATCH[1]}
-    if [[ -n ${dbus_unix_socket} ]]; then
-        container_env_vars+=(DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS//${host_uid}/${container_uid}}")
-        container_args+=(-v "${dbus_unix_socket}:${dbus_unix_socket//${host_uid}/${container_uid}}")
-    fi
-fi
-
-# Configure sound driver
-container_env_vars+=(PULSE_SERVER="${container_runtime_dir}/pulse/native")
-if [[ -d "${XDG_RUNTIME_DIR}/pulse" ]]; then
-    container_args+=(-v "${XDG_RUNTIME_DIR}/pulse:${container_runtime_dir}/pulse")
-else
-    msgbox warning "PulseAudio socket ${XDG_RUNTIME_DIR}/pulse not found — audio may not work (PipeWire-only system?)"
-fi
-
-# Configure bluetooth
-if [[ ${DISABLE_BLUETOOTH} -eq 0 ]]; then
-    container_args+=(
-        --cap-add="NET_ADMIN"
-        --cap-add="NET_RAW"
-        -v "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket"
-    )
-fi
-
-# Check for proprietary nvidia driver and set correct device to use (respects existing VGA_DEVICE_FLAG)
 if is_array "VGA_DEVICE_FLAG"; then
     container_args+=("${VGA_DEVICE_FLAG[@]}")
 elif [[ -n ${VGA_DEVICE_FLAG} ]]; then
