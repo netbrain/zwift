@@ -119,6 +119,7 @@ container_args=(
     -e VERBOSITY="${VERBOSITY}"
     -e COLORED_OUTPUT="${COLORED_OUTPUT_SUPPORTED}"
     -e CONTAINER_TOOL="${CONTAINER_TOOL}"
+    -e ZWIFT_PERMISSIVE_UPDATE=1
 )
 
 # Initialize user ids
