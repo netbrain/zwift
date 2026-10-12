@@ -9,6 +9,8 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
 
+      zwift-fhs = import ./nix/zwift-fhs-package.nix { inherit pkgs; };
+
       zwift-container = import ./nix/zwift-container-package.nix { inherit pkgs; };
 
       nixosModule = import ./nix/module.nix;
@@ -58,7 +60,10 @@
       };
 
       packages.${system} = {
-        inherit zwift-container;
+        inherit
+          zwift-fhs
+          zwift-container
+          ;
         default = zwift-container;
       };
     };
