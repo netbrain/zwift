@@ -141,6 +141,7 @@ readonly IMAGE="${IMAGE:-docker.io/netbrain/zwift}"
 readonly VERSION="${VERSION:-latest}"
 readonly LATEST_SCRIPT_VERSION="master"
 readonly SCRIPT_VERSION="${SCRIPT_VERSION:-${LATEST_SCRIPT_VERSION}}"
+readonly DEFERRED_UPDATE="${DEFERRED_UPDATE:-0}"
 readonly DONT_UPDATE="${DONT_UPDATE:-0}"
 readonly DONT_CLEAN="${DONT_CLEAN:-0}"
 readonly DRYRUN="${DRYRUN:-0}"
@@ -238,7 +239,7 @@ cleanup() {
 
     for i in $(seq $((count - 1)) -1 0); do
         msgbox debug "Invoking cleanup action ${cleanup_actions[i]}"
-        "${cleanup_actions[i]}"
+        "${cleanup_actions[i]}" || true
     done
 }
 
@@ -292,10 +293,14 @@ upgrade_script() {
 if [[ ${SCRIPT_VERSION} != "${LATEST_SCRIPT_VERSION}" ]]; then
     msgbox warning "Using zwift.sh version ${SCRIPT_VERSION} instead of latest"
 fi
+
 if [[ ${DONT_UPDATE} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
     if check_script_up_to_date; then
         msgbox ok "You are running the latest zwift.sh 👏"
+    elif [[ ${DEFERRED_UPDATE} -eq 1 ]]; then
+        deferred_upgrade_script() { upgrade_script || msgbox error "Failed to upgrade script! 😔"; }
+        cleanup_actions+=(deferred_upgrade_script)
     elif upgrade_script; then
         msgbox ok "Switching to new zwift.sh script"
         exec "${0}" "${@}"
@@ -311,15 +316,25 @@ else
 fi
 
 # Check for updated container image
-if [[ "${IMAGE}:${VERSION}" != "docker.io/netbrain/zwift:latest" ]]; then
-    msgbox warning "Using image ${IMAGE}:${VERSION} instead of docker.io/netbrain/zwift:latest"
-fi
-if [[ ${DONT_UPDATE} -ne 1 ]]; then
+
+pull_container_image() {
     msgbox info "Checking for updated container image"
     if ${CONTAINER_TOOL} pull "${IMAGE}:${VERSION}"; then
         msgbox ok "Container image is up to date"
     else
         msgbox error "Failed to update container image"
+    fi
+}
+
+if [[ "${IMAGE}:${VERSION}" != "docker.io/netbrain/zwift:latest" ]]; then
+    msgbox warning "Using image ${IMAGE}:${VERSION} instead of docker.io/netbrain/zwift:latest"
+fi
+
+if [[ ${DONT_UPDATE} -ne 1 ]]; then
+    if [[ ${DEFERRED_UPDATE} -eq 1 ]]; then
+        cleanup_actions+=(pull_container_image)
+    else
+        pull_container_image
     fi
 else
     msgbox warning "DONT_UPDATE: Not checking for new container image"
@@ -329,9 +344,9 @@ else
 fi
 
 # Clean previous container images (if any)
-if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_UPDATE} -ne 1 ]]; then
-    declare -a old_images
-    old_images=()
+
+cleanup_old_images() {
+    declare -a old_images=()
     if images_output="$(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')"; then
         [[ -n ${images_output} ]] && readarray -t old_images <<< "${images_output}"
     else
@@ -345,6 +360,14 @@ if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_UPDATE} -ne 1 ]]; then
             msgbox warning "Failed to clean up previous container images"
         fi
     fi
+}
+
+if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_UPDATE} -ne 1 ]]; then
+    if [[ ${DEFERRED_UPDATE} -eq 1 ]]; then
+        cleanup_actions+=(cleanup_old_images)
+    else
+        cleanup_old_images
+    fi
 fi
 
 ###############################
@@ -352,7 +375,6 @@ fi
 
 # Create temporary file for container environment variables, automatically removed upon exit
 if container_env_file="$(mktemp -q /tmp/zwift-container.env.XXXXXXXXXX)"; then
-    trap 'rm -f -- "${container_env_file}" && msgbox info "Removed temporary file ${container_env_file}"' EXIT
     msgbox info "Created temporary file for environment variables:"
     msgbox info "  ${container_env_file}"
     msgbox info "  This file will be removed automatically when the script exits"

@@ -61,6 +61,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`IMAGE`](#image)                                         | `docker.io/netbrain/zwift` | The image to use                                    |
 | [`VERSION`](#version)                                     | `latest`                   | The image version/tag to use                        |
 | [`SCRIPT_VERSION`](#script_version)                       | `master`                   | The `zwift.sh` script version to use                |
+| [`DEFERRED_UPDATE`](#deferred_update)                     | `0`                        | If set to `1`, update after Zwift has launched      |
 | [`DONT_UPDATE`](#dont_update)                             | `0`                        | If set to `1`, don't update script or image         |
 | [`DONT_CLEAN`](#dont_clean)                               | `0`                        | If set to `1`, don't clean up previous images       |
 | [`DRYRUN`](#dryrun)                                       | `0`                        | If set to `1`, only print the container run command |
@@ -230,6 +231,23 @@ Pin the `zwift.sh` script to a specific version.
 
 {: .warning }
 Pinning to a specific image version may result in Zwift failing to launch. Only use this option if you have a good reason.
+
+---
+
+### `DEFERRED_UPDATE`
+
+See also [`DONT_UPDATE`](#dont_update).
+
+If set to `1`, check for updated `zwift.sh` script and pull for a new image version after Zwift has launcher. The update will
+be performed in the background while Zwift is running.
+
+| Item              | Description                         |
+|:------------------|:------------------------------------|
+| Allowed values    | `0` - Update before starting Zwift. |
+|                   | `1` - Update after launching Zwift. |
+| Default value     | `0`                                 |
+| Commandline usage | `DEFERRED_UPDATE="1" zwift`         |
+| Config file usage | `DEFERRED_UPDATE="1"`               |
 
 ---
 
