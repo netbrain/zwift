@@ -222,6 +222,28 @@ for parameter_to_print in "${parameters_to_print[@]}"; do
     msgbox debug "  • ${parameter_print_value}"
 done
 
+########################################
+##### Initialize cleanup exit trap #####
+
+# To add a cleanup action, create a function and append the function name to the cleanup_actions array.
+# Cleanup actions will be executed at script exit in the opposite order they were registered.
+
+declare -a cleanup_actions=()
+
+cleanup() {
+    trap - EXIT
+
+    local i
+    local count="${#cleanup_actions[@]}"
+
+    for i in $(seq $((count - 1)) -1 0); do
+        msgbox debug "Invoking cleanup action ${cleanup_actions[i]}"
+        "${cleanup_actions[i]}"
+    done
+}
+
+trap cleanup EXIT
+
 ##################################################################
 ##### Update zwift.sh script and pull latest container image #####
 
@@ -334,6 +356,8 @@ if container_env_file="$(mktemp -q /tmp/zwift-container.env.XXXXXXXXXX)"; then
     msgbox info "Created temporary file for environment variables:"
     msgbox info "  ${container_env_file}"
     msgbox info "  This file will be removed automatically when the script exits"
+    remove_container_env_file() { rm -f -- "${container_env_file}" && msgbox info "Removed temporary file ${container_env_file}"; }
+    cleanup_actions+=(remove_container_env_file)
 else
     msgbox error "Failed to create temporary file for environment variables"
     exit 1
