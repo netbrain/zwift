@@ -175,6 +175,9 @@ uninstall_netbrain_zwift() {
 }
 
 install_netbrain_zwift() {
+    local root_bin
+    local root_share
+
     determine_install_location() {
         if invoked_as_root; then
             root_bin="${SYSTEM_BIN_DIR}"
@@ -208,27 +211,52 @@ install_netbrain_zwift() {
     }
 
     download_zwift() {
+        local assets_map temporary_files
+        declare -A assets_map
+        declare -a temporary_files=()
+
+        cleanup() {
+            trap - RETURN
+            msgbox debug "Removing temporary files"
+            rm -f -- "${temporary_files[@]}" > /dev/null 2>&1 || true
+        }
+        trap cleanup RETURN
+
         download_asset() {
-            local destination="${1:?}"
-            local url="${2:?}"
+            local url="${1:?}"
+            local destination="${2:?}"
+            local mode="${3:-}"
+            local tmp_file=""
 
             msgbox info "  Downloading ${url}"
-            if ! curl -fsSLo "${destination}" "${url}"; then
-                msgbox error "Downloading ${url} failed"
-                return 1
-            fi
+            tmp_file="$(mktemp -q "${destination}.part-XXXXXXXXXX")" || return 1
+            temporary_files+=("${tmp_file}")
+            curl -fsSLo "${tmp_file}" "${url}" || return 1
+            if [[ -n ${mode} ]]; then chmod "${mode}" "${tmp_file}" || return 1; fi
+            assets_map["${destination}"]="${tmp_file}"
         }
 
         msgbox info "Downloading netbrain/zwift"
 
-        download_asset "${root_bin}/zwift" "${ZWIFT_SCRIPT}" || return 1
-        download_asset "${root_share}/icons/hicolor/scalable/apps/zwift.svg" "${ZWIFT_LOGO}" || return 1
-        download_asset "${root_share}/applications/Zwift.desktop" "${ZWIFT_DESKTOP_ENTRY}" || return 1
+        # During an update, the zwift.sh script is running while being replaced with the new version.
+        # The safe way to do this is by downloading the updated file to a temporary location in the same
+        # directory as the target directory, and replacing the original file by renaming the new file to
+        # the original name. This rename operation is atomic (if it happens on the same filesystem, this
+        # is why we use the same directory for the temporary file), and atomic renames don't invalidate
+        # existing file descriptors. The already running script keeps reading from the old file and
+        # continues to execute just fine. By following this procedure we can safely update files that are
+        # in use.
 
-        if ! chmod 755 "${root_bin}/zwift"; then
-            msgbox error "Failed to set permissions for ${root_bin}/zwift, aborting"
-            return 1
-        fi
+        # step 1: download to temporary file
+        download_asset "${ZWIFT_SCRIPT}" "${root_bin}/zwift" 755 || return 1
+        download_asset "${ZWIFT_LOGO}" "${root_share}/icons/hicolor/scalable/apps/zwift.svg" || return 1
+        download_asset "${ZWIFT_DESKTOP_ENTRY}" "${root_share}/applications/Zwift.desktop" || return 1
+
+        # step 2: replace old file by renaming temporary file
+        for asset in "${!assets_map[@]}"; do
+            msgbox debug "  Installing temporary file ${assets_map["${asset}"]}"
+            mv -f "${assets_map["${asset}"]}" "${asset}" || return 1
+        done
 
         msgbox ok "Download complete"
     }
