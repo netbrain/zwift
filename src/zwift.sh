@@ -387,12 +387,7 @@ cleanup_old_images() {
 }
 
 if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_UPDATE} -ne 1 ]]; then
-    if [[ ${DEFERRED_UPDATE} -eq 1 ]]; then
-        msgbox ok "DEFERRED_UPDATE: Cleanup will be performed after Zwift has launched"
-        cleanup_actions+=(cleanup_old_images)
-    else
-        cleanup_old_images
-    fi
+    cleanup_old_images
 fi
 
 ###############################
