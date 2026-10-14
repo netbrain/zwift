@@ -236,10 +236,17 @@ Pinning to a specific image version may result in Zwift failing to launch. Only 
 
 ### `DEFERRED_UPDATE`
 
-See also [`DONT_UPDATE`](#dont_update).
+See also [`DONT_UPDATE`](#dont_update), [`ZWIFT_FG`](#zwift_fg), [`INTERACTIVE`](#interactive).
 
-If set to `1`, check for updated `zwift.sh` script and pull for a new image version after Zwift has launcher. The update will
+If set to `1`, check for updated `zwift.sh` script and pull for a new image version after Zwift has launched. The update will
 be performed in the background while Zwift is running.
+
+How it works:
+
+- In the default case, updates are done before Zwift is launched, this can take a bit of time.
+- If the `DEFERRED_UPDATE` configuration option is set to 1, updates are done at script exit.
+  - If Zwift is launched in the background (default, `ZWIFT_FG=0`), updates are done while Zwift is running.
+  - If Zwift is launched in the foreground (`ZWIFT_FG=1` or `INTERACTIVE=1`), updates are done after Zwift has exited.
 
 | Item              | Description                         |
 |:------------------|:------------------------------------|
@@ -248,6 +255,10 @@ be performed in the background while Zwift is running.
 | Default value     | `0`                                 |
 | Commandline usage | `DEFERRED_UPDATE="1" zwift`         |
 | Config file usage | `DEFERRED_UPDATE="1"`               |
+
+{: .note}
+If netbrain/zwift is installed system wide, root privileges are required to update the script. The popup asking for the root
+password may therefore appear while Zwift has already started if background updates are enabled.
 
 ---
 
