@@ -264,7 +264,7 @@ password may therefore appear while Zwift has already started if background upda
 
 ### `DONT_UPDATE`
 
-See also [`IMAGE`](#image), [`VERSION`](#version).
+See also [`IMAGE`](#image), [`VERSION`](#version), [`SCRIPT_VERSION`](#script_version), [`DONT_CLEAN`](#dont_clean).
 
 If set to `1`, don't check for updated `zwift.sh` script and don't pull for a new image version (implies `DONT_CLEAN=1`).
 
@@ -292,7 +292,8 @@ reason.
 
 See also [`DONT_UPDATE`](#dont_update).
 
-If set to `1`, don't clean up previous image versions after pulling.
+If clean up is enabled, old tags of the netbrain/zwift image and all dangling image layers are removed after pulling for a new
+image version. To skip the clean up procedure, set `DONT_CLEAN` to `1`.
 
 | Item              | Description                                                 |
 |:------------------|:------------------------------------------------------------|

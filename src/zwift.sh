@@ -346,18 +346,32 @@ fi
 # Clean previous container images (if any)
 
 cleanup_old_images() {
+    msgbox info "Cleaning up old versions"
+
+    # Collect old tags of the netbrain/zwift image
     declare -a old_images=()
     if images_output="$(${CONTAINER_TOOL} images --filter "reference=${IMAGE#docker.io/}" --filter "before=${IMAGE#docker.io/}:${VERSION}" --format '{{.ID}}')"; then
         [[ -n ${images_output} ]] && readarray -t old_images <<< "${images_output}"
     else
         msgbox warning "Failed to retrieve list of container images"
     fi
-    if [[ ${#old_images[@]} -gt 0 ]]; then
-        msgbox info "Cleaning up previous container images"
-        if ${CONTAINER_TOOL} image rm "${old_images[@]}"; then
-            msgbox ok "Previous container images have been deleted"
+
+    # Collect dangling image layers
+    declare -a dangling_layers=()
+    if dangling_output="$(${CONTAINER_TOOL} images --filter "dangling=1" --format '{{.ID}}')"; then
+        [[ -n ${dangling_output} ]] && readarray -t dangling_layers <<< "${dangling_output}"
+    else
+        msgbox warning "Failed to retrieve list of dangling image layers"
+    fi
+
+    # Remove collected old tags and dangling image layers
+    msgbox info "Found ${#old_images[@]} old tags and ${#dangling_layers[@]} dangling image layers"
+    if [[ ${#old_images[@]} -gt 0 ]] || [[ ${#dangling_layers[@]} -gt 0 ]]; then
+        msgbox info "Removing old versions..."
+        if ${CONTAINER_TOOL} rmi "${old_images[@]}" "${dangling_layers[@]}" > /dev/null; then
+            msgbox ok "Removed old ${IMAGE} tags and dangling image layers"
         else
-            msgbox warning "Failed to clean up previous container images"
+            msgbox warning "Failed to clean up old versions (they may be currently in use)"
         fi
     fi
 }
