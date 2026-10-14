@@ -301,6 +301,7 @@ if [[ ${DONT_UPDATE} -ne 1 ]]; then
     elif [[ ${DRYRUN} -eq 1 ]]; then
         msgbox ok "DRYRUN: Newer zwift.sh script version is available!"
     elif [[ ${DEFERRED_UPDATE} -eq 1 ]]; then
+        msgbox ok "DEFERRED_UPDATE: Newer zwift.sh script version is available and will be installed after Zwift launched!"
         deferred_upgrade_script() { upgrade_script || msgbox error "Failed to upgrade script! 😔"; }
         cleanup_actions+=(deferred_upgrade_script)
     elif upgrade_script; then
@@ -337,6 +338,7 @@ fi
 
 if [[ ${DONT_UPDATE} -ne 1 ]]; then
     if [[ ${DEFERRED_UPDATE} -eq 1 ]]; then
+        msgbox ok "DEFERRED_UPDATE: ${IMAGE} will be pulled after Zwift launched"
         cleanup_actions+=(pull_container_image)
     else
         pull_container_image
@@ -386,6 +388,7 @@ cleanup_old_images() {
 
 if [[ ${DONT_CLEAN} -ne 1 ]] && [[ ${DONT_UPDATE} -ne 1 ]]; then
     if [[ ${DEFERRED_UPDATE} -eq 1 ]]; then
+        msgbox ok "DEFERRED_UPDATE: Cleanup will be performed after Zwift launched"
         cleanup_actions+=(cleanup_old_images)
     else
         cleanup_old_images
