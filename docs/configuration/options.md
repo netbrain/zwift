@@ -309,7 +309,12 @@ image version. To skip the clean up procedure, set `DONT_CLEAN` to `1`.
 
 See also [`VERBOSITY`](#verbosity).
 
-If set to `1`, print the full container run command and exit without launching Zwift.
+If set to `1`, perform a dry-run instead of taking real actions:
+
+- Check for new `zwift.sh` script version, but don't update to the new version.
+- Don't pull the latest container image, instead print the pull command.
+- Find old image versions, but don't remove them, instead print the cleanup command.
+- Print the full container run command and exit without launching Zwift.
 
 | Item              | Description                                                    |
 |:------------------|:---------------------------------------------------------------|

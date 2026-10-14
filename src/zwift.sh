@@ -298,6 +298,8 @@ if [[ ${DONT_UPDATE} -ne 1 ]]; then
     msgbox info "Checking for updated zwift.sh"
     if check_script_up_to_date; then
         msgbox ok "You are running the latest zwift.sh 👏"
+    elif [[ ${DRYRUN} -eq 1 ]]; then
+        msgbox ok "DRYRUN: Newer zwift.sh script version is available!"
     elif [[ ${DEFERRED_UPDATE} -eq 1 ]]; then
         deferred_upgrade_script() { upgrade_script || msgbox error "Failed to upgrade script! 😔"; }
         cleanup_actions+=(deferred_upgrade_script)
@@ -319,7 +321,10 @@ fi
 
 pull_container_image() {
     msgbox info "Checking for updated container image"
-    if ${CONTAINER_TOOL} pull "${IMAGE}:${VERSION}"; then
+    if [[ ${DRYRUN} -eq 1 ]]; then
+        msgbox ok "DRYRUN: Skipping image pull"
+        msgbox ok "  ${CONTAINER_TOOL} pull ${IMAGE}:${VERSION}"
+    elif ${CONTAINER_TOOL} pull "${IMAGE}:${VERSION}"; then
         msgbox ok "Container image is up to date"
     else
         msgbox error "Failed to update container image"
@@ -368,7 +373,10 @@ cleanup_old_images() {
     msgbox info "Found ${#old_images[@]} old tags and ${#dangling_layers[@]} dangling image layers"
     if [[ ${#old_images[@]} -gt 0 ]] || [[ ${#dangling_layers[@]} -gt 0 ]]; then
         msgbox info "Removing old versions..."
-        if ${CONTAINER_TOOL} rmi "${old_images[@]}" "${dangling_layers[@]}" > /dev/null; then
+        if [[ ${DRYRUN} -eq 1 ]]; then
+            msgbox ok "DRYRUN: Skipping removal of old images"
+            msgbox ok "  ${CONTAINER_TOOL} rmi ${old_images[*]} ${dangling_layers[*]}"
+        elif ${CONTAINER_TOOL} rmi "${old_images[@]}" "${dangling_layers[@]}" > /dev/null; then
             msgbox ok "Removed old ${IMAGE} tags and dangling image layers"
         else
             msgbox warning "Failed to clean up old versions (they may be currently in use)"
