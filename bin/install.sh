@@ -221,10 +221,19 @@ install_netbrain_zwift() {
             local tmp_file=""
 
             msgbox info "  Downloading ${url}"
-            tmp_file="$(mktemp -q "${destination}.part-XXXXXXXXXX")" || return 1
+            if ! tmp_file="$(mktemp -q "${destination}.part-XXXXXXXXXX")"; then
+                msgbox error "Failed to create temporary file for $(basename "${destination}")"
+                return 1
+            fi
             temporary_files+=("${tmp_file}")
-            curl -fsSLo "${tmp_file}" "${url}" || return 1
-            chmod "${mode}" "${tmp_file}" || return 1;
+            if ! curl -fsSLo "${tmp_file}" "${url}"; then
+                msgbox error "Downloading ${url} failed"
+                return 1
+            fi
+            if ! chmod "${mode}" "${tmp_file}"; then
+                msgbox error "Failed to set permissions for $(basename "${destination}")"
+                return 1
+            fi
             assets_map["${destination}"]="${tmp_file}"
         }
 
@@ -247,7 +256,10 @@ install_netbrain_zwift() {
         # step 2: replace old file by renaming temporary file
         for asset in "${!assets_map[@]}"; do
             msgbox debug "  Installing temporary file ${assets_map["${asset}"]}"
-            mv -f "${assets_map["${asset}"]}" "${asset}" || return 1
+            if ! mv -f "${assets_map["${asset}"]}" "${asset}"; then
+                msgbox error "Failed to replace $(basename "${asset}") with new version"
+                return 1
+            fi
         done
 
         msgbox ok "Download complete"
