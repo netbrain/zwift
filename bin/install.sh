@@ -225,14 +225,14 @@ install_netbrain_zwift() {
         download_asset() {
             local url="${1:?}"
             local destination="${2:?}"
-            local mode="${3:-}"
+            local mode="${3:-644}"
             local tmp_file=""
 
             msgbox info "  Downloading ${url}"
             tmp_file="$(mktemp -q "${destination}.part-XXXXXXXXXX")" || return 1
             temporary_files+=("${tmp_file}")
             curl -fsSLo "${tmp_file}" "${url}" || return 1
-            if [[ -n ${mode} ]]; then chmod "${mode}" "${tmp_file}" || return 1; fi
+            chmod "${mode}" "${tmp_file}" || return 1;
             assets_map["${destination}"]="${tmp_file}"
         }
 
