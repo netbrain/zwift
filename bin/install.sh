@@ -211,16 +211,8 @@ install_netbrain_zwift() {
     }
 
     download_zwift() {
-        local assets_map temporary_files
+        local assets_map
         declare -A assets_map
-        declare -a temporary_files=()
-
-        cleanup() {
-            trap - RETURN
-            msgbox debug "Removing temporary files"
-            rm -f -- "${temporary_files[@]}" > /dev/null 2>&1 || true
-        }
-        trap cleanup RETURN
 
         download_asset() {
             local url="${1:?}"
@@ -296,6 +288,13 @@ if [[ ${INTERACTIVE_TERMINAL} -eq 0 ]] && [[ ${auto_confirm} -eq 0 ]]; then
     msgbox warning "Detected non-interactive environment, enabling auto-confirm"
     auto_confirm=1
 fi
+
+declare -a temporary_files=()
+cleanup() {
+    msgbox debug "Removing temporary files"
+    rm -f -- "${temporary_files[@]}" > /dev/null 2>&1 || true
+}
+trap cleanup EXIT
 
 if [[ ${uninstall} -eq 1 ]]; then
     uninstall_netbrain_zwift
