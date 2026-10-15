@@ -127,7 +127,6 @@ uninstall_netbrain_zwift() {
         local file="${1:?}"
 
         msgbox info "  Removing ${file}"
-
         if ! rm -- "${file}" > /dev/null 2>&1; then
             msgbox warning "  Failed to remove ${file}"
         fi
@@ -176,10 +175,8 @@ uninstall_netbrain_zwift() {
 }
 
 install_netbrain_zwift() {
-    exit_failure() {
-        msgbox error "Zwift install failed! 😭"
-        exit 1
-    }
+    local root_bin
+    local root_share
 
     determine_install_location() {
         if invoked_as_root; then
@@ -190,19 +187,9 @@ install_netbrain_zwift() {
             root_share="${USER_SHARE_DIR}"
         fi
 
-        msgbox info "Installing Zwift to:"
+        msgbox info "Installing netbrain/zwift to:"
         msgbox info "  binaries → ${root_bin}"
         msgbox info "  data     → ${root_share}"
-    }
-
-    ask_user_confirmation() {
-        if msgbox question "Are you sure you want to install Zwift?"; then
-            msgbox ok "Proceeding with netbrain/zwift installation"
-        else
-            msgbox info "Aborted netbrain/zwift installation"
-            msgbox warning "Zwift not installed! 😥"
-            exit 2
-        fi
     }
 
     create_directories() {
@@ -210,55 +197,79 @@ install_netbrain_zwift() {
             local directory="${1:?}"
 
             msgbox info "  Creating directory ${directory}"
-
             if ! mkdir -p "${directory}"; then
-                msgbox error "Could not create ${directory}, aborting"
-                exit_failure
+                msgbox error "Could not create ${directory}"
+                return 1
             fi
         }
 
         msgbox info "Creating directories"
-
-        create_directory "${root_bin}"
-        create_directory "${root_share}/icons/hicolor/scalable/apps"
-        create_directory "${root_share}/applications"
-
+        create_directory "${root_bin}" || return 1
+        create_directory "${root_share}/icons/hicolor/scalable/apps" || return 1
+        create_directory "${root_share}/applications" || return 1
         msgbox ok "Directories created"
     }
 
     download_zwift() {
+        local assets_map
+        declare -A assets_map
+
         download_asset() {
-            local destination="${1:?}"
-            local url="${2:?}"
+            local url="${1:?}"
+            local destination="${2:?}"
+            local mode="${3:-644}"
+            local tmp_file=""
 
             msgbox info "  Downloading ${url}"
-
-            if ! curl -fsSLo "${destination}" "${url}"; then
-                msgbox error "Downloading ${url} failed, aborting"
-                exit_failure
+            if ! tmp_file="$(mktemp -q "${destination}.part-XXXXXXXXXX")"; then
+                msgbox error "Failed to create temporary file for $(basename "${destination}")"
+                return 1
             fi
+            temporary_files+=("${tmp_file}")
+            if ! curl -fsSLo "${tmp_file}" "${url}"; then
+                msgbox error "Downloading ${url} failed"
+                return 1
+            fi
+            if ! chmod "${mode}" "${tmp_file}"; then
+                msgbox error "Failed to set permissions for $(basename "${destination}")"
+                return 1
+            fi
+            assets_map["${destination}"]="${tmp_file}"
         }
 
         msgbox info "Downloading netbrain/zwift"
 
-        download_asset "${root_bin}/zwift" "${ZWIFT_SCRIPT}"
-        download_asset "${root_share}/icons/hicolor/scalable/apps/zwift.svg" "${ZWIFT_LOGO}"
-        download_asset "${root_share}/applications/Zwift.desktop" "${ZWIFT_DESKTOP_ENTRY}"
+        # During an update, the zwift.sh script is running while being replaced with the new version.
+        # The safe way to do this is by downloading the updated file to a temporary location in the same
+        # directory as the target directory, and replacing the original file by renaming the new file to
+        # the original name. This rename operation is atomic (if it happens on the same filesystem, this
+        # is why we use the same directory for the temporary file), and atomic renames don't invalidate
+        # existing file descriptors. The already running script keeps reading from the old file and
+        # continues to execute just fine. By following this procedure we can safely update files that are
+        # in use.
 
-        if ! chmod 755 "${root_bin}/zwift"; then
-            msgbox error "Failed to set permissions for ${root_bin}/zwift, aborting"
-            exit_failure
-        fi
+        # step 1: download to temporary file
+        download_asset "${ZWIFT_SCRIPT}" "${root_bin}/zwift" 755 || return 1
+        download_asset "${ZWIFT_LOGO}" "${root_share}/icons/hicolor/scalable/apps/zwift.svg" || return 1
+        download_asset "${ZWIFT_DESKTOP_ENTRY}" "${root_share}/applications/Zwift.desktop" || return 1
+
+        # step 2: replace old file by renaming temporary file
+        for asset in "${!assets_map[@]}"; do
+            msgbox debug "  Installing temporary file ${assets_map["${asset}"]}"
+            if ! mv -f "${assets_map["${asset}"]}" "${asset}"; then
+                msgbox error "Failed to replace $(basename "${asset}") with new version"
+                return 1
+            fi
+        done
 
         msgbox ok "Download complete"
     }
 
     check_in_path() {
         msgbox info "Checking if 'zwift' is in PATH"
-
-        if case ":${PATH}:" in *":${root_bin}:"*) true ;; *) false ;; esac then
+        if [[ ":${PATH}:" == *":${root_bin}:"* ]]; then
             msgbox info "  ${root_bin} is in your PATH"
-            msgbox ok "Zwift can be launched using the 'zwift' command"
+            msgbox ok "netbrain/zwift can be launched using the 'zwift' command"
         else
             msgbox warning "${root_bin} is not in your PATH"
             msgbox warning "You may need to add it to your PATH for the 'zwift' command to work"
@@ -267,11 +278,19 @@ install_netbrain_zwift() {
 
     msgbox info "Preparing to install netbrain/zwift"
     determine_install_location
-    ask_user_confirmation
-    create_directories
-    download_zwift
-    check_in_path
-    msgbox ok "Install complete! 🥳"
+    if msgbox question "Are you sure you want to install netbrain/zwift?"; then
+        msgbox ok "Proceeding with netbrain/zwift installation"
+        if create_directories && download_zwift && check_in_path; then
+            msgbox ok "Install complete! 🥳"
+        else
+            msgbox error "netbrain/zwift install failed! 😭"
+            exit 1
+        fi
+    else
+        msgbox info "Aborted netbrain/zwift installation"
+        msgbox warning "netbrain/zwift not installed! 😥"
+        exit 2
+    fi
 }
 
 echo -e "${COLOR_YELLOW}[!] ${STYLE_BOLD}Easily Zwift on linux!${RESET_STYLE}"
@@ -281,6 +300,13 @@ if [[ ${INTERACTIVE_TERMINAL} -eq 0 ]] && [[ ${auto_confirm} -eq 0 ]]; then
     msgbox warning "Detected non-interactive environment, enabling auto-confirm"
     auto_confirm=1
 fi
+
+declare -a temporary_files=()
+cleanup() {
+    msgbox debug "Removing temporary files"
+    rm -f -- "${temporary_files[@]}" || true
+}
+trap cleanup EXIT
 
 if [[ ${uninstall} -eq 1 ]]; then
     uninstall_netbrain_zwift

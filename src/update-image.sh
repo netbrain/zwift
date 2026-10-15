@@ -105,27 +105,23 @@ readonly SCRIPTS_MAP
 ##### Update scripts in image #####
 
 temp_dir=""
-cleanup_invoked=0
 any_script_updated=0
 
 cleanup() {
-    if [[ ${cleanup_invoked} -ne 1 ]]; then
-        msgbox info "Checking for temporary container"
-        if ${CONTAINER_TOOL} rm "${TEMP_CONTAINER_NAME}" > /dev/null 2>&1; then
-            msgbox ok "Removed temporary container"
-        else
-            msgbox info "No temporary container to remove"
-        fi
+    trap - EXIT
 
-        if [[ -n ${temp_dir} ]] && [[ -d ${temp_dir} ]]; then
-            msgbox info "Removing temporary directory"
-            rm -rf -- "${temp_dir}" || true
-        fi
+    msgbox info "Checking for temporary container"
+    if ${CONTAINER_TOOL} rm "${TEMP_CONTAINER_NAME}" > /dev/null 2>&1; then
+        msgbox ok "Removed temporary container"
+    else
+        msgbox info "No temporary container to remove"
+    fi
 
-        cleanup_invoked=1
+    if [[ -n ${temp_dir} ]] && [[ -d ${temp_dir} ]]; then
+        msgbox info "Removing temporary directory"
+        rm -rf -- "${temp_dir}" || true
     fi
 }
-
 trap cleanup EXIT
 
 msgbox info "Creating temporary directory"

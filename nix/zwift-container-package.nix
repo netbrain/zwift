@@ -2,6 +2,7 @@
   pkgs,
   image ? "",
   tag ? "",
+  deferredUpdate ? "",
   dontUpdate ? "",
   dontClean ? "",
   dryRun ? "",
@@ -31,6 +32,7 @@ let
   nixosRun = pkgs.writeShellScript "zwift-nixos.sh" ''
     ${pkgs.lib.optionalString (image != "") "export IMAGE='${image}'"}
     ${pkgs.lib.optionalString (tag != "") "export VERSION='${tag}'"}
+    ${pkgs.lib.optionalString (deferredUpdate != "") "export DEFERRED_UPDATE=${deferredUpdate}"}
     ${pkgs.lib.optionalString (dontUpdate != "") "export DONT_UPDATE=${dontUpdate}"}
     ${pkgs.lib.optionalString (dontClean != "") "export DONT_CLEAN=${dontClean}"}
     ${pkgs.lib.optionalString (dryRun != "") "export DRYRUN=${dryRun}"}
