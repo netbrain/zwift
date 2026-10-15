@@ -304,7 +304,7 @@ fi
 declare -a temporary_files=()
 cleanup() {
     msgbox debug "Removing temporary files"
-    rm -f -- "${temporary_files[@]}" > /dev/null 2>&1 || true
+    rm -f -- "${temporary_files[@]}" || true
 }
 trap cleanup EXIT
 
