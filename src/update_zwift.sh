@@ -167,8 +167,9 @@ cleanup() {
     msgbox info "Removing installation artifacts"
     rm -f -- "/tmp/ZwiftSetup.exe" || true
     rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
-    rm -rf -- "/home/user/.cache/wine*" || true
-    rm -rf -- "${ZWIFT_DATA_DIR:?}/*" || true
+    rm -rf -- "/home/user/.cache/wine"* || true
+    rm -rf -- "${ZWIFT_DATA_DIR:?}/"* || true
+    rm -rf -- "${WINE_USER_HOME}/AppData/Local/Temp/"* || true
 }
 
 trap cleanup EXIT
