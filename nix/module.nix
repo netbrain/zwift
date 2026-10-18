@@ -39,6 +39,12 @@ in
       description = "Container image tag/version.";
     };
 
+    deferredUpdate = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Update after launching Zwift.";
+    };
+
     dontUpdate = mkOption {
       type = types.bool;
       default = false;
@@ -201,6 +207,7 @@ in
           vgaDeviceFlag
           ;
         tag = cfg.version;
+        deferredUpdate = if cfg.deferredUpdate then "1" else "";
         dontUpdate = if cfg.dontUpdate then "1" else "";
         dontClean = if cfg.dontClean then "1" else "";
         dryRun = if cfg.dryRun then "1" else "";

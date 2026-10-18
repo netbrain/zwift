@@ -61,6 +61,7 @@ These environment variables can be used to alter the execution of the zwift bash
 | [`IMAGE`](#image)                                         | `docker.io/netbrain/zwift` | The image to use                                    |
 | [`VERSION`](#version)                                     | `latest`                   | The image version/tag to use                        |
 | [`SCRIPT_VERSION`](#script_version)                       | `master`                   | The `zwift.sh` script version to use                |
+| [`DEFERRED_UPDATE`](#deferred_update)                     | `0`                        | If set to `1`, update after Zwift has launched      |
 | [`DONT_UPDATE`](#dont_update)                             | `0`                        | If set to `1`, don't update script or image         |
 | [`DONT_CLEAN`](#dont_clean)                               | `0`                        | If set to `1`, don't clean up previous images       |
 | [`DRYRUN`](#dryrun)                                       | `0`                        | If set to `1`, only print the container run command |
@@ -233,9 +234,37 @@ Pinning to a specific image version may result in Zwift failing to launch. Only 
 
 ---
 
+### `DEFERRED_UPDATE`
+
+See also [`DONT_UPDATE`](#dont_update), [`ZWIFT_FG`](#zwift_fg), [`INTERACTIVE`](#interactive).
+
+If set to `1`, check for updated `zwift.sh` script and pull for a new image version after Zwift has launched. The update will
+be performed in the background while Zwift is running.
+
+How it works:
+
+- In the default case, updates are done before Zwift is launched, this can take a bit of time.
+- If the `DEFERRED_UPDATE` configuration option is set to 1, updates are done at script exit.
+  - If Zwift is launched in the background (default, `ZWIFT_FG=0`), updates are done while Zwift is running.
+  - If Zwift is launched in the foreground (`ZWIFT_FG=1` or `INTERACTIVE=1`), updates are done after Zwift has exited.
+
+| Item              | Description                         |
+|:------------------|:------------------------------------|
+| Allowed values    | `0` - Update before starting Zwift. |
+|                   | `1` - Update after launching Zwift. |
+| Default value     | `0`                                 |
+| Commandline usage | `DEFERRED_UPDATE="1" zwift`         |
+| Config file usage | `DEFERRED_UPDATE="1"`               |
+
+{: .note}
+If netbrain/zwift is installed system wide, root privileges are required to update the script. The popup asking for the root
+password may therefore appear while Zwift has already started if background updates are enabled.
+
+---
+
 ### `DONT_UPDATE`
 
-See also [`IMAGE`](#image), [`VERSION`](#version).
+See also [`IMAGE`](#image), [`VERSION`](#version), [`SCRIPT_VERSION`](#script_version), [`DONT_CLEAN`](#dont_clean).
 
 If set to `1`, don't check for updated `zwift.sh` script and don't pull for a new image version (implies `DONT_CLEAN=1`).
 
@@ -263,7 +292,8 @@ reason.
 
 See also [`DONT_UPDATE`](#dont_update).
 
-If set to `1`, don't clean up previous image versions after pulling.
+If clean up is enabled, old tags of the netbrain/zwift image and all dangling image layers are removed after pulling for a new
+image version. To skip the clean up procedure, set `DONT_CLEAN` to `1`.
 
 | Item              | Description                                                 |
 |:------------------|:------------------------------------------------------------|
@@ -279,7 +309,12 @@ If set to `1`, don't clean up previous image versions after pulling.
 
 See also [`VERBOSITY`](#verbosity).
 
-If set to `1`, print the full container run command and exit without launching Zwift.
+If set to `1`, perform a dry-run instead of taking real actions:
+
+- Check for new `zwift.sh` script version, but don't update to the new version.
+- Don't pull the latest container image, instead print the pull command.
+- Find old image versions, but don't remove them, instead print the cleanup command.
+- Print the full container run command and exit without launching Zwift.
 
 | Item              | Description                                                    |
 |:------------------|:---------------------------------------------------------------|
