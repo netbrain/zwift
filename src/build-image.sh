@@ -184,7 +184,7 @@ cleanup() {
 trap cleanup EXIT
 
 msgbox info "Building image ${IMAGE}"
-if ${CONTAINER_TOOL} build --force-rm -t "${BUILD_NAME}" "${SCRIPT_DIR}"; then
+if ${CONTAINER_TOOL} build -t "${BUILD_NAME}" "${SCRIPT_DIR}"; then
     msgbox ok "Successfully built image ${IMAGE}"
 else
     msgbox error "Failed to build image! 😭"
