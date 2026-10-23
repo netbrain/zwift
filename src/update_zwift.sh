@@ -155,6 +155,8 @@ install_zwift() {
     msgbox info "Downloading and installing Zwift"
     wget -O /tmp/ZwiftSetup.exe https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
     wine /tmp/ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
+
+    wineserver -k || true # workaround for issue 420, ZwiftLauncher v1.2.0 crashes immediately
 }
 
 #########################################
