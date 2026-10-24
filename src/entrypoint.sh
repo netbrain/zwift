@@ -24,6 +24,7 @@ fi
 readonly VERBOSITY="${VERBOSITY:-1}"
 readonly HOST_UID="${HOST_UID:-$(id -u user)}"
 readonly HOST_GID="${HOST_GID:-$(id -g user)}"
+readonly WINE_DISABLE_EGL="${WINE_DISABLE_EGL:-0}"
 readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-x11}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 readonly ZWIFT_VOLUME="${ZWIFT_VOLUME:-}"
@@ -45,28 +46,18 @@ msgbox() {
     esac
 }
 
-###########################
-##### Configure Zwift #####
+command_exists() {
+    local cmd="${1:?}"
+    local cmd_path
+    cmd_path="$(command -v "${cmd}" 2> /dev/null)" && [[ -x ${cmd_path} ]]
+}
 
-# If Wayland Experimental need to blank DISPLAY here to enable Wayland.
-# NOTE: DISPLAY must be unset here before run_zwift to work
-#       Registry entries are set in the container install or won't work.
-if [[ ${XDG_SESSION_TYPE} == "wayland" ]]; then
-    unset DISPLAY
-fi
+nvidia_proprietary_driver() {
+    local nvidia_gpus
+    command_exists nvidia-smi && nvidia_gpus="$(nvidia-smi -L)" && [[ -n ${nvidia_gpus} ]]
+}
 
-############################################
-##### Clean install, update or launch? #####
-
-msgbox debug "Entrypoint script invoked with arguments: ${*:-none}"
-
-declare -a startup_cmd
-
-if [[ ${1:-} == "--install" ]] || [[ ${1:-} == "--update" ]]; then
-    startup_cmd=(/bin/update_zwift.sh "${1:-}")
-else
-    startup_cmd=(/bin/run_zwift.sh)
-fi
+declare -a run_as=()
 
 ######################################
 ##### Change ownership if needed #####
@@ -145,10 +136,36 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         exit 1
     fi
 
-    startup_cmd=(gosu user:user "${startup_cmd[@]}")
+    run_as=(gosu user:user)
+fi
+
+#####################################
+##### Configure graphics driver #####
+
+if [[ ${XDG_SESSION_TYPE} == "wayland" ]]; then
+    msgbox info "Enabling native Wayland"
+    unset DISPLAY # DISPLAY variable needs to be empty for wine to use native wayland
+elif [[ ${WINE_DISABLE_EGL} -eq 1 ]]; then
+    msgbox info "Disabling EGL (using GLX instead)"
+    "${run_as[@]}" wine reg.exe add 'HKCU\Software\Wine\X11 Driver' /f /v UseEGL /d N > /dev/null 2>&1 || exit 1
+elif nvidia_proprietary_driver; then
+    msgbox info "Detected nvidia graphics, performing EGL vendor library workaround"
+    export __EGL_VENDOR_LIBRARY_FILENAMES=""
+else
+    msgbox debug "Using X11 with EGL on non-nvidia system"
 fi
 
 #########################################
 ##### Launch update or start script #####
+
+msgbox debug "Entrypoint script invoked with arguments: ${*:-none}"
+
+declare -a startup_cmd=("${run_as[@]}")
+
+if [[ ${1:-} == "--install" ]] || [[ ${1:-} == "--update" ]]; then
+    startup_cmd+=(/bin/update_zwift.sh "${1:-}")
+else
+    startup_cmd+=(/bin/run_zwift.sh)
+fi
 
 "${startup_cmd[@]}"

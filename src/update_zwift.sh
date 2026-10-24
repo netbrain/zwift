@@ -149,9 +149,6 @@ install_zwift() {
     msgbox info "Installing prerequisites using winetricks"
     winetricks -q corefonts dotnet48 d3dcompiler_47 webview2 || return 1
 
-    msgbox info "Enabling Wayland support"
-    wine reg.exe add HKCU\\Software\\Wine\\Drivers /f /v Graphics /d x11,wayland || return 1
-
     msgbox info "Downloading and installing Zwift"
     wget -O /tmp/ZwiftSetup.exe https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
     wine /tmp/ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
@@ -168,10 +165,9 @@ cleanup() {
 
     msgbox info "Removing installation artifacts"
     rm -f -- "/tmp/ZwiftSetup.exe" || true
-    rm -rf -- "${WINE_USER_HOME}/Downloads/Zwift" || true
-    rm -rf -- "/home/user/.cache/wine"* || true
-    rm -rf -- "${ZWIFT_DATA_DIR:?}/"* || true
+    rm -rf -- "/home/user/.cache/winetricks" || true
     rm -rf -- "${WINE_USER_HOME}/AppData/Local/Temp/"* || true
+    rm -rf -- "${ZWIFT_DATA_DIR:?}/"* || true
 }
 
 trap cleanup EXIT
