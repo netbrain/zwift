@@ -25,6 +25,7 @@ readonly VERBOSITY="${VERBOSITY:-1}"
 readonly HOST_UID="${HOST_UID:-$(id -u user)}"
 readonly HOST_GID="${HOST_GID:-$(id -g user)}"
 readonly WINE_DISABLE_EGL="${WINE_DISABLE_EGL:-0}"
+readonly WINEPREFIX="${WINEPREFIX:?}"
 readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-x11}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
 readonly ZWIFT_VOLUME="${ZWIFT_VOLUME:-}"
@@ -153,6 +154,10 @@ elif nvidia_proprietary_driver; then
     export __EGL_VENDOR_LIBRARY_FILENAMES=""
 else
     msgbox debug "Using X11 with EGL on non-nvidia system"
+fi
+
+if [[ -f ${WINEPREFIX}/system.reg ]]; then
+    "${run_as[@]}" wine reg.exe add 'HKCU\Software\Wine\AppDefaults\ZwiftApp.exe\Direct3D' /f /v renderer /d vulkan > /dev/null 2>&1 || exit 1
 fi
 
 #########################################

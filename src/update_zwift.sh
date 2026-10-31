@@ -149,6 +149,9 @@ install_zwift() {
     msgbox info "Installing prerequisites using winetricks"
     winetricks -q corefonts dotnet48 d3dcompiler_47 webview2 || return 1
 
+    msgbox info "Enabling wined3d vulkan renderer for video routes"
+    wine reg.exe add 'HKCU\Software\Wine\AppDefaults\ZwiftApp.exe\Direct3D' /f /v renderer /d vulkan || return 1
+
     msgbox info "Downloading and installing Zwift"
     wget -O /tmp/ZwiftSetup.exe https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
     wine /tmp/ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1

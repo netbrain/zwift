@@ -43,8 +43,10 @@ ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731
 # - gpg for dearmoring winehq key
 # - libdecor for wayland client-side window decorations
 # - libglvnd (libegl1 libgl1 libgles1 libgles2 libglvnd0 libglx0 libopengl0) for opengl
+# - gstreamer plugins for h264 decoding (video routes)
 # - libvulkan1 for vulkan loader library
 # - mesa-utils for testing graphics: glxgears, eglgears_wayland, eglgears_x11
+# - mesa-vulkan-drivers for wined3d vulkan renderer (video routes)
 # - procps for pgrep
 # - rsync to synchronize zwift volume with zwift appdata
 # - wget for downloading winehq key
@@ -60,10 +62,12 @@ RUN dpkg --add-architecture i386 \
         gamemode libgamemode0:i386 libgamemodeauto0:i386 \
         gosu \
         gpg \
+        gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-vaapi \
         libdecor-0-0 libdecor-0-plugin-1-gtk \
         libegl1 libgl1 libgles1 libgles2 libglvnd0 libglx0 libopengl0 \
         libvulkan1 \
         mesa-utils \
+        mesa-vulkan-drivers \
         procps \
         rsync \
         wget \
@@ -92,6 +96,10 @@ ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubuserc
 # Configure nvidia driver
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
+
+# Enable vulkan video decode in mesa
+ENV RADV_PERFTEST=video_decode
+ENV ANV_VIDEO_DECODE=1
 
 # Configure audio driver
 COPY pulse-client.conf /etc/pulse/client.conf
