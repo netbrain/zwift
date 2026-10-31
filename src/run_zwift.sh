@@ -140,6 +140,15 @@ if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
     fi
 fi
 
+# Video routes need a d3d11 device with video support, wine only provides that with the vulkan renderer.
+# Zwift itself renders with opengl and is not affected. Only set for ZwiftApp.exe, so the launcher is unaffected.
+msgbox info "Enabling vulkan renderer for video routes"
+if wine reg add 'HKCU\Software\Wine\AppDefaults\ZwiftApp.exe\Direct3D' /v renderer /t REG_SZ /d vulkan /f > /dev/null 2>&1; then
+    msgbox ok "Enabled vulkan renderer for video routes"
+else
+    msgbox warning "Failed to enable vulkan renderer, video routes will not work"
+fi
+
 if [[ -n ${ZWIFT_USERNAME} ]] && [[ -n ${ZWIFT_PASSWORD} ]]; then
     msgbox info "Authenticating with Zwift"
     if auth_token="$(zwift-auth)"; then

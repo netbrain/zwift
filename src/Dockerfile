@@ -41,10 +41,12 @@ ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731
 # - gamemode for freedesktop screensaver inhibit
 # - gosu for invoking scripts in entrypoint
 # - gpg for dearmoring winehq key
+# - gstreamer1.0-libav gstreamer1.0-plugins-bad for h264 decoding in video routes (wine h264 decoder needs h264parse)
 # - libdecor for wayland client-side window decorations
 # - libglvnd (libegl1 libgl1 libgles1 libgles2 libglvnd0 libglx0 libopengl0) for opengl
 # - libvulkan1 for vulkan loader library
 # - mesa-utils for testing graphics: glxgears, eglgears_wayland, eglgears_x11
+# - mesa-vulkan-drivers for 64-bit vulkan, wine needs it for d3d11 video decoding in video routes
 # - procps for pgrep
 # - rsync to synchronize zwift volume with zwift appdata
 # - wget for downloading winehq key
@@ -60,10 +62,12 @@ RUN dpkg --add-architecture i386 \
         gamemode libgamemode0:i386 libgamemodeauto0:i386 \
         gosu \
         gpg \
+        gstreamer1.0-libav gstreamer1.0-plugins-bad \
         libdecor-0-0 libdecor-0-plugin-1-gtk \
         libegl1 libgl1 libgles1 libgles2 libglvnd0 libglx0 libopengl0 \
         libvulkan1 \
         mesa-utils \
+        mesa-vulkan-drivers \
         procps \
         rsync \
         wget \
@@ -92,6 +96,9 @@ ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubuserc
 # Configure nvidia driver
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
+
+# Configure intel driver, anv does not expose vulkan video decoding by default
+ENV ANV_VIDEO_DECODE=1
 
 # Configure audio driver
 COPY pulse-client.conf /etc/pulse/client.conf
