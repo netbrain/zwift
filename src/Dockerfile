@@ -97,8 +97,9 @@ ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubuserc
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 
-# Configure intel driver, anv does not expose vulkan video decoding by default
+# Configure vulkan video decoding, disabled by default in anv and depends on the vcn firmware version in radv
 ENV ANV_VIDEO_DECODE=1
+ENV RADV_PERFTEST=video_decode
 
 # Configure audio driver
 COPY pulse-client.conf /etc/pulse/client.conf
