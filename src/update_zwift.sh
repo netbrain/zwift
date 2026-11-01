@@ -149,6 +149,10 @@ install_zwift() {
     msgbox info "Installing prerequisites using winetricks"
     winetricks -q corefonts dotnet48 d3dcompiler_47 webview2 || return 1
 
+    # video routes need a d3d11 device with video support, wine only provides that with the vulkan renderer
+    msgbox info "Enabling vulkan renderer for video routes"
+    winetricks -q renderer=vulkan || return 1
+
     msgbox info "Downloading and installing Zwift"
     wget -O /tmp/ZwiftSetup.exe https://cdn.zwift.com/app/ZwiftSetup.exe || return 1
     wine /tmp/ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL || return 1
