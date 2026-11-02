@@ -2,6 +2,37 @@
 // Colors come from the $zw-* variables in color_schemes/light.scss and dark.scss. Both schemes are
 // compiled into separate stylesheets and _includes/head.html picks one, so every rule here exists in both.
 
+// Self-hosted fonts (latin subset, SIL OFL 1.1, licenses in assets/fonts). Paths are relative to
+// assets/css/ so they work with any baseurl.
+$zw-fonts: (
+  ("Barlow", normal, 400, "barlow-400"),
+  ("Barlow", normal, 500, "barlow-500"),
+  ("Barlow", normal, 600, "barlow-600"),
+  ("Barlow", normal, 700, "barlow-700"),
+  ("Barlow Condensed", normal, 700, "barlow-condensed-700"),
+  ("Barlow Condensed", italic, 700, "barlow-condensed-700-italic"),
+  ("Barlow Condensed", italic, 800, "barlow-condensed-800-italic"),
+);
+
+@each $family, $style, $weight, $file in $zw-fonts {
+  @font-face {
+    font-family: $family;
+    font-style: $style;
+    font-weight: $weight;
+    font-display: swap;
+    src: url("../fonts/#{$file}.woff2") format("woff2");
+  }
+}
+
+// Variable font, one file covers every weight.
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("../fonts/jetbrains-mono.woff2") format("woff2");
+}
+
 :root {
   --zw-bg: #{$zw-bg};
   --zw-panel: #{$zw-panel};

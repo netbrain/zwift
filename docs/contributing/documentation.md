@@ -29,14 +29,15 @@ The site uses Just the Docs with a Zwift-inspired look. The customizations live 
 |:--------------------------------------|:--------------------------------------------------------------------------------|
 | `_sass/color_schemes/light.scss`      | Light color scheme, also the base for the dark scheme                           |
 | `_sass/color_schemes/dark.scss`       | Dark color scheme                                                               |
-| `_sass/custom/setup.scss`             | Fonts                                                                           |
+| `_sass/custom/setup.scss`             | Font stacks                                                                     |
 | `_sass/custom/custom.scss`            | Styling for headings, navigation zones, callouts and the custom components      |
 | `_includes/head.html`                 | Copy of the theme file that loads both color schemes, see note below            |
-| `_includes/js/custom.js`              | Theme toggle, route profile, segments, spec cards, variable filter, page stats  |
+| `_includes/js/custom.js`              | Theme toggle, route profile, segments, spec cards and variable filter           |
 | `_data/option_groups.yaml`            | Groups for the variable filter on the configuration options page                |
 | `_includes/title.html`                | Logo and site title                                                             |
 | `_includes/header_custom.html`        | Theme toggle button                                                             |
 | `_includes/footer_custom.html`        | Previous/next links and the Ride On box                                         |
+| `assets/fonts/`                       | Self-hosted Barlow and JetBrains Mono (latin subset) with their OFL licenses    |
 
 The site follows the system light/dark preference. The theme toggle in the header overrides it, and the choice is stored in
 the browser.
