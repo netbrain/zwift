@@ -29,7 +29,7 @@ FROM debian:${DEBIAN_VERSION}-slim AS wine-base
 # - 20240105 : first version used in this Dockerfile
 ARG DEBIAN_VERSION
 ARG WINE_BRANCH="devel"
-ARG WINE_VERSION="=11.20~${DEBIAN_VERSION}-1"
+ARG WINE_VERSION="=11.21~${DEBIAN_VERSION}-1"
 ARG WINETRICKS_VERSION=f3890f670867b5ffbc3938726db45c0f7d16c8ba
 ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731e9e9837e
 
@@ -46,7 +46,6 @@ ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731
 # - libglvnd (libegl1 libgl1 libgles1 libgles2 libglvnd0 libglx0 libopengl0) for opengl
 # - libvulkan1 for vulkan loader library
 # - mesa-utils for testing graphics: glxgears, eglgears_wayland, eglgears_x11
-# - mesa-vulkan-drivers for 64-bit vulkan, wine needs it for d3d11 video decoding in video routes
 # - procps for pgrep
 # - rsync to synchronize zwift volume with zwift appdata
 # - wget for downloading winehq key
@@ -67,12 +66,19 @@ RUN dpkg --add-architecture i386 \
         libegl1 libgl1 libgles1 libgles2 libglvnd0 libglx0 libopengl0 \
         libvulkan1 \
         mesa-utils \
-        mesa-vulkan-drivers \
         procps \
         rsync \
         wget \
         winbind \
         xdg-utils \
+ && rm -rf /var/lib/apt/lists/*
+
+# Graphics driver is frozen in debian stable, install from backports to get a more recent version
+# - mesa-vulkan-drivers for vulkan, wine needs it for d3d11 video decoding in video routes
+RUN echo "deb http://deb.debian.org/debian ${DEBIAN_VERSION}-backports main" > /etc/apt/sources.list.d/debian-backports.list \
+ && DEBIAN_FRONTEND="noninteractive" apt-get update \
+ && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y -t ${DEBIAN_VERSION}-backports \
+        mesa-vulkan-drivers \
  && rm -rf /var/lib/apt/lists/*
 
 # Install wine (including recommends, see https://gitlab.winehq.org/wine/wine/-/wikis/Debian-Ubuntu)
@@ -97,9 +103,11 @@ ADD --checksum=sha256:${WINETRICKS_CHECKSUM} --chmod=755 https://raw.githubuserc
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 
-# Configure vulkan video decoding, disabled by default in anv and depends on the vcn firmware version in radv
-ENV ANV_VIDEO_DECODE=1
-ENV RADV_PERFTEST=video_decode
+# Configure mesa driver (enable video decoding)
+# - Intel: https://docs.mesa3d.org/envvars.html#envvar-ANV_DEBUG
+# - AMD: https://docs.mesa3d.org/envvars.html#envvar-RADV_EXPERIMENTAL
+ENV ANV_DEBUG=video-decode
+ENV RADV_EXPERIMENTAL=video_decode
 
 # Configure audio driver
 COPY pulse-client.conf /etc/pulse/client.conf
