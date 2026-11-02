@@ -1,0 +1,578 @@
+// Zwift-inspired look on top of just-the-docs.
+// Colors come from the $zw-* variables in color_schemes/light.scss and dark.scss. Both schemes are
+// compiled into separate stylesheets and _includes/head.html picks one, so every rule here exists in both.
+
+:root {
+  --zw-bg: #{$zw-bg};
+  --zw-panel: #{$zw-panel};
+  --zw-panel-2: #{$zw-panel-2};
+  --zw-line: #{$zw-line};
+  --zw-fg: #{$zw-fg};
+  --zw-muted: #{$zw-muted};
+  --zw-accent: #{$zw-accent};
+  --zw-accent-ink: #{$zw-accent-ink};
+  --zw-z1: #{$zw-z1};
+  --zw-z2: #{$zw-z2};
+  --zw-z3: #{$zw-z3};
+  --zw-z4: #{$zw-z4};
+  --zw-z5: #{$zw-z5};
+  --zw-z6: #{$zw-z6};
+  --zw-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --zw-route-h: 3.5rem;
+
+  color-scheme: #{$color-scheme};
+}
+
+html {
+  scroll-padding-top: calc(var(--zw-route-h) + 1rem);
+
+  @include mq(md) {
+    scroll-padding-top: calc(#{$header-height} + var(--zw-route-h) + 1rem);
+  }
+}
+
+// ---------- Typography ----------
+
+.main-content {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--zw-display);
+    color: var(--zw-fg);
+    text-wrap: balance;
+    line-height: 1.1;
+  }
+
+  h1 {
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    font-style: italic;
+    text-transform: uppercase;
+
+    // Slanted accent marker before each section, like a HUD tag.
+    &::before {
+      content: "";
+      display: inline-block;
+      width: 0.6em;
+      height: 0.6em;
+      margin-right: 0.35em;
+      background: var(--zw-accent);
+      clip-path: polygon(30% 0, 100% 0, 70% 100%, 0 100%);
+    }
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  li::marker {
+    color: var(--zw-accent);
+  }
+}
+
+// ---------- Logo ----------
+
+.site-title {
+  gap: 0.6rem;
+  font-family: var(--zw-display);
+  font-weight: 800;
+  font-style: italic;
+  font-size: 1.4rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+
+  .zw-title-repo {
+    color: var(--zw-muted);
+    font-weight: 700;
+  }
+}
+
+.zw-logo {
+  flex: none;
+  width: 2.125rem;
+  height: 2.125rem;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--zw-accent);
+  transform: skewX(-10deg);
+
+  svg {
+    width: 1.875rem;
+    height: 1.875rem;
+  }
+}
+
+// ---------- Header, theme toggle ----------
+
+.main-header {
+  @include mq(md) {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: var(--zw-bg);
+  }
+}
+
+.zw-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: center;
+  height: 2.25rem;
+  margin: 0 0.75rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--zw-line);
+  border-radius: 8px;
+  background: none;
+  color: var(--zw-muted);
+  font: 600 0.8125rem $body-font-family;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--zw-fg);
+    border-color: var(--zw-accent);
+  }
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+// ---------- Route profile (reading progress) ----------
+
+.zw-route {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  height: var(--zw-route-h);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--zw-line);
+  background: color-mix(in srgb, var(--zw-bg) 90%, transparent);
+  backdrop-filter: blur(8px);
+
+  @include mq(md) {
+    top: $header-height;
+    padding: 0 2rem;
+  }
+}
+
+.zw-hud {
+  display: grid;
+  line-height: 1.05;
+
+  &.zw-hud-right {
+    text-align: right;
+  }
+
+  .zw-hud-label {
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--zw-muted);
+    font-weight: 600;
+  }
+
+  .zw-hud-value {
+    font-family: var(--zw-display);
+    font-weight: 700;
+    font-size: 1.375rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--zw-fg);
+  }
+}
+
+.zw-profile {
+  position: relative;
+  height: 2.5rem;
+
+  svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .zw-ground {
+    fill: var(--zw-panel-2);
+  }
+
+  .zw-ridden {
+    fill: var(--zw-accent);
+    opacity: 0.9;
+  }
+
+  .zw-marker {
+    stroke: var(--zw-muted);
+    stroke-width: 1;
+    stroke-dasharray: 2 2;
+    vector-effect: non-scaling-stroke;
+  }
+}
+
+.zw-rider {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--zw-fg);
+  box-shadow: 0 0 0 3px var(--zw-accent);
+  pointer-events: none;
+}
+
+// ---------- Navigation zones ----------
+// Each top-level section is tagged like a power zone: Z1 is an easy spin, Z5 is for contributors.
+
+$zw-zones: (
+  "getting-started": ("Z1", var(--zw-z1)),
+  "configuration": ("Z2", var(--zw-z2)),
+  "troubleshooting": ("Z3", var(--zw-z3)),
+  "advanced": ("Z4", var(--zw-z4)),
+  "contributing": ("Z5", var(--zw-z5)),
+);
+
+.site-nav > .nav-list > .nav-list-item {
+  --zc: var(--zw-line);
+
+  @each $section, $zone in $zw-zones {
+    &:has(> .nav-list-link[href$="/#{$section}/"]) {
+      --zc: #{nth($zone, 2)};
+
+      > .nav-list-link::after {
+        content: "#{nth($zone, 1)}";
+      }
+    }
+  }
+
+  > .nav-list-link {
+    display: flex;
+    align-items: center;
+    font-family: var(--zw-display);
+    font-weight: 700;
+    font-size: 1.0625rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+
+    &::after {
+      margin-left: auto;
+      padding: 3px 6px 2px;
+      border-radius: 3px;
+      background: var(--zc);
+      color: #0f1219;
+      font-style: italic;
+      font-weight: 800;
+      font-size: 0.75rem;
+      line-height: 1;
+      transform: skewX(-8deg);
+    }
+  }
+
+  .nav-list .nav-list-item .nav-list-link {
+    border-left: 2px solid var(--zw-line);
+    color: var(--zw-muted);
+
+    &:hover,
+    &.active {
+      color: var(--zw-fg);
+      border-left-color: var(--zc);
+      background-image: linear-gradient(90deg, color-mix(in srgb, var(--zc) 16%, transparent), transparent);
+    }
+  }
+}
+
+// ---------- Callouts as in-game notifications ----------
+
+$zw-callouts: (
+  "note": var(--zw-z2),
+  "important": var(--zw-z4),
+  "warning": var(--zw-z6),
+);
+
+@each $name, $color in $zw-callouts {
+  p.#{$name},
+  blockquote.#{$name} {
+    border: 1px solid var(--zw-line) !important;
+    border-left: 6px solid $color !important;
+    border-radius: 8px !important;
+    background: var(--zw-panel);
+    box-shadow: none !important;
+
+    &::before,
+    > .#{$name}-title {
+      color: $color !important;
+      font-family: var(--zw-display);
+      font-style: italic;
+      font-weight: 800 !important;
+      font-size: 0.9375rem !important;
+      letter-spacing: 0.08em;
+    }
+  }
+}
+
+// ---------- Code ----------
+
+code {
+  border-radius: 4px;
+}
+
+div.highlighter-rouge,
+figure.highlight {
+  border: 1px solid var(--zw-line);
+  border-radius: 10px !important;
+}
+
+// ---------- Tables ----------
+
+.table-wrapper {
+  border: 1px solid var(--zw-line);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+th {
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--zw-muted);
+}
+
+tbody tr:hover td {
+  background: color-mix(in srgb, var(--zw-accent) 6%, transparent);
+}
+
+// ---------- Segments (on this page) ----------
+
+.zw-segments {
+  display: none;
+}
+
+// Only where the space right of the content column fits it.
+@media (min-width: 97rem) {
+  .zw-segments {
+    display: block;
+    position: fixed;
+    top: calc(#{$header-height} + var(--zw-route-h) + 2rem);
+    left: calc(50% + #{($nav-width + $content-width) * 0.5} + 2rem);
+    width: 12rem;
+    max-height: calc(100vh - #{$header-height} - var(--zw-route-h) - 4rem);
+    overflow-y: auto;
+    font-size: 0.875rem;
+  }
+}
+
+.zw-segments-title {
+  margin: 0 0 0.6rem;
+  font-family: var(--zw-display);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--zw-muted);
+}
+
+.zw-segments ol {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--zw-line);
+  }
+
+  li {
+    margin: 0;
+
+    &::before {
+      content: none;
+    }
+  }
+
+  a {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.3rem 0;
+    color: var(--zw-muted);
+    text-decoration: none;
+
+    &::before {
+      content: "";
+      position: relative;
+      z-index: 1;
+      width: 10px;
+      height: 10px;
+      border: 2px solid var(--zw-line);
+      border-radius: 50%;
+      background: var(--zw-bg);
+      box-sizing: border-box;
+    }
+  }
+
+  .zw-sub a {
+    font-size: 0.8125rem;
+
+    &::before {
+      width: 6px;
+      height: 6px;
+      margin-left: 2px;
+    }
+  }
+
+  .zw-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .zw-time {
+    font-family: $mono-font-family;
+    font-size: 0.6875rem;
+  }
+
+  .zw-done a::before {
+    background: var(--zw-accent);
+    border-color: var(--zw-accent);
+  }
+
+  .zw-active a {
+    color: var(--zw-fg);
+    font-weight: 600;
+
+    &::before {
+      background: var(--zw-fg);
+      border-color: var(--zw-accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--zw-accent) 35%, transparent);
+    }
+  }
+}
+
+// ---------- Previous / next segment and Ride On ----------
+
+.zw-segment-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 3rem;
+
+  @media (max-width: 40rem) {
+    grid-template-columns: 1fr;
+  }
+
+  a {
+    display: grid;
+    gap: 2px;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--zw-line);
+    border-radius: 10px;
+    background: var(--zw-panel);
+    color: var(--zw-fg);
+    text-decoration: none;
+
+    &:hover {
+      border-color: var(--zw-accent);
+    }
+  }
+
+  .zw-next {
+    grid-column: 2;
+    text-align: right;
+
+    @media (max-width: 40rem) {
+      grid-column: 1;
+      text-align: left;
+    }
+  }
+
+  .zw-label {
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--zw-muted);
+    font-weight: 600;
+  }
+
+  .zw-page {
+    font-family: var(--zw-display);
+    font-weight: 700;
+    font-style: italic;
+    font-size: 1.375rem;
+    text-transform: uppercase;
+  }
+}
+
+.zw-rideon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px dashed var(--zw-line);
+  border-radius: 10px;
+
+  p {
+    flex: 1;
+    min-width: 12rem;
+    margin: 0;
+    color: var(--zw-muted);
+  }
+
+  .zw-rideon-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    background: var(--zw-accent);
+    color: var(--zw-accent-ink);
+    font: italic 800 1.0625rem var(--zw-display);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+
+    svg {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+  }
+
+  .zw-report {
+    font-size: 0.875rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .zw-rider {
+    transition:
+      left 0.12s linear,
+      top 0.12s linear;
+  }
+}
+
+.zw-theme-toggle[hidden],
+.zw-segment-nav[hidden] {
+  display: none;
+}

@@ -1,0 +1,34 @@
+// Zwift-inspired dark scheme. Overrides the just-the-docs built-in "dark" scheme.
+$color-scheme: dark;
+$body-background-color: #0f1219;
+$body-heading-color: #e8ebf1;
+$body-text-color: #d0d5df;
+$link-color: #fc7a35;
+$nav-child-link-color: #8d95a7;
+$sidebar-color: #161b25;
+$base-button-color: #1d2330;
+$btn-primary-color: #c94d0c;
+$code-background-color: #0a0d13;
+$code-linenumber-color: #6f7889;
+$feedback-color: darken($sidebar-color, 3%);
+$table-background-color: #161b25;
+$search-background-color: #1d2330;
+$search-result-preview-color: #8d95a7;
+$border-color: #2a3242;
+
+$zw-bg: $body-background-color;
+$zw-panel: #161b25;
+$zw-panel-2: #1d2330;
+$zw-line: $border-color;
+$zw-fg: $body-heading-color;
+$zw-muted: #8d95a7;
+$zw-accent: #fc6719;
+$zw-accent-ink: #1a0d04;
+$zw-z1: #9aa1ad;
+$zw-z2: #3d8fe0;
+$zw-z3: #48b85a;
+$zw-z4: #f2c21b;
+$zw-z5: #fc6719;
+$zw-z6: #e5383b;
+
+@import "./vendor/accessible-pygments/github-dark";

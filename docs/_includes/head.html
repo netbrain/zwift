@@ -1,0 +1,69 @@
+{%- comment -%}
+  Include as: {%- include head.html -%}
+  Depends on: site.ga_tracking, site.ga_tracking_anonymize_ip,
+    site.search_enabled, site.static_files, site.favicon_ico.
+  Results in: HTML for the head element.
+  Includes:
+    css/activation.scss.liquid, head_custom.html.
+  Overwrites:
+    ga_tracking_ids, ga_property, file, favicon.
+  Should not be cached, because included files depend on page.
+{%- endcomment -%}
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+  {%- comment -%}
+    netbrain/zwift: copied from just-the-docs 0.12.0. Only this block differs: both color schemes are linked and the
+    browser picks one through prefers-color-scheme. A stored choice from the theme toggle overrides it. Re-sync this
+    file when just-the-docs is upgraded.
+  {%- endcomment -%}
+  <link rel="stylesheet" href="{{ '/assets/css/just-the-docs-light.css' | relative_url }}" id="zw-theme-light" media="not all and (prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="{{ '/assets/css/just-the-docs-dark.css' | relative_url }}" id="zw-theme-dark" media="(prefers-color-scheme: dark)">
+  <script>
+    (function () {
+      var theme;
+      try { theme = localStorage.getItem('zw-theme'); } catch (e) {}
+      if (theme === 'light' || theme === 'dark') {
+        document.getElementById('zw-theme-light').media = theme === 'light' ? 'all' : 'not all';
+        document.getElementById('zw-theme-dark').media = theme === 'dark' ? 'all' : 'not all';
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="{{ '/assets/css/just-the-docs-head-nav.css' | relative_url }}" id="jtd-head-nav-stylesheet">
+
+  <style id="jtd-nav-activation">
+  {% include css/activation.scss.liquid %}
+  </style>
+
+  {% if site.ga_tracking != nil %}
+    {% assign ga_tracking_ids = site.ga_tracking | split: "," %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_tracking_ids.first }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      {% for ga_property in ga_tracking_ids %}
+        gtag('config', '{{ ga_property }}'{% unless site.ga_tracking_anonymize_ip == nil %}, { 'anonymize_ip': true }{% endunless %});
+      {% endfor %}
+    </script>
+  {% endif %}
+
+  {% if site.search_enabled != false %}
+    <script src="{{ '/assets/js/vendor/lunr.min.js' | relative_url }}"></script>
+  {% endif %}
+
+  <script src="{{ '/assets/js/just-the-docs.js' | relative_url }}"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {% include_cached favicon.html %}
+
+  {% seo %}
+
+  {% include head_custom.html %}
+
+</head>
