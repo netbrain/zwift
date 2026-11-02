@@ -74,6 +74,15 @@ html {
     font-weight: 700;
   }
 
+  // Variable names as headings (configuration/options.md). The theme shrinks inline code, which made
+  // them as small as the badges next to them.
+  h3 > code {
+    padding: 0.1em 0.4em;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--zw-fg);
+  }
+
   li::marker {
     color: var(--zw-accent);
   }
