@@ -361,28 +361,20 @@
   }
 
   // ---------- Page stats ----------
-  // Zone, reading time and variable count under the page title.
-
-  var ZONE_NAMES = { Z1: 'Recovery', Z2: 'Endurance', Z3: 'Tempo', Z4: 'Threshold', Z5: 'VO2 Max' };
+  // Variable count under the title of the configuration options page.
 
   function setupPageStats() {
     var main = document.querySelector('#main-content main');
     var h1 = main && main.querySelector('h1');
-    if (!h1 || main.querySelectorAll('h2[id]').length < 2) return;
+    if (!h1) return;
 
     var stats = [];
-    var section = document.querySelector('#site-nav > .nav-list > .nav-list-item.active > .nav-list-link');
-    if (section) {
-      var zone = getComputedStyle(section, '::after').content.replace(/["']/g, '');
-      if (ZONE_NAMES[zone]) stats.push({ label: 'Zone', zone: zone, value: ZONE_NAMES[zone] });
-    }
-    var minutes = Math.max(1, Math.round(countWords(main.textContent) / WORDS_PER_MINUTE));
-    stats.push({ label: 'Est. read', value: minutes + ' min' });
     var overview = Array.prototype.filter.call(main.querySelectorAll('table'), function (t) {
       var th = t.querySelector('thead th');
       return th && cellText(th) === 'Key';
     })[0];
     if (overview) stats.push({ label: 'Variables', value: String(overview.querySelectorAll('tbody tr').length) });
+    if (!stats.length) return;
 
     var box = document.createElement('div');
     box.className = 'zw-stats';
@@ -393,12 +385,6 @@
       l.className = 'zw-stat-label';
       l.textContent = s.label;
       el.appendChild(l);
-      if (s.zone) {
-        var z = document.createElement('span');
-        z.className = 'zw-zone zw-zone-' + s.zone.toLowerCase();
-        z.textContent = s.zone;
-        el.appendChild(z);
-      }
       var v = document.createElement('span');
       v.className = 'zw-stat-value';
       v.textContent = s.value;

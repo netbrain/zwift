@@ -666,24 +666,6 @@ div.highlighter-rouge {
   color: var(--zw-fg);
 }
 
-.zw-zone {
-  padding: 3px 6px 2px;
-  border-radius: 3px;
-  color: var(--zw-zone-ink);
-  font-family: var(--zw-display);
-  font-style: italic;
-  font-weight: 800;
-  font-size: 0.75rem;
-  line-height: 1;
-  transform: skewX(-8deg);
-
-  @for $i from 1 through 5 {
-    &.zw-zone-z#{$i} {
-      background: var(--zw-z#{$i});
-    }
-  }
-}
-
 // ---------- Spec cards ----------
 
 .table-wrapper.zw-spec {
