@@ -5,6 +5,7 @@
 [![image-href][image-pulls-src]][image-href]
 [![image-href][image-version-src]][image-href]
 [![image-href][image-size-src]][image-href]
+[![Documentation][docs-badge-src]][docs]
 
 Hello fellow zwifters, here is a docker image for running zwift on linux. It
 uses the companion app by zwift for linking up smart trainers and other
@@ -18,6 +19,10 @@ gl rendering.
 
 If you find this image useful, then feel free to [add me on zwift][zwift-me]
 and give me a ride on from time to time.
+
+**📖 Documentation: [netbrain.github.io/zwift][docs]**. Start with
+[installation][docs-install], or jump to [configuration options][docs-options],
+[connecting devices][docs-devices] and [troubleshooting][docs-troubleshooting].
 
 ## Getting started
 
@@ -40,6 +45,9 @@ foo@bar:~$ ffmpeg -i example.mp4 -i palette.png -filter_complex \
   driver
 - ATI, Intel and Nouveau drivers should work out of the box
 
+See [prerequisites][docs-prerequisites] for system requirements and optional
+software like GameMode.
+
 ### Install
 
 ```console
@@ -50,6 +58,9 @@ This will put the `zwift.sh` script on your `$PATH` and add a desktop icon to `$
 
 **NOTE**: Icon may not show until logging off and back in.
 
+For a system wide install, updating and uninstalling, see
+[installation][docs-install].
+
 ### Run
 
 After installation, simply run:
@@ -59,7 +70,7 @@ zwift
 ```
 
 For configuration options, troubleshooting, and advanced usage, see the
-[full documentation](https://netbrain.github.io/zwift/).
+[full documentation][docs].
 
 ## Sponsors 💖
 
@@ -113,6 +124,13 @@ and tricks :smiley:
     cake, and have it too by creating `vgpus` for vms that leverage the host
     gpu, no dedicated gpu required
 
+[docs]: https://netbrain.github.io/zwift/
+[docs-badge-src]: https://img.shields.io/badge/docs-netbrain.github.io%2Fzwift-fc6719
+[docs-prerequisites]: https://netbrain.github.io/zwift/getting-started/prerequisites/
+[docs-install]: https://netbrain.github.io/zwift/getting-started/installation/
+[docs-devices]: https://netbrain.github.io/zwift/getting-started/connecting-devices/
+[docs-options]: https://netbrain.github.io/zwift/configuration/options/
+[docs-troubleshooting]: https://netbrain.github.io/zwift/troubleshooting/
 [lint-everything-src]: https://github.com/netbrain/zwift/actions/workflows/lint_everything.yaml/badge.svg
 [lint-everything-href]: https://github.com/netbrain/zwift/actions/workflows/lint_everything.yaml
 [zwift-updater-src]: https://github.com/netbrain/zwift/actions/workflows/zwift_updater.yaml/badge.svg
