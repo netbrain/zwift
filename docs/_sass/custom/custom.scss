@@ -669,7 +669,7 @@ div.highlighter-rouge {
 .zw-zone {
   padding: 3px 6px 2px;
   border-radius: 3px;
-  color: #0f1219;
+  color: var(--zw-zone-ink);
   font-family: var(--zw-display);
   font-style: italic;
   font-weight: 800;
