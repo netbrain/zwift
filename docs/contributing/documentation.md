@@ -32,13 +32,19 @@ The site uses Just the Docs with a Zwift-inspired look. The customizations live 
 | `_sass/custom/setup.scss`             | Fonts                                                                           |
 | `_sass/custom/custom.scss`            | Styling for headings, navigation zones, callouts and the custom components      |
 | `_includes/head.html`                 | Copy of the theme file that loads both color schemes, see note below            |
-| `_includes/js/custom.js`              | Theme toggle, route profile, segments list and previous/next links              |
+| `_includes/js/custom.js`              | Theme toggle, route profile, segments, spec cards, variable filter, page stats  |
+| `_data/option_groups.yaml`            | Groups for the variable filter on the configuration options page                |
 | `_includes/title.html`                | Logo and site title                                                             |
 | `_includes/header_custom.html`        | Theme toggle button                                                             |
 | `_includes/footer_custom.html`        | Previous/next links and the Ride On box                                         |
 
 The site follows the system light/dark preference. The theme toggle in the header overrides it, and the choice is stored in
 the browser.
+
+Tables with an `Item | Description` header are shown as spec cards. The `Commandline usage` and `Config file usage` rows add
+badges to the heading above the table, and `:x:` in a row means the option is not supported there. The overview table with a
+`Key` header gets a filter. When adding a variable to `configuration/options.md`, also add it to a group in
+`_data/option_groups.yaml`, otherwise it only shows under "All".
 
 Navigation sections are tagged like power zones (Z1 to Z5) to show how demanding they are. The mapping from section to zone is
 the `$zw-zones` map in `_sass/custom/custom.scss`.

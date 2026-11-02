@@ -72,9 +72,9 @@
   }
 
   function headingLabel(h) {
-    // Strip the anchor link that just-the-docs injects.
+    // Strip the anchor link that just-the-docs injects and the spec card badges.
     var clone = h.cloneNode(true);
-    clone.querySelectorAll('.anchor-heading').forEach(function (a) { a.remove(); });
+    clone.querySelectorAll('.anchor-heading, .zw-badge').forEach(function (a) { a.remove(); });
     return clone.textContent.trim();
   }
 
@@ -243,8 +243,176 @@
     nav.hidden = !nav.children.length;
   }
 
+  // ---------- Spec cards ----------
+  // Tables with the "Item | Description" layout (see configuration/options.md) become spec cards, and the
+  // heading above each one gets badges for where the option can be used.
+
+  function cellText(td) {
+    return td ? td.textContent.trim() : '';
+  }
+
+  function setupSpecCards() {
+    var main = document.querySelector('#main-content main');
+    if (!main) return;
+
+    main.querySelectorAll('.table-wrapper > table').forEach(function (table) {
+      var head = table.querySelectorAll('thead th');
+      if (head.length !== 2 || cellText(head[0]) !== 'Item') return;
+      table.parentNode.classList.add('zw-spec');
+
+      var usage = {};
+      table.querySelectorAll('tbody tr').forEach(function (tr) {
+        var cells = tr.children;
+        if (!cellText(cells[0])) tr.classList.add('zw-cont');
+        var key = cellText(cells[0]);
+        if (key === 'Commandline usage' || key === 'Config file usage') {
+          usage[key] = !cells[1].querySelector('img.emoji[title=":x:"]');
+        }
+      });
+
+      var h = table.parentNode.previousElementSibling;
+      while (h && !/^H[1-6]$/.test(h.tagName)) h = h.previousElementSibling;
+      if (!h || h.tagName !== 'H3' || !Object.keys(usage).length) return;
+
+      [['Commandline usage', 'Command line'], ['Config file usage', 'Config file']].forEach(function (pair) {
+        if (!(pair[0] in usage)) return;
+        var badge = document.createElement('span');
+        badge.className = 'zw-badge ' + (usage[pair[0]] ? 'zw-badge-yes' : 'zw-badge-no');
+        badge.textContent = usage[pair[0]] ? pair[1] : 'Not in ' + pair[1].toLowerCase();
+        h.appendChild(badge);
+      });
+    });
+  }
+
+  // ---------- Variable filter ----------
+  // Adds a search field and group pills above a "Key | Default value | Description" overview table.
+  // Groups come from _data/option_groups.yaml.
+
+  var OPTION_GROUPS = {{ site.data.option_groups | jsonify }};
+
+  function setupVariableFilter() {
+    var main = document.querySelector('#main-content main');
+    if (!main) return;
+
+    main.querySelectorAll('.table-wrapper > table').forEach(function (table) {
+      var head = table.querySelectorAll('thead th');
+      if (!head.length || cellText(head[0]) !== 'Key') return;
+
+      var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+      var groupOf = {};
+      Object.keys(OPTION_GROUPS || {}).forEach(function (group) {
+        OPTION_GROUPS[group].forEach(function (name) { groupOf[name] = group; });
+      });
+      var present = {};
+      rows.forEach(function (tr) {
+        var g = groupOf[cellText(tr.children[0])];
+        if (g) present[g] = true;
+      });
+
+      var bar = document.createElement('div');
+      bar.className = 'zw-filter';
+      var input = document.createElement('input');
+      input.type = 'search';
+      input.id = 'zw-filter-input';
+      input.placeholder = 'Filter variables, e.g. DIR or pull';
+      input.setAttribute('aria-label', 'Filter variables');
+      bar.appendChild(input);
+
+      var group = 'All';
+      var pills = ['All'].concat(Object.keys(OPTION_GROUPS || {}).filter(function (g) { return present[g]; }))
+        .map(function (name) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'zw-pill';
+          b.textContent = name;
+          b.setAttribute('aria-pressed', String(name === group));
+          b.addEventListener('click', function () {
+            group = name;
+            pills.forEach(function (p) { p.setAttribute('aria-pressed', String(p === b)); });
+            apply();
+          });
+          bar.appendChild(b);
+          return b;
+        });
+
+      var empty = document.createElement('p');
+      empty.className = 'zw-filter-empty';
+      empty.textContent = 'No variables match the filter.';
+      empty.hidden = true;
+
+      function apply() {
+        var q = input.value.trim().toLowerCase();
+        var shown = 0;
+        rows.forEach(function (tr) {
+          var ok = (group === 'All' || groupOf[cellText(tr.children[0])] === group) &&
+            (!q || tr.textContent.toLowerCase().indexOf(q) >= 0);
+          tr.hidden = !ok;
+          if (ok) shown++;
+        });
+        empty.hidden = shown > 0;
+        window.dispatchEvent(new Event('resize'));
+      }
+      input.addEventListener('input', apply);
+
+      var wrapper = table.parentNode;
+      wrapper.parentNode.insertBefore(bar, wrapper);
+      wrapper.parentNode.insertBefore(empty, wrapper.nextSibling);
+    });
+  }
+
+  // ---------- Page stats ----------
+  // Zone, reading time and variable count under the page title.
+
+  var ZONE_NAMES = { Z1: 'Recovery', Z2: 'Endurance', Z3: 'Tempo', Z4: 'Threshold', Z5: 'VO2 Max' };
+
+  function setupPageStats() {
+    var main = document.querySelector('#main-content main');
+    var h1 = main && main.querySelector('h1');
+    if (!h1 || main.querySelectorAll('h2[id]').length < 2) return;
+
+    var stats = [];
+    var section = document.querySelector('#site-nav > .nav-list > .nav-list-item.active > .nav-list-link');
+    if (section) {
+      var zone = getComputedStyle(section, '::after').content.replace(/["']/g, '');
+      if (ZONE_NAMES[zone]) stats.push({ label: 'Zone', zone: zone, value: ZONE_NAMES[zone] });
+    }
+    var minutes = Math.max(1, Math.round(countWords(main.textContent) / WORDS_PER_MINUTE));
+    stats.push({ label: 'Est. read', value: minutes + ' min' });
+    var overview = Array.prototype.filter.call(main.querySelectorAll('table'), function (t) {
+      var th = t.querySelector('thead th');
+      return th && cellText(th) === 'Key';
+    })[0];
+    if (overview) stats.push({ label: 'Variables', value: String(overview.querySelectorAll('tbody tr').length) });
+
+    var box = document.createElement('div');
+    box.className = 'zw-stats';
+    stats.forEach(function (s) {
+      var el = document.createElement('div');
+      el.className = 'zw-stat';
+      var l = document.createElement('span');
+      l.className = 'zw-stat-label';
+      l.textContent = s.label;
+      el.appendChild(l);
+      if (s.zone) {
+        var z = document.createElement('span');
+        z.className = 'zw-zone zw-zone-' + s.zone.toLowerCase();
+        z.textContent = s.zone;
+        el.appendChild(z);
+      }
+      var v = document.createElement('span');
+      v.className = 'zw-stat-value';
+      v.textContent = s.value;
+      el.appendChild(v);
+      box.appendChild(el);
+    });
+    h1.parentNode.insertBefore(box, h1.nextSibling);
+  }
+
   ready(function () {
     setupThemeToggle();
+    setupPageStats();
+    setupSpecCards();
+    setupVariableFilter();
     setupRoute();
     setupSegmentNav();
   });

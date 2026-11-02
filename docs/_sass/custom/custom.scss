@@ -580,3 +580,215 @@ tbody tr:hover td {
 .zw-segment-nav[hidden] {
   display: none;
 }
+
+// ---------- Code block title bars ----------
+// The language label sits in a bar that also holds the copy button.
+
+$zw-code-labels: (
+  "bash": "bash",
+  "console": "terminal",
+  "sh": "sh",
+  "shell": "shell",
+  "nix": "nix",
+  "ini": "ini",
+  "yaml": "yaml",
+  "json": "json",
+  "xml": "xml",
+);
+
+div.highlighter-rouge {
+  div.highlight {
+    border: 0;
+  }
+
+  > button {
+    padding: 0.45rem $sp-3;
+    opacity: 1;
+  }
+}
+
+@each $lang, $label in $zw-code-labels {
+  div.language-#{$lang}.highlighter-rouge::before {
+    content: "#{$label}";
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2rem;
+    padding: 0 $sp-3;
+    border-bottom: 1px solid var(--zw-line);
+    color: var(--zw-muted);
+    font-family: $mono-font-family;
+    font-size: 0.75rem;
+  }
+}
+
+// ---------- Page stats ----------
+
+.zw-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.5rem 0 1.5rem;
+}
+
+.zw-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--zw-line);
+  border-radius: 8px;
+  background: var(--zw-panel);
+}
+
+.zw-stat-label {
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--zw-muted);
+  font-weight: 600;
+}
+
+.zw-stat-value {
+  font-family: var(--zw-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--zw-fg);
+}
+
+.zw-zone {
+  padding: 3px 6px 2px;
+  border-radius: 3px;
+  color: #0f1219;
+  font-family: var(--zw-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 0.75rem;
+  line-height: 1;
+  transform: skewX(-8deg);
+
+  @for $i from 1 through 5 {
+    &.zw-zone-z#{$i} {
+      background: var(--zw-z#{$i});
+    }
+  }
+}
+
+// ---------- Spec cards ----------
+
+.table-wrapper.zw-spec {
+  table {
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  td:first-child {
+    width: 11rem;
+    background: var(--zw-panel);
+    color: var(--zw-muted);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+
+  tr.zw-cont td {
+    border-top: 0;
+  }
+
+  tr:has(+ tr.zw-cont) td {
+    border-bottom: 0;
+  }
+
+  @media (max-width: 40rem) {
+    tr,
+    td {
+      display: block;
+    }
+
+    td:first-child {
+      width: auto;
+      padding-bottom: 0;
+      border-bottom: 0;
+      background: none;
+    }
+
+    tr.zw-cont td:first-child {
+      display: none;
+    }
+  }
+}
+
+.zw-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 3px 8px;
+  border: 1px solid var(--zw-line);
+  border-radius: 4px;
+  font-family: $body-font-family;
+  font-size: 0.6875rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  vertical-align: middle;
+
+  &.zw-badge-yes {
+    color: var(--zw-z3);
+    border-color: color-mix(in srgb, var(--zw-z3) 50%, transparent);
+  }
+
+  &.zw-badge-no {
+    color: var(--zw-z6);
+    border-color: color-mix(in srgb, var(--zw-z6) 50%, transparent);
+  }
+}
+
+// ---------- Variable filter ----------
+
+.zw-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 1rem 0 0.75rem;
+
+  input {
+    flex: 1 1 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--zw-line);
+    border-radius: 8px;
+    background: var(--zw-panel);
+    color: var(--zw-fg);
+    font: 0.9375rem $body-font-family;
+  }
+}
+
+.zw-pill {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--zw-line);
+  border-radius: 999px;
+  background: none;
+  color: var(--zw-muted);
+  font: 600 0.8125rem $body-font-family;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--zw-fg);
+  }
+
+  &[aria-pressed="true"] {
+    border-color: var(--zw-accent);
+    background: var(--zw-accent);
+    color: var(--zw-accent-ink);
+  }
+}
+
+.zw-filter-empty {
+  color: var(--zw-muted);
+}
