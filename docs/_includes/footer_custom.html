@@ -1,11 +1,13 @@
 <nav class="zw-segment-nav" id="zw-segment-nav" aria-label="Previous and next page" hidden></nav>
 <div class="zw-rideon">
-  <p>Did this page get you rolling? Give it a Ride On.</p>
+  <p>
+    Did this page get you rolling? Give it a Ride On. Something wrong?
+    <a href="https://github.com/netbrain/zwift/issues/new?title={{ 'Docs: ' | append: page.title | url_encode }}&amp;body={{ 'Page: docs/' | append: page.path | url_encode }}">Report a problem with this page</a>.
+  </p>
   <a class="zw-rideon-button" href="https://github.com/netbrain/zwift">
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M2 10h4v11H2zM8 21h9.3a2 2 0 0 0 2-1.6l1.6-7.5A2 2 0 0 0 19 9.5h-5.2l.8-4.3A2 2 0 0 0 12.7 3L8 9.6z"/>
     </svg>
     Ride On (star on GitHub)
   </a>
-  <a class="zw-report" href="https://github.com/netbrain/zwift/issues/new?title={{ 'Docs: ' | append: page.title | url_encode }}&amp;body={{ 'Page: docs/' | append: page.path | url_encode }}">Report a problem with this page</a>
 </div>
