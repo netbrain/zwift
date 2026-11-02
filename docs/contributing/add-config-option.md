@@ -12,6 +12,8 @@ To add a new configuration option, follow the steps below:
    - `docs/configuration/options.md`
      - Add the option to the table in the list of environment variables
      - Add a section with the option's details
+   - `docs/_data/option_groups.yaml`
+     - Add the option to one of the groups, this drives the filter pills above the table
    - `docs/advanced/nixos.md`
      - Add the option to the example configuration
 2. Add the option to the nix flake
