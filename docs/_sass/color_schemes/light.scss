@@ -1,0 +1,37 @@
+// Zwift-inspired light scheme. Overrides the just-the-docs built-in "light" scheme.
+// It is also imported as the base of the dark scheme, which overrides these values.
+$color-scheme: light;
+$body-background-color: #f7f8fa;
+$body-heading-color: #141821;
+$body-text-color: #2a303c;
+$link-color: #c2490a;
+$nav-child-link-color: #5a6273;
+$sidebar-color: #fff;
+$base-button-color: #eceef3;
+$btn-primary-color: #c2490a;
+$code-background-color: #fff;
+$code-linenumber-color: #8a92a3;
+$feedback-color: darken($sidebar-color, 3%);
+$table-background-color: #fff;
+$search-background-color: #fff;
+$search-result-preview-color: #5a6273;
+$border-color: #d8dce4;
+
+// Tokens for the custom components in custom/custom.scss.
+$zw-bg: $body-background-color;
+$zw-panel: #fff;
+$zw-panel-2: #eceef3;
+$zw-line: $border-color;
+$zw-fg: $body-heading-color;
+$zw-muted: #5a6273;
+$zw-accent: #d9530c;
+$zw-accent-ink: #fff;
+$zw-z1: #6f7682;
+$zw-z2: #1f74c7;
+$zw-z3: #2e9442;
+$zw-z4: #b38a00;
+$zw-z5: #d9530c;
+$zw-z6: #c92a2d;
+$zw-zone-ink: #fff;
+
+@import "./vendor/accessible-pygments/github-light";
