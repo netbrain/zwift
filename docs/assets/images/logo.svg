@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Tux-styled Z on the orange tile: black body, white belly, eyes and beak on the top bar, feet under the base -->
+  <!-- Tux-styled Z on the orange tile: dark head and outline, white belly, eyes and beak on the top bar, feet under the base -->
   <rect x="0" y="0" width="32" height="32" rx="7" fill="#fc6719"/>
   <g transform="translate(1.2 1.6) scale(0.9)">
-    <polygon points="5,5 27,5 27,12 14,20 27,20 27,27 5,27 5,20 18,12 5,12" fill="#16181d" stroke="#16181d" stroke-width="2.6" stroke-linejoin="round"/>
-    <line x1="20.6" y1="13.3" x2="11.4" y2="18.7" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/>
+    <polygon points="5,5 27,5 27,12 14,20 27,20 27,27 5,27 5,20 18,12 5,12" fill="#16181d" stroke="#16181d" stroke-width="3.4" stroke-linejoin="round"/>
+    <polygon points="23.5,12.6 12.5,19.4 25,19.4 25,25.4 7,25.4 7,21 16.6,13.8" fill="#fff" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>
     <circle cx="15.8" cy="8.5" r="2.1" fill="#fff"/>
     <circle cx="20.6" cy="8.5" r="2.1" fill="#fff"/>
     <circle cx="16.4" cy="8.8" r="1" fill="#16181d"/>
