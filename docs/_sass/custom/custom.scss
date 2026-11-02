@@ -631,41 +631,6 @@ div.highlighter-rouge {
   }
 }
 
-// ---------- Page stats ----------
-
-.zw-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin: 0.5rem 0 1.5rem;
-}
-
-.zw-stat {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.4rem 0.85rem;
-  border: 1px solid var(--zw-line);
-  border-radius: 8px;
-  background: var(--zw-panel);
-}
-
-.zw-stat-label {
-  font-size: 0.625rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--zw-muted);
-  font-weight: 600;
-}
-
-.zw-stat-value {
-  font-family: var(--zw-display);
-  font-size: 1.25rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--zw-fg);
-}
-
 // ---------- Spec cards ----------
 
 .table-wrapper.zw-spec {

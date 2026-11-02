@@ -360,43 +360,8 @@
     });
   }
 
-  // ---------- Page stats ----------
-  // Variable count under the title of the configuration options page.
-
-  function setupPageStats() {
-    var main = document.querySelector('#main-content main');
-    var h1 = main && main.querySelector('h1');
-    if (!h1) return;
-
-    var stats = [];
-    var overview = Array.prototype.filter.call(main.querySelectorAll('table'), function (t) {
-      var th = t.querySelector('thead th');
-      return th && cellText(th) === 'Key';
-    })[0];
-    if (overview) stats.push({ label: 'Variables', value: String(overview.querySelectorAll('tbody tr').length) });
-    if (!stats.length) return;
-
-    var box = document.createElement('div');
-    box.className = 'zw-stats';
-    stats.forEach(function (s) {
-      var el = document.createElement('div');
-      el.className = 'zw-stat';
-      var l = document.createElement('span');
-      l.className = 'zw-stat-label';
-      l.textContent = s.label;
-      el.appendChild(l);
-      var v = document.createElement('span');
-      v.className = 'zw-stat-value';
-      v.textContent = s.value;
-      el.appendChild(v);
-      box.appendChild(el);
-    });
-    h1.parentNode.insertBefore(box, h1.nextSibling);
-  }
-
   ready(function () {
     setupThemeToggle();
-    setupPageStats();
     setupSpecCards();
     setupVariableFilter();
     setupRoute();
