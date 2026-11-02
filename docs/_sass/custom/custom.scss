@@ -278,6 +278,11 @@ $zw-zones: (
   "contributing": ("Z5", var(--zw-z5)),
 );
 
+// just-the-docs drops the href from the current page's link, which turns the cursor into a text cursor.
+.site-nav .nav-list-link.active {
+  cursor: pointer;
+}
+
 .site-nav > .nav-list > .nav-list-item {
   --zc: var(--zw-line);
 
