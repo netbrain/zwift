@@ -17,6 +17,9 @@
   --zw-z4: #{$zw-z4};
   --zw-z5: #{$zw-z5};
   --zw-z6: #{$zw-z6};
+  --zw-zone-ink: #{$zw-zone-ink};
+  --zw-logo-body: #{$zw-logo-body};
+  --zw-logo-detail: #{$zw-logo-detail};
   --zw-display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --zw-route-h: 3.5rem;
 
@@ -273,7 +276,7 @@ $zw-zones: (
       padding: 3px 6px 2px;
       border-radius: 3px;
       background: var(--zc);
-      color: #0f1219;
+      color: var(--zw-zone-ink);
       font-style: italic;
       font-weight: 800;
       font-size: 0.75rem;
