@@ -85,10 +85,11 @@
     var wrap = document.querySelector('.main-content-wrap');
     if (!main || !wrap) return;
 
-    var sections = Array.prototype.slice.call(main.querySelectorAll('h2[id]'));
     var heads = Array.prototype.slice.call(main.querySelectorAll('h2[id], h3[id]'));
-    // A page without sections is too short for a route.
-    if (sections.length < 2) return;
+    // Climbs come from the h2 sections. Pages without them use their h3s, and a page with no headings
+    // gets flat rolling terrain.
+    var sections = heads.filter(function (h) { return h.tagName === 'H2'; });
+    if (!sections.length) sections = heads;
 
     var totalMinutes = countWords(main.textContent) / WORDS_PER_MINUTE;
 
@@ -135,7 +136,7 @@
       list.appendChild(li);
       return { h: h, li: li };
     });
-    document.body.appendChild(segments);
+    if (items.length) document.body.appendChild(segments);
 
     var W = 1000, H = 40, N = 160;
     var elevation = [];
@@ -174,8 +175,9 @@
     }
 
     function update() {
-      var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      var p = Math.min(1, Math.max(0, window.scrollY / max));
+      // A page that fits in the window is ridden as soon as it opens.
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      var p = max < 1 ? 1 : Math.min(1, Math.max(0, window.scrollY / max));
       clip.setAttribute('width', p * W);
       rider.style.left = p * 100 + '%';
       rider.style.top = (1 - (elevation[Math.round(p * N)] || 0)) * 100 + '%';
@@ -196,6 +198,7 @@
 
     window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', build);
+    window.addEventListener('load', build);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(build);
     build();
   }
