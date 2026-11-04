@@ -26,7 +26,7 @@ secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwi
 
 In this case the username should still be saved in the config file.
 
-{: .note }
+{: .important }
 It is recommended to save your password securely in the secret store and add your username to the config file.
 
 ## How can I update my persisted password?
@@ -40,7 +40,7 @@ It is recommended to save your password securely in the secret store and add you
   secret-tool store --label "Zwift password for ${ZWIFT_USERNAME}" application zwift username ${ZWIFT_USERNAME}
   ```
 
-### Podman
+### Extra Step for Podman
 
 If you are using podman, you need to remove your password from the podman secret store.
 
