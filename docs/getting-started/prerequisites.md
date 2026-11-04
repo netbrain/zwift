@@ -36,7 +36,7 @@ nav_order: 1
 
 #### NVIDIA Container Toolkit
 
-- Version: 1.18.0 or later
+- Version: 1.20.1 or later
 - Install by following the [NVIDIA Container Toolkit installation guide][install-nvctk]
 - Podman
   - After installation, check the [Container Device Interface guide][use-nvcdi]

@@ -45,7 +45,7 @@ ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731
 # - libdecor for wayland client-side window decorations
 # - libglvnd (libegl1 libgl1 libgles1 libgles2 libglvnd0 libglx0 libopengl0) for opengl
 # - libvulkan1 for vulkan loader library
-# - mesa-utils for testing graphics: glxgears, eglgears_wayland, eglgears_x11
+# - mesa-utils and vulkan-tools for testing graphics: glxgears, eglgears_wayland, eglgears_x11, vkcube
 # - procps for pgrep
 # - rsync to synchronize zwift volume with zwift appdata
 # - wget for downloading winehq key
@@ -65,7 +65,7 @@ RUN dpkg --add-architecture i386 \
         libdecor-0-0 libdecor-0-plugin-1-gtk \
         libegl1 libgl1 libgles1 libgles2 libglvnd0 libglx0 libopengl0 \
         libvulkan1 \
-        mesa-utils \
+        mesa-utils vulkan-tools \
         procps \
         rsync \
         wget \
