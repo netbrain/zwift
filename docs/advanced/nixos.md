@@ -99,3 +99,30 @@ networking = {
   };
 };
 ```
+
+## `xhost`
+
+If `programs.zwift.wineExperimentalWayland` is `false`, the program invokes the `xhost` command. It can be installed system-wide
+with:
+
+```nix
+environment.systemPackages = with pkgs; [ xhost ];
+```
+
+or per user:
+
+```nix
+users.users.<username>.packages = with pkgs; [ xhost ];
+```
+
+## Nvidia Graphics Card
+
+As mentioned in [Prerequisites](../../getting-started/prerequisites#additional-dependencies-for-nvidia-graphics-cards),
+`nvidia-container-toolkit` is required to render Zwift with Nvidia GPU. Enable it with:
+
+```nix
+hardware.nvidia-container-toolkit.enable = true;
+```
+
+Your mileage may vary with Wine's experimental Wayland support. If the GPU render doesn't work under Wayland, set
+`wineExperimentalWayland` to `false`.
