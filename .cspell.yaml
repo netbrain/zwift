@@ -2,14 +2,18 @@
 version: '0.2'
 language: en
 words:
+- antusb
+- avahi
 - crun
 - devcontainer
 - direnv
 - hadolint
 - kickr
 - netbrain
+- openant
 - radeon
 - shellcheck
+- venv
 - wqhd
 - zwift
 - zwifters
