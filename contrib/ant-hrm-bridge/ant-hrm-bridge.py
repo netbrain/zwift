@@ -41,8 +41,12 @@ BODY_SENSOR_CHEST = 0x01
 ANT_VENDOR_ID = 0x0FCF
 DONGLE_CHECK_INTERVAL = 2.0
 
-# Stop sending when the strap has been silent this long (seconds).
+# Report "no sensor contact" when the strap has been silent this long (seconds).
 STALE_AFTER = 5.0
+
+# Heart Rate Measurement flags: sensor contact supported, detected or not.
+HR_FLAGS_CONTACT = 0x06
+HR_FLAGS_NO_CONTACT = 0x04
 
 DEFAULT_NAME = "ANT HRM Bridge"
 
@@ -67,6 +71,19 @@ class Pulse:
             if time.monotonic() - self._at > STALE_AFTER:
                 return None
             return self._bpm
+
+
+def hr_measurement(bpm):
+    """Heart Rate Measurement value: flags byte and a uint8 heart rate.
+
+    While the strap is silent this reports "sensor contact not detected" with
+    no heart rate, once per second, instead of going quiet. Zwift 1.125 drops
+    a Direct Connect device that has sent nothing for 10 seconds, and in our
+    tests it did not always manage to reconnect.
+    """
+    if bpm is None:
+        return bytes([HR_FLAGS_NO_CONTACT, 0])
+    return bytes([HR_FLAGS_CONTACT, min(bpm, 255)])
 
 
 def dongle_address():
@@ -231,9 +248,8 @@ def run_ble(pulse, stop, name):
         def send(self, bpm):
             if not self.notifying:
                 return
-            # Flags 0x00: heart rate is a uint8 with no extra fields.
             value = dbus.Array(
-                [dbus.Byte(0x00), dbus.Byte(min(bpm, 255))], signature="y"
+                [dbus.Byte(b) for b in hr_measurement(bpm)], signature="y"
             )
             self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": value}, [])
 
@@ -341,9 +357,7 @@ def run_ble(pulse, stop, name):
     )
 
     def tick():
-        bpm = pulse.get()
-        if bpm is not None:
-            app.service.measurement.send(bpm)
+        app.service.measurement.send(pulse.get())
         return True
 
     GLib.timeout_add_seconds(1, tick)
@@ -466,15 +480,13 @@ class DirconHandler(socketserver.BaseRequestHandler):
             now = time.monotonic()
             if notifying and now >= next_send:
                 next_send = now + 1
-                bpm = self.server.pulse.get()
-                if bpm is not None:
-                    value = DC_HR_MEASUREMENT + bytes([0x00, min(bpm, 255)])
-                    try:
-                        self.request.sendall(
-                            dircon_packet(DC_NOTIFICATION, 0, DC_OK, value)
-                        )
-                    except OSError:
-                        break
+                value = DC_HR_MEASUREMENT + hr_measurement(self.server.pulse.get())
+                try:
+                    self.request.sendall(
+                        dircon_packet(DC_NOTIFICATION, 0, DC_OK, value)
+                    )
+                except OSError:
+                    break
         log.info("Direct Connect: %s disconnected", client)
 
 

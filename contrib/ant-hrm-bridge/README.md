@@ -13,8 +13,9 @@ How it works:
   TCP port 36867.
 - It answers Direct Connect requests with the standard heart rate service
   (`0x180D`) and measurement characteristic (`0x2A37`).
-- It sends the latest heart rate once per second, and nothing when the strap
-  has been silent for 5 seconds.
+- It sends the latest heart rate once per second. When the strap has been
+  silent for 5 seconds it keeps sending once per second, but with the "sensor
+  contact not detected" flag and no heart rate, so Zwift keeps the connection.
 
 Only heart rate is supported. Power meters, cadence and speed sensors are not.
 
@@ -95,8 +96,10 @@ system packages. Direct Connect is simpler and is the recommended route.
 - Only one program can use the dongle at a time. Stop the service before you
   run the script by hand.
 - If the dongle is unplugged, the bridge exits and systemd restarts it.
-- When the strap sends nothing (not worn, or dry), Zwift reconnects about
-  every 10 seconds. This stops as soon as the strap sends a heart rate.
+- When the strap sends nothing (not worn, or dry), Zwift shows no heart rate
+  until the strap sends one again. Zwift 1.125 drops a Direct Connect device
+  that has been silent for 10 seconds, and did not always reconnect in our
+  tests, which is why the bridge never goes quiet.
 - The strap is picked up again when it comes back after a break, since the
   ANT channel keeps searching. Tested with a 27 minute break: the heart rate
   was back within seconds of putting the strap on, with no restart.
