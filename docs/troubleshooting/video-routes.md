@@ -27,6 +27,11 @@ Vulkan Video, so your GPU driver needs to support `VK_KHR_video_decode_h264`.
    | `device creation failed (0x887A0004)`     | Your driver doesn't expose Vulkan H.264 decoding        |
    | `CreateDXGIFactory1 failed`               | wine didn't find a usable Vulkan driver                 |
 
+3. If the log shows `device creation failed` for `llvmpipe` even though your GPU supports Vulkan Video, check that the
+   container can open your GPU's render node. `ls -l /dev/dri` on the host shows its permissions; on hosts where
+   `renderD*` is `0660` (e.g. Debian), older images could not open it with docker. Make sure you are using the latest
+   image.
+
 ## Related
 
 - [GitHub issue #425](https://github.com/netbrain/zwift/issues/425)
