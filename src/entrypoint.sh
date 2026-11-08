@@ -128,6 +128,35 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         fi
     fi
 
+    grant_gpu_device_access() {
+        # --device keeps the host group of /dev/dri nodes (e.g. render), but that gid usually
+        # has no matching group in the container and the user is not a member, so on hosts
+        # where render nodes are 0660 (e.g. Debian) vulkan can't open them. This breaks
+        # Vulkan Video, which wine needs for the H.264 check that enables video routes.
+        local device gid group
+        for device in /dev/dri/*; do
+            [[ -c ${device} ]] || continue
+            gid="$(stat -c %g "${device}")"
+            [[ ${gid} -eq 0 ]] && continue
+            group="$(getent group "${gid}" | cut -d: -f1)"
+            if [[ -z ${group} ]]; then
+                group="host_gid_${gid}"
+                groupadd -g "${gid}" "${group}" || return 1
+            fi
+            if ! id -nG user | tr ' ' '\n' | grep -qx "${group}"; then
+                msgbox debug "Adding user to group ${group} (${gid}) for ${device}"
+                usermod -aG "${group}" user || return 1
+            fi
+        done
+    }
+
+    msgbox info "Checking GPU device access"
+    if grant_gpu_device_access; then
+        msgbox ok "GPU device access granted"
+    else
+        msgbox warning "Failed to grant access to GPU devices, video routes may not work"
+    fi
+
     msgbox info "Checking file ownership"
     if update_ownership; then
         msgbox ok "File ownership is correct"
@@ -136,7 +165,8 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         exit 1
     fi
 
-    run_as=(gosu user:user)
+    # Don't use user:user, gosu would then drop the supplementary groups added above
+    run_as=(gosu user)
 fi
 
 #####################################
