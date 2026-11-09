@@ -14,8 +14,7 @@ which graphics profile the game uses. When the default options of the profile ar
 recognize your graphics card and you only get the `medium` profile or when your cpu is the bottleneck and your fps is on the low
 side because zwift assigned the ultra profile), it is possible to manually tweak the graphics settings by setting
 `ZWIFT_OVERRIDE_GRAPHICS="1"`, and editing the settings in the `$HOME/.config/zwift/graphics.txt` or
-`$HOME/.config/zwift/$ZWIFT_RIDER-graphics.txt` file as you see fit. To find out which profile zwift assigned, upload your
-zwift log to <https://trainerdx.com>.
+`$HOME/.config/zwift/$ZWIFT_RIDER-graphics.txt` file as you see fit.
 
 The default settings for the different profiles are:
 
@@ -52,9 +51,8 @@ article. Note that this is an older article and as such some of the information 
 different profiles have changed to what is in the table listed above and for example the `aniso` setting does not exist anymore.
 
 {: .important }
-**Before using ZWIFT_OVERRIDE_GRAPHICS**: This option requires that the `$HOME/.config/zwift/graphics.txt` file exists. If a
-`graphics.txt` does not exist and the `ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically the first time
-zwift is launched.
+This option requires that the `$HOME/.config/zwift/graphics.txt` file exists. If `graphics.txt` does not exist and the
+`ZWIFT_OVERRIDE_GRAPHICS` option is used, it will be created automatically the first time Zwift is launched.
 
 ## How can I change the game resolution?
 
@@ -75,7 +73,3 @@ The full list of available resolutions is:
 | High   | 1080p      | 1920x1080 |
 | Ultra  | 1440p      | 2560x1440 |
 | 4k UHD | 2160p      | 3840x2160 |
-
-{: .important }
-**Before using ZWIFT_OVERRIDE_RESOLUTION**: This option requires that the `prefs.xml` file exists. Make sure to launch zwift at
-least once so it creates the `prefs.xml` file before using the `ZWIFT_OVERRIDE_RESOLUTION` option.

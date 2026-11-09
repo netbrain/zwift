@@ -51,6 +51,7 @@ ARG WINETRICKS_CHECKSUM=672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731
 # - wget for downloading winehq key
 # - winbind for ntml_auth required by zwift/wine
 # - xdg-utils for wayland
+# - xmlstarlet for editing the prefs.xml zwift configuration file
 RUN dpkg --add-architecture i386 \
  && DEBIAN_FRONTEND="noninteractive" apt-get update \
  && DEBIAN_FRONTEND="noninteractive" apt-get install --no-install-recommends -y \
@@ -71,6 +72,7 @@ RUN dpkg --add-architecture i386 \
         wget \
         winbind \
         xdg-utils \
+        xmlstarlet \
  && rm -rf /var/lib/apt/lists/*
 
 # Graphics driver is frozen in debian stable, install from backports to get a more recent version
