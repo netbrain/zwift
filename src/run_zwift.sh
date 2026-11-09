@@ -108,6 +108,10 @@ else
     msgbox debug "Zwift installation wine path is: ${zwift_wine_dir}"
 fi
 
+if [[ ! -f ${ZWIFT_PREFS_FILE} ]]; then
+    msgbox warning "${ZWIFT_PREFS_FILE} does not exist"
+fi
+
 ##############################################
 ##### Sync Zwift volume to Zwift AppData #####
 
@@ -128,15 +132,14 @@ declare -a zwift_args
 zwift_args=()
 
 if [[ -n ${ZWIFT_OVERRIDE_RESOLUTION} ]]; then
-    if [[ -f ${ZWIFT_PREFS_FILE} ]]; then
-        msgbox info "Setting zwift resolution to ${ZWIFT_OVERRIDE_RESOLUTION}."
-        updated_prefs="$(awk -v resolution="${ZWIFT_OVERRIDE_RESOLUTION}" '{
-            gsub(/<USER_RESOLUTION_PREF>.*<\/USER_RESOLUTION_PREF>/,
-                 "<USER_RESOLUTION_PREF>" resolution "</USER_RESOLUTION_PREF>")
-        } 1' "${ZWIFT_PREFS_FILE}")"
-        echo "${updated_prefs}" > "${ZWIFT_PREFS_FILE}"
+    msgbox info "Setting Zwift resolution to ${ZWIFT_OVERRIDE_RESOLUTION}."
+    if xmlstarlet ed -L \
+        -u "/ZWIFT/CONFIG/USER_RESOLUTION_PREF" -v "${ZWIFT_OVERRIDE_RESOLUTION}" \
+        -s "/ZWIFT/CONFIG[not(USER_RESOLUTION_PREF)]" -t elem -n "USER_RESOLUTION_PREF" -v "${ZWIFT_OVERRIDE_RESOLUTION}" \
+        "${ZWIFT_PREFS_FILE}" > /dev/null 2>&1; then
+        msgbox ok "Updated Zwift resolution to ${ZWIFT_OVERRIDE_RESOLUTION}"
     else
-        msgbox warning "Preferences file does not exist yet. Resolution ${ZWIFT_OVERRIDE_RESOLUTION} cannot be set."
+        msgbox warning "Failed to update Zwift resolution"
     fi
 fi
 
