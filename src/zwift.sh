@@ -428,11 +428,10 @@ if [[ ${CONTAINER_TOOL} == "podman" ]]; then
     )
 else
     # With docker we manually remap the user and add host user groups inside the container
-    user_groups=" $(id -G) "
-    user_groups="${user_groups/ ${host_gid} /}"
-    user_groups="${user_groups# }"
-    user_groups="${user_groups% }"
+    user_groups="$(id -G) "
     user_groups="${user_groups// /,}"
+    user_groups="${user_groups//${host_gid},/}"
+    user_groups="${user_groups%,}"
     container_env_vars+=(
         HOST_UID="${host_uid}"
         HOST_GID="${host_gid}"
