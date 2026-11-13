@@ -119,11 +119,10 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         find "${target}" \( ! -user user -o ! -group user \) -exec chown user:user {} + || return 1
     }
 
-    add_host_groups() {
-        local gid gids groups=""
+    add_groups() {
+        local gid groups=""
 
-        IFS=',' read -ra gids <<< "${HOST_GROUPS}"
-        for gid in "${gids[@]}"; do
+        for gid in "${@}"; do
             if groupadd --non-unique --gid "${gid}" "host-group-${gid}"; then
                 msgbox debug "Created group host-group-${gid}"
                 groups="${groups},host-group-${gid}"
@@ -164,7 +163,8 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
     if [[ -n ${HOST_GROUPS} ]]; then
         msgbox info "Adding container user to host groups"
         msgbox debug "Additional groups: ${HOST_GROUPS}"
-        if add_host_groups; then
+        IFS=',' read -ra gids <<< "${HOST_GROUPS}"
+        if add_groups "${gids[@]}"; then
             msgbox ok "Added container user to host groups"
         else
             msgbox error "Failed to add container user to host groups"
