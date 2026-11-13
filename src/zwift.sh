@@ -416,19 +416,26 @@ declare -a entrypoint_args
 entrypoint_args=()
 
 # Initialize user ids
+# Keep host supplementary groups (e.g. video/render) so GPU devices stay
+# accessible without --privileged.
 host_uid="${UID}"
 host_gid="$(id -g)"
 if [[ ${CONTAINER_TOOL} == "podman" ]]; then
-    container_args+=(--userns "keep-id:uid=1000,gid=1000")
-    # Keep host supplementary groups (e.g. video/render) so GPU devices stay
-    # accessible without --privileged. On rootless podman 5.x setgroups can
-    # otherwise fail with unmapped groups. Honored by crun, ignored by runc.
-    container_args+=(--group-add keep-groups)
+    # Podman has arguments to remap the user and keep the host user groups
+    container_args+=(
+        --userns "keep-id:uid=1000,gid=1000"
+        --group-add keep-groups
+    )
 else
-    # Remap the container user to the host user
+    # With docker we manually remap the user and add host user groups inside the container
+    user_groups="$(id -G) "
+    user_groups="${user_groups// /,}"
+    user_groups="${user_groups//${host_gid},/}"
+    user_groups="${user_groups%,}"
     container_env_vars+=(
         HOST_UID="${host_uid}"
         HOST_GID="${host_gid}"
+        HOST_GROUPS="${user_groups}"
     )
 fi
 

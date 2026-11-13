@@ -24,6 +24,7 @@ fi
 readonly VERBOSITY="${VERBOSITY:-1}"
 readonly HOST_UID="${HOST_UID:-$(id -u user)}"
 readonly HOST_GID="${HOST_GID:-$(id -g user)}"
+readonly HOST_GROUPS="${HOST_GROUPS:-}"
 readonly WINE_DISABLE_EGL="${WINE_DISABLE_EGL:-0}"
 readonly XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-x11}"
 readonly CONTAINER_TOOL="${CONTAINER_TOOL:?}"
@@ -118,6 +119,29 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         find "${target}" \( ! -user user -o ! -group user \) -exec chown user:user {} + || return 1
     }
 
+    add_groups() {
+        local gid groups=""
+
+        for gid in "${@}"; do
+            if groupadd --non-unique --gid "${gid}" "host-group-${gid}"; then
+                msgbox debug "Created group host-group-${gid}"
+                groups="${groups},host-group-${gid}"
+            else
+                msgbox warning "Failed to create group with id ${gid}"
+            fi
+        done
+        groups="${groups#,}"
+
+        if [[ -n ${groups} ]]; then
+            if ! usermod -aG "${groups}" user; then
+                msgbox error "Failed to add user to host groups"
+                return 1
+            fi
+        else
+            msgbox warning "Did not add user to any groups"
+        fi
+    }
+
     if should_change_user_ids; then
         msgbox info "Changing user ids to ${container_uid}:${container_gid}"
         if change_user_ids; then
@@ -136,7 +160,19 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         exit 1
     fi
 
-    run_as=(gosu user:user)
+    if [[ -n ${HOST_GROUPS} ]]; then
+        msgbox info "Adding container user to host groups"
+        msgbox debug "Additional groups: ${HOST_GROUPS}"
+        IFS=',' read -ra gids <<< "${HOST_GROUPS}"
+        if add_groups "${gids[@]}"; then
+            msgbox ok "Added container user to host groups"
+        else
+            msgbox error "Failed to add container user to host groups"
+            exit 1
+        fi
+    fi
+
+    run_as=(gosu user)
 fi
 
 #####################################
