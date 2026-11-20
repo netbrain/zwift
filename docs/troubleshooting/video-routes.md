@@ -27,6 +27,17 @@ Vulkan Video, so your GPU driver needs to support `VK_KHR_video_decode_h264`.
    | `device creation failed (0x887A0004)`     | Your driver doesn't expose Vulkan H.264 decoding        |
    | `CreateDXGIFactory1 failed`               | wine didn't find a usable Vulkan driver                 |
 
+3. If the log shows `device creation failed` for `llvmpipe` even though your GPU supports Vulkan Video, the container
+   can't open your GPU's render node. Run `ls -l /dev/dri` on the host. If `renderD*` is `0660` (e.g. Debian), add your
+   user to the group that owns it, usually `render`, then log out and in again:
+
+   ```bash
+   sudo usermod -aG render "$USER"
+   ```
+
+   The container user gets the same groups as your host user, with both docker and podman. On podman this needs the
+   `crun` runtime, since `runc` ignores `--group-add keep-groups`.
+
 ## Related
 
 - [GitHub issue #425](https://github.com/netbrain/zwift/issues/425)
