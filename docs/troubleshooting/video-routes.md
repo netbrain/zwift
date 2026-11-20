@@ -36,7 +36,15 @@ Vulkan Video, so your GPU driver needs to support `VK_KHR_video_decode_h264`.
    ```
 
    The container user gets the same groups as your host user, with both docker and podman. On podman this needs the
-   `crun` runtime, since `runc` ignores `--group-add keep-groups`.
+   `crun` runtime, since `runc` ignores `--group-add keep-groups`. This prints the runtime podman uses:
+
+   {% raw %}
+
+   ```bash
+   podman info --format '{{ .Host.OCIRuntime.Name }}'
+   ```
+
+   {% endraw %}
 
 ## Related
 

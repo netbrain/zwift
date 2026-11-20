@@ -5,6 +5,7 @@ words:
 - crun
 - devcontainer
 - direnv
+- endraw
 - hadolint
 - kickr
 - netbrain
