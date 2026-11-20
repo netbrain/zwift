@@ -123,7 +123,9 @@ if [[ ${CONTAINER_TOOL} == "docker" ]]; then
         local gid groups=""
 
         for gid in "${@}"; do
-            if groupadd --non-unique --gid "${gid}" "host-group-${gid}"; then
+            if [[ ! ${gid} =~ ^[0-9]+$ ]]; then
+                msgbox warning "Ignoring group id '${gid}' because it is not a number"
+            elif groupadd --non-unique --gid "${gid}" "host-group-${gid}"; then
                 msgbox debug "Created group host-group-${gid}"
                 groups="${groups},host-group-${gid}"
             else
