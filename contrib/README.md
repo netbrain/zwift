@@ -4,4 +4,6 @@ Optional tools that work alongside netbrain/zwift but are not part of the contai
 its own folder with a README that explains what it does and how to install it. Nothing in this folder is installed or run by
 the main project.
 
+The tools here are community maintained and are not covered by the main project's support.
+
 - [ant-hrm-bridge](ant-hrm-bridge/): use an ANT+ heart rate strap with Zwift, through Direct Connect.

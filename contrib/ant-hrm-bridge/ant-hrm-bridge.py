@@ -6,14 +6,9 @@ network as a Direct Connect (DIRCON) device, the same way a Wahoo KICKR does.
 Zwift in the container finds it by itself (with NETWORKING="host"), with no
 Companion app and no ANT+ support in Wine.
 
-With --ble the heart rate is instead offered as a standard Bluetooth LE heart
-rate sensor through the PC's Bluetooth adapter, which the Companion app can
-then pass on to Zwift.
-
 Usage:
   ant-hrm-bridge.py                 ANT+ in, Direct Connect out
   ant-hrm-bridge.py --belt-id 12345 only use the strap with this ANT ID
-  ant-hrm-bridge.py --ble           ANT+ in, Bluetooth LE out
   ant-hrm-bridge.py --ant-only      only print the heart rate from the strap
   ant-hrm-bridge.py --sim           simulated heart rate out (no dongle/strap)
 """
@@ -130,9 +125,9 @@ def hr_measurement(bpm):
 
     While the strap is silent or has no skin contact, this reports "sensor
     contact not detected" with no heart rate, once per second, instead of going
-    quiet. Zwift 1.125 drops
-    a Direct Connect device that has sent nothing for 10 seconds, and in our
-    tests it did not always manage to reconnect.
+    quiet. Zwift drops a Direct Connect device that has sent nothing for
+    10 seconds (inactivityTimeout=10s in its log, 1.124 to 1.126), and in our
+    tests 1.125 did not always manage to reconnect.
     """
     if bpm is None:
         return bytes([HR_FLAGS_NO_CONTACT, 0])
@@ -167,13 +162,16 @@ def ant_loop(pulse, stop, belt_id):
     from openant.easy.node import Node
 
     last_error = None
+    watcher = None
     while not stop.is_set():
         node = None
         try:
             node = Node()
-            threading.Thread(
-                target=watch_dongle, args=(dongle_address(), stop), daemon=True
-            ).start()
+            if watcher is None:
+                watcher = threading.Thread(
+                    target=watch_dongle, args=(dongle_address(), stop), daemon=True
+                )
+                watcher.start()
             node.set_network_key(0x00, ANTPLUS_NETWORK_KEY)
             # The ANT channel searches forever, so the strap is picked up
             # again whenever it comes back in range or wakes up.
@@ -235,205 +233,6 @@ def sim_loop(pulse, stop, belt_id=None):
     while not stop.is_set():
         pulse.set(int(120 + 15 * math.sin((time.monotonic() - start) / 10)))
         stop.wait(1)
-
-
-# Bluetooth LE output through BlueZ (--ble).
-
-BLUEZ = "org.bluez"
-OM_IFACE = "org.freedesktop.DBus.ObjectManager"
-PROP_IFACE = "org.freedesktop.DBus.Properties"
-ADAPTER_IFACE = "org.bluez.Adapter1"
-GATT_MANAGER_IFACE = "org.bluez.GattManager1"
-GATT_SERVICE_IFACE = "org.bluez.GattService1"
-GATT_CHRC_IFACE = "org.bluez.GattCharacteristic1"
-AD_MANAGER_IFACE = "org.bluez.LEAdvertisingManager1"
-AD_IFACE = "org.bluez.LEAdvertisement1"
-ROOT_PATH = "/antplus/hrmbridge"
-APPEARANCE_HR_BELT = 0x0341
-
-
-def run_ble(pulse, stop, name):
-    # Imported here so Direct Connect mode does not need dbus-python or PyGObject.
-    import dbus
-    import dbus.exceptions
-    import dbus.mainloop.glib
-    import dbus.service
-    from gi.repository import GLib, GLibUnix
-
-    class InvalidArgs(dbus.exceptions.DBusException):
-        _dbus_error_name = "org.freedesktop.DBus.Error.InvalidArgs"
-
-    class Characteristic(dbus.service.Object):
-        def __init__(self, bus, service, index, uuid, flags):
-            self.path = f"{service.path}/char{index}"
-            self.service = service
-            self.uuid = uuid
-            self.flags = flags
-            super().__init__(bus, self.path)
-
-        def properties(self):
-            return {
-                GATT_CHRC_IFACE: {
-                    "Service": dbus.ObjectPath(self.service.path),
-                    "UUID": self.uuid,
-                    "Flags": dbus.Array(self.flags, signature="s"),
-                }
-            }
-
-        @dbus.service.method(PROP_IFACE, in_signature="s", out_signature="a{sv}")
-        def GetAll(self, interface):
-            if interface != GATT_CHRC_IFACE:
-                raise InvalidArgs()
-            return self.properties()[GATT_CHRC_IFACE]
-
-        @dbus.service.signal(PROP_IFACE, signature="sa{sv}as")
-        def PropertiesChanged(self, interface, changed, invalidated):
-            pass
-
-    class HeartRateMeasurement(Characteristic):
-        def __init__(self, bus, service):
-            super().__init__(bus, service, 0, HR_MEASUREMENT_UUID, ["notify"])
-            self.notifying = False
-
-        @dbus.service.method(GATT_CHRC_IFACE)
-        def StartNotify(self):
-            if not self.notifying:
-                self.notifying = True
-                log.info("Bluetooth client connected and receiving heart rate")
-
-        @dbus.service.method(GATT_CHRC_IFACE)
-        def StopNotify(self):
-            if self.notifying:
-                self.notifying = False
-                log.info("Bluetooth client disconnected")
-
-        def send(self, bpm):
-            if not self.notifying:
-                return
-            value = dbus.Array(
-                [dbus.Byte(b) for b in hr_measurement(bpm)], signature="y"
-            )
-            self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": value}, [])
-
-    class BodySensorLocation(Characteristic):
-        def __init__(self, bus, service):
-            super().__init__(bus, service, 1, BODY_SENSOR_LOCATION_UUID, ["read"])
-
-        @dbus.service.method(
-            GATT_CHRC_IFACE, in_signature="a{sv}", out_signature="ay"
-        )
-        def ReadValue(self, options):
-            return dbus.Array([dbus.Byte(BODY_SENSOR_CHEST)], signature="y")
-
-    class HeartRateService(dbus.service.Object):
-        def __init__(self, bus):
-            self.path = ROOT_PATH + "/service0"
-            super().__init__(bus, self.path)
-            self.measurement = HeartRateMeasurement(bus, self)
-            self.characteristics = [self.measurement, BodySensorLocation(bus, self)]
-
-        def properties(self):
-            return {
-                GATT_SERVICE_IFACE: {
-                    "UUID": HR_SERVICE_UUID,
-                    "Primary": True,
-                    "Characteristics": dbus.Array(
-                        [dbus.ObjectPath(c.path) for c in self.characteristics],
-                        signature="o",
-                    ),
-                }
-            }
-
-    class Application(dbus.service.Object):
-        def __init__(self, bus):
-            super().__init__(bus, ROOT_PATH)
-            self.service = HeartRateService(bus)
-
-        @dbus.service.method(OM_IFACE, out_signature="a{oa{sa{sv}}}")
-        def GetManagedObjects(self):
-            objects = {self.service.path: self.service.properties()}
-            for chrc in self.service.characteristics:
-                objects[chrc.path] = chrc.properties()
-            return objects
-
-    class Advertisement(dbus.service.Object):
-        def __init__(self, bus):
-            self.path = ROOT_PATH + "/advertisement0"
-            super().__init__(bus, self.path)
-
-        @dbus.service.method(PROP_IFACE, in_signature="s", out_signature="a{sv}")
-        def GetAll(self, interface):
-            if interface != AD_IFACE:
-                raise InvalidArgs()
-            return {
-                "Type": "peripheral",
-                "ServiceUUIDs": dbus.Array([HR_SERVICE_UUID], signature="s"),
-                "LocalName": name,
-                "Appearance": dbus.UInt16(APPEARANCE_HR_BELT),
-            }
-
-        @dbus.service.method(AD_IFACE)
-        def Release(self):
-            log.warning("BlueZ released the Bluetooth advertisement")
-
-    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-    bus = dbus.SystemBus()
-    manager = dbus.Interface(bus.get_object(BLUEZ, "/"), OM_IFACE)
-    adapter_path = None
-    for path, interfaces in manager.GetManagedObjects().items():
-        if GATT_MANAGER_IFACE in interfaces and AD_MANAGER_IFACE in interfaces:
-            adapter_path = path
-            break
-    if adapter_path is None:
-        log.error("Found no Bluetooth adapter that can act as an LE peripheral")
-        return 1
-
-    adapter = bus.get_object(BLUEZ, adapter_path)
-    adapter_props = dbus.Interface(adapter, PROP_IFACE)
-    adapter_props.Set(ADAPTER_IFACE, "Powered", dbus.Boolean(True))
-
-    gatt_manager = dbus.Interface(adapter, GATT_MANAGER_IFACE)
-    ad_manager = dbus.Interface(adapter, AD_MANAGER_IFACE)
-    app = Application(bus)
-    advertisement = Advertisement(bus)
-    loop = GLib.MainLoop()
-    failed = []
-
-    def fail(what):
-        def handler(err):
-            log.error("%s failed: %s", what, err)
-            failed.append(what)
-            loop.quit()
-
-        return handler
-
-    gatt_manager.RegisterApplication(
-        dbus.ObjectPath(ROOT_PATH), {},
-        reply_handler=lambda: log.info("Heart rate GATT service registered"),
-        error_handler=fail("GATT registration"),
-    )
-    ad_manager.RegisterAdvertisement(
-        dbus.ObjectPath(advertisement.path), {},
-        reply_handler=lambda: log.info("Advertising as '%s'", name),
-        error_handler=fail("Bluetooth advertising"),
-    )
-
-    def tick():
-        app.service.measurement.send(pulse.get())
-        return True
-
-    GLib.timeout_add_seconds(1, tick)
-    for sig in (signal.SIGINT, signal.SIGTERM):
-        GLibUnix.signal_add(GLib.PRIORITY_DEFAULT, sig, loop.quit)
-    loop.run()
-
-    stop.set()
-    try:
-        ad_manager.UnregisterAdvertisement(dbus.ObjectPath(advertisement.path))
-        gatt_manager.UnregisterApplication(dbus.ObjectPath(ROOT_PATH))
-    except dbus.exceptions.DBusException:
-        pass
-    return 1 if failed else 0
 
 
 # Direct Connect (DIRCON): BLE GATT over TCP, the protocol the KICKR uses.
@@ -598,8 +397,6 @@ def main():
                       help="only read and print the heart rate from the strap")
     mode.add_argument("--sim", action="store_true",
                       help="send a simulated heart rate (no dongle or strap)")
-    parser.add_argument("--ble", action="store_true",
-                        help="offer a Bluetooth LE sensor instead of Direct Connect")
     parser.add_argument("--belt-id", type=int, default=0, metavar="ID",
                         help="ANT ID of the strap; 0 (default) takes the first one found")
     parser.add_argument("--name", default=DEFAULT_NAME,
@@ -633,10 +430,7 @@ def main():
     threading.Thread(
         target=source, args=(pulse, stop, args.belt_id), daemon=True
     ).start()
-    if args.ble:
-        code = run_ble(pulse, stop, args.name)
-    else:
-        code = run_dircon(pulse, stop, args.name, args.port)
+    code = run_dircon(pulse, stop, args.name, args.port)
     # A normal Python exit can segfault while the ANT thread is inside libusb.
     logging.shutdown()
     os._exit(code)

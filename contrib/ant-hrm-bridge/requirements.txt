@@ -1,2 +1,2 @@
-openant
-pyusb
+openant==1.3.4
+pyusb==1.3.1

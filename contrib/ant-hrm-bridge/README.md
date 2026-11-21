@@ -85,16 +85,10 @@ Check the log with `journalctl --user -u ant-hrm-bridge -f`.
 | `--port PORT`  | Direct Connect TCP port. Default: 36867.                     |
 | `--ant-only`   | Only read and print the heart rate.                          |
 | `--sim`        | Send a simulated heart rate, for testing without a strap.    |
-| `--ble`        | Offer a Bluetooth LE sensor instead, for the Companion app.  |
 | `--verbose`    | Log every Direct Connect message.                            |
 
 If there is more than one strap nearby (in a gym, or at home with a partner),
 use `--belt-id` with the ID from step 3 in the `ExecStart` line of the service.
-
-`--ble` is an older route through the PC's Bluetooth adapter and the Companion
-app. It needs `dbus-python` and `PyGObject` (`python3-dbus` and `python3-gi`
-on Debian/Ubuntu); create the venv with `--system-site-packages` to use the
-system packages. Direct Connect is simpler and is the recommended route.
 
 ## Notes
 
@@ -102,9 +96,12 @@ system packages. Direct Connect is simpler and is the recommended route.
   run the script by hand.
 - If the dongle is unplugged, the bridge exits and systemd restarts it.
 - When the strap sends nothing (not worn, or dry), Zwift shows no heart rate
-  until the strap sends one again. Zwift 1.125 drops a Direct Connect device
-  that has been silent for 10 seconds, and did not always reconnect in our
-  tests, which is why the bridge never goes quiet.
+  until the strap sends one again. Zwift drops a Direct Connect device that
+  has been silent for 10 seconds (1.124 to 1.126), and 1.125 did not always
+  reconnect in our tests, which is why the bridge never goes quiet.
+- While the bridge reports no contact, Zwift records 0 bpm in the FIT file,
+  and those zeros count in the ride's average heart rate. Rides with good
+  contact had no zeros.
 - The strap is picked up again when it comes back after a break, since the
   ANT channel keeps searching. Tested with a 27 minute break: the strap was
   found again within seconds of putting it on, with no restart.
@@ -126,9 +123,15 @@ system packages. Direct Connect is simpler and is the recommended route.
 
 ## Tested
 
-- Garmin HRM-Tri with an ANTUSB-m dongle, Ubuntu 26.04, podman, Zwift
-  1.124.0: full rides of 33 and 56 minutes with a heart rate every second,
-  and automatic pairing after a reboot.
+Garmin HRM-Tri with an ANTUSB-m dongle, Ubuntu 26.04, podman:
+
+- Zwift 1.124.0: full rides of 33 and 56 minutes with a heart rate every
+  second, and automatic pairing after a reboot.
+- Zwift 1.125.0: the strap taken off during rides. Zwift showed `--` and kept
+  the connection, with no inactivity timeouts.
+- Zwift 1.126.0 (169052), with the current script: rides of 11 and
+  31 minutes, the strap waking up before the ride, and the strap taken off
+  after the ride while it kept sending its last value.
 
 Other straps and dongles should work if they follow the ANT+ heart rate
 profile, but have not been tested. Reports are welcome.
