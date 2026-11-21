@@ -1,0 +1,3 @@
+# Gives normal users access to ANT USB sticks (ANTUSB2 and ANTUSB-m)
+SUBSYSTEM=="usb", ATTR{idVendor}=="0fcf", ATTR{idProduct}=="1008", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTR{idVendor}=="0fcf", ATTR{idProduct}=="1009", MODE="0660", GROUP="plugdev", TAG+="uaccess"

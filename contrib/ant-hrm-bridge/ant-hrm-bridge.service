@@ -1,0 +1,13 @@
+[Unit]
+Description=ANT+ heart rate strap bridge for Zwift (Direct Connect)
+After=network-online.target avahi-daemon.service
+
+[Service]
+# Adjust the paths if you put the bridge somewhere else. Add --belt-id <ID>
+# to always use the same strap.
+ExecStart=%h/.local/share/ant-hrm-bridge/venv/bin/python -u %h/.local/share/ant-hrm-bridge/ant-hrm-bridge.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
