@@ -16,6 +16,11 @@ How it works:
 - It sends the latest heart rate once per second. When the strap has been
   silent for 5 seconds it keeps sending once per second, but with the "sensor
   contact not detected" flag and no heart rate, so Zwift keeps the connection.
+- It also watches the strap's beat count, and only passes on the heart rate
+  while the count moves. When no new beat has come for 3 seconds, the strap
+  has lost skin contact even if it still sends a heart rate, and the bridge
+  sends "sensor contact not detected". It does the same when the strap sends
+  0 bpm.
 
 Only heart rate is supported. Power meters, cadence and speed sensors are not.
 
@@ -101,11 +106,23 @@ system packages. Direct Connect is simpler and is the recommended route.
   that has been silent for 10 seconds, and did not always reconnect in our
   tests, which is why the bridge never goes quiet.
 - The strap is picked up again when it comes back after a break, since the
-  ANT channel keeps searching. Tested with a 27 minute break: the heart rate
-  was back within seconds of putting the strap on, with no restart.
+  ANT channel keeps searching. Tested with a 27 minute break: the strap was
+  found again within seconds of putting it on, with no restart.
 - After you take the strap off, it may keep sending the last value for a
-  couple of minutes (the HRM-Tri repeated 102 bpm for about 2 minutes), so
-  the heart rate in Zwift looks frozen until the strap goes quiet.
+  couple of minutes (the HRM-Tri repeated 102 bpm for about 2 minutes, and
+  137 bpm for 35 seconds in another test). Its beat count stops, so the bridge
+  reports no contact after 3 seconds instead of a frozen heart rate.
+- When the strap is put on, it first sends a start value and then climbs
+  towards the real heart rate. The HRM-Tri sent 71 bpm for 3 to 17 seconds,
+  then reached the real heart rate within about 10 seconds. The bridge passes
+  these values on, as a receiver paired directly with the strap would.
+  Waiting for the real heart rate would show no heart rate for 15 to
+  30 seconds, which looks like a fault.
+- A strap that has been off for a few minutes stops sending. When the HRM-Tri
+  woke up again, it first sent 0 bpm, then 72 bpm for about 4 seconds while
+  its beat count stood still, and then its start value with the beats
+  counting. After more than 30 seconds of silence the bridge forgets the old
+  beat count, so the 72 is not passed on.
 
 ## Tested
 

@@ -44,6 +44,18 @@ DONGLE_CHECK_INTERVAL = 2.0
 # Report "no sensor contact" when the strap has been silent this long (seconds).
 STALE_AFTER = 5.0
 
+# A strap that loses skin contact can keep sending its last heart rate for a
+# while (an HRM-Tri repeated 137 bpm for 35 seconds after it was taken off),
+# but its beat count stops. No new beat for this long means no contact.
+NO_BEAT_AFTER = 3.0
+
+# A strap that has been off for a few minutes stops sending. When it wakes up,
+# it can send 0 bpm and then a heart rate before the beats start (the HRM-Tri
+# sent 0, then 72 bpm for 4 seconds with a beat count that did not move). So
+# 0 bpm means no contact, and after a silence this long the old beat count is
+# forgotten: the heart rate is used again from the first new beat.
+FORGET_AFTER = 30.0
+
 # Heart Rate Measurement flags: sensor contact supported, detected or not.
 HR_FLAGS_CONTACT = 0x06
 HR_FLAGS_NO_CONTACT = 0x04
@@ -62,6 +74,7 @@ class Pulse:
         self._at = 0.0
 
     def set(self, bpm):
+        """Store a heart rate, or None while the strap has no skin contact."""
         with self._lock:
             self._bpm = bpm
             self._at = time.monotonic()
@@ -73,11 +86,51 @@ class Pulse:
             return self._bpm
 
 
+class BeatWatch:
+    """Tells from the strap's beat count whether it has skin contact.
+
+    When the beats start, the heart rate is passed on at once, even though the
+    strap first sends a start value and then climbs towards the real heart
+    rate. A receiver paired directly with the strap shows the same.
+    """
+
+    def __init__(self):
+        self._seen = None  # when the strap last sent anything
+        self._count = None
+        self._changed = 0.0  # when the beat count last changed
+        self._contact = False
+
+    def update(self, beat_count, bpm, now):
+        """Return True when this heart rate from the strap can be used."""
+        if self._seen is not None and now - self._seen > FORGET_AFTER:
+            log.info("Strap back after %.0f s of silence", now - self._seen)
+            self._count, self._contact = None, False
+        self._seen = now
+        if bpm <= 0:
+            if self._contact:
+                self._contact = False
+                log.info("Strap sends 0 bpm: no skin contact")
+            self._count = beat_count
+            return False
+        if beat_count != self._count:
+            if self._count is not None and not self._contact:
+                self._contact = True
+                log.info("Heartbeat detected")
+            self._count = beat_count
+            self._changed = now
+        elif self._contact and now - self._changed > NO_BEAT_AFTER:
+            self._contact = False
+            log.info("No heartbeat for %.0f s: strap off or no skin contact",
+                     NO_BEAT_AFTER)
+        return self._contact
+
+
 def hr_measurement(bpm):
     """Heart Rate Measurement value: flags byte and a uint8 heart rate.
 
-    While the strap is silent this reports "sensor contact not detected" with
-    no heart rate, once per second, instead of going quiet. Zwift 1.125 drops
+    While the strap is silent or has no skin contact, this reports "sensor
+    contact not detected" with no heart rate, once per second, instead of going
+    quiet. Zwift 1.125 drops
     a Direct Connect device that has sent nothing for 10 seconds, and in our
     tests it did not always manage to reconnect.
     """
@@ -125,16 +178,25 @@ def ant_loop(pulse, stop, belt_id):
             # The ANT channel searches forever, so the strap is picked up
             # again whenever it comes back in range or wakes up.
             device = HeartRate(node, device_id=belt_id)
-            last = [0.0]
+            watch = BeatWatch()
+            last = [0.0, 0.0]  # last info log, last debug log
 
             def on_found():
                 log.info("Found heart rate strap with ANT ID %d", device.device_id)
 
             def on_device_data(page, page_name, data):
-                if not isinstance(data, HeartRateData) or data.heart_rate <= 0:
+                if not isinstance(data, HeartRateData):
+                    return
+                now = time.monotonic()
+                current = watch.update(data.beat_count, data.heart_rate, now)
+                if not current:
+                    pulse.set(None)
+                    if now - last[1] >= 1:
+                        last[1] = now
+                        log.debug("Not used: %d bpm, beat count %d",
+                                  data.heart_rate, data.beat_count)
                     return
                 pulse.set(data.heart_rate)
-                now = time.monotonic()
                 if now - last[0] >= 5:
                     last[0] = now
                     log.info("Heart rate: %d bpm", data.heart_rate)
