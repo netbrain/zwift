@@ -171,7 +171,6 @@ cleanup() {
     rm -f -- "/tmp/ZwiftSetup.exe" || true
     rm -rf -- "/home/user/.cache/winetricks" || true
     rm -rf -- "${WINE_USER_HOME}/AppData/Local/Temp/"* || true
-    rm -rf -- "${ZWIFT_DATA_DIR:?}/"* || true
 }
 
 trap cleanup EXIT
