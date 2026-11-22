@@ -10,7 +10,11 @@ nav_order: 4
 
 ## ANT+
 
-ANT+ devices are not supported.
+ANT+ devices are not supported, because Wine has no ANT+ support.
+
+For ANT+ heart rate straps there is an optional workaround in [contrib/ant-hrm-bridge][ant-hrm-bridge]. It runs on the host,
+reads the strap through an ANT+ USB dongle and offers the heart rate to Zwift as a [Direct Connect](#direct-connect) device, so
+it needs `NETWORKING="host"`. Other ANT+ devices, such as power meters or cadence sensors, are not covered.
 
 ## Bluetooth
 
@@ -106,6 +110,7 @@ For example, your heart rate monitor and Zwift Ride controllers connect to your 
 JetBlack Victory connects over USB to your PC running Zwift.
 
 [connecting-devices]: https://support.zwift.com/en_us/connecting-your-devices-for-cycling-HJIFDrw5S
+[ant-hrm-bridge]: https://github.com/netbrain/zwift/tree/master/contrib/ant-hrm-bridge
 [companion-app-bridge]: https://support.zwift.com/en_us/using-the-zwift-companion-app-as-a-bridge-ByAnUzlLj
 [wahoo-trainer-bridge]: https://support.wahoofitness.com/hc/en-us/articles/28126062260370-How-to-use-the-KICKR-Bridge
 [zwift-trainer-bridge]: https://support.zwift.com/en_us/using-your-trainer-as-a-bridge-rJ1JwU6Ee
